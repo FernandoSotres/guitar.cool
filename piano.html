@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>guitarra.cool — Piano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'DM Sans','Segoe UI',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+}
+[data-theme="dark"] {
+  --bg:#090807; --surface:#141210; --surface2:#1e1a17;
+  --accent:#c8874a; --accent2:#7c5cbf;
+  --text:#f5ede2; --text2:#8a7a6e; --hl:#2e2820;
+}
+[data-theme="light"] {
+  --bg:#f5ede2; --surface:#ede4d8; --surface2:#dfd4c4;
+  --accent:#8c4c14; --accent2:#4a2e90;
+  --text:#0e0c0a; --text2:#6a5a4a; --hl:#c8baa8;
+}
+
+/* Piano key colors */
+[data-theme="dark"]  { --wk:#d8d0c4; --bk:#141210; --wk-s:#a09080; }
+[data-theme="light"] { --wk:#f8f3ec; --bk:#1a1410; --wk-s:#c0b8a8; }
+
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--bg); color:var(--text); font-family:var(--sans); height:100vh; display:flex; flex-direction:column; overflow:hidden; transition:background .25s,color .25s; }
+
+header { background:var(--surface); padding:7px 14px; border-bottom:1px solid var(--hl); display:flex; align-items:center; gap:9px; flex-shrink:0; flex-wrap:wrap; }
+.logo { font-family:var(--serif); font-size:18px; font-weight:700; color:var(--text); margin-right:4px; letter-spacing:-.01em; }
+.logo span { color:var(--accent); }
+.logo-sub { font-size:10px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--text2); padding:2px 8px; background:var(--surface2); border:1px solid var(--hl); border-radius:4px; }
+.h-label { font-size:11px; color:var(--text2); }
+.hsel { background:var(--surface2); border:1px solid var(--hl); color:var(--text); border-radius:5px; padding:3px 6px; font-size:12px; cursor:pointer; outline:none; font-family:var(--sans); }
+.hsel:hover { border-color:var(--accent2); }
+.theme-toggle { margin-left:auto; display:flex; align-items:center; gap:5px; padding:4px 10px; border-radius:5px; border:1px solid var(--hl); background:var(--surface2); color:var(--text2); font-size:11px; font-weight:600; cursor:pointer; letter-spacing:.04em; font-family:var(--sans); transition:border-color .2s,color .2s; }
+.theme-toggle:hover { border-color:var(--accent); color:var(--text); }
+.theme-toggle-dot { width:7px; height:7px; border-radius:50%; background:var(--accent); flex-shrink:0; }
+
+.home-link { font-size:11px; color:var(--text2); text-decoration:none; padding:3px 8px; border:1px solid var(--hl); border-radius:4px; background:var(--surface2); }
+.home-link:hover { color:var(--text); border-color:var(--accent); }
+
+.main { display:flex; flex:1; overflow:hidden; }
+
+.sidebar { width:248px; background:var(--surface); border-right:1px solid var(--hl); display:flex; flex-direction:column; flex-shrink:0; overflow-y:auto; padding:12px 10px; gap:10px; }
+.panel { background:var(--surface2); border-radius:9px; padding:10px; display:flex; flex-direction:column; gap:7px; }
+.panel-title { font-size:10px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:.1em; }
+.seg { display:flex; border-radius:6px; overflow:hidden; border:1px solid var(--hl); }
+.seg-btn { flex:1; padding:5px 3px; font-size:11px; background:transparent; border:none; color:var(--text2); cursor:pointer; text-align:center; }
+.seg-btn.active { background:var(--accent2); color:#fff; }
+select.full { width:100%; background:var(--surface); border:1px solid var(--hl); color:var(--text); border-radius:6px; padding:5px 7px; font-size:12px; outline:none; cursor:pointer; }
+select.full:hover { border-color:var(--accent2); }
+
+.chord-search { width:100%; background:var(--surface); border:1px solid var(--hl); color:var(--text); border-radius:6px; padding:5px 8px; font-size:12px; outline:none; }
+.chord-search:focus { border-color:var(--accent2); }
+.chord-search::placeholder { color:var(--text2); }
+
+.compat-badge { font-size:10px; font-weight:700; padding:1px 6px; border-radius:3px; }
+.compat-yes { background:rgba(76,175,80,.15); color:#4caf50; border:1px solid rgba(76,175,80,.3); }
+.compat-no  { background:var(--hl); color:var(--text2); }
+
+.ibuilder-grid { display:grid; grid-template-columns:1fr 1fr; gap:3px; }
+.itvl-btn { border-radius:4px; border:1.5px solid var(--hl); background:var(--surface); color:var(--text2); font-size:10px; padding:3px 2px; cursor:pointer; text-align:center; }
+.itvl-btn.active { border-color:#b855d8; background:rgba(184,85,216,.15); color:#b855d8; }
+.itvl-btn.locked { border-color:var(--accent); background:rgba(200,135,74,.12); color:var(--accent); cursor:default; }
+.ibuilder-match { font-size:11px; color:var(--accent); font-weight:600; min-height:15px; margin-top:2px; }
+
+.int-legend { display:flex; flex-direction:column; gap:3px; }
+.int-row { display:flex; align-items:center; gap:7px; font-size:11px; }
+.int-dot { width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+.int-name { color:var(--text2); }
+
+.note-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:3px; }
+.note-btn { border-radius:4px; border:1.5px solid var(--hl); background:var(--surface); color:var(--text2); font-size:10px; padding:3px 1px; cursor:pointer; text-align:center; }
+.note-btn.active { border-color:var(--accent); background:rgba(200,135,74,.14); color:var(--accent); }
+.itvl2-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:3px; }
+.itvl2-btn { border-radius:4px; border:1.5px solid var(--hl); background:var(--surface); color:var(--text2); font-size:10px; padding:3px 2px; cursor:pointer; text-align:center; }
+.itvl2-btn.active { border-color:#b855d8; background:rgba(184,85,216,.15); color:#b855d8; }
+
+/* Piano area */
+.piano-area { flex:1; display:flex; flex-direction:column; align-items:center; overflow:hidden; background:var(--bg); }
+.keys-scroll { flex:1; width:100%; overflow-x:auto; overflow-y:hidden; display:flex; align-items:center; justify-content:center; padding:24px 20px; }
+#piano-svg { display:block; }
+
+.info-bar { background:var(--surface); border-top:1px solid var(--hl); padding:5px 14px; font-size:12px; color:var(--text2); flex-shrink:0; min-height:28px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; width:100%; }
+.info-tag { background:var(--surface2); border-radius:4px; padding:2px 7px; color:var(--accent); font-weight:600; }
+
+/* Octave selector */
+.oct-label { font-size:11px; color:var(--text2); white-space:nowrap; }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="/" style="text-decoration:none"><div class="logo">guitarra<span>.cool</span></div></a>
+  <span class="logo-sub">Piano</span>
+  <span class="h-label">Octavas</span>
+  <select class="hsel" id="oct-sel" onchange="drawPiano()">
+    <option value="2">2</option>
+    <option value="3" selected>3</option>
+    <option value="4">4</option>
+  </select>
+  <a href="/" class="home-link">← Inicio</a>
+  <button class="theme-toggle" id="theme-toggle-btn" onclick="toggleTheme()">
+    <span class="theme-toggle-dot"></span>
+    <span id="theme-toggle-label">Claro</span>
+  </button>
+</header>
+
+<div class="main">
+  <div class="sidebar">
+
+    <div class="panel">
+      <div class="panel-title">Modo</div>
+      <div class="seg">
+        <button class="seg-btn active" id="m-scale" onclick="setMode('scale')">Escala</button>
+        <button class="seg-btn" id="m-chord" onclick="setMode('chord')">Acorde</button>
+        <button class="seg-btn" id="m-note"  onclick="setMode('note')">Nota</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Tonalidad</div>
+      <select class="full" id="key-sel" onchange="update()">
+        <option value="0">C</option><option value="1">C# / D♭</option><option value="2">D</option>
+        <option value="3">D# / E♭</option><option value="4">E</option><option value="5">F</option>
+        <option value="6">F# / G♭</option><option value="7">G</option><option value="8">G# / A♭</option>
+        <option value="9">A</option><option value="10">A# / B♭</option><option value="11">B</option>
+      </select>
+    </div>
+
+    <div class="panel" id="panel-scale">
+      <div class="panel-title">Escala</div>
+      <select class="full" id="scale-sel" onchange="update()">
+        <option value="major">Mayor</option>
+        <option value="minor" selected>Menor natural</option>
+        <option value="hminor">Menor armónica</option>
+        <option value="mminor">Menor melódica</option>
+        <option value="penta_maj">Pentatónica mayor</option>
+        <option value="penta_min">Pentatónica menor</option>
+        <option value="blues">Blues</option>
+        <option value="dorian">Dórico</option>
+        <option value="phrygian">Frigio</option>
+        <option value="lydian">Lidio</option>
+        <option value="mixolydian">Mixolidio</option>
+        <option value="locrian">Locrio</option>
+        <option value="whole">Tonos enteros</option>
+        <option value="dim">Disminuida</option>
+      </select>
+    </div>
+
+    <div class="panel" id="panel-chord" style="display:none">
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+        <div class="panel-title">Acorde</div>
+        <span id="scale-compat-badge"></span>
+      </div>
+      <input class="chord-search" id="chord-search" placeholder="Buscar: Maj7, m7b5, 9..." oninput="filterChords(this.value)">
+      <select class="full" id="chord-sel" onchange="onChordSel(this.value)"></select>
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:2px 0" onclick="toggleIBuilder()">
+        <span class="panel-title">Por intervalos</span>
+        <span id="ibuilder-arrow" style="font-size:11px;color:var(--text2)">▾</span>
+      </div>
+      <div id="ibuilder-wrap" style="display:none">
+        <div class="ibuilder-grid" id="ibuilder-grid"></div>
+        <div class="ibuilder-match" id="ibuilder-match"></div>
+      </div>
+      <div class="panel-title">Notas del acorde</div>
+      <div class="int-legend" id="int-legend"></div>
+    </div>
+
+    <div class="panel" id="panel-note" style="display:none">
+      <div class="panel-title">Nota raíz</div>
+      <div class="note-grid" id="note-grid"></div>
+      <div class="panel-title" style="margin-top:4px">Intervalo</div>
+      <div class="itvl2-grid" id="itvl2-grid"></div>
+    </div>
+
+  </div>
+
+  <div class="piano-area">
+    <div class="keys-scroll">
+      <svg id="piano-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="info-bar" id="info-bar">Selecciona una tonalidad y modo para comenzar.</div>
+  </div>
+</div>
+
+<script>
+// ── DATA (reutilizado de herramientas.html) ────────────────────────────────────
+const SCALES = {
+  major:[0,2,4,5,7,9,11],minor:[0,2,3,5,7,8,10],hminor:[0,2,3,5,7,8,11],
+  mminor:[0,2,3,5,7,9,11],penta_maj:[0,2,4,7,9],penta_min:[0,3,5,7,10],
+  blues:[0,3,5,6,7,10],dorian:[0,2,3,5,7,9,10],phrygian:[0,1,3,5,7,8,10],
+  lydian:[0,2,4,6,7,9,11],mixolydian:[0,2,4,5,7,9,10],locrian:[0,1,3,5,6,8,10],
+  whole:[0,2,4,6,8,10],dim:[0,2,3,5,6,8,9,11],
+};
+const SCALE_NAMES={major:'Mayor',minor:'Menor natural',hminor:'Menor armónica',mminor:'Menor melódica',penta_maj:'Pentatónica mayor',penta_min:'Pentatónica menor',blues:'Blues',dorian:'Dórico',phrygian:'Frigio',lydian:'Lidio',mixolydian:'Mixolidio',locrian:'Locrio',whole:'Tonos enteros',dim:'Disminuida'};
+
+const NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+
+const CHORD_TYPES={
+  '5':{name:'Power (5ª)',intervals:[0,7]},
+  'maj':{name:'Mayor',intervals:[0,4,7]},
+  'min':{name:'Menor',intervals:[0,3,7]},
+  'aug':{name:'Aumentado',intervals:[0,4,8]},
+  'dim':{name:'Disminuido',intervals:[0,3,6]},
+  'sus2':{name:'Sus2',intervals:[0,2,7]},
+  'sus4':{name:'Sus4',intervals:[0,5,7]},
+  'maj6':{name:'Mayor 6ª',intervals:[0,4,7,9]},
+  'min6':{name:'Menor 6ª',intervals:[0,3,7,9]},
+  'maj7':{name:'Mayor 7ª (Δ7)',intervals:[0,4,7,11]},
+  'min7':{name:'Menor 7ª',intervals:[0,3,7,10]},
+  '7':{name:'Dom 7ª',intervals:[0,4,7,10]},
+  'dim7':{name:'Disminuido 7ª',intervals:[0,3,6,9]},
+  'm7b5':{name:'m7♭5 (semidism.)',intervals:[0,3,6,10]},
+  'mMaj7':{name:'m(Maj7)',intervals:[0,3,7,11]},
+  'aug7':{name:'Aumentado 7ª',intervals:[0,4,8,10]},
+  '7sus4':{name:'7sus4',intervals:[0,5,7,10]},
+  'add9':{name:'add9',intervals:[0,4,7,14]},
+  'madd9':{name:'m(add9)',intervals:[0,3,7,14]},
+  'maj9':{name:'Mayor 9ª (Δ9)',intervals:[0,4,7,11,14]},
+  'min9':{name:'Menor 9ª',intervals:[0,3,7,10,14]},
+  '9':{name:'Dom 9ª',intervals:[0,4,7,10,14]},
+  '7b9':{name:'7♭9',intervals:[0,4,7,10,13]},
+  '7s9':{name:'7♯9',intervals:[0,4,7,10,15]},
+  'min11':{name:'Menor 11ª',intervals:[0,3,7,10,14,17]},
+  '13':{name:'Dom 13ª',intervals:[0,4,7,10,14,21]},
+  'maj13':{name:'Mayor 13ª',intervals:[0,4,7,11,14,21]},
+};
+const CHORD_GROUPS=[
+  {label:'Tríadas',   chords:['5','maj','min','aug','dim','sus2','sus4']},
+  {label:'6ª',        chords:['maj6','min6']},
+  {label:'7ª',        chords:['maj7','min7','7','dim7','m7b5','mMaj7','aug7','7sus4']},
+  {label:'9ª',        chords:['add9','madd9','maj9','min9','9','7b9','7s9']},
+  {label:'11ª / 13ª', chords:['min11','13','maj13']},
+];
+
+const INT_BUILDER_OPTIONS=[
+  {semi:0,label:'1 (Raíz)',locked:true},
+  {semi:2,label:'2ª M'},{semi:3,label:'♭3'},
+  {semi:4,label:'3ª M'},{semi:5,label:'4ª J'},
+  {semi:6,label:'♭5'}, {semi:7,label:'5ª J'},
+  {semi:8,label:'♯5'}, {semi:9,label:'6ª M'},
+  {semi:10,label:'♭7'},{semi:11,label:'7ª M'},
+  {semi:13,label:'♭9'},{semi:14,label:'9ª M'},
+  {semi:15,label:'♯9'},{semi:17,label:'11ª J'},
+];
+const INT_COLORS={0:'#e8a838',2:'#38a4d8',3:'#5b9bd5',4:'#6bc96b',5:'#38c8c8',6:'#e85858',7:'#b855d8',8:'#a090e8',9:'#a4d838',10:'#e87d38',11:'#e858a8',13:'#e86868',14:'#38a4d8',15:'#d870f8',17:'#38d8c8'};
+const INT_NAMES={0:'Tónica',2:'2ª M',3:'3ª m',4:'3ª M',5:'4ª J',6:'♭5 Tritono',7:'5ª J',8:'♯5',9:'6ª M',10:'♭7',11:'7ª M',13:'♭9',14:'9ª M',15:'♯9',17:'11ª J'};
+const NOTE_INTERVALS=[
+  {label:'Unísono',semi:0},{label:'♭2ª',semi:1},{label:'2ª M',semi:2},
+  {label:'3ª m',semi:3},{label:'3ª M',semi:4},{label:'4ª J',semi:5},
+  {label:'♭5',semi:6},{label:'5ª J',semi:7},{label:'♭6',semi:8},
+  {label:'6ª M',semi:9},{label:'♭7',semi:10},{label:'7ª M',semi:11},
+];
+
+// ── PIANO LAYOUT ──────────────────────────────────────────────────────────────
+const WW=44, WH=150, GAP=1;   // white key width, height, gap
+const BW=26, BH=94;            // black key width, height
+const STEP=WW+GAP;             // 45px per white key slot
+const OCTAVE_W=7*STEP;         // 315px per octave
+const WHITE_PCS=[0,2,4,5,7,9,11]; // C D E F G A B (pitch classes)
+// Black key left-edge x-offset within one octave
+const BLACK_X={1:30,3:75,6:164,8:208,10:252};
+const START_OCT=2; // keyboard starts at C2
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let mode='scale';
+let chordType='min', customIntervals=null;
+let selectedNoteRoot=9, selectedInterval=7;
+let iBuilderOpen=false, iBuilderSelected=new Set([0,3,7]);
+
+const getKey=()=>parseInt(document.getElementById('key-sel').value)||0;
+const getOctaves=()=>parseInt(document.getElementById('oct-sel').value)||3;
+
+// ── THEME ─────────────────────────────────────────────────────────────────────
+function toggleTheme(){
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+  document.documentElement.setAttribute('data-theme',isDark?'light':'dark');
+  document.getElementById('theme-toggle-label').textContent=isDark?'Oscuro':'Claro';
+  drawPiano();
+}
+
+// ── ACTIVE NOTES ──────────────────────────────────────────────────────────────
+function getActiveNotes(){
+  const root=getKey();
+  if(mode==='scale'){
+    const sk=document.getElementById('scale-sel').value;
+    return new Set((SCALES[sk]||[]).map(i=>(root+i)%12));
+  } else if(mode==='chord'){
+    const intervals=customIntervals||CHORD_TYPES[chordType]?.intervals||[0,3,7];
+    return new Set(intervals.map(i=>(root+i)%12));
+  } else {
+    const notes=new Set([selectedNoteRoot]);
+    if(selectedInterval>0) notes.add((selectedNoteRoot+selectedInterval)%12);
+    return notes;
+  }
+}
+
+// ── DRAW PIANO ────────────────────────────────────────────────────────────────
+function drawPiano(){
+  const svg=document.getElementById('piano-svg');
+  const root=getKey();
+  const activeNotes=getActiveNotes();
+  const OCTS=getOctaves();
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
+
+  const totalW=OCTS*OCTAVE_W+WW+GAP; // +1 extra C at the end
+  const svgH=WH+28;
+  svg.setAttribute('width',totalW);
+  svg.setAttribute('height',svgH);
+  svg.setAttribute('viewBox',`0 0 ${totalW} ${svgH}`);
+
+  const wDef=isDark?'#cdc5b8':'#f8f3ec';
+  const bDef=isDark?'#141210':'#1a1410';
+  const wStroke=isDark?'#9a9080':'#c0b8a8';
+  const rootFill=isDark?'#c8874a':'#a05c20';
+  const noteFill=isDark?'#7c5cbf':'#6040a0';
+  const dimText=isDark?'#7a6a5e':'#a09080';
+  const octLabelFill=isDark?'#6a5a4e':'#9a8a78';
+
+  let h='';
+
+  // ── White keys ──
+  for(let oct=0;oct<=OCTS;oct++){
+    const isExtraC=(oct===OCTS); // last C for visual closure
+    const pcsToRender=isExtraC?[0]:WHITE_PCS;
+    let wIdx=0;
+    for(const pc of pcsToRender){
+      const x=oct*OCTAVE_W+wIdx*STEP;
+      const isRoot=pc===root;
+      const isActive=activeNotes.has(pc);
+      const fill=isRoot?rootFill:isActive?noteFill:wDef;
+      const keyStroke=wStroke;
+
+      h+=`<rect x="${x}" y="6" width="${WW}" height="${WH}" rx="4" fill="${fill}" stroke="${keyStroke}" stroke-width="1"/>`;
+
+      // Octave label on C keys
+      if(pc===0){
+        const octNum=oct+START_OCT;
+        h+=`<text x="${x+WW/2}" y="${WH-3}" text-anchor="middle" font-size="9" fill="${isActive||isRoot?'rgba(255,255,255,.7)':octLabelFill}" font-family="DM Mono,monospace">C${octNum}</text>`;
+      }
+      // Note name on active white keys
+      if((isActive||isRoot)&&pc!==0){
+        h+=`<text x="${x+WW/2}" y="${WH-3}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.8)" font-family="DM Mono,monospace">${NOTE_NAMES[pc]}</text>`;
+      }
+      wIdx++;
+    }
+  }
+
+  // ── Black keys (on top, no extra) ──
+  for(let oct=0;oct<OCTS;oct++){
+    for(const [pcStr,offset] of Object.entries(BLACK_X)){
+      const pc=parseInt(pcStr);
+      const x=oct*OCTAVE_W+offset;
+      const isRoot=pc===root;
+      const isActive=activeNotes.has(pc);
+      const fill=isRoot?(isDark?'#d89050':'#c06820'):isActive?(isDark?'#9070d8':'#7050c0'):bDef;
+
+      h+=`<rect x="${x}" y="6" width="${BW}" height="${BH}" rx="2" fill="${fill}"/>`;
+
+      if(isRoot||isActive){
+        h+=`<text x="${x+BW/2}" y="${BH-1}" text-anchor="middle" font-size="8" fill="#fff" font-weight="600" font-family="DM Mono,monospace">${NOTE_NAMES[pc]}</text>`;
+      }
+    }
+  }
+
+  svg.innerHTML=h;
+}
+
+// ── UPDATE ────────────────────────────────────────────────────────────────────
+function update(){
+  const root=getKey();
+  const infoBar=document.getElementById('info-bar');
+
+  if(mode==='scale'){
+    const sk=document.getElementById('scale-sel').value;
+    const sn=(SCALES[sk]||[]).map(i=>(root+i)%12);
+    infoBar.innerHTML=`<span class="info-tag">${NOTE_NAMES[root]} ${SCALE_NAMES[sk]||sk}</span> ${sn.map(n=>NOTE_NAMES[n]).join(' – ')}`;
+  } else if(mode==='chord'){
+    const intervals=customIntervals||CHORD_TYPES[chordType]?.intervals||[0,3,7];
+    const ct=CHORD_TYPES[chordType];
+    // Scale compat
+    const sk=document.getElementById('scale-sel')?.value||'minor';
+    const sc=new Set((SCALES[sk]||[]).map(i=>(root+i)%12));
+    const compat=intervals.every(i=>sc.has((root+i)%12));
+    document.getElementById('scale-compat-badge').innerHTML=compat
+      ?'<span class="compat-badge compat-yes">✓ En escala</span>'
+      :'<span class="compat-badge compat-no">○ Fuera de escala</span>';
+    // Legend
+    const leg=document.getElementById('int-legend');leg.innerHTML='';
+    intervals.forEach(i=>{const col=INT_COLORS[i%12]||'#aaa',name=INT_NAMES[i%12]||`+${i}`;leg.innerHTML+=`<div class="int-row"><div class="int-dot" style="background:${col}"></div><span class="int-name">${name}</span></div>`;});
+    // Info
+    const name=ct?ct.name:(customIntervals?'Custom':'?');
+    infoBar.innerHTML=`<span class="info-tag">${NOTE_NAMES[root]} ${name}</span> ${intervals.map(i=>NOTE_NAMES[(root+i)%12]).join(' – ')}`;
+  } else {
+    const iv=NOTE_INTERVALS.find(x=>x.semi===selectedInterval);
+    infoBar.innerHTML=`<span class="info-tag">${NOTE_NAMES[selectedNoteRoot]}</span> Raíz &nbsp;|&nbsp; <span class="info-tag" style="background:rgba(184,85,216,.2);color:#b855d8">${NOTE_NAMES[(selectedNoteRoot+selectedInterval)%12]}</span> ${iv?iv.label:''}`;
+  }
+  drawPiano();
+}
+
+// ── MODE ──────────────────────────────────────────────────────────────────────
+function setMode(m){
+  mode=m;
+  ['scale','chord','note'].forEach(x=>{
+    document.getElementById('m-'+x).classList.toggle('active',x===m);
+    const p=document.getElementById('panel-'+x);if(p)p.style.display=(x===m)?'':'none';
+  });
+  update();
+}
+
+// ── CHORD PANEL ───────────────────────────────────────────────────────────────
+function buildChordSelect(filter){
+  const sel=document.getElementById('chord-sel'),q=(filter||'').toLowerCase();
+  sel.innerHTML='';
+  for(const grp of CHORD_GROUPS){
+    const matches=grp.chords.filter(k=>{const ct=CHORD_TYPES[k];if(!ct)return false;return !q||ct.name.toLowerCase().includes(q)||k.toLowerCase().includes(q);});
+    if(!matches.length)continue;
+    const og=document.createElement('optgroup');og.label=grp.label;
+    for(const k of matches){const opt=document.createElement('option');opt.value=k;opt.textContent=CHORD_TYPES[k].name;opt.selected=(k===chordType);og.appendChild(opt);}
+    sel.appendChild(og);
+  }
+  if(![...sel.options].some(o=>o.selected)&&sel.options.length){chordType=sel.options[0].value;sel.options[0].selected=true;}
+}
+function filterChords(q){buildChordSelect(q);onChordSel(document.getElementById('chord-sel').value);}
+function onChordSel(key){
+  if(!CHORD_TYPES[key])return;
+  chordType=key;customIntervals=null;
+  iBuilderSelected=new Set(CHORD_TYPES[key].intervals);
+  updateIBuilderGrid();update();
+}
+function toggleIBuilder(){
+  iBuilderOpen=!iBuilderOpen;
+  document.getElementById('ibuilder-wrap').style.display=iBuilderOpen?'':'none';
+  document.getElementById('ibuilder-arrow').textContent=iBuilderOpen?'▴':'▾';
+}
+function buildIBuilderGrid(){
+  const grid=document.getElementById('ibuilder-grid');grid.innerHTML='';
+  for(const opt of INT_BUILDER_OPTIONS){
+    const btn=document.createElement('button');
+    btn.className='itvl-btn'+(iBuilderSelected.has(opt.semi)?' active':'')+(opt.locked?' locked':'');
+    btn.textContent=opt.label;btn.dataset.semi=opt.semi;
+    if(!opt.locked)btn.onclick=()=>{
+      if(iBuilderSelected.has(opt.semi))iBuilderSelected.delete(opt.semi);
+      else iBuilderSelected.add(opt.semi);
+      onIBuilderChange();
+    };
+    grid.appendChild(btn);
+  }
+}
+function updateIBuilderGrid(){
+  document.querySelectorAll('#ibuilder-grid .itvl-btn').forEach(btn=>{btn.classList.toggle('active',iBuilderSelected.has(+btn.dataset.semi));});
+}
+function onIBuilderChange(){
+  updateIBuilderGrid();
+  const intervals=Array.from(iBuilderSelected).sort((a,b)=>a-b);
+  const match=matchChordName(intervals);
+  document.getElementById('ibuilder-match').textContent=match?CHORD_TYPES[match].name:'Custom';
+  if(match){chordType=match;customIntervals=null;}
+  else{chordType='_custom';customIntervals=intervals;}
+  [...document.getElementById('chord-sel').options].forEach(o=>o.selected=(o.value===chordType));
+  update();
+}
+function matchChordName(intervals){
+  const str=intervals.join(',');
+  for(const[k,ct]of Object.entries(CHORD_TYPES)){if(ct.intervals.join(',')===str)return k;}
+  return null;
+}
+
+// ── NOTE MODE ─────────────────────────────────────────────────────────────────
+function buildNoteGrids(){
+  const ng=document.getElementById('note-grid');ng.innerHTML='';
+  NOTE_NAMES.forEach((n,i)=>{
+    const btn=document.createElement('button');
+    btn.className='note-btn'+(i===selectedNoteRoot?' active':'');
+    btn.textContent=n;
+    btn.onclick=()=>{selectedNoteRoot=i;document.querySelectorAll('.note-btn').forEach((b,j)=>b.classList.toggle('active',j===i));update();};
+    ng.appendChild(btn);
+  });
+  const ig=document.getElementById('itvl2-grid');ig.innerHTML='';
+  NOTE_INTERVALS.forEach(iv=>{
+    const btn=document.createElement('button');
+    btn.className='itvl2-btn'+(iv.semi===selectedInterval?' active':'');
+    btn.textContent=iv.label;
+    btn.onclick=()=>{selectedInterval=iv.semi;document.querySelectorAll('.itvl2-btn').forEach(b=>b.classList.toggle('active',b.textContent===iv.label));update();};
+    ig.appendChild(btn);
+  });
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+buildChordSelect();
+buildIBuilderGrid();
+buildNoteGrids();
+update();
+</script>
+</body>
+</html>

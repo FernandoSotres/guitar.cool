@@ -1,5 +1,6 @@
 {
   "rewrites": [
-    { "source": "/herramientas", "destination": "/herramientas.html" }
+    { "source": "/herramientas", "destination": "/herramientas.html" },
+    { "source": "/piano",        "destination": "/piano.html" }
   ]
 }
