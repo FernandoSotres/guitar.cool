@@ -6,6 +6,7 @@
 <title>guitarra.cool — Herramientas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
 <style>
 /* ── Tokens ── */
 :root {
@@ -169,6 +170,9 @@ select.full:hover { border-color:var(--accent2); }
     </div>
   </div>
   <button class="dtbtn" id="clear-ann-btn" onclick="clearAnns()" style="display:none;color:#e86060;border-color:#e86060">✕ Borrar todo</button>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:5px">
+    <button class="dtbtn" id="play-btn" onclick="playCurrentMode()" style="border-color:var(--accent);color:var(--accent)">▶ Reproducir</button>
+  </div>
   <div class="draw-opts" id="draw-opts" style="display:none">
     <input type="color" id="draw-color" value="#ffdd44">
     <select id="draw-size">
@@ -840,8 +844,8 @@ function drawFretboard(){
       for(let f=0;f<=FRETS;f++){
         const note=(OPEN[idx]+f)%12;if(!sn.includes(note))continue;
         const x=fnx(f),isRoot=note===root,col=isRoot?'#e8a838':'#7c5cbf',r=isRoot?11:9;
-        h+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${col}" opacity=".92"/>`;
-        h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="${isRoot?11:10}" font-weight="${isRoot?700:500}" font-family="DM Sans,sans-serif">${NOTE_NAMES[note]}</text>`;
+        h+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${col}" opacity=".92" style="cursor:pointer" onclick="noteClick(${note})"/>`;
+        h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="${isRoot?11:10}" font-weight="${isRoot?700:500}" font-family="DM Sans,sans-serif" style="pointer-events:none">${NOTE_NAMES[note]}</text>`;
       }
     }
   }else if(_dp.type==='chord-all'||_dp.type==='chord-iso'){
@@ -854,8 +858,8 @@ function drawFretboard(){
         const note=(OPEN[idx]+f)%12;if(!cn.has(note))continue;
         if(voicing){if(voicing[idx]<0||voicing[idx]!==f)continue;}
         const x=fnx(f),sem=(note-root+12)%12,col=INT_COLORS[sem]||'#aaa';
-        h+=`<circle cx="${x}" cy="${y}" r="10" fill="${col}" opacity=".93"/>`;
-        h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="DM Sans,sans-serif">${NOTE_NAMES[note]}</text>`;
+        h+=`<circle cx="${x}" cy="${y}" r="10" fill="${col}" opacity=".93" style="cursor:pointer" onclick="noteClick(${note})"/>`;
+        h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="DM Sans,sans-serif" style="pointer-events:none">${NOTE_NAMES[note]}</text>`;
       }
     }
   }else if(_dp.type==='note'){
@@ -868,8 +872,8 @@ function drawFretboard(){
         if(note===rn){col='#e8a838';r=11;}else if(note===iNote&&semi!==0){col='#b855d8';r=10;}
         if(!col)continue;
         const x=fnx(f);
-        h+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${col}" opacity=".92"/>`;
-        h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="${r===11?11:10}" font-weight="700" font-family="DM Sans,sans-serif">${NOTE_NAMES[note]}</text>`;
+        h+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${col}" opacity=".92" style="cursor:pointer" onclick="noteClick(${note})"/>`;
+        h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="${r===11?11:10}" font-weight="700" font-family="DM Sans,sans-serif" style="pointer-events:none">${NOTE_NAMES[note]}</text>`;
       }
     }
   }
@@ -906,6 +910,50 @@ document.addEventListener('keydown',e=>{
     stepVoicing(e.key==='ArrowRight'?1:-1);
   }
 });
+
+// ── AUDIO ─────────────────────────────────────────────────────────────────────
+const _PC=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+let _synth=null;
+
+async function _initAudio(){
+  if(_synth)return;
+  await Tone.start();
+  _synth=new Tone.PolySynth(Tone.PluckSynth,{attackNoise:1.2,dampening:4000,resonance:0.97}).toDestination();
+}
+
+function _pcNote(pc,oct=3){return `${_PC[pc]}${oct}`;}
+
+async function noteClick(pc){
+  if(drawTool)return; // don't fire while drawing
+  await _initAudio();
+  Tone.Transport.cancel();
+  _synth.releaseAll?.();
+  _synth.triggerAttackRelease(_pcNote(pc,3),'2n');
+}
+
+async function playCurrentMode(){
+  await _initAudio();
+  Tone.Transport.cancel();
+  _synth.releaseAll?.();
+  const root=parseInt(document.getElementById('key-sel').value)||0;
+  const now=Tone.now()+0.05;
+
+  if(mode==='scale'){
+    const sk=document.getElementById('scale-sel').value;
+    const ivs=SCALES[sk]||[0,2,4,5,7,9,11];
+    // Build ascending notes; wrap to next octave when interval pushes past B
+    const notes=ivs.map(i=>_pcNote((root+i)%12,root+i>=12?4:3));
+    notes.push(_pcNote(root,4)); // root at top
+    notes.forEach((n,i)=>_synth.triggerAttackRelease(n,'4n',now+i*0.3));
+  } else if(mode==='chord'){
+    const ivs=customIntervals||CHORD_TYPES[chordType]?.intervals||[0,3,7];
+    ivs.forEach((i,idx)=>_synth.triggerAttackRelease(_pcNote((root+i)%12,3),'2n',now+idx*0.045));
+  } else {
+    const rn=selectedNoteRoot,semi=selectedInterval;
+    _synth.triggerAttackRelease(_pcNote(rn,3),'2n',now);
+    if(semi>0)_synth.triggerAttackRelease(_pcNote((rn+semi)%12,semi>=12?4:3),'2n',now);
+  }
+}
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 buildChordSelect('');
