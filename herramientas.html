@@ -584,18 +584,23 @@ function endDraw(e){endDrawAt(e.clientX,e.clientY);}
 document.addEventListener('mouseup',e=>{if(drawState)endDrawAt(e.clientX,e.clientY);});
 function placeText(svg,svgX,svgY,clientX,clientY){
   const inp=document.createElement('input');inp.type='text';
-  inp.style.cssText=`position:fixed;left:${clientX}px;top:${clientY}px;background:var(--surface);color:var(--text);border:1.5px solid var(--accent);border-radius:4px;padding:4px 8px;font-size:13px;font-family:var(--sans);z-index:9999;outline:none;min-width:100px;box-shadow:0 2px 12px rgba(0,0,0,.3);`;
-  document.body.appendChild(inp);inp.focus();
-  let committed=false;
-  const commit=()=>{
-    if(committed)return;committed=true;
-    const t=inp.value.trim();
-    if(t)annotations.push({type:'text',x:svgX,y:svgY,text:t,color:drawColor});
-    if(document.body.contains(inp))document.body.removeChild(inp);
-    renderAnnotations();
-  };
-  inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();commit();}if(ev.key==='Escape'&&document.body.contains(inp))document.body.removeChild(inp);});
-  inp.addEventListener('blur',commit);
+  inp.style.cssText=`position:fixed;left:${clientX}px;top:${clientY}px;background:var(--surface);color:var(--text);border:1.5px solid var(--accent);border-radius:4px;padding:4px 8px;font-size:13px;font-family:var(--sans);z-index:9999;outline:none;min-width:120px;box-shadow:0 2px 12px rgba(0,0,0,.4);`;
+  document.body.appendChild(inp);
+  // Retrasar focus y blur para evitar que el blur se dispare inmediatamente
+  // dentro del ciclo del evento mousedown
+  requestAnimationFrame(()=>{
+    inp.focus();
+    let committed=false;
+    const commit=()=>{
+      if(committed)return;committed=true;
+      const t=inp.value.trim();
+      if(t)annotations.push({type:'text',x:svgX,y:svgY,text:t,color:drawColor});
+      if(document.body.contains(inp))document.body.removeChild(inp);
+      renderAnnotations();
+    };
+    inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();commit();}if(ev.key==='Escape'){ev.preventDefault();if(document.body.contains(inp))document.body.removeChild(inp);}});
+    setTimeout(()=>inp.addEventListener('blur',commit),150);
+  });
 }
 function undoAnn(){if(annotations.length){annotations.pop();renderAnnotations();}}
 function clearAnns(){annotations=[];renderAnnotations();}

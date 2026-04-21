@@ -83,8 +83,8 @@ select.full:hover { border-color:var(--accent2); }
 
 /* Piano area */
 .piano-area { flex:1; display:flex; flex-direction:column; align-items:center; overflow:hidden; background:var(--bg); }
-.keys-scroll { flex:1; width:100%; overflow-x:auto; overflow-y:hidden; display:flex; align-items:center; justify-content:center; padding:24px 20px; }
-#piano-svg { display:block; }
+.keys-scroll { flex:1; width:100%; overflow:auto; display:flex; align-items:flex-start; justify-content:center; padding:40px 60px 80px; }
+#piano-svg { display:block; flex-shrink:0; }
 
 .info-bar { background:var(--surface); border-top:1px solid var(--hl); padding:5px 14px; font-size:12px; color:var(--text2); flex-shrink:0; min-height:28px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; width:100%; }
 .info-tag { background:var(--surface2); border-radius:4px; padding:2px 7px; color:var(--accent); font-weight:600; }
@@ -314,6 +314,8 @@ function drawPiano(){
   svg.setAttribute('width',totalW);
   svg.setAttribute('height',svgH);
   svg.setAttribute('viewBox',`0 0 ${totalW} ${svgH}`);
+  svg.style.transform='scale(1.8)';
+  svg.style.transformOrigin='top center';
 
   const wDef=isDark?'#cdc5b8':'#f8f3ec';
   const bDef=isDark?'#141210':'#1a1410';
