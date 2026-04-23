@@ -172,6 +172,8 @@ select.full:hover { border-color:var(--accent2); }
   <button class="dtbtn" id="clear-ann-btn" onclick="clearAnns()" style="display:none;color:#e86060;border-color:#e86060">✕ Borrar todo</button>
   <div style="margin-left:auto;display:flex;align-items:center;gap:5px">
     <button class="dtbtn" id="play-btn" onclick="playCurrentMode()" style="border-color:var(--accent);color:var(--accent)">▶ Reproducir</button>
+    <button class="dtbtn" id="record-btn" onclick="toggleRecord()" title="Grabar audio">⏺ Grabar</button>
+    <button class="dtbtn" onclick="downloadFretboard()" title="Descargar JPG">↓ JPG</button>
   </div>
   <div class="draw-opts" id="draw-opts" style="display:none">
     <input type="color" id="draw-color" value="#ffdd44">
@@ -287,8 +289,58 @@ const SCALE_NAMES={major:'Mayor',minor:'Menor natural',hminor:'Menor armónica',
 
 const NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const NOTE_FLAT =['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
-const FLAT_ROOTS=new Set([1,3,5,6,8,10]); // Db Eb F Gb Ab Bb
-function nn(pc,root){return(FLAT_ROOTS.has(root)?NOTE_FLAT:NOTE_NAMES)[pc];}
+const FLAT_ROOTS=new Set([1,3,5,6,8,10]);
+
+// ── Diatonic spelling algorithm ───────────────────────────────────────────────
+// For 7-note scales: assigns exactly one letter per degree, guaranteeing no
+// double-letter conflicts (Ab minor → Ab Bb Cb Db Eb Fb Gb, not Ab Bb B Db Eb E Gb)
+const _NATLPC=[0,2,4,5,7,9,11]; // natural pc for letters C D E F G A B
+const _LNAME=['C','D','E','F','G','A','B'];
+const _RLS=[0,0,1,1,2,3,3,4,4,5,5,6]; // root letter index — sharp keys
+const _RLF=[0,1,1,2,2,3,4,4,5,5,6,6]; // root letter index — flat keys
+function _spell(pc,li){
+  const d=((pc-_NATLPC[li%7]+12)%12),l=_LNAME[li%7];
+  return d===0?l:d===1?l+'#':d===11?l+'♭':d===2?l+'𝄪':d===10?l+'♭♭':NOTE_NAMES[pc];
+}
+// Build a {pc→name} map for a given set of intervals+root
+function buildSpelling(ivs,root){
+  const m={};
+  if(ivs.length===7){
+    const rl=(FLAT_ROOTS.has(root)?_RLF:_RLS)[root];
+    ivs.forEach((iv,i)=>{m[(root+iv)%12]=_spell((root+iv)%12,(rl+i)%7);});
+  }else{
+    // Non-diatonic: conflict-aware enharmonic selection
+    const set=new Set(ivs.map(i=>(root+i)%12));
+    const _FW=[[0,1,'D♭'],[2,3,'E♭'],[5,6,'G♭'],[7,8,'A♭'],[9,10,'B♭'],[10,11,'C♭'],[3,4,'F♭']];
+    ivs.forEach(iv=>{
+      const pc=(root+iv)%12;
+      let name=null;
+      // Forward: if natural-below in set → use flat name
+      for(const[n,a,f]of _FW) if(pc===a&&set.has(n)){name=f;break;}
+      // Backward: if natural-above in set AND natural-below NOT in set → use sharp
+      if(!name){
+        if(pc===8&&set.has(9)&&!set.has(7)) name='G#';
+        else if(pc===6&&set.has(7)&&!set.has(5)) name='F#';
+        else if(pc===3&&set.has(4)&&!set.has(2)) name='D#';
+        else if(pc===1&&set.has(2)&&!set.has(0)) name='C#';
+        else if(pc===10&&set.has(11)&&!set.has(9)) name='A#';
+      }
+      m[pc]=name||(FLAT_ROOTS.has(root)?NOTE_FLAT:NOTE_NAMES)[pc];
+    });
+  }
+  return m;
+}
+// nn(pc, root, set?) — fall-through helper for places where we have a note-set
+// Converts the set to sorted intervals and delegates to buildSpelling
+function nn(pc,root,set){
+  if(!set) return (FLAT_ROOTS.has(root)?NOTE_FLAT:NOTE_NAMES)[pc];
+  const ivs=[...set].map(p=>(p-root+12)%12).sort((a,b)=>a-b);
+  const m=buildSpelling(ivs,root);
+  return m[pc]||(FLAT_ROOTS.has(root)?NOTE_FLAT:NOTE_NAMES)[pc];
+}
+
+// ── Scale degree colors (7 distinct colors, one per scale degree) ─────────────
+const SCALE_DEG_COLORS=['#e8a838','#4a9ed8','#50c490','#e07040','#9868d4','#e0589a','#a8c840'];
 
 const CHORD_TYPES={
   '5':      {name:'Power (5ª)',       intervals:[0,7]},
@@ -736,16 +788,19 @@ function update(){
   const root=getKey();
   if(mode==='scale'){
     const sk=document.getElementById('scale-sel').value;
-    const sn=(SCALES[sk]||[]).map(i=>(root+i)%12);
-    _dp={type:'scale',scaleNotes:sn,rootNote:root};
-    document.getElementById('info-bar').innerHTML=`<span class="info-tag">${nn(root,root)} ${SCALE_NAMES[sk]||sk}</span> ${sn.map(n=>nn(n,root)).join(' – ')}`;
+    const ivs=SCALES[sk]||[0,2,4,5,7,9,11];
+    const sn=ivs.map(i=>(root+i)%12);
+    const labels=buildSpelling(ivs,root);
+    _dp={type:'scale',scaleNotes:sn,rootNote:root,labels};
+    document.getElementById('info-bar').innerHTML=`<span class="info-tag">${labels[root]} ${SCALE_NAMES[sk]||sk}</span> ${sn.map(n=>labels[n]).join(' – ')}`;
   }else if(mode==='chord'){
     const intervals=customIntervals||CHORD_TYPES[chordType]?.intervals||[0,3,7];
     const ct=CHORD_TYPES[chordType];
     if(!voicings.length)voicings=generateVoicings(root,intervals);
     voicingIdx=Math.min(voicingIdx,voicings.length-1);
     document.getElementById('voicing-label').textContent=`Pos. ${voicingIdx+1}/${voicings.length}`;
-    _dp={type:vMode==='iso'?'chord-iso':'chord-all',rootNote:root,chordIntervals:intervals};
+    const labels=buildSpelling(intervals,root);
+    _dp={type:vMode==='iso'?'chord-iso':'chord-all',rootNote:root,chordIntervals:intervals,labels};
     // Legend
     const leg=document.getElementById('int-legend');leg.innerHTML='';
     intervals.forEach(i=>{const col=INT_COLORS[i]||'#aaa',name=INT_NAMES[i]||`+${i}`;leg.innerHTML+=`<div class="int-row"><div class="int-dot" style="background:${col}"></div><span class="int-name">${name}</span></div>`;});
@@ -756,11 +811,13 @@ function update(){
       :'<span class="compat-badge compat-no">○ Fuera de escala</span>';
     // Info bar
     const name=ct?ct.name:(customIntervals?'Custom':'?');
-    document.getElementById('info-bar').innerHTML=`<span class="info-tag">${nn(root,root)} ${name}</span> ${intervals.map(i=>nn((root+i)%12,root)).join(' – ')} &nbsp;|&nbsp; ${voicings.length} posiciones`;
+    document.getElementById('info-bar').innerHTML=`<span class="info-tag">${labels[root]} ${name}</span> ${intervals.map(i=>labels[(root+i)%12]).join(' – ')} &nbsp;|&nbsp; ${voicings.length} posiciones`;
   }else{
-    _dp={type:'note',rootNote:selectedNoteRoot,intervalSemi:selectedInterval};
+    const noteIvs=[0,selectedInterval].filter((v,i,a)=>a.indexOf(v)===i);
+    const labels=buildSpelling(noteIvs,selectedNoteRoot);
+    _dp={type:'note',rootNote:selectedNoteRoot,intervalSemi:selectedInterval,labels};
     const iv=NOTE_INTERVALS.find(x=>x.semi===selectedInterval);
-    document.getElementById('info-bar').innerHTML=`<span class="info-tag">${nn(selectedNoteRoot,selectedNoteRoot)}</span> Raíz &nbsp;|&nbsp; <span class="info-tag" style="background:#2a0a38;color:#b855d8">${nn((selectedNoteRoot+selectedInterval)%12,selectedNoteRoot)}</span> ${iv?iv.label:''}`;
+    document.getElementById('info-bar').innerHTML=`<span class="info-tag">${labels[selectedNoteRoot]}</span> Raíz &nbsp;|&nbsp; <span class="info-tag" style="background:#2a0a38;color:#b855d8">${labels[(selectedNoteRoot+selectedInterval)%12]}</span> ${iv?iv.label:''}`;
   }
   drawFretboard();
 }
@@ -841,18 +898,20 @@ function drawFretboard(){
   // Note circles
   const root=_dp.rootNote;
   if(_dp.type==='scale'){
-    const sn=_dp.scaleNotes;
+    const sn=_dp.scaleNotes,lbl=_dp.labels||{};
     for(let s=0;s<NS;s++){
       const idx=si(s),y=oy+s*SH;
       for(let f=0;f<=FRETS;f++){
         const note=(OPEN[idx]+f)%12;if(!sn.includes(note))continue;
-        const x=fnx(f),isRoot=note===root,col=isRoot?'#e8a838':'#7c5cbf',r=isRoot?11:9;
+        const deg=sn.indexOf(note);
+        const col=SCALE_DEG_COLORS[deg]||'#7c5cbf',r=deg===0?11:9;
+        const x=fnx(f);
         h+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${col}" opacity=".92" style="cursor:pointer" onclick="noteClick(${note})"/>`;
-        h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="${isRoot?11:10}" font-weight="${isRoot?700:500}" font-family="DM Sans,sans-serif" style="pointer-events:none">${nn(note,root)}</text>`;
+        h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="${deg===0?11:10}" font-weight="${deg===0?700:500}" font-family="DM Sans,sans-serif" style="pointer-events:none">${lbl[note]||NOTE_NAMES[note]}</text>`;
       }
     }
   }else if(_dp.type==='chord-all'||_dp.type==='chord-iso'){
-    const ci=_dp.chordIntervals;
+    const ci=_dp.chordIntervals,lbl=_dp.labels||{};
     const cn=new Set(ci.map(i=>(root+i)%12));
     const voicing=(_dp.type==='chord-iso'&&voicings.length)?voicings[voicingIdx]:null;
     for(let s=0;s<NS;s++){
@@ -862,11 +921,11 @@ function drawFretboard(){
         if(voicing){if(voicing[idx]<0||voicing[idx]!==f)continue;}
         const x=fnx(f),sem=(note-root+12)%12,col=INT_COLORS[sem]||'#aaa';
         h+=`<circle cx="${x}" cy="${y}" r="10" fill="${col}" opacity=".93" style="cursor:pointer" onclick="noteClick(${note})"/>`;
-        h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="DM Sans,sans-serif" style="pointer-events:none">${nn(note,root)}</text>`;
+        h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="DM Sans,sans-serif" style="pointer-events:none">${lbl[note]||NOTE_NAMES[note]}</text>`;
       }
     }
   }else if(_dp.type==='note'){
-    const rn=_dp.rootNote,semi=_dp.intervalSemi,iNote=(rn+semi)%12;
+    const rn=_dp.rootNote,semi=_dp.intervalSemi,iNote=(rn+semi)%12,lbl=_dp.labels||{};
     for(let s=0;s<NS;s++){
       const idx=si(s),y=oy+s*SH;
       for(let f=0;f<=FRETS;f++){
@@ -876,7 +935,7 @@ function drawFretboard(){
         if(!col)continue;
         const x=fnx(f);
         h+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${col}" opacity=".92" style="cursor:pointer" onclick="noteClick(${note})"/>`;
-        h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="${r===11?11:10}" font-weight="700" font-family="DM Sans,sans-serif" style="pointer-events:none">${nn(note,rn)}</text>`;
+        h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="${r===11?11:10}" font-weight="700" font-family="DM Sans,sans-serif" style="pointer-events:none">${lbl[note]||NOTE_NAMES[note]}</text>`;
       }
     }
   }
@@ -916,47 +975,97 @@ document.addEventListener('keydown',e=>{
 
 // ── AUDIO ─────────────────────────────────────────────────────────────────────
 const _APC=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-const _POOL_SIZE=8;
-let _pool=null, _pi=0;
+let _plucks=null,_delay=null,_pi=0,_rec=null,_recOn=false;
 
 async function _initAudio(){
-  if(_pool)return;
+  if(_plucks)return;
   await Tone.start();
-  _pool=Array.from({length:_POOL_SIZE},()=>
-    new Tone.PluckSynth({attackNoise:1.5,dampening:4200,resonance:0.98}).toDestination()
+  // Short stereo delay for depth
+  _delay=new Tone.FeedbackDelay(0.16,0.18);
+  const limiter=new Tone.Limiter(-6).toDestination();
+  _delay.connect(limiter);
+  // PluckSynth pool (Karplus-Strong) — genuine plucked-string sound
+  _plucks=Array.from({length:10},()=>
+    new Tone.PluckSynth({attackNoise:0.15,dampening:3000,resonance:0.97}).connect(_delay)
   );
 }
 
-function _gn(pc,oct){return `${_APC[pc]}${oct}`;}
-
-function _pluck(pc,oct,when){
-  _pool[_pi%_POOL_SIZE].triggerAttack(_gn(pc,oct),when);
-  _pi++;
-}
+function _gn(pc,oct=3){return `${_APC[pc]}${oct}`;}
+function _pluck(pc,oct,when){_plucks[_pi%10].triggerAttack(_gn(pc,oct),when);_pi++;}
 
 async function noteClick(pc){
   if(drawTool)return;
-  await _initAudio();
-  _pluck(pc,3,Tone.now());
+  await Tone.start();await _initAudio();
+  _pluck(pc,3,Tone.now()+0.06);
 }
 
 async function playCurrentMode(){
-  await _initAudio();
+  await Tone.start();await _initAudio();
   const root=parseInt(document.getElementById('key-sel').value)||0;
-  const now=Tone.now()+0.05;
-
+  const now=Tone.now()+0.1;
   if(mode==='scale'){
     const sk=document.getElementById('scale-sel').value;
     const ivs=SCALES[sk]||[0,2,4,5,7,9,11];
-    ivs.forEach((v,i)=>_pluck((root+v)%12,root+v>=12?4:3,now+i*0.3));
-    _pluck(root,4,now+ivs.length*0.3); // octave root at top
+    ivs.forEach((v,i)=>_pluck((root+v)%12,root+v>=12?4:3,now+i*0.32));
+    _pluck(root,4,now+ivs.length*0.32);
   }else if(mode==='chord'){
     const ivs=customIntervals||CHORD_TYPES[chordType]?.intervals||[0,3,7];
-    ivs.forEach((v,i)=>_pluck((root+v)%12,3,now+i*0.05));
+    ivs.forEach((v,i)=>_pluck((root+v)%12,3,now+i*0.06));
   }else{
     const rn=selectedNoteRoot,semi=selectedInterval;
     _pluck(rn,3,now);
     if(semi>0)_pluck((rn+semi)%12,rn+semi>=12?4:3,now);
+  }
+}
+
+// ── DOWNLOAD JPG ──────────────────────────────────────────────────────────────
+function downloadFretboard(){
+  const svg=document.getElementById('fretboard-svg');
+  const w=+svg.getAttribute('width')||800,h=+svg.getAttribute('height')||200;
+  const bg=document.documentElement.getAttribute('data-theme')==='dark'?'#090807':'#f5ede2';
+  let src=new XMLSerializer().serializeToString(svg);
+  // embed background
+  src=src.replace('<svg ','<svg style="background:'+bg+'" ');
+  const blob=new Blob([src],{type:'image/svg+xml'});
+  const url=URL.createObjectURL(blob);
+  const img=new Image();
+  img.onload=()=>{
+    const sc=2; // 2× for crispness
+    const cv=document.createElement('canvas');
+    cv.width=w*sc;cv.height=h*sc;
+    const ctx=cv.getContext('2d');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,cv.width,cv.height);
+    ctx.scale(sc,sc);ctx.drawImage(img,0,0,w,h);
+    URL.revokeObjectURL(url);
+    cv.toBlob(b=>{
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(b);a.download='diapason.jpg';a.click();
+    },'image/jpeg',0.92);
+  };
+  img.src=url;
+}
+
+// ── RECORDING ─────────────────────────────────────────────────────────────────
+async function toggleRecord(){
+  await Tone.start();await _initAudio();
+  const btn=document.getElementById('record-btn');
+  if(!_recOn){
+    _rec=new Tone.Recorder();
+    Tone.getDestination().connect(_rec);
+    await _rec.start();
+    _recOn=true;
+    btn.textContent='⏹ Detener';
+    btn.style.color='#e86060';btn.style.borderColor='#e86060';
+  }else{
+    const blob=await _rec.stop();
+    Tone.getDestination().disconnect(_rec);
+    _recOn=false;_rec=null;
+    btn.textContent='⏺ Grabar';
+    btn.style.color='';btn.style.borderColor='';
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download='grabacion.webm';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
   }
 }
 
