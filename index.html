@@ -143,53 +143,93 @@ nav {
 /* ── TOOLS PREVIEW ── */
 .tools-preview {
   padding: 100px 48px;
-  background: var(--paper);
+  background: var(--paper2);
 }
 .tp-inner { max-width: 1100px; margin: 0 auto; }
-.tp-header {
-  display: flex; align-items: flex-end; justify-content: space-between;
-  margin-bottom: 52px; flex-wrap: wrap; gap: 16px;
+.tp-header { text-align: center; margin-bottom: 52px; }
+.tp-eyebrow {
+  display: block; margin-bottom: 14px;
+  font-size: 11px; font-weight: 600; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--copper);
 }
-.tp-h2 { font-family: var(--serif); font-size: 40px; font-weight: 700; color: var(--ink); max-width: 420px; line-height: 1.1; letter-spacing: -.02em; }
-.tp-sub { font-size: 14px; color: var(--ink4); max-width: 280px; line-height: 1.6; }
-.tp-card {
-  border: 1px solid var(--paper3);
+.tp-h2 {
+  font-family: var(--serif); font-size: 40px; font-weight: 700;
+  color: var(--ink); line-height: 1.1; letter-spacing: -.02em; margin-bottom: 12px;
+}
+.tp-sub {
+  font-size: 15px; color: var(--ink4);
+  max-width: 460px; margin: 0 auto; line-height: 1.65;
+}
+.tp-app {
+  border: 1px solid var(--paper4);
   border-radius: 16px; overflow: hidden;
-  background: var(--paper2);
-  box-shadow: 0 4px 32px rgba(26,20,16,.06);
+  box-shadow: 0 12px 48px rgba(26,20,16,.10), 0 2px 8px rgba(26,20,16,.04);
+  margin-bottom: 24px;
+}
+.tp-titlebar {
+  background: var(--paper3); border-bottom: 1px solid var(--paper4);
+  padding: 11px 16px; display: flex; align-items: center; gap: 7px;
+}
+.tp-wdot { width: 11px; height: 11px; border-radius: 50%; }
+.tp-wtitle {
+  flex: 1; text-align: center;
+  font-size: 11px; font-weight: 500; color: var(--ink5);
+  font-family: var(--mono);
 }
 .tp-toolbar {
   background: var(--paper); border-bottom: 1px solid var(--paper3);
-  padding: 14px 20px; display: flex; align-items: center; gap: 10px;
+  padding: 9px 20px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
 }
-.tp-dot { width: 10px; height: 10px; border-radius: 50%; }
-.tp-label {
-  margin-left: 8px; font-size: 12px; font-weight: 500; color: var(--ink4);
-  font-family: var(--mono);
+.tp-sel {
+  display: inline-flex; flex-direction: column;
+  background: var(--paper2); border: 1px solid var(--paper3);
+  border-radius: 6px; padding: 4px 12px 5px 10px; cursor: default;
 }
-.tp-fretboard { padding: 32px 24px 24px; overflow-x: auto; }
-.tp-chips {
-  display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; padding: 0 24px 28px;
+.tp-sel-lbl { font-size: 8px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--ink5); line-height: 1; }
+.tp-sel-val { font-size: 12px; font-weight: 600; color: var(--ink2); font-family: var(--mono); line-height: 1.4; margin-top: 1px; }
+.tp-sep { flex: 1; }
+.tp-tbtn {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--paper2); border: 1px solid var(--paper3);
+  border-radius: 6px; padding: 6px 13px;
+  font-size: 11px; font-weight: 600; color: var(--ink4); cursor: default;
 }
-.tp-chip {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 11px; font-weight: 600; letter-spacing: .04em;
-  padding: 5px 12px; border-radius: 20px;
-  color: #fff;
+.tp-fb-wrap {
+  background: #160e06; padding: 22px 20px 10px; overflow-x: auto;
+}
+.tp-infobar {
+  padding: 10px 20px; background: var(--paper2);
+  border-top: 1px solid var(--paper3);
+  display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+}
+.tp-infobar-lbl { font-size: 11px; font-weight: 600; color: var(--ink4); margin-right: 3px; white-space: nowrap; }
+.tp-npill {
+  font-size: 11px; font-weight: 700; padding: 3px 10px;
+  border-radius: 20px; color: #fff; display: inline-block;
 }
 .tp-cta-row {
-  padding: 20px 24px; border-top: 1px solid var(--paper3);
+  padding: 14px 20px; background: var(--paper);
+  border-top: 1px solid var(--paper3);
   display: flex; align-items: center; justify-content: space-between;
-  background: var(--paper);
 }
-.tp-cta-hint { font-size: 12px; color: var(--ink5); }
+.tp-cta-hint { font-size: 11px; color: var(--ink5); font-style: italic; }
 .tp-cta-btn {
   background: var(--ink); color: var(--paper);
   font-size: 12px; font-weight: 600; padding: 9px 20px;
-  border-radius: 6px; text-decoration: none;
-  transition: background .2s;
+  border-radius: 6px; text-decoration: none; transition: background .2s;
 }
-.tp-cta-btn:hover { background: var(--ink2); }
+.tp-cta-btn:hover { background: var(--copper-dk); }
+.tp-feats { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+.tp-feat {
+  background: var(--paper); border: 1px solid var(--paper3);
+  border-radius: 12px; padding: 28px 24px;
+}
+.tp-feat-ico { font-size: 20px; margin-bottom: 10px; }
+.tp-feat-title {
+  font-family: var(--serif); font-size: 20px; font-weight: 700;
+  color: var(--ink); margin-bottom: 5px; letter-spacing: -.01em;
+}
+.tp-feat-body { font-size: 13px; color: var(--ink4); line-height: 1.65; }
 
 /* ── FOOTER ── */
 footer { background: var(--ink); padding: 48px; }
@@ -203,6 +243,7 @@ footer p { font-size: 12px; color: var(--ink4); }
   .pillars { padding: 60px 20px; }
   .tools-preview { padding: 60px 20px; }
   .pil-grid { grid-template-columns: 1fr; }
+  .tp-feats { grid-template-columns: 1fr; }
   footer { padding: 40px 20px; }
 }
 </style>
@@ -283,139 +324,242 @@ footer p { font-size: 12px; color: var(--ink4); }
 
 <section class="tools-preview">
   <div class="tp-inner">
+
     <div class="tp-header">
-      <h2 class="tp-h2">Herramientas interactivas para tu instrumento</h2>
-      <p class="tp-sub">Explora escalas, acordes e intervalos en el diapasón — en tiempo real, con audio y colores por grado.</p>
+      <span class="tp-eyebrow">Herramientas · Disponible ahora</span>
+      <h2 class="tp-h2">El diapasón que siempre<br>quisiste tener</h2>
+      <p class="tp-sub">Visualiza cualquier escala o acorde en el mango — con audio, colores por grado y descarga en JPG.</p>
     </div>
 
-    <!-- Preview card -->
-    <div class="tp-card">
-      <!-- Fake toolbar -->
-      <div class="tp-toolbar">
-        <div class="tp-dot" style="background:#e07040"></div>
-        <div class="tp-dot" style="background:#c09030"></div>
-        <div class="tp-dot" style="background:#2a7a50"></div>
-        <span class="tp-label">Escala — A menor natural</span>
+    <!-- App mockup -->
+    <div class="tp-app">
+
+      <!-- Window chrome -->
+      <div class="tp-titlebar">
+        <div class="tp-wdot" style="background:#e07040"></div>
+        <div class="tp-wdot" style="background:#c09030"></div>
+        <div class="tp-wdot" style="background:#2a7a50"></div>
+        <span class="tp-wtitle">guitarra.cool / herramientas</span>
       </div>
 
-      <!-- Static mini fretboard SVG -->
-      <div class="tp-fretboard">
-        <svg viewBox="0 0 860 180" width="100%" style="display:block;min-width:560px">
-          <!-- Fretboard background -->
-          <rect x="0" y="10" width="860" height="160" rx="8" fill="#5c3d1e"/>
+      <!-- Fake toolbar -->
+      <div class="tp-toolbar">
+        <div class="tp-sel">
+          <span class="tp-sel-lbl">Modo</span>
+          <span class="tp-sel-val">Escala</span>
+        </div>
+        <div class="tp-sel">
+          <span class="tp-sel-lbl">Raíz</span>
+          <span class="tp-sel-val">A</span>
+        </div>
+        <div class="tp-sel">
+          <span class="tp-sel-lbl">Tipo</span>
+          <span class="tp-sel-val">Menor natural</span>
+        </div>
+        <div class="tp-sep"></div>
+        <div class="tp-tbtn">⏺ Grabar</div>
+        <div class="tp-tbtn">↓ JPG</div>
+      </div>
 
-          <!-- Fret lines -->
-          <line x1="60"  y1="10" x2="60"  y2="170" stroke="#c8a878" stroke-width="4"/>
-          <line x1="180" y1="10" x2="180" y2="170" stroke="#9e845a" stroke-width="1.5"/>
-          <line x1="295" y1="10" x2="295" y2="170" stroke="#9e845a" stroke-width="1.5"/>
-          <line x1="405" y1="10" x2="405" y2="170" stroke="#9e845a" stroke-width="1.5"/>
-          <line x1="510" y1="10" x2="510" y2="170" stroke="#9e845a" stroke-width="1.5"/>
-          <line x1="610" y1="10" x2="610" y2="170" stroke="#9e845a" stroke-width="1.5"/>
-          <line x1="705" y1="10" x2="705" y2="170" stroke="#9e845a" stroke-width="1.5"/>
-          <line x1="795" y1="10" x2="795" y2="170" stroke="#9e845a" stroke-width="1.5"/>
-          <line x1="860" y1="10" x2="860" y2="170" stroke="#9e845a" stroke-width="1"/>
+      <!-- Fretboard — equal temperament spacing, proper nut, real note positions -->
+      <!-- Standard tuning: E2 A2 D3 G3 B3 E4 (s6→s1 top to bottom) -->
+      <!-- A natural minor: A B C D E F G. Scale length L=2437, nut at x=40 -->
+      <!-- Fret x-positions: nut=40 f1=177 f2=306 f3=428 f4=542 f5=651 f6=754 f7=850 -->
+      <!-- Midpoints: open=20 f1=108 f2=241 f3=367 f4=485 f5=596 f6=702 f7=802 -->
+      <!-- String y-positions: s1(e)=40 s2(B)=76 s3(G)=112 s4(D)=148 s5(A)=184 s6(E)=220 -->
+      <div class="tp-fb-wrap">
+        <svg viewBox="0 0 900 258" width="100%" style="display:block;min-width:600px">
+          <defs>
+            <linearGradient id="fb-wood" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stop-color="#4e2408"/>
+              <stop offset="30%"  stop-color="#3c1a06"/>
+              <stop offset="55%"  stop-color="#461e0e"/>
+              <stop offset="100%" stop-color="#3a1804"/>
+            </linearGradient>
+            <linearGradient id="fb-nut" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%"   stop-color="#c0b080"/>
+              <stop offset="45%"  stop-color="#ede0bc"/>
+              <stop offset="100%" stop-color="#b8a870"/>
+            </linearGradient>
+            <linearGradient id="fb-fret" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%"   stop-color="#8a7a58"/>
+              <stop offset="50%"  stop-color="#ccc0a0"/>
+              <stop offset="100%" stop-color="#8a7a58"/>
+            </linearGradient>
+          </defs>
 
-          <!-- Strings (6) -->
-          <line x1="0" y1="35"  x2="860" y2="35"  stroke="#e8dcc8" stroke-width="1.0" opacity=".8"/>
-          <line x1="0" y1="59"  x2="860" y2="59"  stroke="#e8dcc8" stroke-width="1.2" opacity=".8"/>
-          <line x1="0" y1="83"  x2="860" y2="83"  stroke="#d8c8a8" stroke-width="1.5" opacity=".85"/>
-          <line x1="0" y1="107" x2="860" y2="107" stroke="#d8c8a8" stroke-width="1.8" opacity=".85"/>
-          <line x1="0" y1="131" x2="860" y2="131" stroke="#c8b890" stroke-width="2.2" opacity=".9"/>
-          <line x1="0" y1="155" x2="860" y2="155" stroke="#c8b890" stroke-width="2.6" opacity=".9"/>
+          <!-- Fretboard body -->
+          <rect x="40" y="18" width="855" height="214" rx="2" fill="url(#fb-wood)"/>
 
-          <!-- Fret position dots -->
-          <circle cx="237" cy="90" r="5" fill="#c8a878" opacity=".5"/>
-          <circle cx="350" cy="90" r="5" fill="#c8a878" opacity=".5"/>
-          <circle cx="457" cy="90" r="5" fill="#c8a878" opacity=".5"/>
-          <circle cx="557" cy="90" r="5" fill="#c8a878" opacity=".5"/>
+          <!-- Binding strips top & bottom -->
+          <rect x="40" y="18" width="855" height="5" fill="#c0ae7a" opacity=".65"/>
+          <rect x="40" y="227" width="855" height="5" fill="#c0ae7a" opacity=".65"/>
 
-          <!-- Scale notes (A minor: A B C D E F G) — scattered across fretboard -->
-          <!-- A (root) - amber #e8a838 -->
-          <circle cx="120" cy="155" r="11" fill="#e8a838"/>
-          <text x="120" y="159" text-anchor="middle" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">A</text>
+          <!-- Fret lines (equal temperament spacing) -->
+          <line x1="177" y1="18" x2="177" y2="232" stroke="url(#fb-fret)" stroke-width="2.8"/>
+          <line x1="306" y1="18" x2="306" y2="232" stroke="url(#fb-fret)" stroke-width="2.2"/>
+          <line x1="428" y1="18" x2="428" y2="232" stroke="url(#fb-fret)" stroke-width="2.0"/>
+          <line x1="542" y1="18" x2="542" y2="232" stroke="url(#fb-fret)" stroke-width="1.8"/>
+          <line x1="651" y1="18" x2="651" y2="232" stroke="url(#fb-fret)" stroke-width="1.6"/>
+          <line x1="754" y1="18" x2="754" y2="232" stroke="url(#fb-fret)" stroke-width="1.5"/>
+          <line x1="850" y1="18" x2="850" y2="232" stroke="url(#fb-fret)" stroke-width="1.4"/>
 
-          <circle cx="510" cy="131" r="11" fill="#e8a838"/>
-          <text x="510" y="135" text-anchor="middle" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">A</text>
+          <!-- Inlay dots at frets III, V, VII -->
+          <circle cx="367" cy="125" r="6" fill="#c8b888" opacity=".38"/>
+          <circle cx="596" cy="125" r="6" fill="#c8b888" opacity=".38"/>
+          <circle cx="802" cy="100" r="5" fill="#c8b888" opacity=".38"/>
+          <circle cx="802" cy="150" r="5" fill="#c8b888" opacity=".38"/>
 
-          <!-- B - blue #4a9ed8 -->
-          <circle cx="237" cy="155" r="9" fill="#4a9ed8"/>
-          <text x="237" y="159" text-anchor="middle" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">B</text>
+          <!-- Strings (s1 thin top → s6 thick bottom) -->
+          <line x1="0" y1="40"  x2="900" y2="40"  stroke="#d8cca8" stroke-width="0.8" opacity=".65"/>
+          <line x1="0" y1="76"  x2="900" y2="76"  stroke="#d4c89e" stroke-width="1.1" opacity=".7"/>
+          <line x1="0" y1="112" x2="900" y2="112" stroke="#ccbe90" stroke-width="1.6" opacity=".75"/>
+          <line x1="0" y1="148" x2="900" y2="148" stroke="#c4b282" stroke-width="2.1" opacity=".8"/>
+          <line x1="0" y1="184" x2="900" y2="184" stroke="#bcaa74" stroke-width="2.7" opacity=".82"/>
+          <line x1="0" y1="220" x2="900" y2="220" stroke="#b4a264" stroke-width="3.3" opacity=".85"/>
 
-          <circle cx="120" cy="107" r="9" fill="#4a9ed8"/>
-          <text x="120" y="111" text-anchor="middle" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">B</text>
+          <!-- Nut (cream/bone bar, left edge of fretboard) -->
+          <rect x="40" y="18" width="8" height="214" fill="url(#fb-nut)"/>
 
-          <circle cx="610" cy="131" r="9" fill="#4a9ed8"/>
-          <text x="610" y="135" text-anchor="middle" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">B</text>
+          <!-- Headstock shadow (left of nut) -->
+          <rect x="0" y="18" width="40" height="214" fill="#0e0804" opacity=".55"/>
 
-          <!-- C - teal #50c490 -->
-          <circle cx="120" cy="83" r="9" fill="#50c490"/>
-          <text x="120" y="87" text-anchor="middle" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">C</text>
+          <!-- Open string label strip -->
+          <text x="20" y="14" text-anchor="middle" font-size="7.5" fill="#6a5a46" font-family="DM Mono,monospace" font-weight="500">abierta</text>
 
-          <circle cx="295" cy="155" r="9" fill="#50c490"/>
-          <text x="295" y="159" text-anchor="middle" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">C</text>
+          <!-- Fret number labels -->
+          <text x="20"  y="250" text-anchor="middle" font-size="9" fill="#6a5a46" font-family="DM Mono,monospace">○</text>
+          <text x="108" y="250" text-anchor="middle" font-size="9" fill="#6a5a46" font-family="DM Mono,monospace">I</text>
+          <text x="241" y="250" text-anchor="middle" font-size="9" fill="#6a5a46" font-family="DM Mono,monospace">II</text>
+          <text x="367" y="250" text-anchor="middle" font-size="9" fill="#c09030" font-family="DM Mono,monospace" font-weight="700">III</text>
+          <text x="485" y="250" text-anchor="middle" font-size="9" fill="#6a5a46" font-family="DM Mono,monospace">IV</text>
+          <text x="596" y="250" text-anchor="middle" font-size="9" fill="#c09030" font-family="DM Mono,monospace" font-weight="700">V</text>
+          <text x="702" y="250" text-anchor="middle" font-size="9" fill="#6a5a46" font-family="DM Mono,monospace">VI</text>
+          <text x="802" y="250" text-anchor="middle" font-size="9" fill="#c09030" font-family="DM Mono,monospace" font-weight="700">VII</text>
 
-          <circle cx="705" cy="131" r="9" fill="#50c490"/>
-          <text x="705" y="135" text-anchor="middle" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">C</text>
+          <!-- ═══════════════════════════════════════════════════════════ -->
+          <!-- NOTE CIRCLES  A=#e8a838 B=#4a9ed8 C=#50c490 D=#e07040     -->
+          <!--               E=#9868d4 F=#e0589a G=#a8c840                -->
+          <!-- Root r=11, others r=9. G text dark (#333), rest white.    -->
+          <!-- ═══════════════════════════════════════════════════════════ -->
 
-          <!-- D - coral #e07040 -->
-          <circle cx="295" cy="107" r="9" fill="#e07040"/>
-          <text x="295" y="111" text-anchor="middle" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">D</text>
+          <!-- OPEN STRINGS (x=20) — all 6 open strings are in A minor -->
+          <circle cx="20" cy="40"  r="9"  fill="#9868d4"/><!-- s1: E -->
+          <text x="20" y="40"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">E</text>
+          <circle cx="20" cy="76"  r="9"  fill="#4a9ed8"/><!-- s2: B -->
+          <text x="20" y="76"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">B</text>
+          <circle cx="20" cy="112" r="9"  fill="#a8c840"/><!-- s3: G -->
+          <text x="20" y="112" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#333" font-family="DM Sans,sans-serif">G</text>
+          <circle cx="20" cy="148" r="9"  fill="#e07040"/><!-- s4: D -->
+          <text x="20" y="148" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">D</text>
+          <circle cx="20" cy="184" r="11" fill="#e8a838"/><!-- s5: A ROOT -->
+          <text x="20" y="184" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">A</text>
+          <circle cx="20" cy="220" r="9"  fill="#9868d4"/><!-- s6: E -->
+          <text x="20" y="220" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">E</text>
 
-          <circle cx="405" cy="155" r="9" fill="#e07040"/>
-          <text x="405" y="159" text-anchor="middle" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">D</text>
+          <!-- FRET I (x=108) -->
+          <circle cx="108" cy="40"  r="9"  fill="#e0589a"/><!-- s1: F -->
+          <text x="108" y="40"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">F</text>
+          <circle cx="108" cy="76"  r="9"  fill="#50c490"/><!-- s2: C -->
+          <text x="108" y="76"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">C</text>
+          <circle cx="108" cy="220" r="9"  fill="#e0589a"/><!-- s6: F -->
+          <text x="108" y="220" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">F</text>
 
-          <circle cx="795" cy="131" r="9" fill="#e07040"/>
-          <text x="795" y="135" text-anchor="middle" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">D</text>
+          <!-- FRET II (x=241) -->
+          <circle cx="241" cy="112" r="11" fill="#e8a838"/><!-- s3: A ROOT -->
+          <text x="241" y="112" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">A</text>
+          <circle cx="241" cy="148" r="9"  fill="#9868d4"/><!-- s4: E -->
+          <text x="241" y="148" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">E</text>
+          <circle cx="241" cy="184" r="9"  fill="#4a9ed8"/><!-- s5: B -->
+          <text x="241" y="184" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">B</text>
 
-          <!-- E - purple #9868d4 -->
-          <circle cx="180" cy="59" r="9" fill="#9868d4"/>
-          <text x="180" y="63" text-anchor="middle" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">E</text>
+          <!-- FRET III (x=367) — inlay position -->
+          <circle cx="367" cy="40"  r="9"  fill="#a8c840"/><!-- s1: G -->
+          <text x="367" y="40"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#333" font-family="DM Sans,sans-serif">G</text>
+          <circle cx="367" cy="76"  r="9"  fill="#e07040"/><!-- s2: D -->
+          <text x="367" y="76"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">D</text>
+          <circle cx="367" cy="148" r="9"  fill="#e0589a"/><!-- s4: F -->
+          <text x="367" y="148" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">F</text>
+          <circle cx="367" cy="184" r="9"  fill="#50c490"/><!-- s5: C -->
+          <text x="367" y="184" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">C</text>
+          <circle cx="367" cy="220" r="9"  fill="#a8c840"/><!-- s6: G -->
+          <text x="367" y="220" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#333" font-family="DM Sans,sans-serif">G</text>
 
-          <circle cx="510" cy="107" r="9" fill="#9868d4"/>
-          <text x="510" y="111" text-anchor="middle" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">E</text>
+          <!-- FRET IV (x=485) -->
+          <circle cx="485" cy="112" r="9"  fill="#4a9ed8"/><!-- s3: B -->
+          <text x="485" y="112" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">B</text>
 
-          <circle cx="60"  cy="35"  r="9" fill="#9868d4"/>
-          <text x="60"  y="39"  text-anchor="middle" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">E</text>
+          <!-- FRET V (x=596) — inlay + all 6 strings have scale notes -->
+          <circle cx="596" cy="40"  r="11" fill="#e8a838"/><!-- s1: A ROOT -->
+          <text x="596" y="40"  text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">A</text>
+          <circle cx="596" cy="76"  r="9"  fill="#9868d4"/><!-- s2: E -->
+          <text x="596" y="76"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">E</text>
+          <circle cx="596" cy="112" r="9"  fill="#50c490"/><!-- s3: C -->
+          <text x="596" y="112" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">C</text>
+          <circle cx="596" cy="148" r="9"  fill="#a8c840"/><!-- s4: G -->
+          <text x="596" y="148" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#333" font-family="DM Sans,sans-serif">G</text>
+          <circle cx="596" cy="184" r="9"  fill="#e07040"/><!-- s5: D -->
+          <text x="596" y="184" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">D</text>
+          <circle cx="596" cy="220" r="11" fill="#e8a838"/><!-- s6: A ROOT -->
+          <text x="596" y="220" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">A</text>
 
-          <!-- F - pink #e0589a -->
-          <circle cx="295" cy="59" r="9" fill="#e0589a"/>
-          <text x="295" y="63" text-anchor="middle" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">F</text>
+          <!-- FRET VI (x=702) -->
+          <circle cx="702" cy="76"  r="9"  fill="#e0589a"/><!-- s2: F -->
+          <text x="702" y="76"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">F</text>
 
-          <circle cx="610" cy="107" r="9" fill="#e0589a"/>
-          <text x="610" y="111" text-anchor="middle" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">F</text>
-
-          <circle cx="180" cy="35" r="9" fill="#e0589a"/>
-          <text x="180" y="39" text-anchor="middle" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">F</text>
-
-          <!-- G - lime #a8c840 -->
-          <circle cx="405" cy="59" r="9" fill="#a8c840"/>
-          <text x="405" y="63" text-anchor="middle" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">G</text>
-
-          <circle cx="510" cy="83" r="9" fill="#a8c840"/>
-          <text x="510" y="87" text-anchor="middle" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">G</text>
-
-          <circle cx="295" cy="35" r="9" fill="#a8c840"/>
-          <text x="295" y="39" text-anchor="middle" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">G</text>
+          <!-- FRET VII (x=802) — double inlay -->
+          <circle cx="802" cy="40"  r="9"  fill="#4a9ed8"/><!-- s1: B -->
+          <text x="802" y="40"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">B</text>
+          <circle cx="802" cy="112" r="9"  fill="#e07040"/><!-- s3: D -->
+          <text x="802" y="112" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">D</text>
+          <circle cx="802" cy="148" r="11" fill="#e8a838"/><!-- s4: A ROOT -->
+          <text x="802" y="148" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">A</text>
+          <circle cx="802" cy="184" r="9"  fill="#9868d4"/><!-- s5: E -->
+          <text x="802" y="184" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">E</text>
+          <circle cx="802" cy="220" r="9"  fill="#4a9ed8"/><!-- s6: B -->
+          <text x="802" y="220" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">B</text>
         </svg>
       </div>
 
-      <!-- Scale degree chips -->
-      <div class="tp-chips">
-        <span class="tp-chip" style="background:#e8a838">A — I</span>
-        <span class="tp-chip" style="background:#4a9ed8">B — II</span>
-        <span class="tp-chip" style="background:#50c490">C — III♭</span>
-        <span class="tp-chip" style="background:#e07040">D — IV</span>
-        <span class="tp-chip" style="background:#9868d4">E — V</span>
-        <span class="tp-chip" style="background:#e0589a">F — VI♭</span>
-        <span class="tp-chip" style="background:#a8c840; color:#333">G — VII♭</span>
+      <!-- Scale notes info bar -->
+      <div class="tp-infobar">
+        <span class="tp-infobar-lbl">La menor natural —</span>
+        <span class="tp-npill" style="background:#e8a838">A</span>
+        <span class="tp-npill" style="background:#4a9ed8">B</span>
+        <span class="tp-npill" style="background:#50c490">C</span>
+        <span class="tp-npill" style="background:#e07040">D</span>
+        <span class="tp-npill" style="background:#9868d4">E</span>
+        <span class="tp-npill" style="background:#e0589a">F</span>
+        <span class="tp-npill" style="background:#a8c840; color:#333">G</span>
+        <span style="margin-left:auto; font-size:11px; color:var(--ink5)">7 notas · 30 posiciones en el mango</span>
       </div>
 
-      <!-- CTA row -->
+      <!-- CTA -->
       <div class="tp-cta-row">
-        <span class="tp-cta-hint">Haz click en cualquier nota para escucharla</span>
+        <span class="tp-cta-hint">Click en cualquier nota para escucharla en tiempo real</span>
         <a href="/herramientas" class="tp-cta-btn">Abrir herramientas →</a>
       </div>
     </div>
+
+    <!-- Feature tiles -->
+    <div class="tp-feats">
+      <div class="tp-feat">
+        <div class="tp-feat-ico">🎵</div>
+        <div class="tp-feat-title">Audio por nota</div>
+        <div class="tp-feat-body">Toca cualquier nota en el diapasón y escúchala con síntesis Karplus-Strong — el timbre real de una cuerda pulsada.</div>
+      </div>
+      <div class="tp-feat">
+        <div class="tp-feat-ico">🎨</div>
+        <div class="tp-feat-title">7 colores, 7 grados</div>
+        <div class="tp-feat-body">Cada grado de la escala tiene un color único. La tónica, la quinta, la séptima — identificables al vuelo, sin contar.</div>
+      </div>
+      <div class="tp-feat">
+        <div class="tp-feat-ico">📐</div>
+        <div class="tp-feat-title">Exporta tu diagrama</div>
+        <div class="tp-feat-body">Descarga el diapasón como imagen JPG o graba un audio de lo que estás tocando — listo para compartir o estudiar.</div>
+      </div>
+    </div>
+
   </div>
 </section>
 
