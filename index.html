@@ -237,6 +237,37 @@ a.nav-logo { color: var(--ink); }
 }
 .tp-feat-body { font-size: 13px; color: var(--ink4); line-height: 1.65; }
 
+/* ── PHOTO GALLERY ── */
+.photo-gallery {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr 1fr;
+  height: 520px;
+  overflow: hidden;
+}
+.pg-item {
+  overflow: hidden;
+  position: relative;
+}
+.pg-item img {
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center;
+  display: block;
+  transition: transform .7s cubic-bezier(.22,.68,0,1);
+  /* placeholder color while image loads */
+  background: #160e06;
+}
+.pg-item:hover img { transform: scale(1.04); }
+.pg-item::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent 60%, rgba(10,6,3,.3) 100%);
+  pointer-events: none;
+}
+@media (max-width: 768px) {
+  .photo-gallery { grid-template-columns: 1fr; height: auto; }
+  .pg-item { height: 260px; }
+}
+
 /* ── FOOTER ── */
 footer { background: var(--ink); padding: 56px 48px 40px; }
 .f-inner { max-width: 1100px; margin: 0 auto; }
@@ -297,7 +328,7 @@ footer .f-copy { font-size: 12px; color: var(--ink5); }
   <p class="hero-subtitle">Comprende, practica y explora con tu instrumento.</p>
 
   <p class="hero-desc">
-    Herramientas visuales, teoría aplicada y práctica guiada — todo en un solo lugar, diseñado para guitarristas, pianistas y más.
+    Herramientas visuales, teoría aplicada y práctica guiada en un solo lugar, diseñado para guitarristas, pianistas y más.
   </p>
 
   <div class="hero-ctas">
@@ -361,14 +392,12 @@ footer .f-copy { font-size: 12px; color: var(--ink5); }
   <line x1="1012" y1="4" x2="1012" y2="76" stroke="#585018" stroke-width="0.7" opacity=".35"/>
   <line x1="1036" y1="4" x2="1036" y2="76" stroke="#585018" stroke-width="0.6" opacity=".3"/>
 
-  <!-- Inlay dots at III, V, VII, XII, XV, XVII -->
-  <circle cx="265" cy="40" r="5" fill="#c8b880" opacity=".35"/>
-  <circle cx="417" cy="40" r="5" fill="#c8b880" opacity=".35"/>
-  <circle cx="503" cy="40" r="5" fill="#c8b880" opacity=".35"/>
-  <circle cx="720" cy="26" r="4" fill="#c8b880" opacity=".35"/>
-  <circle cx="720" cy="54" r="4" fill="#c8b880" opacity=".35"/>
-  <circle cx="817" cy="40" r="4" fill="#c8b880" opacity=".25"/>
-  <circle cx="902" cy="40" r="4" fill="#c8b880" opacity=".25"/>
+  <!-- Inlay dots at III, V, VII, XII -->
+  <circle cx="265" cy="39" r="5" fill="#c8b880" opacity=".3"/>
+  <circle cx="417" cy="39" r="5" fill="#c8b880" opacity=".3"/>
+  <circle cx="503" cy="39" r="5" fill="#c8b880" opacity=".3"/>
+  <circle cx="720" cy="28" r="5" fill="#c8b880" opacity=".3"/>
+  <circle cx="720" cy="50" r="5" fill="#c8b880" opacity=".3"/>
 
   <!-- Guitar strings (6, thin at top → thick at bottom) -->
   <line x1="0" y1="14" x2="1440" y2="14" stroke="#d8cc9e" stroke-width="0.8" opacity=".6"/>
@@ -658,6 +687,19 @@ footer .f-copy { font-size: 12px; color: var(--ink5); }
 
   </div>
 </section>
+
+<!-- ── PHOTO GALLERY ── -->
+<div class="photo-gallery">
+  <div class="pg-item">
+    <img src="/img/photo-guitar-head.jpg" alt="Clavijero de guitarra clásica" loading="lazy">
+  </div>
+  <div class="pg-item">
+    <img src="/img/photo-guitars.jpg" alt="Guitarras en el estudio" loading="lazy">
+  </div>
+  <div class="pg-item">
+    <img src="/img/photo-piano.jpg" alt="Manos tocando el piano" loading="lazy">
+  </div>
+</div>
 
 <!-- ── PIANO KEYBOARD DIVIDER ── -->
 <!-- One octave = 140px (7 white keys × 20px). 10 octaves = 1400px. -->
