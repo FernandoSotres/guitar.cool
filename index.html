@@ -136,46 +136,63 @@ a.nav-logo { color: var(--ink); }
 /* ── PHOTO CARDS (shared) ── */
 .ph-card {
   position: relative; overflow: hidden; display: block;
-  aspect-ratio: 4/5;
+  aspect-ratio: 4/5; background: #1a1006;
 }
 .ph-card img {
   width: 100%; height: 100%;
   object-fit: cover; object-position: center;
-  display: block; background: #160e06;
-  transition: transform .7s cubic-bezier(.22,.68,0,1.1);
+  display: block;
+  transition: transform .8s cubic-bezier(.22,.68,0,1.1);
 }
-.ph-card:hover img { transform: scale(1.06); }
+.ph-card:hover img { transform: scale(1.05); }
+
+/* Título siempre visible al fondo */
+.ph-label {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 70px 24px 22px;
+  background: linear-gradient(to top, rgba(10,6,3,.78) 0%, transparent 100%);
+  font-family: var(--serif); font-size: 24px; font-weight: 700;
+  color: #fff; line-height: 1.1; letter-spacing: -.01em;
+  transition: opacity .3s;
+}
+.ph-label-sm { font-size: 18px; }
+.ph-card:hover .ph-label { opacity: 0; }
+
+/* Overlay completo al hacer hover */
 .ph-overlay {
   position: absolute; inset: 0;
-  display: flex; flex-direction: column; justify-content: flex-end;
-  padding: 28px 24px;
-  background: linear-gradient(to top, rgba(10,6,3,.88) 30%, rgba(10,6,3,.08) 100%);
-  transition: background .45s;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 36px 28px; text-align: center;
+  background: rgba(10,6,3,0);
+  transition: background .42s;
 }
-.ph-card:hover .ph-overlay {
-  background: linear-gradient(to top, rgba(10,6,3,.96) 55%, rgba(10,6,3,.42) 100%);
+.ph-card:hover .ph-overlay { background: rgba(10,6,3,.87); }
+.ph-ov-title {
+  font-family: var(--serif); font-size: 26px; font-weight: 700;
+  color: #fff; line-height: 1.08; letter-spacing: -.01em;
+  opacity: 0; transform: translateY(-10px);
+  transition: opacity .32s .06s, transform .32s .06s;
 }
+.ph-ov-title-sm { font-size: 20px; }
+.ph-ov-body {
+  font-size: 14px; color: rgba(255,255,255,.8); line-height: 1.65;
+  margin-top: 14px;
+  opacity: 0; transform: translateY(10px);
+  transition: opacity .32s .1s, transform .32s .1s;
+}
+.ph-card:hover .ph-ov-title,
+.ph-card:hover .ph-ov-body { opacity: 1; transform: translateY(0); }
+
 .ph-badge {
-  position: absolute; top: 20px; left: 22px;
+  position: absolute; top: 20px; left: 22px; z-index: 2;
   font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
   padding: 4px 9px; border-radius: 4px;
 }
 .ph-badge-cop { background: rgba(240,228,208,.92); color: #7a4010; }
 .ph-badge-vlt { background: rgba(232,224,244,.92); color: #6040a0; }
-.ph-title {
-  font-family: var(--serif); font-size: 26px; font-weight: 700;
-  color: #fff; line-height: 1.08; letter-spacing: -.01em;
-}
-.ph-title-sm { font-size: 20px; }
-.ph-body {
-  font-size: 13px; color: rgba(255,255,255,.76); line-height: 1.6;
-  margin-top: 10px;
-  opacity: 0; transform: translateY(8px);
-  transition: opacity .35s .06s, transform .35s .06s;
-}
-.ph-card:hover .ph-body { opacity: 1; transform: translateY(0); }
 @media (max-width: 768px) {
-  .ph-body { opacity: 1; transform: none; }
+  .ph-ov-title, .ph-ov-body { opacity: 1; transform: none; }
+  .ph-card:hover .ph-label { opacity: 1; }
 }
 
 /* ── TOOLS PREVIEW ── */
@@ -447,26 +464,29 @@ footer .f-copy { font-size: 12px; color: var(--ink5); }
       <div class="ph-card">
         <img src="/img/card-teoria.jpg" alt="Teoría Musical" loading="lazy">
         <span class="ph-badge ph-badge-vlt">Próximamente</span>
+        <div class="ph-label">Teoría Musical</div>
         <div class="ph-overlay">
-          <div class="ph-title">Teoría Musical</div>
-          <div class="ph-body">Comprende teoría musical aplicada al instrumento. Escalas, acordes, armonía e intervalos explicados visualmente, sin pentagrama.</div>
+          <div class="ph-ov-title">Teoría Musical</div>
+          <div class="ph-ov-body">Comprende teoría musical aplicada al instrumento. Escalas, acordes, armonía e intervalos explicados visualmente, sin pentagrama.</div>
         </div>
       </div>
       <div class="ph-card">
         <img src="/img/card-practica.jpg" alt="Práctica" loading="lazy">
         <span class="ph-badge ph-badge-vlt">Próximamente</span>
+        <div class="ph-label">Práctica</div>
         <div class="ph-overlay">
-          <div class="ph-title">Práctica</div>
-          <div class="ph-body">Practica lo necesario para lograr tus objetivos. Rutinas, ejercicios y seguimiento de progreso adaptados a lo que quieres tocar.</div>
+          <div class="ph-ov-title">Práctica</div>
+          <div class="ph-ov-body">Practica lo necesario para lograr tus objetivos. Rutinas, ejercicios y seguimiento de progreso adaptados a lo que quieres tocar.</div>
         </div>
       </div>
       <a href="/herramientas" class="pc-link">
         <div class="ph-card">
           <img src="/img/card-herramientas.jpg" alt="Herramientas" loading="lazy">
           <span class="ph-badge ph-badge-cop">Disponible ahora</span>
+          <div class="ph-label">Herramientas</div>
           <div class="ph-overlay">
-            <div class="ph-title">Herramientas</div>
-            <div class="ph-body">Explora herramientas visuales para instrumentos de cuerda y de teclado. Diapasón, piano, escalas, acordes e intervalos en tiempo real.</div>
+            <div class="ph-ov-title">Herramientas</div>
+            <div class="ph-ov-body">Explora herramientas visuales para instrumentos de cuerda y de teclado. Diapasón, piano, escalas, acordes e intervalos en tiempo real.</div>
           </div>
         </div>
       </a>
@@ -698,23 +718,26 @@ footer .f-copy { font-size: 12px; color: var(--ink5); }
     <div class="tp-feats">
       <div class="ph-card">
         <img src="/img/card-visual.jpg" alt="Visualiza la teoría" loading="lazy">
+        <div class="ph-label ph-label-sm">Comprende la teoría musical</div>
         <div class="ph-overlay">
-          <div class="ph-title ph-title-sm">Comprende teoría musical aplicada al instrumento</div>
-          <div class="ph-body">Visualiza escalas, acordes e intervalos directamente en el mango o el teclado. La teoría cobra sentido cuando la ves en tu instrumento.</div>
+          <div class="ph-ov-title ph-ov-title-sm">Comprende teoría musical aplicada al instrumento</div>
+          <div class="ph-ov-body">Visualiza escalas, acordes e intervalos directamente en el mango o el teclado. La teoría cobra sentido cuando la ves en tu instrumento.</div>
         </div>
       </div>
       <div class="ph-card">
         <img src="/img/card-rutinas.jpg" alt="Práctica guiada" loading="lazy">
+        <div class="ph-label ph-label-sm">Practica con propósito</div>
         <div class="ph-overlay">
-          <div class="ph-title ph-title-sm">Practica lo necesario para lograr tus objetivos</div>
-          <div class="ph-body">Rutinas y ejercicios diseñados para que avances de verdad, construyendo oído, técnica y musicalidad de forma progresiva.</div>
+          <div class="ph-ov-title ph-ov-title-sm">Practica lo necesario para lograr tus objetivos</div>
+          <div class="ph-ov-body">Rutinas y ejercicios diseñados para que avances de verdad, construyendo oído, técnica y musicalidad de forma progresiva.</div>
         </div>
       </div>
       <div class="ph-card">
         <img src="/img/card-explora.jpg" alt="Herramientas visuales" loading="lazy">
+        <div class="ph-label ph-label-sm">Explora las herramientas</div>
         <div class="ph-overlay">
-          <div class="ph-title ph-title-sm">Explora herramientas visuales para tu instrumento</div>
-          <div class="ph-body">Diapasón interactivo y piano en tiempo real. Cambia entre guitarra y piano dentro de las herramientas para ver la misma escala en ambos instrumentos.</div>
+          <div class="ph-ov-title ph-ov-title-sm">Explora herramientas visuales para tu instrumento</div>
+          <div class="ph-ov-body">Diapasón interactivo y piano en tiempo real. Cambia entre guitarra y piano para ver la misma escala en ambos instrumentos.</div>
         </div>
       </div>
     </div>
