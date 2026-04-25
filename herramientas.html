@@ -138,6 +138,7 @@ select.full:hover { border-color:var(--accent2); }
     <option value="violin">Violín</option>
     <option value="banjo">Banjo</option>
   </select>
+  <a href="/piano" class="dtbtn" style="text-decoration:none">🎹 Piano</a>
   <span class="h-label">Afinación</span>
   <select class="hsel" id="tuning-sel" onchange="setTuning(this.value)" style="max-width:160px"></select>
   <span class="h-label">Trastes</span>
@@ -172,7 +173,6 @@ select.full:hover { border-color:var(--accent2); }
   <button class="dtbtn" id="clear-ann-btn" onclick="clearAnns()" style="display:none;color:#e86060;border-color:#e86060">✕ Borrar todo</button>
   <div style="margin-left:auto;display:flex;align-items:center;gap:5px">
     <button class="dtbtn" id="play-btn" onclick="playCurrentMode()" style="border-color:var(--accent);color:var(--accent)">▶ Reproducir</button>
-    <a href="/piano" class="dtbtn" style="text-decoration:none;border-color:var(--accent2);gap:5px">🎹 Piano</a>
   </div>
   <div class="draw-opts" id="draw-opts" style="display:none">
     <input type="color" id="draw-color" value="#ffdd44">
