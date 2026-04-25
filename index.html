@@ -45,8 +45,9 @@ nav {
 .nav-logo {
   font-family: var(--serif); font-size: 22px; font-weight: 700;
   color: var(--ink); margin-right: 36px;
-  display: flex; align-items: center; gap: 8px; letter-spacing: -.01em;
+  letter-spacing: -.01em; text-decoration: none;
 }
+a.nav-logo { color: var(--ink); }
 .nav-logo span { color: var(--copper); }
 .nav-link {
   padding: 0 16px; height: 56px; display: flex; align-items: center;
@@ -55,6 +56,11 @@ nav {
 }
 .nav-link:hover { color: var(--ink2); }
 .nav-link.active { color: var(--copper); border-bottom-color: var(--copper); }
+.nav-soon { color: var(--paper5); cursor: default; font-size: 13px; font-weight: 500;
+  padding: 0 16px; height: 56px; display: flex; align-items: center; gap: 5px; }
+.nav-soon::after { content: 'pronto'; font-size: 9px; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; background: var(--paper3); color: var(--ink5);
+  padding: 2px 5px; border-radius: 3px; }
 .nav-cta {
   margin-left: auto; background: var(--ink);
   color: var(--paper); font-size: 12px; font-weight: 600;
@@ -232,10 +238,19 @@ nav {
 .tp-feat-body { font-size: 13px; color: var(--ink4); line-height: 1.65; }
 
 /* ── FOOTER ── */
-footer { background: var(--ink); padding: 48px; }
-.f-logo { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--paper); margin-bottom: 8px; }
+footer { background: var(--ink); padding: 56px 48px 40px; }
+.f-inner { max-width: 1100px; margin: 0 auto; }
+.f-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 40px; margin-bottom: 40px; flex-wrap: wrap; }
+.f-logo { font-family: var(--serif); font-size: 24px; font-weight: 700; color: var(--paper); margin-bottom: 6px; letter-spacing: -.01em; }
 .f-logo span { color: var(--copper-lt); }
-footer p { font-size: 12px; color: var(--ink4); }
+.f-tagline { font-size: 13px; color: var(--ink4); line-height: 1.5; max-width: 220px; }
+.f-nav { display: flex; gap: 40px; flex-wrap: wrap; }
+.f-nav-col h4 { font-size: 10px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: var(--ink5); margin-bottom: 14px; }
+.f-nav-col a { display: block; font-size: 13px; color: var(--ink4); text-decoration: none; margin-bottom: 8px; transition: color .2s; }
+.f-nav-col a:hover { color: var(--paper3); }
+.f-nav-col span { display: block; font-size: 13px; color: var(--ink5); margin-bottom: 8px; }
+.f-bottom { border-top: 1px solid rgba(255,255,255,.07); padding-top: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+footer .f-copy { font-size: 12px; color: var(--ink5); }
 
 @media (max-width: 768px) {
   nav { padding: 0 20px; }
@@ -251,10 +266,12 @@ footer p { font-size: 12px; color: var(--ink4); }
 <body>
 
 <nav>
-  <div class="nav-logo">guitarra<span>.cool</span></div>
-  <div class="nav-link active">Teoría Musical</div>
-  <div class="nav-link">Práctica</div>
-  <a href="/herramientas" class="nav-cta">Herramientas</a>
+  <a href="/" class="nav-logo">guitarra<span>.cool</span></a>
+  <a href="#teoria" class="nav-link" style="text-decoration:none">Teoría</a>
+  <a href="#teoria" class="nav-link" style="text-decoration:none">Práctica</a>
+  <a href="/herramientas" class="nav-link" style="text-decoration:none">Herramientas</a>
+  <span class="nav-link nav-soon">Lecciones</span>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
 </nav>
 
 <section class="hero">
@@ -277,15 +294,15 @@ footer p { font-size: 12px; color: var(--ink4); }
     Todo lo que necesitas<br>
     para <em>aprender música.</em>
   </h1>
-  <p class="hero-subtitle">Teoría y práctica musical en tu instrumento.</p>
+  <p class="hero-subtitle">Comprende, practica y explora con tu instrumento.</p>
 
   <p class="hero-desc">
-    Teoría visual, práctica guiada y herramientas de exploración reunidas en un solo lugar para que puedas avanzar desde los primeros acordes hasta la composición.
+    Herramientas visuales, teoría aplicada y práctica guiada — todo en un solo lugar, diseñado para guitarristas, pianistas y más.
   </p>
 
   <div class="hero-ctas">
     <a href="/herramientas" class="btn-dark">Abrir las herramientas</a>
-    <a href="#teoria" class="btn-outline" style="text-decoration:none">Teoría Musical →</a>
+    <a href="#preview" class="btn-outline" style="text-decoration:none">Ver cómo funciona ↓</a>
   </div>
 </section>
 
@@ -400,7 +417,7 @@ footer p { font-size: 12px; color: var(--ink4); }
   </div>
 </section>
 
-<section class="tools-preview">
+<section class="tools-preview" id="preview">
   <div class="tp-inner">
 
     <div class="tp-header">
@@ -720,8 +737,31 @@ footer p { font-size: 12px; color: var(--ink4); }
 </div>
 
 <footer>
-  <div class="f-logo">guitarra<span>.cool</span></div>
-  <p>Aprende música en tu instrumento · 2025</p>
+  <div class="f-inner">
+    <div class="f-top">
+      <div>
+        <div class="f-logo">guitarra<span>.cool</span></div>
+        <p class="f-tagline">Aprende música en tu instrumento — teoría, práctica y herramientas visuales.</p>
+      </div>
+      <div class="f-nav">
+        <div class="f-nav-col">
+          <h4>Aprende</h4>
+          <span>Teoría Musical <small style="font-size:10px;color:var(--ink5)">pronto</small></span>
+          <span>Práctica <small style="font-size:10px;color:var(--ink5)">pronto</small></span>
+          <span>Lecciones <small style="font-size:10px;color:var(--ink5)">pronto</small></span>
+        </div>
+        <div class="f-nav-col">
+          <h4>Herramientas</h4>
+          <a href="/herramientas">Diapasón — Guitarra</a>
+          <a href="/piano">Teclado — Piano</a>
+        </div>
+      </div>
+    </div>
+    <div class="f-bottom">
+      <span class="f-copy">© 2025 guitarra.cool — Todos los derechos reservados</span>
+      <a href="/herramientas" style="font-size:12px;color:var(--copper-lt);text-decoration:none;font-weight:600">Abrir herramientas →</a>
+    </div>
+  </div>
 </footer>
 
 </body>
