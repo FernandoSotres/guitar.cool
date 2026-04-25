@@ -289,7 +289,127 @@ footer p { font-size: 12px; color: var(--ink4); }
   </div>
 </section>
 
-<div style="height:1px;background:var(--paper3)"></div>
+<!-- ── GUITAR FRETBOARD DIVIDER ── -->
+<!-- ET fret positions for L=1440: f1=81 f2=157 f3=229 f4=297 f5=361 f6=422 f7=479 f8=533 f9=584 f10=632 f11=677 f12=720 ... f24=1080 -->
+<!-- Strings: s1(e)=y14 s2(B)=y23 s3(G)=y33 s4(D)=y44 s5(A)=y56 s6(E)=y66 -->
+<div style="overflow:hidden;line-height:0">
+<svg viewBox="0 0 1440 80" width="100%" height="80" preserveAspectRatio="xMidYMid slice" style="display:block" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="div-wood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#4e2408"/>
+      <stop offset="40%"  stop-color="#3c1806"/>
+      <stop offset="70%"  stop-color="#461e0c"/>
+      <stop offset="100%" stop-color="#3a1604"/>
+    </linearGradient>
+    <linearGradient id="div-fade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#1a0e06" stop-opacity="1"/>
+      <stop offset="4%"   stop-color="#1a0e06" stop-opacity="0"/>
+      <stop offset="74%"  stop-color="#1a0e06" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#1a0e06" stop-opacity="1"/>
+    </linearGradient>
+    <linearGradient id="div-nut-g" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#c0b080"/>
+      <stop offset="45%"  stop-color="#ece0bc"/>
+      <stop offset="100%" stop-color="#b8a870"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Fretboard background -->
+  <rect width="1440" height="80" fill="url(#div-wood)"/>
+  <!-- Binding strips -->
+  <rect y="0"  width="1440" height="4" fill="#b8a86a" opacity=".7"/>
+  <rect y="76" width="1440" height="4" fill="#b8a86a" opacity=".7"/>
+
+  <!-- Fret lines (ET spacing, L=1440, getting narrower toward body) -->
+  <line x1="81"  y1="4" x2="81"  y2="76" stroke="#c8b880" stroke-width="3.0" opacity=".9"/>
+  <line x1="157" y1="4" x2="157" y2="76" stroke="#c0b078" stroke-width="2.4" opacity=".85"/>
+  <line x1="229" y1="4" x2="229" y2="76" stroke="#b8a870" stroke-width="2.1" opacity=".8"/>
+  <line x1="297" y1="4" x2="297" y2="76" stroke="#b0a068" stroke-width="1.9" opacity=".8"/>
+  <line x1="361" y1="4" x2="361" y2="76" stroke="#a89860" stroke-width="1.8" opacity=".75"/>
+  <line x1="422" y1="4" x2="422" y2="76" stroke="#a09058" stroke-width="1.7" opacity=".75"/>
+  <line x1="479" y1="4" x2="479" y2="76" stroke="#988850" stroke-width="1.6" opacity=".7"/>
+  <line x1="533" y1="4" x2="533" y2="76" stroke="#908048" stroke-width="1.5" opacity=".7"/>
+  <line x1="584" y1="4" x2="584" y2="76" stroke="#887840" stroke-width="1.4" opacity=".65"/>
+  <line x1="632" y1="4" x2="632" y2="76" stroke="#887840" stroke-width="1.3" opacity=".65"/>
+  <line x1="677" y1="4" x2="677" y2="76" stroke="#807038" stroke-width="1.2" opacity=".6"/>
+  <line x1="720" y1="4" x2="720" y2="76" stroke="#c8b880" stroke-width="2.2" opacity=".85"/><!-- XII octave -->
+  <line x1="760" y1="4" x2="760" y2="76" stroke="#787038" stroke-width="1.1" opacity=".55"/>
+  <line x1="799" y1="4" x2="799" y2="76" stroke="#787038" stroke-width="1.0" opacity=".5"/>
+  <line x1="835" y1="4" x2="835" y2="76" stroke="#706830" stroke-width="1.0" opacity=".5"/>
+  <line x1="869" y1="4" x2="869" y2="76" stroke="#706830" stroke-width="0.9" opacity=".45"/>
+  <line x1="901" y1="4" x2="901" y2="76" stroke="#686028" stroke-width="0.9" opacity=".45"/>
+  <line x1="931" y1="4" x2="931" y2="76" stroke="#686028" stroke-width="0.8" opacity=".4"/>
+  <line x1="960" y1="4" x2="960" y2="76" stroke="#605820" stroke-width="0.8" opacity=".4"/>
+  <line x1="986" y1="4" x2="986" y2="76" stroke="#605820" stroke-width="0.7" opacity=".35"/>
+  <line x1="1012" y1="4" x2="1012" y2="76" stroke="#585018" stroke-width="0.7" opacity=".35"/>
+  <line x1="1036" y1="4" x2="1036" y2="76" stroke="#585018" stroke-width="0.6" opacity=".3"/>
+
+  <!-- Inlay dots at III, V, VII, XII, XV, XVII -->
+  <circle cx="265" cy="40" r="5" fill="#c8b880" opacity=".35"/>
+  <circle cx="417" cy="40" r="5" fill="#c8b880" opacity=".35"/>
+  <circle cx="503" cy="40" r="5" fill="#c8b880" opacity=".35"/>
+  <circle cx="720" cy="26" r="4" fill="#c8b880" opacity=".35"/>
+  <circle cx="720" cy="54" r="4" fill="#c8b880" opacity=".35"/>
+  <circle cx="817" cy="40" r="4" fill="#c8b880" opacity=".25"/>
+  <circle cx="902" cy="40" r="4" fill="#c8b880" opacity=".25"/>
+
+  <!-- Guitar strings (6, thin at top → thick at bottom) -->
+  <line x1="0" y1="14" x2="1440" y2="14" stroke="#d8cc9e" stroke-width="0.8" opacity=".6"/>
+  <line x1="0" y1="23" x2="1440" y2="23" stroke="#d0c490" stroke-width="1.1" opacity=".65"/>
+  <line x1="0" y1="33" x2="1440" y2="33" stroke="#c8ba80" stroke-width="1.6" opacity=".7"/>
+  <line x1="0" y1="44" x2="1440" y2="44" stroke="#c0b070" stroke-width="2.0" opacity=".75"/>
+  <line x1="0" y1="56" x2="1440" y2="56" stroke="#b8a860" stroke-width="2.6" opacity=".78"/>
+  <line x1="0" y1="66" x2="1440" y2="66" stroke="#b0a050" stroke-width="3.2" opacity=".82"/>
+
+  <!-- Nut (cream/bone bar) -->
+  <rect x="55" y="4" width="8" height="72" fill="url(#div-nut-g)"/>
+
+  <!-- Scale note circles — A minor, scattered across first 7 frets -->
+  <circle cx="118" cy="14" r="8"  fill="#e0589a"/><!-- s1 f1 F -->
+  <circle cx="118" cy="23" r="8"  fill="#50c490"/><!-- s2 f1 C -->
+  <circle cx="193" cy="44" r="8"  fill="#9868d4"/><!-- s4 f2 E -->
+  <circle cx="193" cy="56" r="8"  fill="#4a9ed8"/><!-- s5 f2 B -->
+  <circle cx="193" cy="33" r="9"  fill="#e8a838"/><!-- s3 f2 A root -->
+  <circle cx="265" cy="14" r="8"  fill="#a8c840"/><!-- s1 f3 G -->
+  <circle cx="265" cy="23" r="8"  fill="#e07040"/><!-- s2 f3 D -->
+  <circle cx="265" cy="56" r="8"  fill="#50c490"/><!-- s5 f3 C -->
+  <circle cx="265" cy="66" r="8"  fill="#a8c840"/><!-- s6 f3 G -->
+  <circle cx="340" cy="33" r="8"  fill="#4a9ed8"/><!-- s3 f4 B -->
+  <circle cx="417" cy="14" r="9"  fill="#e8a838"/><!-- s1 f5 A root -->
+  <circle cx="417" cy="23" r="8"  fill="#9868d4"/><!-- s2 f5 E -->
+  <circle cx="417" cy="33" r="8"  fill="#50c490"/><!-- s3 f5 C -->
+  <circle cx="417" cy="44" r="8"  fill="#a8c840"/><!-- s4 f5 G -->
+  <circle cx="417" cy="56" r="8"  fill="#e07040"/><!-- s5 f5 D -->
+  <circle cx="417" cy="66" r="9"  fill="#e8a838"/><!-- s6 f5 A root -->
+  <circle cx="503" cy="33" r="8"  fill="#e07040"/><!-- s3 f7 D -->
+  <circle cx="503" cy="44" r="9"  fill="#e8a838"/><!-- s4 f7 A root -->
+  <circle cx="503" cy="14" r="8"  fill="#4a9ed8"/><!-- s1 f7 B -->
+
+  <!-- Note text labels -->
+  <text x="118" cy="14" y="18"  text-anchor="middle" font-size="7" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">F</text>
+  <text x="118" y="27"  text-anchor="middle" font-size="7" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">C</text>
+  <text x="193" y="48"  text-anchor="middle" font-size="7" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">E</text>
+  <text x="193" y="60"  text-anchor="middle" font-size="7" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">B</text>
+  <text x="193" y="37"  text-anchor="middle" font-size="7.5" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">A</text>
+  <text x="265" y="18"  text-anchor="middle" font-size="7" font-weight="700" fill="#333" font-family="DM Sans,sans-serif">G</text>
+  <text x="265" y="27"  text-anchor="middle" font-size="7" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">D</text>
+  <text x="265" y="60"  text-anchor="middle" font-size="7" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">C</text>
+  <text x="265" y="70"  text-anchor="middle" font-size="7" font-weight="700" fill="#333" font-family="DM Sans,sans-serif">G</text>
+  <text x="340" y="37"  text-anchor="middle" font-size="7" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">B</text>
+  <text x="417" y="18"  text-anchor="middle" font-size="7.5" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">A</text>
+  <text x="417" y="27"  text-anchor="middle" font-size="7" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">E</text>
+  <text x="417" y="37"  text-anchor="middle" font-size="7" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">C</text>
+  <text x="417" y="48"  text-anchor="middle" font-size="7" font-weight="700" fill="#333" font-family="DM Sans,sans-serif">G</text>
+  <text x="417" y="60"  text-anchor="middle" font-size="7" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">D</text>
+  <text x="417" y="70"  text-anchor="middle" font-size="7.5" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">A</text>
+  <text x="503" y="37"  text-anchor="middle" font-size="7" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">D</text>
+  <text x="503" y="48"  text-anchor="middle" font-size="7.5" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">A</text>
+  <text x="503" y="18"  text-anchor="middle" font-size="7" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">B</text>
+
+  <!-- Left/right fade overlay -->
+  <rect width="1440" height="80" fill="url(#div-fade)"/>
+</svg>
+</div>
 
 <section class="pillars">
   <div class="pillars-inner">
@@ -395,14 +515,14 @@ footer p { font-size: 12px; color: var(--ink4); }
           <rect x="40" y="18" width="855" height="5" fill="#c0ae7a" opacity=".65"/>
           <rect x="40" y="227" width="855" height="5" fill="#c0ae7a" opacity=".65"/>
 
-          <!-- Fret lines (equal temperament spacing) -->
-          <line x1="177" y1="18" x2="177" y2="232" stroke="url(#fb-fret)" stroke-width="2.8"/>
-          <line x1="306" y1="18" x2="306" y2="232" stroke="url(#fb-fret)" stroke-width="2.2"/>
-          <line x1="428" y1="18" x2="428" y2="232" stroke="url(#fb-fret)" stroke-width="2.0"/>
-          <line x1="542" y1="18" x2="542" y2="232" stroke="url(#fb-fret)" stroke-width="1.8"/>
-          <line x1="651" y1="18" x2="651" y2="232" stroke="url(#fb-fret)" stroke-width="1.6"/>
-          <line x1="754" y1="18" x2="754" y2="232" stroke="url(#fb-fret)" stroke-width="1.5"/>
-          <line x1="850" y1="18" x2="850" y2="232" stroke="url(#fb-fret)" stroke-width="1.4"/>
+          <!-- Fret lines (equal temperament spacing, solid metallic) -->
+          <line x1="177" y1="18" x2="177" y2="232" stroke="#c4b080" stroke-width="2.8"/>
+          <line x1="306" y1="18" x2="306" y2="232" stroke="#b8a870" stroke-width="2.2"/>
+          <line x1="428" y1="18" x2="428" y2="232" stroke="#b8a870" stroke-width="2.0"/>
+          <line x1="542" y1="18" x2="542" y2="232" stroke="#b0a068" stroke-width="1.8"/>
+          <line x1="651" y1="18" x2="651" y2="232" stroke="#b0a068" stroke-width="1.6"/>
+          <line x1="754" y1="18" x2="754" y2="232" stroke="#a89860" stroke-width="1.5"/>
+          <line x1="850" y1="18" x2="850" y2="232" stroke="#a89860" stroke-width="1.4"/>
 
           <!-- Inlay dots at frets III, V, VII -->
           <circle cx="367" cy="125" r="6" fill="#c8b888" opacity=".38"/>
@@ -563,7 +683,74 @@ footer p { font-size: 12px; color: var(--ink4); }
   </div>
 </section>
 
-<div style="height:1px;background:var(--paper3)"></div>
+<!-- ── PIANO KEYBOARD DIVIDER ── -->
+<!-- One octave = 140px (7 white keys × 20px). 10 octaves = 1400px. -->
+<!-- A minor = all white keys (A B C D E F G). Black keys uncolored. -->
+<!-- Colors: C=#50c490 D=#e07040 E=#9868d4 F=#e0589a G=#a8c840 A=#e8a838 B=#4a9ed8 -->
+<div style="overflow:hidden;line-height:0">
+<svg viewBox="0 0 1400 80" width="100%" height="80" preserveAspectRatio="xMidYMid slice" style="display:block" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- One piano octave (C to B, 140px wide) reused via <use> -->
+    <g id="kb-oct">
+      <!-- White keys (width 19 + 1px gap) -->
+      <rect x="0"   y="0" width="19" height="80" fill="#50c490"/><!-- C -->
+      <rect x="20"  y="0" width="19" height="80" fill="#e07040"/><!-- D -->
+      <rect x="40"  y="0" width="19" height="80" fill="#9868d4"/><!-- E -->
+      <rect x="60"  y="0" width="19" height="80" fill="#e0589a"/><!-- F -->
+      <rect x="80"  y="0" width="19" height="80" fill="#a8c840"/><!-- G -->
+      <rect x="100" y="0" width="19" height="80" fill="#e8a838"/><!-- A -->
+      <rect x="120" y="0" width="19" height="80" fill="#4a9ed8"/><!-- B -->
+      <!-- Key shine (top highlight on white keys) -->
+      <rect x="0"   y="0" width="19" height="6" fill="#fff" opacity=".18"/>
+      <rect x="20"  y="0" width="19" height="6" fill="#fff" opacity=".18"/>
+      <rect x="40"  y="0" width="19" height="6" fill="#fff" opacity=".18"/>
+      <rect x="60"  y="0" width="19" height="6" fill="#fff" opacity=".18"/>
+      <rect x="80"  y="0" width="19" height="6" fill="#fff" opacity=".18"/>
+      <rect x="100" y="0" width="19" height="6" fill="#fff" opacity=".18"/>
+      <rect x="120" y="0" width="19" height="6" fill="#fff" opacity=".18"/>
+      <!-- Black keys on top -->
+      <rect x="14"  y="0" width="12" height="50" fill="#1a0e06" rx="1"/><!-- C# -->
+      <rect x="34"  y="0" width="12" height="50" fill="#1a0e06" rx="1"/><!-- D# -->
+      <rect x="73"  y="0" width="12" height="50" fill="#1a0e06" rx="1"/><!-- F# -->
+      <rect x="93"  y="0" width="12" height="50" fill="#1a0e06" rx="1"/><!-- G# -->
+      <rect x="113" y="0" width="12" height="50" fill="#1a0e06" rx="1"/><!-- A# -->
+      <!-- Black key shine -->
+      <rect x="14"  y="0" width="12" height="4" fill="#fff" opacity=".12" rx="1"/>
+      <rect x="34"  y="0" width="12" height="4" fill="#fff" opacity=".12" rx="1"/>
+      <rect x="73"  y="0" width="12" height="4" fill="#fff" opacity=".12" rx="1"/>
+      <rect x="93"  y="0" width="12" height="4" fill="#fff" opacity=".12" rx="1"/>
+      <rect x="113" y="0" width="12" height="4" fill="#fff" opacity=".12" rx="1"/>
+    </g>
+    <linearGradient id="kb-fade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#1a1410" stop-opacity="1"/>
+      <stop offset="6%"   stop-color="#1a1410" stop-opacity="0"/>
+      <stop offset="94%"  stop-color="#1a1410" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#1a1410" stop-opacity="1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background (fills key gaps) -->
+  <rect width="1400" height="80" fill="#1a0e06"/>
+
+  <!-- 10 octaves via <use> -->
+  <use href="#kb-oct" transform="translate(0,0)"/>
+  <use href="#kb-oct" transform="translate(140,0)"/>
+  <use href="#kb-oct" transform="translate(280,0)"/>
+  <use href="#kb-oct" transform="translate(420,0)"/>
+  <use href="#kb-oct" transform="translate(560,0)"/>
+  <use href="#kb-oct" transform="translate(700,0)"/>
+  <use href="#kb-oct" transform="translate(840,0)"/>
+  <use href="#kb-oct" transform="translate(980,0)"/>
+  <use href="#kb-oct" transform="translate(1120,0)"/>
+  <use href="#kb-oct" transform="translate(1260,0)"/>
+
+  <!-- Shadow line at bottom of black keys -->
+  <line x1="0" y1="50" x2="1400" y2="50" stroke="#00000030" stroke-width="1"/>
+
+  <!-- Left/right fade -->
+  <rect width="1400" height="80" fill="url(#kb-fade)"/>
+</svg>
+</div>
 
 <footer>
   <div class="f-logo">guitarra<span>.cool</span></div>
