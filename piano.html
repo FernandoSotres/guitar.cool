@@ -82,6 +82,24 @@ select.full:hover { border-color:var(--accent2); }
 .itvl2-btn { border-radius:4px; border:1.5px solid var(--hl); background:var(--surface); color:var(--text2); font-size:10px; padding:3px 2px; cursor:pointer; text-align:center; }
 .itvl2-btn.active { border-color:#b855d8; background:rgba(184,85,216,.15); color:#b855d8; }
 
+/* Barra de herramientas */
+.dtoolbar { background:var(--surface); border-bottom:1px solid var(--hl); padding:5px 12px; display:flex; align-items:center; gap:5px; flex-shrink:0; flex-wrap:wrap; position:relative; z-index:100; }
+.dtbtn { display:flex; align-items:center; gap:4px; padding:4px 8px; border-radius:5px; border:1px solid var(--hl); background:var(--surface2); color:var(--text2); font-size:12px; font-weight:600; cursor:pointer; white-space:nowrap; text-decoration:none; }
+.dtbtn:hover { border-color:var(--accent2); color:var(--text); }
+.dtbtn.dd-open { background:var(--accent2); border-color:var(--accent2); color:#fff; }
+.dd-wrap { position:relative; }
+.dd-menu { position:absolute; top:calc(100% + 4px); left:0; background:var(--surface); border:1px solid var(--hl); border-radius:8px; min-width:200px; padding:4px 0; z-index:999; display:none; box-shadow:0 6px 24px rgba(0,0,0,.22); }
+.dd-menu.open { display:block; }
+.dd-item { display:flex; align-items:center; gap:8px; padding:7px 13px; font-size:12px; color:var(--text); cursor:pointer; }
+.dd-item:hover { background:var(--hl); }
+.dd-item.danger { color:#e86060; }
+.dd-ck { width:13px; font-size:11px; color:var(--accent); flex-shrink:0; }
+.dd-sep { height:1px; background:var(--hl); margin:3px 8px; }
+.draw-opts { display:flex; align-items:center; gap:6px; }
+.draw-opts input[type=color] { width:24px; height:24px; border:none; border-radius:4px; cursor:pointer; padding:0; }
+.draw-opts select { background:var(--surface2); border:1px solid var(--hl); color:var(--text); border-radius:4px; padding:3px 5px; font-size:12px; cursor:pointer; outline:none; }
+.dt-hint { font-size:11px; color:var(--text2); font-style:italic; }
+
 /* Piano area */
 .piano-area { flex:1; display:flex; flex-direction:column; align-items:center; overflow:hidden; background:var(--bg); }
 .keys-scroll { flex:1; width:100%; overflow:auto; display:flex; align-items:flex-start; justify-content:center; padding:40px 60px 80px; }
@@ -113,6 +131,31 @@ select.full:hover { border-color:var(--accent2); }
     <span id="theme-toggle-label">Claro</span>
   </button>
 </header>
+
+<div class="dtoolbar">
+  <div class="dd-wrap">
+    <button class="dtbtn" id="draw-btn" onclick="toggleDD('draw-dd')">Indicadores ▾</button>
+    <div class="dd-menu" id="draw-dd">
+      <div class="dd-item" id="di-none"  onclick="setDT(null);closeDD()"><span class="dd-ck">✓</span>↖ Cursor</div>
+      <div class="dd-item" id="di-arrow" onclick="setDT('arrow');closeDD()"><span class="dd-ck"></span>→ Flecha</div>
+      <div class="dd-item" id="di-line"  onclick="setDT('line');closeDD()"><span class="dd-ck"></span>╱ Línea</div>
+      <div class="dd-item" id="di-rect"  onclick="setDT('rect');closeDD()"><span class="dd-ck"></span>▭ Cuadrado</div>
+      <div class="dd-item" id="di-free"  onclick="setDT('free');closeDD()"><span class="dd-ck"></span>~ Dibujo libre</div>
+      <div class="dd-item" id="di-text"  onclick="setDT('text');closeDD()"><span class="dd-ck"></span>T Texto</div>
+      <div class="dd-sep"></div>
+      <div class="dd-item danger" onclick="undoAnn();closeDD()">↩ Deshacer último</div>
+      <div class="dd-item danger" onclick="clearAnns();closeDD()">✕ Limpiar todo</div>
+    </div>
+  </div>
+  <button id="clear-ann-btn" onclick="clearAnns()" style="display:none;color:#e86060;border-color:#e86060" class="dtbtn">✕ Borrar todo</button>
+  <div class="draw-opts" id="draw-opts" style="display:none">
+    <input type="color" id="draw-color" value="#ffdd44">
+    <select id="draw-size">
+      <option value="2">Fino</option><option value="3" selected>Normal</option><option value="5">Grueso</option>
+    </select>
+    <span class="dt-hint" id="dt-hint"></span>
+  </div>
+</div>
 
 <div class="main">
   <div class="sidebar">
@@ -418,7 +461,10 @@ function drawPiano(){
     }
   }
 
+  // Capas de anotaciones al final (encima de las teclas)
+  h += '<g id="annotation-layer"></g><g id="draw-preview"></g>';
   svg.innerHTML=h;
+  renderAnnotations();
 }
 
 // ── UPDATE ────────────────────────────────────────────────────────────────────
@@ -544,6 +590,145 @@ function buildNoteGrids(){
   });
 }
 
+// ── INDICADORES (sistema de anotaciones) ─────────────────────────────────────
+let drawTool=null, drawColor='#ffdd44', drawSW=3, drawState=null, annotations=[];
+
+function toggleDD(id){
+  const el=document.getElementById(id),was=el.classList.contains('open');
+  closeDD();
+  if(!was){el.classList.add('open');}
+  document.querySelectorAll('.dtbtn').forEach(b=>b.classList.remove('dd-open'));
+  if(!was&&id==='draw-dd')document.getElementById('draw-btn').classList.add('dd-open');
+}
+function closeDD(){
+  document.querySelectorAll('.dd-menu').forEach(m=>m.classList.remove('open'));
+  document.querySelectorAll('.dtbtn').forEach(b=>b.classList.remove('dd-open'));
+}
+document.addEventListener('click',e=>{if(!e.target.closest('.dd-wrap'))closeDD();});
+
+function setDT(tool){
+  drawTool=tool; drawState=null;
+  document.getElementById('draw-opts').style.display=tool?'flex':'none';
+  document.getElementById('clear-ann-btn').style.display=tool?'flex':'none';
+  const hints={arrow:'Clic y arrastra → flecha',line:'Clic y arrastra → línea',rect:'Clic y arrastra → cuadrado',free:'Dibuja libremente',text:'Clic para escribir texto'};
+  document.getElementById('dt-hint').textContent=tool?(hints[tool]||''):'';
+  ['none','arrow','line','rect','free','text'].forEach(t=>{
+    const el=document.getElementById('di-'+t);
+    if(el)el.querySelector('.dd-ck').textContent=t==='none'?(tool===null?'✓':''):(tool===t?'✓':'');
+  });
+  const svg=document.getElementById('piano-svg');
+  if(svg)svg.style.cursor=tool?'crosshair':'default';
+}
+document.getElementById('draw-color').addEventListener('input',e=>drawColor=e.target.value);
+document.getElementById('draw-size').addEventListener('change',e=>drawSW=+e.target.value);
+
+function svgPt(svg,e){const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;return pt.matrixTransform(svg.getScreenCTM().inverse());}
+
+function renderAnnotations(){
+  const layer=document.getElementById('annotation-layer');if(!layer)return;
+  layer.innerHTML='';
+  for(const ann of annotations){
+    if(ann.type==='line'||ann.type==='arrow'){
+      const ln=document.createElementNS('http://www.w3.org/2000/svg','line');
+      ln.setAttribute('x1',ann.x1);ln.setAttribute('y1',ann.y1);ln.setAttribute('x2',ann.x2);ln.setAttribute('y2',ann.y2);
+      ln.setAttribute('stroke',ann.color);ln.setAttribute('stroke-width',ann.sw);ln.setAttribute('stroke-linecap','round');
+      layer.appendChild(ln);
+      if(ann.type==='arrow'){
+        const dx=ann.x2-ann.x1,dy=ann.y2-ann.y1,len=Math.sqrt(dx*dx+dy*dy);if(len<5)continue;
+        const ux=dx/len,uy=dy/len,hs=Math.max(10,ann.sw*3.5),px=-uy,py=ux;
+        const poly=document.createElementNS('http://www.w3.org/2000/svg','polygon');
+        poly.setAttribute('points',`${ann.x2},${ann.y2} ${ann.x2-ux*hs+px*hs*.45},${ann.y2-uy*hs+py*hs*.45} ${ann.x2-ux*hs-px*hs*.45},${ann.y2-uy*hs-py*hs*.45}`);
+        poly.setAttribute('fill',ann.color);layer.appendChild(poly);
+      }
+    }else if(ann.type==='rect'){
+      const rx=document.createElementNS('http://www.w3.org/2000/svg','rect');
+      const x=Math.min(ann.x1,ann.x2),y=Math.min(ann.y1,ann.y2);
+      rx.setAttribute('x',x);rx.setAttribute('y',y);rx.setAttribute('width',Math.abs(ann.x2-ann.x1));rx.setAttribute('height',Math.abs(ann.y2-ann.y1));
+      rx.setAttribute('stroke',ann.color);rx.setAttribute('stroke-width',ann.sw);rx.setAttribute('fill','none');rx.setAttribute('rx',3);
+      layer.appendChild(rx);
+    }else if(ann.type==='free'){
+      const pl=document.createElementNS('http://www.w3.org/2000/svg','polyline');
+      pl.setAttribute('points',ann.points.map(pt=>`${pt.x},${pt.y}`).join(' '));
+      pl.setAttribute('stroke',ann.color);pl.setAttribute('stroke-width',ann.sw);pl.setAttribute('fill','none');pl.setAttribute('stroke-linecap','round');pl.setAttribute('stroke-linejoin','round');
+      layer.appendChild(pl);
+    }else if(ann.type==='text'){
+      const tx=document.createElementNS('http://www.w3.org/2000/svg','text');
+      tx.setAttribute('x',ann.x);tx.setAttribute('y',ann.y);tx.setAttribute('fill',ann.color);
+      tx.setAttribute('font-size',14);tx.setAttribute('font-family','DM Sans,sans-serif');tx.setAttribute('font-weight','600');
+      tx.textContent=ann.text;layer.appendChild(tx);
+    }
+  }
+}
+
+function startDraw(e){
+  if(!drawTool||e.button!==0)return;
+  const svg=document.getElementById('piano-svg'),p=svgPt(svg,e);
+  if(drawTool==='text'){placeText(svg,p.x,p.y,e.clientX,e.clientY);return;}
+  if(drawTool==='free'){drawState={points:[{x:p.x,y:p.y}]};return;}
+  drawState={x1:p.x,y1:p.y};
+}
+function moveDraw(e){
+  if(!drawState||!drawTool||drawTool==='text')return;
+  const svg=document.getElementById('piano-svg'),p=svgPt(svg,e);
+  const prev=document.getElementById('draw-preview');if(!prev)return;
+  prev.innerHTML='';
+  if(drawTool==='free'){
+    drawState.points.push({x:p.x,y:p.y});
+    const pl=document.createElementNS('http://www.w3.org/2000/svg','polyline');
+    pl.setAttribute('points',drawState.points.map(pt=>`${pt.x},${pt.y}`).join(' '));
+    pl.setAttribute('stroke',drawColor);pl.setAttribute('stroke-width',drawSW);pl.setAttribute('fill','none');pl.setAttribute('stroke-linecap','round');pl.setAttribute('stroke-linejoin','round');
+    prev.appendChild(pl);return;
+  }
+  if(drawTool==='rect'){
+    const rx=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    const x=Math.min(drawState.x1,p.x),y=Math.min(drawState.y1,p.y);
+    rx.setAttribute('x',x);rx.setAttribute('y',y);rx.setAttribute('width',Math.abs(p.x-drawState.x1));rx.setAttribute('height',Math.abs(p.y-drawState.y1));
+    rx.setAttribute('stroke',drawColor);rx.setAttribute('stroke-width',drawSW);rx.setAttribute('fill','none');rx.setAttribute('stroke-dasharray','5,4');rx.setAttribute('rx',3);
+    prev.appendChild(rx);return;
+  }
+  const ln=document.createElementNS('http://www.w3.org/2000/svg','line');
+  ln.setAttribute('x1',drawState.x1);ln.setAttribute('y1',drawState.y1);ln.setAttribute('x2',p.x);ln.setAttribute('y2',p.y);
+  ln.setAttribute('stroke',drawColor);ln.setAttribute('stroke-width',drawSW);ln.setAttribute('stroke-linecap','round');ln.setAttribute('stroke-dasharray','5,4');
+  prev.appendChild(ln);
+}
+function endDrawAt(clientX,clientY){
+  if(!drawState||!drawTool||drawTool==='text')return;
+  const svg=document.getElementById('piano-svg');
+  const pt=svg.createSVGPoint();pt.x=clientX;pt.y=clientY;
+  const p=pt.matrixTransform(svg.getScreenCTM().inverse());
+  if(drawTool==='free'){
+    if(drawState.points.length>2)annotations.push({type:'free',points:drawState.points,color:drawColor,sw:drawSW});
+    document.getElementById('draw-preview').innerHTML='';drawState=null;
+    renderAnnotations();return;
+  }
+  const dx=p.x-drawState.x1,dy=p.y-drawState.y1;
+  if(Math.sqrt(dx*dx+dy*dy)>5){annotations.push({type:drawTool,x1:drawState.x1,y1:drawState.y1,x2:p.x,y2:p.y,color:drawColor,sw:drawSW});renderAnnotations();}
+  document.getElementById('draw-preview').innerHTML='';drawState=null;
+}
+function endDraw(e){endDrawAt(e.clientX,e.clientY);}
+document.addEventListener('mouseup',e=>{if(drawState)endDrawAt(e.clientX,e.clientY);});
+
+function placeText(svg,svgX,svgY,clientX,clientY){
+  const inp=document.createElement('input');inp.type='text';
+  inp.style.cssText=`position:fixed;left:${clientX}px;top:${clientY}px;background:var(--surface);color:var(--text);border:1.5px solid var(--accent);border-radius:4px;padding:4px 8px;font-size:13px;font-family:var(--sans);z-index:9999;outline:none;min-width:120px;box-shadow:0 2px 12px rgba(0,0,0,.4);`;
+  document.body.appendChild(inp);
+  requestAnimationFrame(()=>{
+    inp.focus();
+    let committed=false;
+    const commit=()=>{
+      if(committed)return;committed=true;
+      const t=inp.value.trim();
+      if(t)annotations.push({type:'text',x:svgX,y:svgY,text:t,color:drawColor});
+      if(document.body.contains(inp))document.body.removeChild(inp);
+      renderAnnotations();
+    };
+    inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();commit();}if(ev.key==='Escape'){ev.preventDefault();if(document.body.contains(inp))document.body.removeChild(inp);}});
+    setTimeout(()=>inp.addEventListener('blur',commit),150);
+  });
+}
+function undoAnn(){if(annotations.length){annotations.pop();renderAnnotations();}}
+function clearAnns(){annotations=[];renderAnnotations();}
+
 // ── AUDIO ─────────────────────────────────────────────────────────────────────
 const _APC=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 let _sampler=null, _samplerReady=false;
@@ -555,6 +740,14 @@ buildChordSelect();
 buildIBuilderGrid();
 buildNoteGrids();
 update();
+
+// Conectar eventos de dibujo al SVG del piano (el elemento persiste entre redraws)
+(()=>{
+  const svg=document.getElementById('piano-svg');
+  svg.addEventListener('mousedown', startDraw);
+  svg.addEventListener('mousemove', moveDraw);
+  svg.addEventListener('mouseup',   endDraw);
+})();
 
 // ── Pre-load audio samples (wrapped so JS errors here never block the UI) ─────
 (()=>{
