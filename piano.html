@@ -353,11 +353,13 @@ function drawPiano(){
 
   const totalW=OCTS*OCTAVE_W+WW+GAP; // +1 extra C at the end
   const svgH=WH+28;
-  svg.setAttribute('width',totalW);
-  svg.setAttribute('height',svgH);
+  // Use explicit rendered dimensions (no CSS transform) so click areas match visuals
+  const scale=1.8;
   svg.setAttribute('viewBox',`0 0 ${totalW} ${svgH}`);
-  svg.style.transform='scale(1.8)';
-  svg.style.transformOrigin='top center';
+  svg.setAttribute('width', Math.round(totalW*scale));
+  svg.setAttribute('height', Math.round(svgH*scale));
+  svg.style.transform='';
+  svg.style.transformOrigin='';
 
   const wDef=isDark?'#cdc5b8':'#f8f3ec';
   const bDef=isDark?'#141210':'#1a1410';
@@ -548,37 +550,50 @@ let _sampler=null, _samplerReady=false;
 
 function _gn(pc,oct){return `${_APC[pc]}${oct}`;}
 
-// Pre-load samples (download can start without AudioContext)
-_sampler=new Tone.Sampler({
-  urls:{
-    A0:'A0.mp3',C1:'C1.mp3','D#1':'Ds1.mp3','F#1':'Fs1.mp3',
-    A1:'A1.mp3',C2:'C2.mp3','D#2':'Ds2.mp3','F#2':'Fs2.mp3',
-    A2:'A2.mp3',C3:'C3.mp3','D#3':'Ds3.mp3','F#3':'Fs3.mp3',
-    A3:'A3.mp3',C4:'C4.mp3','D#4':'Ds4.mp3','F#4':'Fs4.mp3',
-    A4:'A4.mp3',C5:'C5.mp3','D#5':'Ds5.mp3','F#5':'Fs5.mp3',
-    A5:'A5.mp3',C6:'C6.mp3','D#6':'Ds6.mp3','F#6':'Fs6.mp3',
-    A7:'A7.mp3',C8:'C8.mp3',
-  },
-  baseUrl:'https://tonejs.github.io/audio/salamander/',
-  onload:()=>{
-    _samplerReady=true;
-    const btn=document.getElementById('play-btn');
-    if(btn)btn.textContent='▶ Reproducir';
-  }
-}).toDestination();
+// ── INIT (runs regardless of audio availability) ───────────────────────────────
+buildChordSelect();
+buildIBuilderGrid();
+buildNoteGrids();
+update();
 
-// Show loading state
-(()=>{const btn=document.getElementById('play-btn');if(btn)btn.textContent='⟳ Cargando...';})();
+// ── Pre-load audio samples (wrapped so JS errors here never block the UI) ─────
+(()=>{
+  const btn=document.getElementById('play-btn');
+  if(btn)btn.textContent='⟳ Cargando...';
+  try{
+    if(typeof Tone==='undefined') throw new Error('Tone.js not loaded');
+    _sampler=new Tone.Sampler({
+      urls:{
+        A0:'A0.mp3',C1:'C1.mp3','D#1':'Ds1.mp3','F#1':'Fs1.mp3',
+        A1:'A1.mp3',C2:'C2.mp3','D#2':'Ds2.mp3','F#2':'Fs2.mp3',
+        A2:'A2.mp3',C3:'C3.mp3','D#3':'Ds3.mp3','F#3':'Fs3.mp3',
+        A3:'A3.mp3',C4:'C4.mp3','D#4':'Ds4.mp3','F#4':'Fs4.mp3',
+        A4:'A4.mp3',C5:'C5.mp3','D#5':'Ds5.mp3','F#5':'Fs5.mp3',
+        A5:'A5.mp3',C6:'C6.mp3','D#6':'Ds6.mp3','F#6':'Fs6.mp3',
+        A7:'A7.mp3',C8:'C8.mp3',
+      },
+      baseUrl:'https://tonejs.github.io/audio/salamander/',
+      onload:()=>{
+        _samplerReady=true;
+        const b=document.getElementById('play-btn');
+        if(b)b.textContent='▶ Reproducir';
+      }
+    }).toDestination();
+  } catch(e){
+    console.warn('Audio not available:',e.message);
+    if(btn)btn.style.display='none';
+  }
+})();
 
 async function noteClick(pc,oct){
+  if(!_sampler||!_samplerReady)return;
   await Tone.start(); // unlock AudioContext on user gesture
-  if(!_samplerReady)return;
   _sampler.triggerAttackRelease(_gn(pc,oct),'2n');
 }
 
 async function playCurrentMode(){
+  if(!_sampler||!_samplerReady)return;
   await Tone.start();
-  if(!_samplerReady)return;
   const root=getKey();
   const OCTS=getOctaves();
   const midOct=START_OCT+Math.floor(OCTS/2);
@@ -600,11 +615,7 @@ async function playCurrentMode(){
   }
 }
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
-buildChordSelect();
-buildIBuilderGrid();
-buildNoteGrids();
-update();
+
 </script>
 </body>
 </html>
