@@ -974,46 +974,61 @@ document.addEventListener('keydown',e=>{
 
 // ── AUDIO ─────────────────────────────────────────────────────────────────────
 const _APC=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-let _plucks=null,_delay=null,_pi=0,_rec=null,_recOn=false;
+let _sampler=null,_samplerReady=false,_rec=null,_recOn=false;
 
 async function _initAudio(){
-  if(_plucks)return;
+  if(_sampler)return;
   await Tone.start();
-  // Short stereo delay for depth
-  _delay=new Tone.FeedbackDelay(0.16,0.18);
-  const limiter=new Tone.Limiter(-6).toDestination();
-  _delay.connect(limiter);
-  // PluckSynth pool (Karplus-Strong) — genuine plucked-string sound
-  _plucks=Array.from({length:10},()=>
-    new Tone.PluckSynth({attackNoise:0.15,dampening:3000,resonance:0.97}).connect(_delay)
-  );
+
+  // Cadena de efectos: reverb sutil → compresor → limiter
+  const limiter  = new Tone.Limiter(-2).toDestination();
+  const comp     = new Tone.Compressor({ threshold:-22, ratio:4, attack:0.005, release:0.12 }).connect(limiter);
+  const reverb   = new Tone.Freeverb({ roomSize:0.38, dampening:3200, wet:0.14 }).connect(comp);
+
+  // Sampler con grabaciones reales de guitarra acústica nylon (FluidR3 GM)
+  // Carga muestras distribuidas en el rango de guitarra; Tone.js interpola el resto
+  _sampler = new Tone.Sampler({
+    urls:{
+      'E2':'E2.mp3','A2':'A2.mp3','D3':'D3.mp3','G3':'G3.mp3',
+      'B3':'B3.mp3','E4':'E4.mp3','A4':'A4.mp3','D5':'D5.mp3',
+      'G5':'G5.mp3','B5':'B5.mp3',
+    },
+    baseUrl:'https://cdn.jsdelivr.net/gh/gleitz/midi-js-soundfonts@gh-pages/FluidR3_GM/acoustic_guitar_nylon-mp3/',
+    onload:()=>{ _samplerReady=true; },
+    onerror:(e)=>console.warn('Error cargando sample:',e),
+  }).connect(reverb);
 }
 
 function _gn(pc,oct=3){return `${_APC[pc]}${oct}`;}
-function _pluck(pc,oct,when){_plucks[_pi%10].triggerAttack(_gn(pc,oct),when);_pi++;}
+function _pluck(pc,oct,when){
+  if(!_sampler||!_samplerReady)return;
+  _sampler.triggerAttackRelease(_gn(pc,oct),'2n',when);
+}
 
 async function noteClick(pc){
   if(drawTool)return;
   await Tone.start();await _initAudio();
-  _pluck(pc,3,Tone.now()+0.06);
+  _pluck(pc,3,Tone.now()+0.05);
 }
 
 async function playCurrentMode(){
   await Tone.start();await _initAudio();
+  if(!_samplerReady)return;
   const root=parseInt(document.getElementById('key-sel').value)||0;
-  const now=Tone.now()+0.1;
+  const now=Tone.now()+0.08;
   if(mode==='scale'){
     const sk=document.getElementById('scale-sel').value;
     const ivs=SCALES[sk]||[0,2,4,5,7,9,11];
-    ivs.forEach((v,i)=>_pluck((root+v)%12,root+v>=12?4:3,now+i*0.32));
-    _pluck(root,4,now+ivs.length*0.32);
+    ivs.forEach((v,i)=>_pluck((root+v)%12,root+v>=12?4:3,now+i*0.30));
+    _pluck(root,4,now+ivs.length*0.30);
   }else if(mode==='chord'){
     const ivs=customIntervals||CHORD_TYPES[chordType]?.intervals||[0,3,7];
-    ivs.forEach((v,i)=>_pluck((root+v)%12,3,now+i*0.06));
+    // Rasgado: separación de 55ms entre cuerdas como una mano real
+    ivs.forEach((v,i)=>_pluck((root+v)%12,3,now+i*0.055));
   }else{
     const rn=selectedNoteRoot,semi=selectedInterval;
     _pluck(rn,3,now);
-    if(semi>0)_pluck((rn+semi)%12,rn+semi>=12?4:3,now);
+    if(semi>0)_pluck((rn+semi)%12,rn+semi>=12?4:3,now+0.04);
   }
 }
 
