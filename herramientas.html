@@ -138,7 +138,7 @@ select.full:hover { border-color:var(--accent2); }
     <option value="violin">Violín</option>
     <option value="banjo">Banjo</option>
   </select>
-  <a href="/piano" class="dtbtn" style="text-decoration:none">🎹 Piano</a>
+  <a href="/piano" class="dtbtn" style="text-decoration:none">Piano →</a>
   <span class="h-label">Afinación</span>
   <select class="hsel" id="tuning-sel" onchange="setTuning(this.value)" style="max-width:160px"></select>
   <span class="h-label">Trastes</span>
@@ -840,61 +840,121 @@ function drawFretboard(){
   svg.setAttribute('width',vW);svg.setAttribute('height',vH);
   svg.setAttribute('viewBox',`0 0 ${vW} ${vH}`);
 
-  // Content group transform: rotation only (flips handled via coordinate math)
-  // Vertical: CW 90° — translate(svgH,0) rotate(90) maps (x,y)→(svgH-y, x)
-  // so nut (small x) → near top of vertical SVG, low-E (large y) → left side ✓
   const rotT=orientation==='v'?`translate(${svgH},0) rotate(90)`:'';
-
-  // Counter-rotate text in vertical mode so labels stay readable (not sideways)
   const T=(x,y)=>orientation==='v'?` transform="rotate(-90,${x},${y})"`:'';
-
-  // Fret x position (nut always at left)
   const flx=f=>ox+f*FW;
-  // Center of fret slot f (where a note sits between fret f-1 and fret f)
   const fnx=f=>f===0?flx(0)-FW*0.35:flx(f)-FW*0.5;
-  // String data index:
-  //   horizontal → low-E at bottom: s=0 top = high e, s=NS-1 bottom = low E
-  //   vertical   → low-E at top:    s=0 top = low E,  s=NS-1 bottom = high e
   const si=s=>orientation==='v'?s:(NS-1-s);
 
   const nl=getCSSVar('--nl'),nut=getCSSVar('--nut'),dot=getCSSVar('--dot'),nstr=getCSSVar('--nstr');
   const boardBg=getCSSVar('--board-bg'),wood=getCSSVar('--wood');
   const fbLeft=flx(0)-LP;
+  const fbW=boardW+LP+RP, fbH=boardH+TP+BP;
+  const fbX=fbLeft, fbY=oy-TP;
+  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
 
-  let h=`
-<rect width="${vW}" height="${vH}" fill="${boardBg}"/>
-<g id="cg" transform="${rotT}">
-<rect x="${fbLeft}" y="${oy-TP}" width="${boardW+LP+RP}" height="${boardH+TP+BP}" fill="${wood}" rx="6"/>
-`;
-
-  // Fret lines
-  for(let f=0;f<=FRETS;f++){
-    const x=flx(f),sw=f===0?5:1.2,col=f===0?nut:nl;
-    h+=`<line x1="${x}" y1="${oy}" x2="${x}" y2="${oy+boardH}" stroke="${col}" stroke-width="${sw}"/>`;
+  // ── Wood grain lines (drawn inside pattern tile) ──────────────────────────
+  let grainLines='';
+  for(let i=0;i<38;i++){
+    const yi=(fbH*(i/38)+(Math.sin(i*13.7)*2.8)).toFixed(1);
+    const y2=(+yi+Math.sin(i*2.3)*1.6).toFixed(1);
+    const op=(0.028+Math.abs(Math.sin(i*3.7))*0.048).toFixed(3);
+    const gc=isDark?'#ffffff':'#000000';
+    grainLines+=`<line x1="0" y1="${yi}" x2="${fbW}" y2="${y2}" stroke="${gc}" stroke-width="0.9" opacity="${op}"/>`;
   }
 
-  // Strings + labels
+  // ── SVG defs: gradients, pattern, filters ────────────────────────────────
+  const defs=`<defs>
+<pattern id="fb-grain" x="${fbX}" y="${fbY}" width="${fbW}" height="${fbH}" patternUnits="userSpaceOnUse">${grainLines}</pattern>
+<linearGradient id="fb-edge" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0%"   stop-color="rgba(0,0,0,0.28)"/>
+  <stop offset="7%"   stop-color="rgba(0,0,0,0)"/>
+  <stop offset="93%"  stop-color="rgba(0,0,0,0)"/>
+  <stop offset="100%" stop-color="rgba(0,0,0,0.32)"/>
+</linearGradient>
+<linearGradient id="fb-fret" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0%"   stop-color="rgba(255,255,255,0.52)"/>
+  <stop offset="28%"  stop-color="${nl}"/>
+  <stop offset="72%"  stop-color="${nl}"/>
+  <stop offset="100%" stop-color="rgba(0,0,0,0.62)"/>
+</linearGradient>
+<linearGradient id="fb-nut" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0%"   stop-color="rgba(255,255,255,0.65)"/>
+  <stop offset="22%"  stop-color="${nut}"/>
+  <stop offset="78%"  stop-color="${nut}"/>
+  <stop offset="100%" stop-color="rgba(0,0,0,0.55)"/>
+</linearGradient>
+<radialGradient id="fb-inlay" cx="38%" cy="36%" r="62%">
+  <stop offset="0%"   stop-color="${isDark?'rgba(255,255,255,0.22)':'rgba(255,255,255,0.5)'}"/>
+  <stop offset="100%" stop-color="rgba(0,0,0,0)"/>
+</radialGradient>
+<filter id="fb-nshadow" x="-40%" y="-40%" width="180%" height="180%">
+  <feDropShadow dx="0" dy="1.5" stdDeviation="2.2" flood-color="#000" flood-opacity="0.48"/>
+</filter>
+</defs>`;
+
+  let h=defs+`
+<rect width="${vW}" height="${vH}" fill="${boardBg}"/>
+<g id="cg" transform="${rotT}">`;
+
+  // ── Board: wood fill + grain + edge shading ───────────────────────────────
+  h+=`<rect x="${fbX}" y="${fbY}" width="${fbW}" height="${fbH}" fill="${wood}" rx="6"/>`;
+  h+=`<rect x="${fbX}" y="${fbY}" width="${fbW}" height="${fbH}" fill="url(#fb-grain)" rx="6"/>`;
+  h+=`<rect x="${fbX}" y="${fbY}" width="${fbW}" height="${fbH}" fill="url(#fb-edge)" rx="6"/>`;
+
+  // ── Fret slot shadows (subtle depth before each fret bar) ─────────────────
+  for(let f=1;f<=FRETS;f++){
+    const x=flx(f);
+    h+=`<rect x="${x-4}" y="${oy}" width="4" height="${boardH}" fill="rgba(0,0,0,0.16)"/>`;
+  }
+
+  // ── Fret bars ─────────────────────────────────────────────────────────────
+  for(let f=0;f<=FRETS;f++){
+    const x=flx(f);
+    if(f===0){
+      // Nut: bone/ivory rect with top-lit gradient
+      h+=`<rect x="${x-3.5}" y="${oy-1.5}" width="7" height="${boardH+3}" fill="url(#fb-nut)" rx="1.5"/>`;
+    } else {
+      // Fret wire: metallic gradient rect
+      h+=`<rect x="${x-1.4}" y="${oy}" width="2.8" height="${boardH}" fill="url(#fb-fret)" rx="0.6"/>`;
+    }
+  }
+
+  // ── Strings ───────────────────────────────────────────────────────────────
   for(let s=0;s<NS;s++){
     const idx=si(s),y=oy+s*SH;
-    h+=`<line x1="${flx(0)}" y1="${y}" x2="${flx(FRETS)}" y2="${y}" stroke="${nstr}" stroke-width="${THICK[idx]}"/>`;
+    const sw=THICK[idx];
+    const x1=flx(0),x2=flx(FRETS);
+    // Cast shadow below string
+    h+=`<line x1="${x1}" y1="${y+sw*0.5}" x2="${x2}" y2="${y+sw*0.5}" stroke="rgba(0,0,0,0.5)" stroke-width="${sw*0.65}"/>`;
+    // Main string body
+    h+=`<line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="${nstr}" stroke-width="${sw}"/>`;
+    // Metallic highlight (top edge)
+    h+=`<line x1="${x1}" y1="${y-sw*0.22}" x2="${x2}" y2="${y-sw*0.22}" stroke="rgba(255,255,255,0.2)" stroke-width="${sw*0.38}"/>`;
+    // String name label
     const lx=flx(0)-14;
-    h+=`<text x="${lx}" y="${y+4}"${T(lx,y+4)} text-anchor="middle" fill="${nstr}" font-size="10" font-family="monospace">${SNAMES[idx]}</text>`;
+    h+=`<text x="${lx}" y="${y+4}"${T(lx,y+4)} text-anchor="middle" fill="${nstr}" font-size="10" font-family="DM Mono,monospace" opacity="0.82">${SNAMES[idx]}</text>`;
   }
 
-  // Fret numbers
+  // ── Fret numbers ──────────────────────────────────────────────────────────
   for(let f=1;f<=FRETS;f++){
-    h+=`<text x="${fnx(f)}" y="${oy-10}"${T(fnx(f),oy-10)} text-anchor="middle" fill="${nl}" font-size="10" font-family="monospace">${f}</text>`;
+    h+=`<text x="${fnx(f)}" y="${oy-10}"${T(fnx(f),oy-10)} text-anchor="middle" fill="${nl}" font-size="10" font-family="DM Mono,monospace" opacity="0.6">${f}</text>`;
   }
 
-  // Position dots
+  // ── Position dot inlays (mother-of-pearl look) ────────────────────────────
+  const drawInlay=(cx,cy)=>{
+    h+=`<circle cx="${cx}" cy="${cy}" r="5.8" fill="${dot}" opacity="0.38"/>`;
+    h+=`<circle cx="${cx}" cy="${cy}" r="4.0" fill="${dot}" opacity="0.88"/>`;
+    h+=`<circle cx="${cx}" cy="${cy}" r="4.0" fill="url(#fb-inlay)"/>`;
+  };
   for(const df of[3,5,7,9,12,15,17]){
     if(df>FRETS)continue;
     const x=fnx(df),y=oy+boardH/2;
-    if(df===12){h+=`<circle cx="${x}" cy="${y-SH*.7}" r="4" fill="${dot}"/>`;h+=`<circle cx="${x}" cy="${y+SH*.7}" r="4" fill="${dot}"/>`;}
-    else h+=`<circle cx="${x}" cy="${y}" r="4" fill="${dot}"/>`;
+    if(df===12){drawInlay(x,y-SH*.72);drawInlay(x,y+SH*.72);}
+    else drawInlay(x,y);
   }
 
-  // Note circles
+  // ── Note circles ──────────────────────────────────────────────────────────
   const root=_dp.rootNote;
   if(_dp.type==='scale'){
     const sn=_dp.scaleNotes,lbl=_dp.labels||{};
@@ -905,8 +965,8 @@ function drawFretboard(){
         const deg=sn.indexOf(note);
         const col=SCALE_DEG_COLORS[deg]||'#7c5cbf',r=deg===0?11:9;
         const x=fnx(f);
-        h+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${col}" opacity=".92" style="cursor:pointer" onclick="noteClick(${note})"/>`;
-        h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="${deg===0?11:10}" font-weight="${deg===0?700:500}" font-family="DM Sans,sans-serif" style="pointer-events:none">${lbl[note]||NOTE_NAMES[note]}</text>`;
+        h+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${col}" opacity=".93" filter="url(#fb-nshadow)" style="cursor:pointer" onclick="noteClick(${note})"/>`;
+        h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="${deg===0?11:10}" font-weight="${deg===0?700:600}" font-family="DM Sans,sans-serif" style="pointer-events:none">${lbl[note]||NOTE_NAMES[note]}</text>`;
       }
     }
   }else if(_dp.type==='chord-all'||_dp.type==='chord-iso'){
@@ -919,7 +979,7 @@ function drawFretboard(){
         const note=(OPEN[idx]+f)%12;if(!cn.has(note))continue;
         if(voicing){if(voicing[idx]<0||voicing[idx]!==f)continue;}
         const x=fnx(f),sem=(note-root+12)%12,col=INT_COLORS[sem]||'#aaa';
-        h+=`<circle cx="${x}" cy="${y}" r="10" fill="${col}" opacity=".93" style="cursor:pointer" onclick="noteClick(${note})"/>`;
+        h+=`<circle cx="${x}" cy="${y}" r="10" fill="${col}" opacity=".94" filter="url(#fb-nshadow)" style="cursor:pointer" onclick="noteClick(${note})"/>`;
         h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="DM Sans,sans-serif" style="pointer-events:none">${lbl[note]||NOTE_NAMES[note]}</text>`;
       }
     }
@@ -933,13 +993,13 @@ function drawFretboard(){
         if(note===rn){col='#e8a838';r=11;}else if(note===iNote&&semi!==0){col='#b855d8';r=10;}
         if(!col)continue;
         const x=fnx(f);
-        h+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${col}" opacity=".92" style="cursor:pointer" onclick="noteClick(${note})"/>`;
+        h+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${col}" opacity=".93" filter="url(#fb-nshadow)" style="cursor:pointer" onclick="noteClick(${note})"/>`;
         h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="${r===11?11:10}" font-weight="700" font-family="DM Sans,sans-serif" style="pointer-events:none">${lbl[note]||NOTE_NAMES[note]}</text>`;
       }
     }
   }
 
-  h+=`</g><g id="annotation-layer"></g><g id="draw-preview"></g></svg>`;
+  h+=`</g><g id="annotation-layer"></g><g id="draw-preview"></g>`;
   svg.innerHTML=h.replace(/<\/svg>$/,'');
   renderAnnotations();
   svg.removeEventListener('mousedown',startDraw);svg.removeEventListener('mousemove',moveDraw);svg.removeEventListener('mouseup',endDraw);
