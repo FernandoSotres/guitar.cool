@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>guitarra.cool · Armonía</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<style>
+:root {
+  --paper:#faf6f0;--paper2:#f2ece3;--paper3:#e8e0d4;--paper4:#ddd4c4;--paper5:#cec4b0;
+  --copper:#a05c20;--copper-lt:#c07830;--copper-dk:#7a4010;
+  --ink:#1a1410;--ink2:#2e2418;--ink3:#4a3c2c;--ink4:#6a5a46;--ink5:#8a7a66;
+  --tonic:#a05c20;--subdom:#5a7abf;--dominant:#7a4abf;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(250,246,240,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:56px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{color:var(--copper);}
+.nav-link{padding:0 16px;height:56px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+.th-progress{position:fixed;top:56px;left:0;right:0;height:2px;background:rgba(160,92,32,.12);z-index:99;}
+.th-progress-bar{height:100%;background:var(--copper);width:0%;transition:width .08s linear;}
+
+.th-breadcrumb{background:var(--paper2);border-bottom:1px solid var(--paper4);padding:0 48px;height:40px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink5);}
+.th-breadcrumb a{color:var(--ink5);text-decoration:none;}
+.th-breadcrumb a:hover{color:var(--copper);}
+.th-breadcrumb .sep{opacity:.5;}
+.th-breadcrumb .current{color:var(--ink3);font-weight:500;}
+
+.th-hero{background:#100a04;padding:110px 48px 90px;text-align:center;overflow:hidden;}
+.th-chapter{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:28px;display:flex;align-items:center;justify-content:center;gap:14px;}
+.th-chapter::before,.th-chapter::after{content:'';display:block;height:1px;width:48px;background:var(--copper-lt);opacity:.35;}
+.th-title{font-family:var(--serif);font-size:clamp(54px,7.5vw,92px);font-weight:700;line-height:.92;letter-spacing:-.025em;color:var(--paper);margin-bottom:28px;}
+.th-title em{font-style:italic;color:var(--copper-lt);}
+.th-lead{font-family:var(--serif);font-size:clamp(17px,2vw,22px);font-style:italic;color:rgba(250,246,240,.58);max-width:580px;margin:0 auto 44px;line-height:1.65;}
+.th-scroll-hint{font-size:11px;color:rgba(250,246,240,.22);letter-spacing:.14em;text-transform:uppercase;}
+
+.th-section{padding:88px 48px;}
+.th-section.dark{background:#100a04;}
+.th-inner{max-width:1080px;margin:0 auto;}
+.th-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;display:block;}
+.th-section.dark .th-label{color:var(--copper-lt);}
+.th-h2{font-family:var(--serif);font-size:clamp(34px,4.5vw,56px);font-weight:700;line-height:1.02;letter-spacing:-.025em;color:var(--ink);margin-bottom:22px;}
+.th-section.dark .th-h2{color:var(--paper);}
+.th-body{font-size:15px;color:var(--ink3);line-height:1.85;max-width:600px;}
+.th-body+.th-body{margin-top:14px;}
+.th-section.dark .th-body{color:rgba(250,246,240,.58);}
+.th-body strong{color:var(--ink2);font-weight:600;}
+.th-section.dark .th-body strong{color:rgba(250,246,240,.92);}
+.th-split{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center;}
+.th-callout{border-left:3px solid var(--copper);border-radius:0 8px 8px 0;padding:16px 20px;margin:28px 0;background:rgba(160,92,32,.07);}
+.th-section.dark .th-callout{background:rgba(255,255,255,.05);border-left-color:var(--copper-lt);}
+.th-callout-label{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);margin-bottom:7px;}
+.th-section.dark .th-callout-label{color:var(--copper-lt);}
+.th-callout p{font-size:14px;color:var(--ink3);line-height:1.65;}
+.th-section.dark .th-callout p{color:rgba(250,246,240,.58);}
+hr.th-div{border:none;height:1px;background:var(--paper4);}
+hr.th-div.dark{background:rgba(255,255,255,.06);}
+
+/* ── DIATONIC CHORD GRID ── */
+.key-sel-row{display:flex;align-items:center;gap:16px;margin-bottom:32px;flex-wrap:wrap;}
+.key-sel-row label{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--copper);}
+.key-select{background:var(--paper2);border:1px solid var(--paper4);color:var(--ink2);font-family:var(--sans);font-size:14px;padding:8px 36px 8px 14px;border-radius:8px;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a7a66' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
+.key-select:focus{border-color:var(--copper);}
+
+.diat-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:8px;}
+.diat-card{
+  border-radius:10px;padding:16px 8px 14px;text-align:center;cursor:pointer;
+  border:1.5px solid var(--paper4);background:var(--paper2);
+  transition:border-color .18s,box-shadow .18s,transform .14s;
+}
+.diat-card:hover{border-color:var(--copper);box-shadow:0 3px 12px rgba(160,92,32,.1);transform:translateY(-2px);}
+.diat-card.playing{border-color:var(--copper);background:rgba(160,92,32,.09);transform:translateY(-3px);box-shadow:0 6px 20px rgba(160,92,32,.18);}
+.diat-roman{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.06em;margin-bottom:6px;}
+.diat-roman.tonic   {color:var(--tonic);}
+.diat-roman.subdom  {color:var(--subdom);}
+.diat-roman.dominant{color:var(--dominant);}
+.diat-name{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--ink);line-height:1.1;margin-bottom:6px;}
+.diat-type{font-size:10px;color:var(--ink5);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;}
+.diat-notes{font-family:var(--mono);font-size:10px;color:var(--ink5);line-height:1.5;}
+
+.diat-legend{display:flex;gap:20px;flex-wrap:wrap;margin-top:14px;}
+.diat-leg-item{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink4);}
+.diat-leg-dot{width:10px;height:10px;border-radius:50%;}
+
+/* ── FUNCTION CARDS ── */
+.func-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:28px 0;}
+.func-card{border-radius:12px;padding:24px 18px;}
+.func-card.tonic   {background:rgba(160,92,32,.08);border:1.5px solid rgba(160,92,32,.25);}
+.func-card.subdom  {background:rgba(90,122,191,.08);border:1.5px solid rgba(90,122,191,.25);}
+.func-card.dominant{background:rgba(122,74,191,.08);border:1.5px solid rgba(122,74,191,.25);}
+.func-title{font-family:var(--serif);font-size:22px;font-weight:700;margin-bottom:6px;}
+.func-card.tonic    .func-title{color:var(--tonic);}
+.func-card.subdom   .func-title{color:var(--subdom);}
+.func-card.dominant .func-title{color:var(--dominant);}
+.func-degrees{font-family:var(--mono);font-size:13px;font-weight:600;margin-bottom:10px;}
+.func-card.tonic    .func-degrees{color:rgba(160,92,32,.8);}
+.func-card.subdom   .func-degrees{color:rgba(90,122,191,.9);}
+.func-card.dominant .func-degrees{color:rgba(122,74,191,.9);}
+.func-desc{font-size:13px;color:var(--ink4);line-height:1.6;}
+
+/* ── PROGRESSION PLAYER ── */
+.prog-wrap{background:#100a04;border-radius:14px;padding:36px;margin:32px 0;}
+.prog-key-row{display:flex;align-items:center;gap:14px;margin-bottom:28px;flex-wrap:wrap;}
+.prog-key-row label{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--copper-lt);}
+.prog-select{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(250,246,240,.88);font-family:var(--sans);font-size:14px;padding:8px 36px 8px 14px;border-radius:8px;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a7a66' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
+.prog-select option{background:#1c1008;}
+
+.prog-presets{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;}
+.prog-preset-btn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(250,246,240,.65);font-family:var(--mono);font-size:11px;padding:7px 13px;border-radius:6px;cursor:pointer;transition:all .15s;}
+.prog-preset-btn:hover{background:rgba(160,92,32,.18);border-color:rgba(192,120,48,.4);color:rgba(250,246,240,.9);}
+.prog-preset-btn.active{background:var(--copper);border-color:var(--copper-dk);color:#fff;}
+
+.prog-display{display:flex;gap:10px;justify-content:center;align-items:stretch;margin-bottom:24px;flex-wrap:wrap;}
+.prog-chord-block{
+  min-width:72px;flex:1;max-width:120px;border-radius:10px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  padding:16px 10px;text-align:center;transition:background .15s,border-color .15s,transform .12s;
+}
+.prog-chord-block.playing{background:rgba(160,92,32,.22);border-color:var(--copper-lt);transform:translateY(-3px);}
+.prog-chord-roman{font-family:var(--mono);font-size:10px;color:rgba(250,246,240,.3);margin-bottom:6px;display:block;}
+.prog-chord-name{font-family:var(--serif);font-size:24px;font-weight:700;color:var(--paper);display:block;line-height:1;}
+.prog-chord-notes{font-family:var(--mono);font-size:9px;color:rgba(250,246,240,.25);margin-top:6px;display:block;}
+
+.prog-play-btn{display:block;margin:0 auto;background:var(--copper);border:none;color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;padding:13px 36px;border-radius:8px;cursor:pointer;transition:background .18s;}
+.prog-play-btn:hover{background:var(--copper-dk);}
+.prog-play-btn:disabled{background:rgba(255,255,255,.12);cursor:default;}
+
+/* ── MINOR DIATONIC ── */
+.minor-diat-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin:24px 0;}
+.minor-diat-card{border-radius:8px;padding:14px 6px 12px;text-align:center;cursor:pointer;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);transition:border-color .15s,background .15s,transform .12s;}
+.minor-diat-card:hover{border-color:rgba(192,120,48,.4);background:rgba(160,92,32,.1);transform:translateY(-2px);}
+.minor-diat-card.playing{border-color:var(--copper-lt);background:rgba(160,92,32,.16);transform:translateY(-3px);}
+.minor-roman{font-family:var(--mono);font-size:11px;font-weight:600;color:rgba(250,246,240,.35);margin-bottom:5px;}
+.minor-name{font-family:var(--serif);font-size:17px;font-weight:700;color:var(--paper);margin-bottom:4px;}
+.minor-type{font-size:10px;color:rgba(250,246,240,.3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
+.minor-notes{font-family:var(--mono);font-size:9px;color:rgba(250,246,240,.25);line-height:1.5;}
+
+/* ── NEXT ── */
+.th-next{background:var(--ink);padding:88px 48px;text-align:center;}
+.th-next-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink5);margin-bottom:18px;display:block;}
+.th-next-title{font-family:var(--serif);font-size:clamp(36px,5vw,56px);font-weight:700;color:var(--paper);margin-bottom:10px;letter-spacing:-.02em;}
+.th-next-sub{font-size:14px;color:var(--ink4);margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.th-next-btn{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:13px;font-weight:600;padding:13px 28px;border-radius:8px;text-decoration:none;transition:background .2s;}
+.th-next-btn:hover{background:var(--copper-dk);}
+.th-next-btn.back{background:transparent;color:var(--ink5);border:1px solid rgba(255,255,255,.12);cursor:pointer;}
+.th-next-btn.back:hover{color:var(--paper);border-color:rgba(255,255,255,.28);}
+
+@media(max-width:768px){
+  nav{padding:0 20px;}
+  .th-breadcrumb{padding:0 20px;}
+  .th-hero{padding:80px 20px 64px;}
+  .th-section{padding:64px 20px;}
+  .th-split{grid-template-columns:1fr;gap:44px;}
+  .diat-grid{grid-template-columns:repeat(4,1fr);}
+  .minor-diat-grid{grid-template-columns:repeat(4,1fr);}
+  .func-grid{grid-template-columns:1fr;}
+  .prog-wrap{padding:24px 16px;}
+  .th-next{padding:64px 20px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">guitarra<span>.cool</span></a>
+  <a href="/teoria" class="nav-link active">Teoría</a>
+  <a href="/" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<div class="th-progress"><div class="th-progress-bar" id="prog-bar"></div></div>
+
+<div class="th-breadcrumb">
+  <a href="/teoria">Teoría musical</a>
+  <span class="sep">›</span>
+  <span class="current">Capítulo 5 · Armonía</span>
+</div>
+
+<!-- HERO -->
+<section class="th-hero">
+  <div class="th-chapter">Teoría musical · Capítulo 5</div>
+  <h1 class="th-title">Acordes que se<br><em>hablan entre sí</em></h1>
+  <p class="th-lead">La armonía es la lógica que conecta los acordes. Entenderla te permite saber por qué ciertas progresiones funcionan, y cómo construir las tuyas.</p>
+  <div class="th-scroll-hint">Sigue leyendo ↓</div>
+</section>
+
+<!-- 01: TONALIDAD -->
+<section class="th-section" id="s1">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">01 · La tonalidad</span>
+        <h2 class="th-h2">Todo gira alrededor de una nota</h2>
+        <p class="th-body">
+          La <strong>tonalidad</strong> es el sistema que da a cada nota y cada acorde un papel dentro de una jerarquía. Hay una nota central, la <strong>tónica</strong>, y todo lo demás se entiende en relación a ella.
+        </p>
+        <p class="th-body">
+          Cuando decimos que una canción está en <strong>Do mayor</strong>, significa que la nota C actúa como centro gravitacional. Las notas que forman la escala de Do mayor son el "vocabulario" disponible, y los acordes que se construyen sobre esas notas son las "palabras".
+        </p>
+        <div class="th-callout">
+          <div class="th-callout-label">Cifrado romano</div>
+          <p>Los acordes de una tonalidad se numeran con cifras romanas según su posición en la escala: <strong>I</strong> (tónica), <strong>II</strong>, <strong>III</strong>… <strong>VII</strong>. Las mayúsculas indican acorde mayor y las minúsculas acorde menor. Así una progresión I·IV·V funciona igual en cualquier tonalidad.</p>
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--paper2);border-radius:12px;padding:28px;border:1px solid var(--paper4)">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--copper);margin-bottom:18px">Escala de C mayor</div>
+          <div style="display:flex;gap:6px;margin-bottom:24px;flex-wrap:wrap" id="scale-preview"></div>
+          <div style="font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--copper);margin-bottom:14px">Sus acordes diatónicos</div>
+          <div style="display:flex;flex-direction:column;gap:8px" id="diat-preview"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="th-div">
+
+<!-- 02: ACORDES DIATÓNICOS -->
+<section class="th-section" id="s2">
+  <div class="th-inner">
+    <span class="th-label">02 · Acordes diatónicos</span>
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:32px;flex-wrap:wrap;margin-bottom:28px">
+      <h2 class="th-h2" style="max-width:460px;margin:0">Los siete acordes de una tonalidad</h2>
+      <p class="th-body" style="max-width:360px;margin:0">Apilando terceras sobre cada nota de la escala mayor obtienes los <strong>siete acordes diatónicos</strong>. Son los acordes "nativos" de esa tonalidad. Haz clic en cualquiera para escucharlo.</p>
+    </div>
+    <div class="key-sel-row">
+      <label>Tonalidad</label>
+      <select class="key-select" id="diat-key-sel"></select>
+    </div>
+    <div class="diat-grid" id="diat-grid"></div>
+    <div class="diat-legend">
+      <div class="diat-leg-item"><div class="diat-leg-dot" style="background:var(--tonic)"></div>Función tónica</div>
+      <div class="diat-leg-item"><div class="diat-leg-dot" style="background:var(--subdom)"></div>Función subdominante</div>
+      <div class="diat-leg-item"><div class="diat-leg-dot" style="background:var(--dominant)"></div>Función dominante</div>
+    </div>
+  </div>
+</section>
+
+<hr class="th-div">
+
+<!-- 03: FUNCIONES -->
+<section class="th-section" id="s3">
+  <div class="th-inner">
+    <span class="th-label">03 · Función armónica</span>
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:32px;flex-wrap:wrap;margin-bottom:36px">
+      <h2 class="th-h2" style="max-width:460px;margin:0">Cada acorde tiene un papel</h2>
+      <p class="th-body" style="max-width:380px;margin:0">Los siete acordes se agrupan en tres <strong>funciones</strong>. No importa la tonalidad: el papel de cada función siempre es el mismo. Entender las funciones te permite improvisar progresiones que suenan bien.</p>
+    </div>
+    <div class="func-grid">
+      <div class="func-card tonic">
+        <div class="func-title">Tónica</div>
+        <div class="func-degrees">I · iii · vi</div>
+        <p class="func-desc">Reposo y estabilidad. La sensación de "haber llegado". Las progresiones terminan o descansan aquí. El I es el más estable de los tres.</p>
+      </div>
+      <div class="func-card subdom">
+        <div class="func-title">Subdominante</div>
+        <div class="func-degrees">IV · ii</div>
+        <p class="func-desc">Movimiento suave, alejarse de la tónica sin crear tensión. Preparan la llegada del dominante. El IV suena abierto; el ii, más urgente.</p>
+      </div>
+      <div class="func-card dominant">
+        <div class="func-title">Dominante</div>
+        <div class="func-degrees">V · vii°</div>
+        <p class="func-desc">Tensión máxima. El V contiene un tritono interno que exige resolver al I. Es el motor de la música tonal: dominante siempre quiere ir a tónica.</p>
+      </div>
+    </div>
+    <div class="th-callout">
+      <div class="th-callout-label">La progresión más poderosa</div>
+      <p>La cadencia <strong>V → I</strong> es el movimiento más fundamental de toda la música occidental. En C mayor: G7 → C. El tritono de G7 (B y F) resuelve por movimiento de semitono: B sube a C, F baja a E. Esa resolución es el corazón de la armonía tonal.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="th-div">
+
+<!-- 04: PROGRESIONES -->
+<section class="th-section dark" id="s4">
+  <div class="th-inner">
+    <span class="th-label">04 · Progresiones</span>
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:32px;flex-wrap:wrap;margin-bottom:36px">
+      <h2 class="th-h2" style="max-width:460px;margin:0">Progresiones clásicas</h2>
+      <p class="th-body" style="max-width:360px;margin:0">Una progresión es una secuencia de acordes que se repite. Elige una tonalidad, selecciona una progresión y escucha cómo suena. Cada bloque se ilumina cuando suena.</p>
+    </div>
+    <div class="prog-wrap">
+      <div class="prog-key-row">
+        <label>Tonalidad</label>
+        <select class="prog-select" id="prog-key-sel"></select>
+      </div>
+      <div class="prog-presets" id="prog-presets"></div>
+      <div class="prog-display" id="prog-display"></div>
+      <button class="prog-play-btn" id="prog-play-btn">Escuchar progresión</button>
+    </div>
+  </div>
+</section>
+
+<hr class="th-div dark">
+
+<!-- 05: MENOR -->
+<section class="th-section" id="s5">
+  <div class="th-inner">
+    <span class="th-label">05 · Tonalidad menor</span>
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:32px;flex-wrap:wrap;margin-bottom:36px">
+      <h2 class="th-h2" style="max-width:460px;margin:0">La misma lógica, otro color</h2>
+      <p class="th-body" style="max-width:380px;margin:0">
+        La escala menor natural genera sus propios siete acordes diatónicos. El sistema funciona igual pero los colores cambian: la tónica es menor, el dominante es menor también, lo que da un sonido más oscuro y modal. Haz clic para escuchar.
+      </p>
+    </div>
+    <div class="key-sel-row">
+      <label>Tonalidad</label>
+      <select class="key-select" id="minor-key-sel"></select>
+    </div>
+    <div class="minor-diat-grid" id="minor-diat-grid"></div>
+    <div class="th-callout">
+      <div class="th-callout-label">El dominante menor</div>
+      <p>En la tonalidad menor natural, el acorde V es menor (v), lo que debilita la tensión hacia la tónica. Por eso en la práctica se usa la <strong>escala menor armónica</strong>, que sube la séptima para convertir el v en V7 y recuperar la cadencia dominante → tónica.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FINISH -->
+<section class="th-next" style="background:linear-gradient(135deg,#100a04 60%,#1c0e08)">
+  <span class="th-next-label" style="color:var(--copper-lt)">Has completado el arco de teoría</span>
+  <h2 class="th-next-title" style="font-size:clamp(32px,5vw,60px)">Notas · Intervalos · Escalas · Acordes · Armonía</h2>
+  <p class="th-next-sub" style="color:rgba(250,246,240,.45);max-width:520px">Con esto tienes el mapa completo. El siguiente paso es llevar todo esto a las cuerdas: explorar las herramientas de la guitarra y el piano con lo que ahora sabes.</p>
+  <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+    <a href="/herramientas" class="th-next-btn">Abrir herramientas →</a>
+    <a href="/teoria/acordes" class="th-next-btn back">← Volver a Acordes</a>
+  </div>
+</section>
+
+<script>
+// ── Audio ──────────────────────────────────────────────────────────────────
+let _poly = null;
+async function _init() {
+  if (_poly) return;
+  await Tone.start();
+  _poly = new Tone.PolySynth(Tone.Synth, {
+    oscillator: { type: 'triangle4' },
+    envelope: { attack: 0.03, decay: 0.6, sustain: 0.3, release: 1.6 },
+    volume: -13,
+  }).toDestination();
+}
+const midiNote = (oct, semi) => (oct + 1) * 12 + semi;
+async function playChord(semis, root=0) {
+  await _init();
+  const midis = semis.map(s => {
+    const oct = s < root ? 5 : 4;
+    return midiNote(oct, s);
+  });
+  _poly.triggerAttackRelease(midis.map(m => Tone.Frequency(m,'midi')), '2n');
+}
+
+// ── Note data ──────────────────────────────────────────────────────────────
+const N  = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const NF = ['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
+const AC = [0,1,0,1,0,0,1,0,1,0,1,0].map(Boolean);
+const nn = s => AC[((s%12)+12)%12] ? NF[((s%12)+12)%12] : N[((s%12)+12)%12];
+
+const MAJOR_SCALE = [0,2,4,5,7,9,11];
+const MINOR_SCALE = [0,2,3,5,7,8,10];
+
+// Build diatonic triads from a scale
+function diatonicTriads(root, scale) {
+  return scale.map((deg, i) => {
+    const r  = (root + deg) % 12;
+    const t  = (root + scale[(i+2)%7]) % 12;
+    const f  = (root + scale[(i+4)%7]) % 12;
+    const ti = ((t - r + 12) % 12);
+    const fi = ((f - r + 12) % 12);
+    let type, sym;
+    if      (ti===4 && fi===7) { type='Mayor';      sym=''; }
+    else if (ti===3 && fi===7) { type='Menor';      sym='m'; }
+    else if (ti===3 && fi===6) { type='Disminuido'; sym='°'; }
+    else if (ti===4 && fi===8) { type='Aumentado';  sym='+'; }
+    else                       { type='';            sym=''; }
+    return { root:r, third:t, fifth:f, type, sym, notes:[r,t,f] };
+  });
+}
+
+const MAJOR_ROMANS    = ['I','ii','iii','IV','V','vi','vii°'];
+const MINOR_ROMANS    = ['i','ii°','III','iv','v','VI','VII'];
+const MAJOR_FUNCTIONS = ['tonic','subdom','tonic','subdom','dominant','tonic','dominant'];
+const MINOR_FUNCTIONS = ['tonic','dominant','tonic','subdom','dominant','subdom','dominant'];
+
+// ── Section 01: Scale and chord preview (C major) ─────────────────────────
+(function buildPreview() {
+  const scalePrev = document.getElementById('scale-preview');
+  MAJOR_SCALE.forEach(s => {
+    const el = document.createElement('div');
+    el.style.cssText = `min-width:34px;padding:7px 5px;border-radius:6px;text-align:center;font-family:var(--mono);font-size:12px;font-weight:600;background:${s===0?'var(--copper)':'var(--paper3)'};color:${s===0?'#fff':'var(--ink3)'};border:1px solid ${s===0?'var(--copper)':'var(--paper4)'};`;
+    el.textContent = nn(s);
+    scalePrev.appendChild(el);
+  });
+
+  const diatPrev = document.getElementById('diat-preview');
+  const triads = diatonicTriads(0, MAJOR_SCALE);
+  triads.forEach((t, i) => {
+    const el = document.createElement('div');
+    el.style.cssText = 'display:flex;align-items:center;gap:10px;';
+    el.innerHTML = `
+      <span style="font-family:var(--mono);font-size:10px;color:var(--copper);width:28px;text-align:right">${MAJOR_ROMANS[i]}</span>
+      <span style="font-family:var(--serif);font-size:15px;font-weight:700;color:var(--ink);min-width:42px">${nn(t.root)}${t.sym}</span>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--ink5)">${t.notes.map(nn).join(' · ')}</span>
+    `;
+    diatPrev.appendChild(el);
+  });
+})();
+
+// ── Section 02: Diatonic chord grid ───────────────────────────────────────
+const NOTE_NAMES_SEL = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+
+// Populate key selects
+function populateKeySel(id) {
+  const sel = document.getElementById(id);
+  NOTE_NAMES_SEL.forEach((n,i) => {
+    const opt = document.createElement('option');
+    opt.value = i; opt.textContent = n;
+    sel.appendChild(opt);
+  });
+}
+populateKeySel('diat-key-sel');
+populateKeySel('prog-key-sel');
+populateKeySel('minor-key-sel');
+
+function buildDiatGrid(root) {
+  const grid = document.getElementById('diat-grid');
+  grid.innerHTML = '';
+  const triads = diatonicTriads(root, MAJOR_SCALE);
+  triads.forEach((t, i) => {
+    const fn = MAJOR_FUNCTIONS[i];
+    const card = document.createElement('div');
+    card.className = 'diat-card';
+    card.innerHTML = `
+      <div class="diat-roman ${fn}">${MAJOR_ROMANS[i]}</div>
+      <div class="diat-name">${nn(t.root)}${t.sym}</div>
+      <div class="diat-type">${t.type}</div>
+      <div class="diat-notes">${t.notes.map(nn).join(' · ')}</div>
+    `;
+    card.addEventListener('click', async () => {
+      grid.querySelectorAll('.diat-card').forEach(c => c.classList.remove('playing'));
+      card.classList.add('playing');
+      await playChord(t.notes, t.root);
+      setTimeout(() => card.classList.remove('playing'), 900);
+    });
+    grid.appendChild(card);
+  });
+}
+buildDiatGrid(0);
+document.getElementById('diat-key-sel').addEventListener('change', e => buildDiatGrid(parseInt(e.target.value)));
+
+// ── Section 04: Progressions ───────────────────────────────────────────────
+const PROGRESSIONS = [
+  { label:'I · IV · V',       roman:[0,3,4], name:'Blues / Rock' },
+  { label:'I · V · vi · IV',  roman:[0,4,5,3], name:'Pop' },
+  { label:'I · vi · IV · V',  roman:[0,5,3,4], name:'50s / Doo-wop' },
+  { label:'ii · V · I',       roman:[1,4,0], name:'Jazz' },
+  { label:'I · IV · vi · V',  roman:[0,3,5,4], name:'Mixta' },
+  { label:'vi · IV · I · V',  roman:[5,3,0,4], name:'Menor relativa' },
+];
+
+let activeProgIdx = 0;
+let progPlaying = false;
+
+function buildProgPresets() {
+  const wrap = document.getElementById('prog-presets');
+  wrap.innerHTML = '';
+  PROGRESSIONS.forEach((p, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'prog-preset-btn' + (i === activeProgIdx ? ' active' : '');
+    btn.innerHTML = `<span style="display:block;font-size:10px;opacity:.55;margin-bottom:2px">${p.name}</span>${p.label}`;
+    btn.addEventListener('click', () => {
+      activeProgIdx = i;
+      buildProgPresets();
+      buildProgDisplay(parseInt(document.getElementById('prog-key-sel').value));
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+function buildProgDisplay(root) {
+  const display = document.getElementById('prog-display');
+  display.innerHTML = '';
+  const prog = PROGRESSIONS[activeProgIdx];
+  const triads = diatonicTriads(root, MAJOR_SCALE);
+  prog.roman.forEach((deg, bi) => {
+    const t = triads[deg];
+    const block = document.createElement('div');
+    block.className = 'prog-chord-block';
+    block.id = `pb-${bi}`;
+    block.innerHTML = `
+      <span class="prog-chord-roman">${MAJOR_ROMANS[deg]}</span>
+      <span class="prog-chord-name">${nn(t.root)}${t.sym}</span>
+      <span class="prog-chord-notes">${t.notes.map(nn).join(' · ')}</span>
+    `;
+    display.appendChild(block);
+  });
+}
+
+async function playProgression() {
+  if (progPlaying) return;
+  progPlaying = true;
+  const btn = document.getElementById('prog-play-btn');
+  btn.disabled = true;
+  await _init();
+
+  const root = parseInt(document.getElementById('prog-key-sel').value);
+  const prog = PROGRESSIONS[activeProgIdx];
+  const triads = diatonicTriads(root, MAJOR_SCALE);
+
+  for (let bi = 0; bi < prog.roman.length; bi++) {
+    const block = document.getElementById(`pb-${bi}`);
+    const t = triads[prog.roman[bi]];
+    block.classList.add('playing');
+    await playChord(t.notes, t.root);
+    await new Promise(r => setTimeout(r, 900));
+    block.classList.remove('playing');
+  }
+  progPlaying = false;
+  btn.disabled = false;
+}
+
+buildProgPresets();
+buildProgDisplay(0);
+document.getElementById('prog-key-sel').addEventListener('change', e => buildProgDisplay(parseInt(e.target.value)));
+document.getElementById('prog-play-btn').addEventListener('click', playProgression);
+
+// ── Section 05: Minor diatonic ─────────────────────────────────────────────
+function buildMinorGrid(root) {
+  const grid = document.getElementById('minor-diat-grid');
+  grid.innerHTML = '';
+  const triads = diatonicTriads(root, MINOR_SCALE);
+  triads.forEach((t, i) => {
+    const card = document.createElement('div');
+    card.className = 'minor-diat-card';
+    card.innerHTML = `
+      <div class="minor-roman">${MINOR_ROMANS[i]}</div>
+      <div class="minor-name">${nn(t.root)}${t.sym}</div>
+      <div class="minor-type">${t.type}</div>
+      <div class="minor-notes">${t.notes.map(nn).join(' · ')}</div>
+    `;
+    card.addEventListener('click', async () => {
+      grid.querySelectorAll('.minor-diat-card').forEach(c => c.classList.remove('playing'));
+      card.classList.add('playing');
+      await playChord(t.notes, t.root);
+      setTimeout(() => card.classList.remove('playing'), 900);
+    });
+    grid.appendChild(card);
+  });
+}
+buildMinorGrid(9); // A minor default
+document.getElementById('minor-key-sel').value = 9;
+document.getElementById('minor-key-sel').addEventListener('change', e => buildMinorGrid(parseInt(e.target.value)));
+
+// ── Progress bar ───────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const d = document.documentElement;
+  const p = (d.scrollTop||document.body.scrollTop)/(d.scrollHeight-d.clientHeight)*100;
+  document.getElementById('prog-bar').style.width = p + '%';
+});
+</script>
+</body>
+</html>
