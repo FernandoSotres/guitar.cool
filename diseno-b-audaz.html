@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>guitarra.cool — Propuesta B: Audaz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --void:     #07050f;
+  --void2:    #0f0b1c;
+  --void3:    #161228;
+  --void4:    #1e1934;
+  --void5:    #272240;
+
+  --gold:     #f0c040;
+  --gold-lt:  #f8d870;
+  --gold-dk:  #a07820;
+  --violet:   #9040f0;
+  --violet-lt:#b870ff;
+  --violet-dk:#5820a0;
+  --magenta:  #e03880;
+  --teal:     #20d8b0;
+
+  --snow:     #f0eeff;
+  --snow2:    #c8c0e0;
+  --mist:     #7060a0;
+  --shadow:   #382858;
+
+  --sans:  'Syne', system-ui, sans-serif;
+  --body:  'DM Sans', system-ui, sans-serif;
+  --mono:  'DM Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--void); color: var(--snow); font-family: var(--body); font-size: 15px; line-height: 1.6; overflow-x: hidden; }
+
+/* ── NAV ── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(7,5,15,.88);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(144,64,240,.2);
+  padding: 0 40px;
+  display: flex; align-items: center; gap: 0; height: 56px;
+}
+.nav-logo {
+  font-family: var(--sans); font-size: 18px; font-weight: 800;
+  letter-spacing: -.02em; color: var(--snow);
+  margin-right: 36px; display: flex; align-items: center; gap: 8px;
+}
+.nav-logo span { color: var(--gold); }
+.nav-link {
+  padding: 0 16px; height: 56px;
+  display: flex; align-items: center;
+  font-size: 13px; font-weight: 500; font-family: var(--sans);
+  color: var(--mist); cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color .2s, border-color .2s;
+}
+.nav-link:hover { color: var(--snow2); }
+.nav-link.active { color: var(--gold); border-bottom-color: var(--gold); }
+.nav-cta {
+  margin-left: auto;
+  background: linear-gradient(135deg, var(--violet), var(--magenta));
+  color: #fff; font-size: 12px; font-weight: 600; font-family: var(--sans);
+  padding: 7px 18px; border-radius: 99px;
+  cursor: pointer; letter-spacing: .02em;
+  transition: opacity .2s, transform .15s;
+}
+.nav-cta:hover { opacity: .88; transform: translateY(-1px); }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+  align-items: flex-start; justify-content: center;
+  padding: 120px 80px 80px;
+  position: relative; overflow: hidden;
+}
+.hero-glow {
+  position: absolute; pointer-events: none;
+  border-radius: 50%;
+  filter: blur(100px);
+}
+.glow-1 { width: 600px; height: 600px; background: rgba(144,64,240,.18); top: -100px; right: -100px; }
+.glow-2 { width: 400px; height: 400px; background: rgba(240,192,64,.1); bottom: 0; left: 200px; }
+.glow-3 { width: 300px; height: 300px; background: rgba(224,56,128,.12); top: 30%; left: -80px; }
+
+.hero-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(144,64,240,.15);
+  border: 1px solid rgba(144,64,240,.35);
+  border-radius: 99px;
+  padding: 6px 14px;
+  font-size: 11px; font-weight: 600; font-family: var(--sans);
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--violet-lt);
+  margin-bottom: 28px;
+}
+.chip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--violet-lt); animation: pulse 2s ease infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+
+.hero-title {
+  font-family: var(--sans);
+  font-size: clamp(56px, 8vw, 110px);
+  font-weight: 800;
+  line-height: .92;
+  letter-spacing: -.04em;
+  color: var(--snow);
+  margin-bottom: 16px;
+  max-width: 800px;
+  position: relative;
+}
+.hero-title .accent { color: var(--gold); display: block; }
+.hero-title .accent-v { color: var(--violet-lt); }
+
+.hero-sub {
+  font-size: clamp(16px, 2vw, 20px);
+  color: var(--snow2); font-weight: 300;
+  max-width: 520px; margin-bottom: 20px;
+  line-height: 1.6; position: relative;
+}
+.hero-sub strong { color: var(--snow); font-weight: 500; }
+
+.hero-pillars {
+  display: flex; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 44px; position: relative;
+}
+.hpill {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--void3);
+  border: 1px solid var(--void5);
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 12px; font-weight: 600; font-family: var(--sans);
+  color: var(--snow2);
+}
+.hpill-icon { font-size: 14px; }
+
+.hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; position: relative; }
+.btn-gold {
+  background: var(--gold); color: var(--void);
+  font-size: 14px; font-weight: 700; font-family: var(--sans);
+  padding: 13px 28px; border-radius: 7px;
+  cursor: pointer; border: none; letter-spacing: .01em;
+  transition: background .2s, transform .15s;
+}
+.btn-gold:hover { background: var(--gold-lt); transform: translateY(-2px); }
+.btn-line {
+  background: transparent; color: var(--snow2);
+  font-size: 14px; font-weight: 500; font-family: var(--sans);
+  padding: 13px 28px; border-radius: 7px;
+  cursor: pointer; border: 1px solid var(--void5);
+  transition: all .2s;
+}
+.btn-line:hover { border-color: var(--mist); color: var(--snow); }
+
+/* large decorative number */
+.hero-number {
+  position: absolute; right: 60px; top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--sans); font-size: 320px; font-weight: 800;
+  line-height: 1; letter-spacing: -.06em;
+  background: linear-gradient(180deg, rgba(144,64,240,.12) 0%, transparent 80%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  user-select: none; pointer-events: none;
+}
+
+/* ── PILLARS SECTION ── */
+.pillars {
+  padding: 100px 80px;
+  position: relative;
+}
+.pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  margin-top: 56px;
+  border: 1px solid var(--void4);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.pillar-card {
+  background: var(--void2);
+  padding: 40px 32px;
+  position: relative;
+  transition: background .25s;
+  cursor: default;
+}
+.pillar-card:hover { background: var(--void3); }
+.pillar-card + .pillar-card { border-left: 1px solid var(--void4); }
+.p-num {
+  font-family: var(--sans); font-size: 11px; font-weight: 700;
+  letter-spacing: .16em; color: var(--mist);
+  margin-bottom: 28px;
+}
+.p-icon-wrap {
+  width: 48px; height: 48px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; margin-bottom: 20px;
+}
+.ic-teoria  { background: rgba(144,64,240,.2); }
+.ic-practica{ background: rgba(32,216,176,.15); }
+.ic-tools   { background: rgba(240,192,64,.15); }
+.p-title {
+  font-family: var(--sans); font-size: 22px; font-weight: 700;
+  color: var(--snow); margin-bottom: 10px; letter-spacing: -.02em;
+}
+.p-body { font-size: 13px; color: var(--mist); line-height: 1.65; }
+.p-tag {
+  display: inline-block; margin-top: 20px;
+  font-size: 10px; font-weight: 700; font-family: var(--sans);
+  letter-spacing: .12em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 4px;
+}
+.tag-v { background: rgba(144,64,240,.2); color: var(--violet-lt); }
+.tag-t { background: rgba(32,216,176,.15); color: var(--teal); }
+.tag-g { background: rgba(240,192,64,.15); color: var(--gold); }
+
+/* ── PALETTE ── */
+.palette-section { padding: 80px 80px; max-width: 1200px; margin: 0 auto; }
+.palette-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+.swatch { display: flex; flex-direction: column; gap: 6px; width: 100px; }
+.swatch-color { height: 52px; border-radius: 8px; border: 1px solid rgba(255,255,255,.06); }
+.swatch-name { font-size: 10px; color: var(--mist); font-family: var(--mono); }
+.swatch-hex  { font-size: 10px; color: var(--shadow); font-family: var(--mono); }
+
+/* ── TYPE ── */
+.type-section { padding: 80px 80px; max-width: 1200px; margin: 0 auto; }
+.type-sample { margin-top: 36px; display: flex; flex-direction: column; gap: 24px; }
+.type-row { display: flex; align-items: baseline; gap: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--void4); }
+.type-meta { width: 150px; flex-shrink: 0; font-size: 10px; color: var(--shadow); font-family: var(--mono); line-height: 1.6; }
+.t-disp  { font-family: var(--sans); font-size: 64px; font-weight: 800; line-height: 1; color: var(--snow); letter-spacing: -.04em; }
+.t-disp-g{ font-family: var(--sans); font-size: 64px; font-weight: 800; line-height: 1; color: var(--gold); letter-spacing: -.04em; }
+.t-h1    { font-family: var(--sans); font-size: 32px; font-weight: 700; color: var(--snow); letter-spacing: -.03em; }
+.t-h2    { font-family: var(--sans); font-size: 20px; font-weight: 600; color: var(--snow2); letter-spacing: -.01em; }
+.t-body  { font-family: var(--body); font-size: 15px; color: var(--snow2); line-height: 1.7; max-width: 480px; }
+.t-label { font-family: var(--sans); font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--violet-lt); }
+.t-mono  { font-family: var(--mono); font-size: 13px; color: var(--gold); }
+
+/* ── COMPONENTS ── */
+.comp-section { padding: 80px 80px; max-width: 1200px; margin: 0 auto; }
+.comp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 36px; }
+.comp-card {
+  background: var(--void2); border: 1px solid var(--void4);
+  border-radius: 12px; padding: 28px;
+}
+.comp-title { font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--mist); margin-bottom: 20px; font-family: var(--sans); }
+
+.seg2 { display: inline-flex; border-radius: 7px; overflow: hidden; border: 1px solid var(--void4); }
+.sg-o { padding: 7px 16px; font-size: 12px; font-weight: 600; font-family: var(--sans); background: transparent; color: var(--mist); cursor: pointer; border: none; transition: all .15s; }
+.sg-o.on { background: var(--violet-dk); color: var(--snow); }
+.sg-o:hover:not(.on) { color: var(--snow2); background: var(--void4); }
+
+.mini-p { background: var(--void3); border: 1px solid var(--void4); border-radius: 9px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.mp-l { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--shadow); font-family: var(--sans); }
+.mp-s { width: 100%; background: var(--void4); border: 1px solid var(--void5); color: var(--snow2); border-radius: 6px; padding: 7px 10px; font-size: 12px; font-family: var(--body); outline: none; }
+.mp-s:focus { border-color: var(--violet-dk); }
+.note-ps { display: flex; flex-wrap: wrap; gap: 4px; }
+.np { padding: 4px 9px; border-radius: 4px; font-size: 11px; font-weight: 600; background: var(--void4); color: var(--mist); border: 1px solid var(--void5); cursor: pointer; transition: all .15s; font-family: var(--mono); }
+.np.root { background: rgba(240,192,64,.15); color: var(--gold); border-color: var(--gold-dk); }
+.np.on   { background: rgba(144,64,240,.2); color: var(--violet-lt); border-color: var(--violet-dk); }
+
+.info-s { background: var(--void3); border: 1px solid var(--void4); border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.itg { background: var(--void4); border-radius: 4px; padding: 3px 9px; font-size: 12px; font-weight: 700; color: var(--gold); font-family: var(--mono); }
+.itg-v { color: var(--violet-lt); background: rgba(144,64,240,.15); }
+.itx { font-size: 12px; color: var(--mist); }
+
+/* ── FRETBOARD PREVIEW SHELL ── */
+.fp-section { padding: 80px 80px 100px; max-width: 1200px; margin: 0 auto; }
+.fp-shell { background: var(--void2); border: 1px solid var(--void4); border-radius: 16px; overflow: hidden; margin-top: 40px; }
+.fp-header {
+  background: var(--void3);
+  border-bottom: 1px solid var(--void4);
+  padding: 10px 18px;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.fp-logo { font-family: var(--sans); font-size: 15px; font-weight: 800; color: var(--snow); margin-right: 6px; letter-spacing: -.02em; }
+.fp-logo span { color: var(--gold); }
+.fph-sel { background: var(--void4); border: 1px solid var(--void5); color: var(--snow2); border-radius: 5px; padding: 4px 8px; font-size: 12px; font-family: var(--body); outline: none; }
+.fph-btn { background: var(--void4); border: 1px solid var(--void5); color: var(--snow2); border-radius: 5px; padding: 4px 12px; font-size: 12px; cursor: pointer; font-family: var(--body); transition: border-color .15s; }
+.fph-btn:hover { border-color: var(--violet-dk); color: var(--violet-lt); }
+.fp-body { display: flex; min-height: 320px; }
+.fp-side { width: 210px; flex-shrink: 0; background: var(--void2); border-right: 1px solid var(--void4); padding: 14px 12px; display: flex; flex-direction: column; gap: 11px; }
+.fp-main { flex: 1; background: var(--void); display: flex; flex-direction: column; }
+.fp-svg  { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.fp-bar  { background: var(--void3); border-top: 1px solid var(--void4); padding: 8px 16px; display: flex; align-items: center; gap: 10px; }
+.fp-bar-tag { background: var(--void4); border-radius: 4px; padding: 3px 9px; font-size: 12px; font-weight: 700; color: var(--gold); font-family: var(--mono); }
+
+/* ── SECTION LABEL ── */
+.sec-lbl { font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--violet-lt); font-family: var(--sans); margin-bottom: 8px; }
+.sec-h2 { font-family: var(--sans); font-size: 28px; font-weight: 700; color: var(--snow); letter-spacing: -.02em; margin-bottom: 6px; }
+.sec-sub { font-size: 13px; color: var(--mist); }
+
+.div-line { height: 1px; background: linear-gradient(to right, transparent, var(--void4), transparent); margin: 60px 80px; }
+
+/* ── FOOTER ── */
+footer { background: var(--void2); border-top: 1px solid var(--void4); padding: 40px 80px; }
+.f-logo { font-family: var(--sans); font-size: 20px; font-weight: 800; color: var(--snow); letter-spacing: -.02em; margin-bottom: 6px; }
+.f-logo span { color: var(--gold); }
+footer p { font-size: 12px; color: var(--shadow); }
+
+@media (max-width: 768px) {
+  .hero { padding: 100px 24px 60px; }
+  .hero-number { display: none; }
+  .pillars { padding: 60px 24px; }
+  .pillars-grid { grid-template-columns: 1fr; }
+  .pillar-card + .pillar-card { border-left: none; border-top: 1px solid var(--void4); }
+  .palette-section,.type-section,.comp-section,.fp-section { padding: 60px 24px; }
+  .comp-grid { grid-template-columns: 1fr; }
+  .div-line { margin: 40px 24px; }
+  footer { padding: 40px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">🎸 guitarra<span>.cool</span></div>
+  <div class="nav-link active">Guitarra</div>
+  <div class="nav-link">Piano</div>
+  <div class="nav-cta">Comenzar gratis</div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow glow-1"></div>
+  <div class="hero-glow glow-2"></div>
+  <div class="hero-glow glow-3"></div>
+  <div class="hero-number">G</div>
+
+  <div class="hero-chip"><span class="chip-dot"></span>Teoría · Práctica · Herramientas</div>
+
+  <h1 class="hero-title">
+    Todo lo que<br>
+    necesitas para<br>
+    <span class="accent">aprender música.</span>
+  </h1>
+
+  <p class="hero-sub">
+    Un solo lugar para dominar tu instrumento: desde los primeros acordes hasta <strong>armonía, composición y exploración</strong> avanzada.
+  </p>
+
+  <div class="hero-pillars">
+    <div class="hpill"><span class="hpill-icon">📚</span>Teoría musical</div>
+    <div class="hpill"><span class="hpill-icon">🎯</span>Práctica guiada</div>
+    <div class="hpill"><span class="hpill-icon">🔧</span>Herramientas visuales</div>
+    <div class="hpill"><span class="hpill-icon">🎼</span>Composición</div>
+  </div>
+
+  <div class="hero-ctas">
+    <button class="btn-gold">Explorar la guitarra</button>
+    <button class="btn-line">Ver el piano →</button>
+  </div>
+</section>
+
+<!-- PILLARS -->
+<section class="pillars">
+  <div class="sec-lbl">Lo que vas a encontrar</div>
+  <h2 class="sec-h2" style="font-size:36px;max-width:560px">Un sistema completo de aprendizaje musical</h2>
+
+  <div class="pillars-grid">
+    <div class="pillar-card">
+      <div class="p-num">01</div>
+      <div class="p-icon-wrap ic-teoria">📚</div>
+      <div class="p-title">Teoría</div>
+      <div class="p-body">Escalas, acordes, intervalos y armonía explicados de forma visual e interactiva. Sin pentagrama. Con tu instrumento.</div>
+      <span class="p-tag tag-v">Próximamente</span>
+    </div>
+    <div class="pillar-card">
+      <div class="p-num">02</div>
+      <div class="p-icon-wrap ic-practica">🎯</div>
+      <div class="p-title">Práctica</div>
+      <div class="p-body">Ejercicios y rutinas para construir velocidad, oído y memoria. Progresiones, lectura de posiciones, metrónomo inteligente.</div>
+      <span class="p-tag tag-t">Próximamente</span>
+    </div>
+    <div class="pillar-card">
+      <div class="p-num">03</div>
+      <div class="p-icon-wrap ic-tools">🔧</div>
+      <div class="p-title">Herramientas</div>
+      <div class="p-body">Diapasón interactivo, explorador de acordes y escalas, construcción de voicings. Para explorar, enseñar y componer.</div>
+      <span class="p-tag tag-g">Disponible ahora ✓</span>
+    </div>
+  </div>
+</section>
+
+<div class="div-line"></div>
+
+<!-- PALETTE -->
+<section class="palette-section">
+  <div class="sec-lbl">Sistema de diseño — Paleta</div>
+  <div class="sec-h2">Violeta profundo + oro eléctrico</div>
+  <p class="sec-sub">Oscuro, energético, con toques de magenta y teal para jerarquía visual. Sensación: tecnología musical viva.</p>
+  <div class="palette-grid">
+    <div class="swatch"><div class="swatch-color" style="background:#07050f"></div><div class="swatch-name">void</div><div class="swatch-hex">#07050f</div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#0f0b1c"></div><div class="swatch-name">void-2</div><div class="swatch-hex">#0f0b1c</div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#161228"></div><div class="swatch-name">void-3</div><div class="swatch-hex">#161228</div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#272240"></div><div class="swatch-name">void-5</div><div class="swatch-hex">#272240</div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#f0c040"></div><div class="swatch-name">gold</div><div class="swatch-hex">#f0c040</div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#9040f0"></div><div class="swatch-name">violet</div><div class="swatch-hex">#9040f0</div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#b870ff"></div><div class="swatch-name">violet-lt</div><div class="swatch-hex">#b870ff</div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#e03880"></div><div class="swatch-name">magenta</div><div class="swatch-hex">#e03880</div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#20d8b0"></div><div class="swatch-name">teal</div><div class="swatch-hex">#20d8b0</div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#f0eeff"></div><div class="swatch-name">snow</div><div class="swatch-hex">#f0eeff</div></div>
+    <div class="swatch"><div class="swatch-color" style="background:#7060a0"></div><div class="swatch-name">mist</div><div class="swatch-hex">#7060a0</div></div>
+  </div>
+</section>
+
+<div class="div-line"></div>
+
+<!-- TYPE -->
+<section class="type-section">
+  <div class="sec-lbl">Sistema de diseño — Tipografía</div>
+  <div class="sec-h2">Syne — sin serifa, sin contemplaciones</div>
+  <p class="sec-sub">Una sola familia tipográfica en distintos pesos. Geométrica, directa, con carácter propio.</p>
+  <div class="type-sample">
+    <div class="type-row">
+      <div class="type-meta">Syne 800<br>Display</div>
+      <div class="t-disp">Aprende</div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">Syne 800<br>Acento</div>
+      <div class="t-disp-g">música.</div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">Syne 700<br>H1</div>
+      <div class="t-h1">Escala pentatónica menor en La</div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">Syne 600<br>H2</div>
+      <div class="t-h2">Acorde Am7 — 8 posiciones encontradas</div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">DM Sans 400<br>Body</div>
+      <div class="t-body">La pentatónica menor es la escala más usada en rock, blues y pop. Sus 5 notas se distribuyen en patrones claros a lo largo de todo el diapasón.</div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">Syne 700<br>Label</div>
+      <div class="t-label">Tonalidad · Modo · Instrumento</div>
+    </div>
+    <div class="type-row">
+      <div class="type-meta">DM Mono<br>Data</div>
+      <div class="t-mono">Am7 · A – C – E – G</div>
+    </div>
+  </div>
+</section>
+
+<div class="div-line"></div>
+
+<!-- COMPONENTS -->
+<section class="comp-section">
+  <div class="sec-lbl">Sistema de diseño — Componentes</div>
+  <div class="sec-h2">Elementos de UI</div>
+  <p class="sec-sub">Controles de la app con la nueva identidad visual.</p>
+  <div class="comp-grid">
+    <div class="comp-card">
+      <div class="comp-title">Modos y selectores</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="seg2">
+          <button class="sg-o on">Escala</button>
+          <button class="sg-o">Acorde</button>
+          <button class="sg-o">Nota</button>
+        </div>
+        <div class="seg2">
+          <button class="sg-o on">⬌ Horizontal</button>
+          <button class="sg-o">⬍ Vertical</button>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+          <button style="background:var(--gold);color:var(--void);font-size:13px;font-weight:700;padding:8px 20px;border-radius:6px;border:none;cursor:pointer;font-family:var(--sans)">Explorar</button>
+          <button style="background:transparent;color:var(--snow2);font-size:13px;font-weight:500;padding:8px 20px;border-radius:6px;border:1px solid var(--void5);cursor:pointer;font-family:var(--body)">Ver más</button>
+          <button style="background:var(--void4);color:var(--snow2);font-size:13px;padding:8px 10px;border-radius:6px;border:1px solid var(--void5);cursor:pointer">⬌</button>
+          <button style="background:var(--void4);color:var(--snow2);font-size:13px;padding:8px 10px;border-radius:6px;border:1px solid var(--void5);cursor:pointer">✏️</button>
+        </div>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-title">Panel lateral</div>
+      <div class="mini-p">
+        <div class="mp-l">Tonalidad</div>
+        <select class="mp-s"><option>A — La</option></select>
+        <div class="mp-l">Escala</div>
+        <select class="mp-s"><option>Pentatónica menor</option></select>
+        <div class="mp-l">Notas activas</div>
+        <div class="note-ps">
+          <span class="np root">A</span><span class="np on">C</span><span class="np on">D</span><span class="np on">E</span><span class="np on">G</span>
+        </div>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-title">Info + navegación de acorde</div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="info-s">
+          <span class="itg">Am7</span>
+          <span class="itx">A – C – E – G</span>
+          <span class="itg" style="margin-left:auto;background:rgba(32,216,176,.15);color:var(--teal)">✓ En escala</span>
+        </div>
+        <div class="info-s">
+          <span style="font-size:12px;color:var(--mist);font-weight:600;font-family:var(--sans)">Posición:</span>
+          <button style="background:var(--void4);border:1px solid var(--void5);color:var(--snow2);border-radius:4px;width:28px;height:28px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">◀</button>
+          <span style="font-size:14px;font-weight:700;color:var(--gold);font-family:var(--mono);min-width:52px;text-align:center">2 / 8</span>
+          <button style="background:var(--void4);border:1px solid var(--void5);color:var(--snow2);border-radius:4px;width:28px;height:28px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center">▶</button>
+          <span style="font-size:11px;color:var(--shadow);margin-left:auto">← → teclado</span>
+        </div>
+      </div>
+    </div>
+    <div class="comp-card">
+      <div class="comp-title">Leyenda de intervalos</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;align-items:center;gap:8px"><div style="width:10px;height:10px;border-radius:50%;background:var(--gold)"></div><span style="font-size:12px;color:var(--snow2)">Tónica (A)</span></div>
+        <div style="display:flex;align-items:center;gap:8px"><div style="width:10px;height:10px;border-radius:50%;background:var(--violet-lt)"></div><span style="font-size:12px;color:var(--snow2)">3ª m (C)</span></div>
+        <div style="display:flex;align-items:center;gap:8px"><div style="width:10px;height:10px;border-radius:50%;background:var(--teal)"></div><span style="font-size:12px;color:var(--snow2)">4ª J (D)</span></div>
+        <div style="display:flex;align-items:center;gap:8px"><div style="width:10px;height:10px;border-radius:50%;background:#60c0ff"></div><span style="font-size:12px;color:var(--snow2)">5ª J (E)</span></div>
+        <div style="display:flex;align-items:center;gap:8px"><div style="width:10px;height:10px;border-radius:50%;background:var(--magenta)"></div><span style="font-size:12px;color:var(--snow2)">♭7 (G)</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="div-line"></div>
+
+<!-- FRETBOARD PREVIEW -->
+<section class="fp-section">
+  <div class="sec-lbl">Vista previa — Herramienta de guitarra</div>
+  <div class="sec-h2">El motor actual, nueva identidad</div>
+  <p class="sec-sub">El mismo diapasón SVG dentro del nuevo shell visual.</p>
+
+  <div class="fp-shell">
+    <div class="fp-header">
+      <div class="fp-logo">🎸 guitarra<span>.cool</span></div>
+      <span style="font-size:11px;color:var(--shadow)">|</span>
+      <span style="font-size:12px;color:var(--mist);font-family:var(--sans)">Herramientas</span>
+      <select class="fph-sel"><option>Guitarra</option><option>Bajo</option></select>
+      <select class="fph-sel"><option>12 trastes</option></select>
+      <button class="fph-btn">⬌ Horizontal</button>
+      <button class="fph-btn">✏️ Indicadores</button>
+      <div style="display:flex;gap:3px;margin-left:auto">
+        <button style="background:var(--void4);border:1px solid var(--void5);color:var(--snow2);border-radius:4px;width:22px;height:22px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center">−</button>
+        <span style="font-size:11px;color:var(--shadow);width:36px;text-align:center;display:flex;align-items:center;justify-content:center">100%</span>
+        <button style="background:var(--void4);border:1px solid var(--void5);color:var(--snow2);border-radius:4px;width:22px;height:22px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center">+</button>
+      </div>
+    </div>
+    <div class="fp-body">
+      <div class="fp-side">
+        <div class="mini-p">
+          <div class="mp-l">Modo</div>
+          <div class="seg2" style="width:100%">
+            <button class="sg-o on" style="flex:1;font-size:11px">Escala</button>
+            <button class="sg-o" style="flex:1;font-size:11px">Acorde</button>
+            <button class="sg-o" style="flex:1;font-size:11px">Nota</button>
+          </div>
+        </div>
+        <div class="mini-p">
+          <div class="mp-l">Tonalidad</div>
+          <select class="mp-s"><option>A — La</option></select>
+          <div class="mp-l">Escala</div>
+          <select class="mp-s"><option>Pentatónica menor</option></select>
+        </div>
+      </div>
+      <div class="fp-main">
+        <div class="fp-svg">
+          <svg width="700" height="210" viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg">
+            <rect x="30" y="20" width="670" height="180" fill="#0c0818" rx="5"/>
+            <line x1="68" y1="30" x2="68" y2="190" stroke="#c8b870" stroke-width="5"/>
+            <line x1="118" y1="30" x2="118" y2="190" stroke="#302050" stroke-width="1.2"/>
+            <line x1="168" y1="30" x2="168" y2="190" stroke="#302050" stroke-width="1.2"/>
+            <line x1="218" y1="30" x2="218" y2="190" stroke="#302050" stroke-width="1.2"/>
+            <line x1="268" y1="30" x2="268" y2="190" stroke="#302050" stroke-width="1.2"/>
+            <line x1="318" y1="30" x2="318" y2="190" stroke="#302050" stroke-width="1.2"/>
+            <line x1="368" y1="30" x2="368" y2="190" stroke="#302050" stroke-width="1.2"/>
+            <line x1="418" y1="30" x2="418" y2="190" stroke="#302050" stroke-width="1.2"/>
+            <line x1="468" y1="30" x2="468" y2="190" stroke="#302050" stroke-width="1.2"/>
+            <line x1="518" y1="30" x2="518" y2="190" stroke="#302050" stroke-width="1.2"/>
+            <line x1="568" y1="30" x2="568" y2="190" stroke="#302050" stroke-width="1.2"/>
+            <line x1="618" y1="30" x2="618" y2="190" stroke="#302050" stroke-width="1.2"/>
+            <line x1="668" y1="30" x2="668" y2="190" stroke="#302050" stroke-width="1.2"/>
+            <circle cx="193" cy="110" r="4" fill="#1e1438"/><circle cx="293" cy="110" r="4" fill="#1e1438"/>
+            <circle cx="393" cy="110" r="4" fill="#1e1438"/><circle cx="493" cy="110" r="4" fill="#1e1438"/>
+            <circle cx="593" cy="88" r="4" fill="#1e1438"/><circle cx="593" cy="132" r="4" fill="#1e1438"/>
+            <line x1="68" y1="42"  x2="700" y2="42"  stroke="#9890c0" stroke-width="1.2"/>
+            <line x1="68" y1="74"  x2="700" y2="74"  stroke="#8880b0" stroke-width="1.5"/>
+            <line x1="68" y1="106" x2="700" y2="106" stroke="#7870a0" stroke-width="2.0"/>
+            <line x1="68" y1="138" x2="700" y2="138" stroke="#686090" stroke-width="2.5"/>
+            <line x1="68" y1="170" x2="700" y2="170" stroke="#585080" stroke-width="3.0"/>
+            <line x1="68" y1="202" x2="700" y2="202" stroke="#484070" stroke-width="3.5"/>
+            <text x="93"  y="14" text-anchor="middle" fill="#382858" font-size="10" font-family="DM Mono,monospace">1</text>
+            <text x="143" y="14" text-anchor="middle" fill="#382858" font-size="10" font-family="DM Mono,monospace">2</text>
+            <text x="193" y="14" text-anchor="middle" fill="#382858" font-size="10" font-family="DM Mono,monospace">3</text>
+            <text x="243" y="14" text-anchor="middle" fill="#382858" font-size="10" font-family="DM Mono,monospace">4</text>
+            <text x="293" y="14" text-anchor="middle" fill="#382858" font-size="10" font-family="DM Mono,monospace">5</text>
+            <text x="343" y="14" text-anchor="middle" fill="#382858" font-size="10" font-family="DM Mono,monospace">6</text>
+            <text x="393" y="14" text-anchor="middle" fill="#382858" font-size="10" font-family="DM Mono,monospace">7</text>
+            <text x="443" y="14" text-anchor="middle" fill="#382858" font-size="10" font-family="DM Mono,monospace">8</text>
+            <text x="493" y="14" text-anchor="middle" fill="#382858" font-size="10" font-family="DM Mono,monospace">9</text>
+            <text x="543" y="14" text-anchor="middle" fill="#382858" font-size="10" font-family="DM Mono,monospace">10</text>
+            <text x="593" y="14" text-anchor="middle" fill="#382858" font-size="10" font-family="DM Mono,monospace">11</text>
+            <text x="643" y="14" text-anchor="middle" fill="#382858" font-size="10" font-family="DM Mono,monospace">12</text>
+            <text x="54" y="46"  text-anchor="middle" fill="#504070" font-size="10" font-family="DM Mono,monospace">e</text>
+            <text x="54" y="78"  text-anchor="middle" fill="#504070" font-size="10" font-family="DM Mono,monospace">B</text>
+            <text x="54" y="110" text-anchor="middle" fill="#504070" font-size="10" font-family="DM Mono,monospace">G</text>
+            <text x="54" y="142" text-anchor="middle" fill="#504070" font-size="10" font-family="DM Mono,monospace">D</text>
+            <text x="54" y="174" text-anchor="middle" fill="#504070" font-size="10" font-family="DM Mono,monospace">A</text>
+            <text x="54" y="206" text-anchor="middle" fill="#504070" font-size="10" font-family="DM Mono,monospace">E</text>
+            <!-- Notas Am Penta: A=gold, resto=violet -->
+            <circle cx="293" cy="42" r="10" fill="#f0c040" opacity=".95"/><text x="293" y="46" text-anchor="middle" fill="#07050f" font-size="10" font-weight="700" font-family="DM Sans,sans-serif">A</text>
+            <circle cx="393" cy="42" r="9" fill="#9040f0" opacity=".85"/><text x="393" y="46" text-anchor="middle" fill="#fff" font-size="10" font-weight="600" font-family="DM Sans,sans-serif">C</text>
+            <circle cx="468" cy="42" r="9" fill="#9040f0" opacity=".85"/><text x="468" y="46" text-anchor="middle" fill="#fff" font-size="10" font-weight="600" font-family="DM Sans,sans-serif">D</text>
+            <circle cx="568" cy="42" r="9" fill="#9040f0" opacity=".85"/><text x="568" y="46" text-anchor="middle" fill="#fff" font-size="10" font-weight="600" font-family="DM Sans,sans-serif">E</text>
+            <circle cx="618" cy="42" r="9" fill="#9040f0" opacity=".85"/><text x="618" y="46" text-anchor="middle" fill="#fff" font-size="10" font-weight="600" font-family="DM Sans,sans-serif">G</text>
+            <circle cx="243" cy="74" r="9" fill="#9040f0" opacity=".85"/><text x="243" y="78" text-anchor="middle" fill="#fff" font-size="10" font-weight="600" font-family="DM Sans,sans-serif">E</text>
+            <circle cx="343" cy="74" r="9" fill="#9040f0" opacity=".85"/><text x="343" y="78" text-anchor="middle" fill="#fff" font-size="10" font-weight="600" font-family="DM Sans,sans-serif">G</text>
+            <circle cx="393" cy="74" r="10" fill="#f0c040" opacity=".95"/><text x="393" y="78" text-anchor="middle" fill="#07050f" font-size="10" font-weight="700" font-family="DM Sans,sans-serif">A</text>
+            <circle cx="493" cy="74" r="9" fill="#9040f0" opacity=".85"/><text x="493" y="78" text-anchor="middle" fill="#fff" font-size="10" font-weight="600" font-family="DM Sans,sans-serif">C</text>
+            <circle cx="118" cy="106" r="9" fill="#9040f0" opacity=".85"/><text x="118" y="110" text-anchor="middle" fill="#fff" font-size="10" font-weight="600" font-family="DM Sans,sans-serif">C</text>
+            <circle cx="218" cy="106" r="9" fill="#9040f0" opacity=".85"/><text x="218" y="110" text-anchor="middle" fill="#fff" font-size="10" font-weight="600" font-family="DM Sans,sans-serif">D</text>
+            <circle cx="293" cy="106" r="9" fill="#9040f0" opacity=".85"/><text x="293" y="110" text-anchor="middle" fill="#fff" font-size="10" font-weight="600" font-family="DM Sans,sans-serif">E</text>
+            <circle cx="393" cy="106" r="9" fill="#9040f0" opacity=".85"/><text x="393" y="110" text-anchor="middle" fill="#fff" font-size="10" font-weight="600" font-family="DM Sans,sans-serif">G</text>
+            <circle cx="443" cy="106" r="10" fill="#f0c040" opacity=".95"/><text x="443" y="110" text-anchor="middle" fill="#07050f" font-size="10" font-weight="700" font-family="DM Sans,sans-serif">A</text>
+            <circle cx="268" cy="138" r="10" fill="#f0c040" opacity=".95"/><text x="268" y="142" text-anchor="middle" fill="#07050f" font-size="10" font-weight="700" font-family="DM Sans,sans-serif">A</text>
+            <circle cx="368" cy="138" r="9" fill="#9040f0" opacity=".85"/><text x="368" y="142" text-anchor="middle" fill="#fff" font-size="10" font-weight="600" font-family="DM Sans,sans-serif">C</text>
+            <circle cx="93"  cy="170" r="10" fill="#f0c040" opacity=".95"/><text x="93"  y="174" text-anchor="middle" fill="#07050f" font-size="10" font-weight="700" font-family="DM Sans,sans-serif">A</text>
+            <circle cx="193" cy="170" r="9" fill="#9040f0" opacity=".85"/><text x="193" y="174" text-anchor="middle" fill="#fff" font-size="10" font-weight="600" font-family="DM Sans,sans-serif">C</text>
+            <circle cx="268" cy="170" r="9" fill="#9040f0" opacity=".85"/><text x="268" y="174" text-anchor="middle" fill="#fff" font-size="10" font-weight="600" font-family="DM Sans,sans-serif">D</text>
+            <circle cx="218" cy="202" r="10" fill="#f0c040" opacity=".95"/><text x="218" y="206" text-anchor="middle" fill="#07050f" font-size="10" font-weight="700" font-family="DM Sans,sans-serif">A</text>
+            <circle cx="318" cy="202" r="9" fill="#9040f0" opacity=".85"/><text x="318" y="206" text-anchor="middle" fill="#fff" font-size="10" font-weight="600" font-family="DM Sans,sans-serif">C</text>
+          </svg>
+        </div>
+        <div class="fp-bar">
+          <span class="fp-bar-tag">Am Pentatónica</span>
+          <span style="font-size:12px;color:var(--mist)">A – C – D – E – G</span>
+          <span style="font-size:11px;color:var(--teal);margin-left:auto;background:rgba(32,216,176,.1);padding:2px 9px;border-radius:4px">✓ En escala</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="f-logo">guitarra<span>.cool</span></div>
+  <p>Propuesta B — Audaz · Violeta profundo + Oro eléctrico · 2025</p>
+</footer>
+
+</body>
+</html>

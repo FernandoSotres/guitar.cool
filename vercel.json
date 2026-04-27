@@ -1,7 +1,9 @@
 {
   "rewrites": [
-    { "source": "/herramientas", "destination": "/herramientas.html" },
-    { "source": "/piano",        "destination": "/piano.html" },
-    { "source": "/teoria",       "destination": "/teoria.html" }
+    { "source": "/herramientas",      "destination": "/herramientas.html" },
+    { "source": "/piano",             "destination": "/piano.html" },
+    { "source": "/teoria",            "destination": "/teoria.html" },
+    { "source": "/teoria/notas",      "destination": "/teoria-notas.html" },
+    { "source": "/teoria/intervalos", "destination": "/teoria-intervalos.html" }
   ]
 }

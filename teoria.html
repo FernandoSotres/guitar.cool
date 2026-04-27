@@ -3,10 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>guitarra.cool — Notas musicales</title>
+<title>guitarra.cool — Teoría musical</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
 <style>
 :root {
   --paper:    #faf6f0; --paper2: #f2ece3; --paper3: #e8e0d4;
@@ -37,175 +36,144 @@ nav {
 .nav-cta { margin-left: auto; background: var(--copper); color: #fff; font-size: 12px; font-weight: 600; padding: 7px 18px; border-radius: 6px; text-decoration: none; transition: background .2s; }
 .nav-cta:hover { background: var(--copper-dk); }
 
-/* ── PROGRESS BAR ── */
-.th-progress { position: fixed; top: 56px; left: 0; right: 0; height: 2px; background: rgba(160,92,32,.12); z-index: 99; }
-.th-progress-bar { height: 100%; background: var(--copper); width: 0%; transition: width .08s linear; }
-
 /* ── HERO ── */
-.th-hero {
+.hub-hero {
   background: #100a04;
-  padding: 110px 48px 90px; text-align: center;
+  padding: 120px 48px 100px; text-align: center;
   position: relative; overflow: hidden;
 }
-.th-chapter {
+.hub-eyebrow {
   font-size: 11px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase;
   color: var(--copper-lt); margin-bottom: 28px;
   display: flex; align-items: center; justify-content: center; gap: 14px;
 }
-.th-chapter::before, .th-chapter::after {
+.hub-eyebrow::before, .hub-eyebrow::after {
   content: ''; display: block; height: 1px; width: 48px; background: var(--copper-lt); opacity: .35;
 }
-.th-title {
-  font-family: var(--serif); font-size: clamp(54px, 7.5vw, 92px);
-  font-weight: 700; line-height: .92; letter-spacing: -.025em;
-  color: var(--paper); margin-bottom: 28px;
+.hub-title {
+  font-family: var(--serif); font-size: clamp(60px, 9vw, 110px);
+  font-weight: 700; line-height: .88; letter-spacing: -.03em;
+  color: var(--paper); margin-bottom: 32px;
 }
-.th-title em { font-style: italic; color: var(--copper-lt); }
-.th-lead {
+.hub-title em { font-style: italic; color: var(--copper-lt); }
+.hub-lead {
   font-family: var(--serif); font-size: clamp(17px, 2vw, 22px); font-style: italic;
-  color: rgba(250,246,240,.58); max-width: 580px; margin: 0 auto 44px; line-height: 1.65;
+  color: rgba(250,246,240,.5); max-width: 560px; margin: 0 auto; line-height: 1.7;
 }
-.th-scroll-hint { font-size: 11px; color: rgba(250,246,240,.22); letter-spacing: .14em; text-transform: uppercase; }
 
-/* ── SECTIONS ── */
-.th-section { padding: 88px 48px; }
-.th-section.dark { background: #100a04; }
-.th-inner { max-width: 1080px; margin: 0 auto; }
-
-.th-label {
-  font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase;
-  color: var(--copper); margin-bottom: 14px; display: block;
+/* ── PATH SECTION ── */
+.hub-path {
+  padding: 96px 48px 112px;
+  background: var(--paper);
 }
-.th-section.dark .th-label { color: var(--copper-lt); }
+.hub-inner { max-width: 900px; margin: 0 auto; }
 
-.th-h2 {
-  font-family: var(--serif); font-size: clamp(34px, 4.5vw, 56px);
-  font-weight: 700; line-height: 1.02; letter-spacing: -.025em; color: var(--ink); margin-bottom: 22px;
+.hub-section-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--copper); margin-bottom: 16px; display: block;
 }
-.th-section.dark .th-h2 { color: var(--paper); }
-
-.th-body { font-size: 15px; color: var(--ink3); line-height: 1.85; max-width: 600px; }
-.th-body + .th-body { margin-top: 14px; }
-.th-section.dark .th-body { color: rgba(250,246,240,.58); }
-.th-body strong { color: var(--ink2); font-weight: 600; }
-.th-section.dark .th-body strong { color: rgba(250,246,240,.92); }
-
-/* ── 2-COL SPLIT ── */
-.th-split { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; }
-
-/* ── CALLOUT ── */
-.th-callout {
-  border-left: 3px solid var(--copper); border-radius: 0 8px 8px 0;
-  padding: 16px 20px; margin: 28px 0;
-  background: rgba(160,92,32,.07);
+.hub-section-title {
+  font-family: var(--serif); font-size: clamp(32px, 4vw, 48px);
+  font-weight: 700; line-height: 1.05; letter-spacing: -.02em;
+  color: var(--ink); margin-bottom: 14px;
 }
-.th-section.dark .th-callout { background: rgba(255,255,255,.05); border-left-color: var(--copper-lt); }
-.th-callout-label { font-size: 9px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--copper); margin-bottom: 7px; }
-.th-section.dark .th-callout-label { color: var(--copper-lt); }
-.th-callout p { font-size: 14px; color: var(--ink3); line-height: 1.65; }
-.th-section.dark .th-callout p { color: rgba(250,246,240,.58); }
+.hub-section-sub {
+  font-size: 15px; color: var(--ink4); line-height: 1.7; max-width: 540px; margin-bottom: 56px;
+}
 
-/* ── SECTION DIVIDER ── */
-hr.th-div { border: none; height: 1px; background: var(--paper4); }
-hr.th-div.dark { background: rgba(255,255,255,.06); }
+/* ── CHAPTER CARDS ── */
+.chapter-list { display: flex; flex-direction: column; gap: 0; }
 
-/* ── NOTE CIRCLES ── */
-.note-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin: 28px 0; }
-.nc {
-  width: 54px; height: 54px; border-radius: 50%;
+.chapter-card {
+  display: flex; align-items: stretch; gap: 0;
+  border: 1px solid var(--paper4); border-radius: 12px;
+  overflow: hidden; margin-bottom: 16px;
+  transition: box-shadow .22s, border-color .22s;
+  text-decoration: none; color: inherit;
+  background: #fff;
+}
+.chapter-card:hover {
+  border-color: var(--copper);
+  box-shadow: 0 6px 28px rgba(160,92,32,.12);
+}
+.chapter-card.locked {
+  cursor: default; pointer-events: none; opacity: .55;
+}
+.chapter-card.locked:hover {
+  border-color: var(--paper4); box-shadow: none;
+}
+
+.chapter-num {
+  width: 72px; flex-shrink: 0;
+  background: #100a04;
   display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 600; cursor: pointer;
-  transition: transform .14s, box-shadow .14s; user-select: none;
-  border: 2px solid transparent; flex-shrink: 0;
+  font-family: var(--mono); font-size: 13px; font-weight: 500;
+  color: rgba(250,246,240,.28); letter-spacing: .08em;
 }
-.nc:hover { transform: scale(1.1); }
-.nc.active { transform: scale(1.14); box-shadow: 0 0 0 3px var(--copper), 0 4px 12px rgba(160,92,32,.35); }
-.nc.nat  { background: var(--paper2); color: var(--ink2); border-color: var(--paper4); }
-.nc.acc  { background: var(--ink2); color: rgba(250,246,240,.9); border-color: var(--ink3); }
-.nc.nat.active { border-color: var(--copper); }
-.nc.acc.active { border-color: var(--copper-lt); }
+.chapter-card:not(.locked):hover .chapter-num {
+  background: var(--ink2);
+}
+.chapter-card.available .chapter-num {
+  color: var(--copper-lt);
+}
 
-.note-display {
-  text-align: center; min-height: 96px; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; margin-bottom: 12px;
+.chapter-body {
+  flex: 1; padding: 28px 32px;
 }
-.note-display-name {
-  font-family: var(--serif); font-size: 76px; font-weight: 700; line-height: 1;
-  color: var(--copper); transition: color .15s;
+.chapter-tag {
+  font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--copper); margin-bottom: 10px; display: block;
 }
-.note-display-sub { font-family: var(--mono); font-size: 12px; color: var(--ink5); margin-top: 6px; min-height: 18px; }
+.chapter-card.locked .chapter-tag {
+  color: var(--ink5);
+}
+.chapter-title {
+  font-family: var(--serif); font-size: 30px; font-weight: 700;
+  line-height: 1.1; letter-spacing: -.015em; color: var(--ink); margin-bottom: 10px;
+}
+.chapter-desc {
+  font-size: 14px; color: var(--ink4); line-height: 1.65; max-width: 560px;
+}
 
-/* ── PIANO ── */
-.piano-outer { overflow-x: auto; padding: 24px 0 8px; display: flex; justify-content: center; }
-.piano-container { position: relative; display: inline-block; }
-.key-w {
-  position: absolute; border-radius: 0 0 7px 7px; background: var(--paper);
-  border: 1.5px solid var(--paper4); cursor: pointer; transition: background .1s;
-  display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10px;
-  font-family: var(--mono); font-size: 10px; color: var(--ink5); user-select: none; z-index: 1;
+.chapter-arrow {
+  width: 64px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: var(--paper4);
+  transition: color .2s, transform .2s;
 }
-.key-w:hover  { background: var(--paper3); }
-.key-w.lit    { background: #dfc06a; border-color: var(--copper); color: var(--ink3); }
-.key-b {
-  position: absolute; border-radius: 0 0 5px 5px; background: var(--ink2);
-  cursor: pointer; transition: background .1s;
-  display: flex; align-items: flex-end; justify-content: center; padding-bottom: 6px;
-  font-family: var(--mono); font-size: 9px; color: rgba(250,246,240,.3); user-select: none; z-index: 2;
+.chapter-card:not(.locked):hover .chapter-arrow {
+  color: var(--copper); transform: translateX(4px);
 }
-.key-b:hover { background: #3a3028; }
-.key-b.lit   { background: var(--copper-dk); }
-
-/* ── ENHARMONIC GRID ── */
-.enharm-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 10px; margin: 28px 0; }
-.enharm-card {
-  border-radius: 10px; padding: 14px 8px; text-align: center;
-  cursor: pointer; transition: border-color .18s, background .18s;
-  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+.chapter-card.locked .chapter-arrow {
+  font-size: 13px; color: var(--paper5);
 }
-.enharm-card:hover { border-color: rgba(192,120,48,.5); background: rgba(160,92,32,.12); }
-.enharm-card.active { border-color: var(--copper-lt); background: rgba(160,92,32,.18); }
-.enharm-sharp { font-family: var(--mono); font-size: 16px; font-weight: 600; color: var(--copper-lt); }
-.enharm-eq    { font-size: 11px; color: rgba(250,246,240,.3); display: block; margin: 4px 0; }
-.enharm-flat  { font-family: var(--mono); font-size: 16px; font-weight: 600; color: rgba(250,246,240,.7); }
-.enharm-sub   { font-size: 10px; color: rgba(250,246,240,.3); margin-top: 6px; display: block; }
 
-/* ── OCTAVE DEMO ── */
-.oct-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; max-width: 560px; margin: 0 auto 28px; }
-.oct-cell { text-align: center; cursor: pointer; }
-.oct-circle {
-  width: 72px; height: 72px; border-radius: 50%; border: 2px solid var(--paper4);
-  background: var(--paper2); display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 10px; transition: border-color .15s, background .15s, transform .12s;
-  font-family: var(--serif); font-size: 30px; font-weight: 700; color: var(--copper);
+/* ── FOOTER STRIP ── */
+.hub-footer-strip {
+  background: #100a04; padding: 64px 48px; text-align: center;
 }
-.oct-cell:hover .oct-circle { border-color: var(--copper); transform: scale(1.05); }
-.oct-circle.lit { background: rgba(160,92,32,.12); border-color: var(--copper); transform: scale(1.07); }
-.oct-name { font-family: var(--mono); font-size: 12px; color: var(--ink4); }
-.oct-freq { font-size: 12px; color: var(--ink5); margin-top: 3px; }
-
-/* ── FRETBOARD STRIP ── */
-.fret-strip-wrap { background: #1c0e04; border-radius: 10px; padding: 24px 20px; overflow-x: auto; margin: 28px 0; }
-
-/* ── NEXT LESSON ── */
-.th-next { background: var(--ink); padding: 88px 48px; text-align: center; }
-.th-next-label { font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--ink5); margin-bottom: 18px; display: block; }
-.th-next-title { font-family: var(--serif); font-size: clamp(36px, 5vw, 56px); font-weight: 700; color: var(--paper); margin-bottom: 10px; letter-spacing: -.02em; }
-.th-next-sub { font-size: 14px; color: var(--ink4); margin-bottom: 36px; max-width: 360px; margin-left: auto; margin-right: auto; line-height: 1.6; }
-.th-next-btn {
+.hub-footer-text {
+  font-family: var(--serif); font-size: clamp(22px, 3vw, 34px);
+  font-style: italic; color: rgba(250,246,240,.38); max-width: 560px; margin: 0 auto 32px;
+  line-height: 1.55;
+}
+.hub-footer-cta {
   display: inline-flex; align-items: center; gap: 8px;
-  background: rgba(255,255,255,.06); color: var(--ink5); font-size: 12px; font-weight: 600;
-  padding: 11px 24px; border-radius: 6px; text-decoration: none;
-  border: 1px solid rgba(255,255,255,.1); cursor: default;
+  background: var(--copper); color: #fff; font-size: 13px; font-weight: 600;
+  padding: 12px 26px; border-radius: 8px; text-decoration: none;
+  transition: background .2s;
 }
+.hub-footer-cta:hover { background: var(--copper-dk); }
 
 @media (max-width: 768px) {
   nav { padding: 0 20px; }
-  .th-hero  { padding: 80px 20px 64px; }
-  .th-section { padding: 64px 20px; }
-  .th-split { grid-template-columns: 1fr; gap: 44px; }
-  .enharm-grid { grid-template-columns: repeat(3,1fr); }
-  .oct-grid { grid-template-columns: repeat(2,1fr); }
-  .th-next { padding: 64px 20px; }
+  .hub-hero { padding: 80px 20px 72px; }
+  .hub-path { padding: 64px 20px 80px; }
+  .hub-footer-strip { padding: 48px 20px; }
+  .chapter-num { width: 52px; font-size: 11px; }
+  .chapter-body { padding: 20px 20px; }
+  .chapter-title { font-size: 24px; }
+  .chapter-arrow { width: 44px; }
 }
 </style>
 </head>
@@ -219,377 +187,86 @@ hr.th-div.dark { background: rgba(255,255,255,.06); }
   <a href="/herramientas" class="nav-cta">Empezar →</a>
 </nav>
 
-<div class="th-progress"><div class="th-progress-bar" id="prog-bar"></div></div>
-
-<!-- ── HERO ────────────────────────────────────────────────────────────────── -->
-<section class="th-hero">
-  <div class="th-chapter">Teoría musical · Capítulo 1</div>
-  <h1 class="th-title">Todo empieza con<br><em>doce sonidos</em></h1>
-  <p class="th-lead">Antes de escalas, acordes o armonía, necesitas conocer los bloques más básicos de toda la música: las notas.</p>
-  <div class="th-scroll-hint">Sigue leyendo ↓</div>
+<!-- ── HERO ── -->
+<section class="hub-hero">
+  <div class="hub-eyebrow">guitarra.cool</div>
+  <h1 class="hub-title">Teoría<br><em>musical</em></h1>
+  <p class="hub-lead">De las notas más básicas hasta la armonía completa — aprende a entender la música que tocas.</p>
 </section>
 
-<!-- ── 01: QUÉ ES UNA NOTA ──────────────────────────────────────────────────── -->
-<section class="th-section" id="s1">
-  <div class="th-inner">
-    <div class="th-split">
-      <div>
-        <span class="th-label">01 · Las notas</span>
-        <h2 class="th-h2">¿Qué es una nota musical?</h2>
-        <p class="th-body">
-          Una nota es un sonido con una <strong>frecuencia específica</strong>. Cuando tu guitarra vibra, mueve el aire. La velocidad de esa vibración se llama frecuencia — y esa frecuencia es lo que define la nota.
-        </p>
-        <p class="th-body">
-          Existen infinitas frecuencias posibles, pero la música occidental eligió <strong>doce</strong> como sus unidades fundamentales. Esos doce sonidos — repetidos en distintas alturas — forman la <strong>escala cromática</strong>.
-        </p>
-        <div class="th-callout">
-          <div class="th-callout-label">Dato</div>
-          <p>El La central (A4) vibra exactamente a <strong>440 Hz</strong>. Este estándar fue acordado internacionalmente en 1939 y es la referencia universal de afinación.</p>
+<!-- ── CHAPTER LIST ── -->
+<section class="hub-path">
+  <div class="hub-inner">
+    <span class="hub-section-label">El camino</span>
+    <h2 class="hub-section-title">Elige un capítulo</h2>
+    <p class="hub-section-sub">Cada lección construye sobre la anterior. Comienza por el principio o entra directamente donde quieras.</p>
+
+    <div class="chapter-list">
+
+      <!-- 01 · Notas -->
+      <a href="/teoria/notas" class="chapter-card available">
+        <div class="chapter-num">01</div>
+        <div class="chapter-body">
+          <span class="chapter-tag">Disponible</span>
+          <div class="chapter-title">Notas musicales</div>
+          <p class="chapter-desc">Los doce sonidos de la música occidental, la escala cromática, sostenidos, bemoles y octavas. El punto de partida de todo.</p>
         </div>
-      </div>
+        <div class="chapter-arrow">→</div>
+      </a>
 
-      <div>
-        <div class="note-display">
-          <div class="note-display-name" id="nd-name">·</div>
-          <div class="note-display-sub" id="nd-freq"></div>
+      <!-- 02 · Intervalos -->
+      <a href="/teoria/intervalos" class="chapter-card available">
+        <div class="chapter-num">02</div>
+        <div class="chapter-body">
+          <span class="chapter-tag">Disponible</span>
+          <div class="chapter-title">Intervalos</div>
+          <p class="chapter-desc">La distancia entre dos notas — los 12 intervalos, sus nombres, su sonido y por qué son la base de escalas y acordes.</p>
         </div>
-        <div class="note-row" id="note-circles"></div>
-        <p style="text-align:center;font-size:12px;color:var(--ink5);margin-top:6px">Haz clic en cualquier nota para escucharla</p>
-      </div>
-    </div>
-  </div>
-</section>
+        <div class="chapter-arrow">→</div>
+      </a>
 
-<hr class="th-div">
-
-<!-- ── 02: PIANO / LOS 12 SONIDOS ─────────────────────────────────────────── -->
-<section class="th-section" id="s2">
-  <div class="th-inner">
-    <span class="th-label">02 · La escala cromática</span>
-    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:32px;flex-wrap:wrap;margin-bottom:44px">
-      <h2 class="th-h2" style="max-width:480px;margin:0">Los doce sonidos en el teclado</h2>
-      <p class="th-body" style="max-width:380px;margin:0">Las teclas <strong>blancas</strong> son las siete notas naturales (C D E F G A B). Las teclas <strong>negras</strong> son los cinco sostenidos y bemoles. Juntos forman la escala cromática completa.</p>
-    </div>
-    <div class="piano-outer">
-      <div class="piano-container" id="piano-container"></div>
-    </div>
-    <p style="text-align:center;font-size:12px;color:var(--ink5);margin-top:6px">Haz clic en cualquier tecla · dos octavas completas</p>
-  </div>
-</section>
-
-<hr class="th-div">
-
-<!-- ── 03: SOSTENIDOS Y BEMOLES ───────────────────────────────────────────── -->
-<section class="th-section dark" id="s3">
-  <div class="th-inner">
-    <div class="th-split">
-      <div>
-        <span class="th-label">03 · Sostenidos y bemoles</span>
-        <h2 class="th-h2">El mismo sonido, dos nombres</h2>
-        <p class="th-body">
-          Las cinco notas negras del piano tienen <strong>dos nombres</strong>. Un <strong>sostenido (♯)</strong> sube la nota un semitono. Un <strong>bemol (♭)</strong> la baja un semitono.
-        </p>
-        <p class="th-body">
-          C♯ y D♭ son exactamente el mismo sonido. Esto se llama <strong>equivalencia enarmónica</strong>. Qué nombre usar depende del contexto: la escala o acorde en que aparezca la nota.
-        </p>
-        <div class="th-callout">
-          <div class="th-callout-label">Regla práctica</div>
-          <p>En escalas mayores y menores se usa una sola vez cada letra. Si la escala de D mayor ya tiene F♯, no puedes llamar a esa nota G♭ — aunque suene igual.</p>
+      <!-- 03 · Escalas -->
+      <div class="chapter-card locked">
+        <div class="chapter-num">03</div>
+        <div class="chapter-body">
+          <span class="chapter-tag">Próximamente</span>
+          <div class="chapter-title">Escalas</div>
+          <p class="chapter-desc">Mayor, menor, pentatónica, modal — cómo se construyen las escalas y cómo usarlas en la guitarra.</p>
         </div>
+        <div class="chapter-arrow">Pronto</div>
       </div>
-      <div>
-        <div class="enharm-grid" id="enharm-grid"></div>
-        <p style="font-size:12px;color:rgba(250,246,240,.28);text-align:center;margin-top:4px">Haz clic en cada par para escucharlo</p>
+
+      <!-- 04 · Acordes -->
+      <div class="chapter-card locked">
+        <div class="chapter-num">04</div>
+        <div class="chapter-body">
+          <span class="chapter-tag">Próximamente</span>
+          <div class="chapter-title">Acordes</div>
+          <p class="chapter-desc">Tríadas, séptimas, extensiones — cómo se forman los acordes y qué los hace mayores, menores o dominantes.</p>
+        </div>
+        <div class="chapter-arrow">Pronto</div>
       </div>
+
+      <!-- 05 · Armonía -->
+      <div class="chapter-card locked">
+        <div class="chapter-num">05</div>
+        <div class="chapter-body">
+          <span class="chapter-tag">Próximamente</span>
+          <div class="chapter-title">Armonía</div>
+          <p class="chapter-desc">Tonalidad, progresiones, cifrado romano — cómo los acordes se relacionan entre sí y crean movimiento armónico.</p>
+        </div>
+        <div class="chapter-arrow">Pronto</div>
+      </div>
+
     </div>
   </div>
 </section>
 
-<hr class="th-div dark">
-
-<!-- ── 04: OCTAVAS ───────────────────────────────────────────────────────── -->
-<section class="th-section" id="s4">
-  <div class="th-inner">
-    <span class="th-label">04 · Las octavas</span>
-    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:32px;flex-wrap:wrap;margin-bottom:48px">
-      <h2 class="th-h2" style="max-width:460px;margin:0">El mismo nombre, diferente altura</h2>
-      <p class="th-body" style="max-width:380px;margin:0">
-        Después de los 12 sonidos, las notas se repiten más <strong>agudas</strong>. Cada vez que una nota sube una octava, su frecuencia se <strong>duplica</strong>. Haz clic para escuchar el mismo Do en cuatro octavas distintas.
-      </p>
-    </div>
-
-    <div class="oct-grid" id="oct-grid"></div>
-
-    <p style="text-align:center;font-size:13px;color:var(--ink4);margin-bottom:32px">
-      Cada octava superior duplica la frecuencia: C3 (262 Hz) · C4 (523 Hz) · C5 (1047 Hz) · C6 (2093 Hz)
-    </p>
-
-    <div class="th-callout">
-      <div class="th-callout-label">¿Por qué "octava"?</div>
-      <p>La palabra viene del latín <em>octava</em>: "octava nota". En la escala mayor hay siete notas distintas, y la <strong>octava</strong> es la misma que la primera — pero el doble de aguda. C, D, E, F, G, A, B… y luego C otra vez.</p>
-    </div>
-  </div>
+<!-- ── FOOTER STRIP ── -->
+<section class="hub-footer-strip">
+  <p class="hub-footer-text">"La teoría no es el destino — es el mapa."</p>
+  <a href="/herramientas" class="hub-footer-cta">Explorar herramientas →</a>
 </section>
 
-<hr class="th-div">
-
-<!-- ── 05: EN LA GUITARRA ─────────────────────────────────────────────────── -->
-<section class="th-section dark" id="s5">
-  <div class="th-inner">
-    <span class="th-label">05 · En la guitarra</span>
-    <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:32px;flex-wrap:wrap;margin-bottom:36px">
-      <h2 class="th-h2" style="max-width:460px;margin:0">Doce trastes, doce sonidos</h2>
-      <p class="th-body" style="max-width:360px;margin:0">
-        Cada traste sube un <strong>semitono</strong>. La cuerda de Mi grave recorre los doce sonidos cromáticos en los primeros doce trastes — y en el traste 12 vuelve al Mi, una octava arriba.
-      </p>
-    </div>
-
-    <div class="fret-strip-wrap">
-      <svg id="fret-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 80" width="100%" style="display:block;min-width:620px"></svg>
-    </div>
-    <p style="font-size:12px;color:rgba(250,246,240,.28);margin-top:10px">Cuerda Mi grave (E2) · trastes 0 al 12 · haz clic en cada nota</p>
-
-    <p class="th-body" style="margin-top:40px">
-      A partir del traste 12 el patrón se <strong>repite</strong> — igual que las octavas en el teclado. Por eso aprender las notas en los primeros doce trastes es suficiente para conocer todo el mástil.
-    </p>
-  </div>
-</section>
-
-<!-- ── SIGUIENTE LECCIÓN ────────────────────────────────────────────────────── -->
-<section class="th-next">
-  <span class="th-next-label">Siguiente lección</span>
-  <h2 class="th-next-title">Intervalos</h2>
-  <p class="th-next-sub">La distancia entre dos notas — y por qué esa distancia es la base de toda la teoría musical.</p>
-  <a class="th-next-btn">Próximamente</a>
-</section>
-
-<script>
-// ── Audio ─────────────────────────────────────────────────────────────────────
-let _synth = null;
-async function _init() {
-  if (_synth) return;
-  await Tone.start();
-  _synth = new Tone.Synth({
-    oscillator: { type: 'triangle4' },
-    envelope: { attack: 0.01, decay: 0.5, sustain: 0.25, release: 1.4 },
-    volume: -9,
-  }).toDestination();
-}
-async function play(midi) {
-  await _init();
-  _synth.triggerAttackRelease(Tone.Frequency(midi, 'midi'), '2n');
-}
-
-// ── Note data ─────────────────────────────────────────────────────────────────
-const N  = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-const NF = ['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
-const FQ = [261.63,277.18,293.66,311.13,329.63,349.23,369.99,392.00,415.30,440.00,466.16,493.88];
-const AC = [0,1,0,1,0,0,1,0,1,0,1,0].map(Boolean);
-
-// MIDI helper: C4 = 60
-const midi = (oct, semi) => (oct + 1) * 12 + semi;
-
-// ── Section 01: Note circles ─────────────────────────────────────────────────
-(function buildCircles() {
-  const row = document.getElementById('note-circles');
-  let active = null;
-  N.forEach((name, i) => {
-    const el = document.createElement('div');
-    el.className = 'nc ' + (AC[i] ? 'acc' : 'nat');
-    el.textContent = name;
-    el.addEventListener('click', async () => {
-      if (active) active.classList.remove('active');
-      el.classList.add('active'); active = el;
-      await play(midi(4, i));
-      document.getElementById('nd-name').textContent = name;
-      document.getElementById('nd-freq').textContent =
-        AC[i] ? `${name} · ${NF[i]} · ${FQ[i].toFixed(2)} Hz` : `${FQ[i].toFixed(2)} Hz`;
-    });
-    row.appendChild(el);
-  });
-})();
-
-// ── Section 02: Piano keyboard ────────────────────────────────────────────────
-(function buildPiano() {
-  const WW = 46, WH = 148, GAP = 2, BW = 28, BH = 92;
-  // White key layout for 2 octaves (C3..B4) + final C5
-  // semitone indices of white keys within an octave: C=0 D=2 E=4 F=5 G=7 A=9 B=11
-  const WS = [0,2,4,5,7,9,11];
-  // Black key: {afterWhiteIdx (0-based per octave), semitone}
-  const BS = [{a:0,s:1},{a:1,s:3},{a:3,s:6},{a:4,s:8},{a:5,s:10}];
-
-  const octaves = [3, 4];
-  // Build flattened white key list
-  const whites = [];
-  octaves.forEach(o => WS.forEach(s => whites.push({oct:o, semi:s})));
-  whites.push({oct:5, semi:0}); // C5
-
-  const totalW = whites.length * (WW + GAP) - GAP;
-  const container = document.getElementById('piano-container');
-  container.style.width  = totalW + 'px';
-  container.style.height = (WH + 8) + 'px';
-  container.style.position = 'relative';
-
-  let active = null;
-  function setLit(el, isBlack) {
-    if (active) {
-      active.classList.remove('lit');
-      active.style.zIndex = active._z;
-    }
-    el.classList.add('lit'); active = el; el._z = el.style.zIndex;
-  }
-
-  // White keys
-  whites.forEach((note, i) => {
-    const el = document.createElement('div');
-    el.className = 'key-w';
-    el.style.left   = i * (WW + GAP) + 'px';
-    el.style.top    = '0';
-    el.style.width  = WW + 'px';
-    el.style.height = WH + 'px';
-    el.textContent = N[note.semi];
-    el.addEventListener('click', async () => {
-      setLit(el, false);
-      await play(midi(note.oct, note.semi));
-    });
-    container.appendChild(el);
-  });
-
-  // Black keys — offset within each octave block
-  octaves.forEach((oct, oi) => {
-    const octStartWhite = oi * 7; // 7 white keys per octave
-    BS.forEach(b => {
-      const whiteIdx = octStartWhite + b.a;
-      const x = whiteIdx * (WW + GAP) + WW - BW / 2;
-      const el = document.createElement('div');
-      el.className = 'key-b';
-      el.style.left   = x + 'px';
-      el.style.top    = '0';
-      el.style.width  = BW + 'px';
-      el.style.height = BH + 'px';
-      el.textContent  = N[b.s] + '·' + NF[b.s];
-      el.addEventListener('click', async () => {
-        setLit(el, true);
-        await play(midi(oct, b.s));
-      });
-      container.appendChild(el);
-    });
-  });
-})();
-
-// ── Section 03: Enharmonic pairs ──────────────────────────────────────────────
-(function buildEnharm() {
-  const pairs = [
-    {sharp:'C♯', flat:'D♭', semi:1},
-    {sharp:'D♯', flat:'E♭', semi:3},
-    {sharp:'F♯', flat:'G♭', semi:6},
-    {sharp:'G♯', flat:'A♭', semi:8},
-    {sharp:'A♯', flat:'B♭', semi:10},
-  ];
-  const grid = document.getElementById('enharm-grid');
-  let active = null;
-  pairs.forEach(p => {
-    const card = document.createElement('div');
-    card.className = 'enharm-card';
-    card.innerHTML = `
-      <div class="enharm-sharp">${p.sharp}</div>
-      <span class="enharm-eq">= igual a =</span>
-      <div class="enharm-flat">${p.flat}</div>
-      <span class="enharm-sub">mismo sonido</span>
-    `;
-    card.addEventListener('click', async () => {
-      if (active) active.classList.remove('active');
-      card.classList.add('active'); active = card;
-      await play(midi(4, p.semi));
-    });
-    grid.appendChild(card);
-  });
-})();
-
-// ── Section 04: Octave demo ───────────────────────────────────────────────────
-(function buildOctaves() {
-  const data = [
-    {oct:2, freq:'130 Hz'},
-    {oct:3, freq:'262 Hz'},
-    {oct:4, freq:'523 Hz'},
-    {oct:5, freq:'1047 Hz'},
-  ];
-  const grid = document.getElementById('oct-grid');
-  data.forEach(d => {
-    const cell = document.createElement('div');
-    cell.className = 'oct-cell';
-    cell.innerHTML = `
-      <div class="oct-circle" id="oc-${d.oct}">C</div>
-      <div class="oct-name">C${d.oct}</div>
-      <div class="oct-freq">${d.freq}</div>
-    `;
-    cell.addEventListener('click', async () => {
-      const circle = document.getElementById('oc-' + d.oct);
-      circle.classList.add('lit');
-      await play(midi(d.oct, 0));
-      setTimeout(() => circle.classList.remove('lit'), 900);
-    });
-    grid.appendChild(cell);
-  });
-})();
-
-// ── Section 05: Fretboard strip (E2 string, frets 0-12) ──────────────────────
-(function buildFretStrip() {
-  const svg = document.getElementById('fret-svg');
-  const FRETS = 12, FW = 62, startX = 28, Y = 40, boardH = 64;
-  const openSemi = 4; // E = semitone 4
-  const openOct  = 2; // E2
-
-  let h = '';
-  // Board
-  h += `<rect x="12" y="8" width="${FW*FRETS+startX+18}" height="${boardH}" fill="#2e1408" rx="6"/>`;
-  // Nut
-  h += `<rect x="${startX-4}" y="8" width="6" height="${boardH}" fill="#d4c5a0" rx="1"/>`;
-  // String
-  h += `<line x1="${startX}" y1="${Y}" x2="${startX+FW*FRETS+18}" y2="${Y}" stroke="#c8c8a0" stroke-width="2.8"/>`;
-
-  for (let f = 0; f <= FRETS; f++) {
-    const x   = startX + f * FW;
-    const semi = (openSemi + f) % 12;
-    const oct  = openOct + Math.floor((openSemi + f) / 12);
-    const m    = midi(oct, semi);
-    const isAcc = AC[semi];
-    const isE   = semi === 4; // root (E)
-    const cx    = f === 0 ? startX - 2 : x - FW / 2;
-
-    // Fret bar
-    if (f > 0) {
-      const col = f === 12 ? '#cfc0a0' : '#7a6a50';
-      const sw  = f === 12 ? 3 : 1.8;
-      h += `<line x1="${x}" y1="8" x2="${x}" y2="${8+boardH}" stroke="${col}" stroke-width="${sw}"/>`;
-    }
-
-    // Note circle
-    const fill   = isE ? '#a05c20' : isAcc ? '#3c2e20' : '#1e1006';
-    const stroke = isE ? '#c87030' : isAcc ? '#6a5040' : '#5a3a22';
-    const tc     = isE ? '#fff' : 'rgba(250,246,240,.88)';
-    const r      = 16;
-    h += `<circle cx="${cx}" cy="${Y}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="1.5" style="cursor:pointer" onclick="playFret(${m})"/>`;
-    h += `<text x="${cx}" y="${Y+5}" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="${N[semi].length>2?9.5:11.5}" font-weight="700" fill="${tc}" style="pointer-events:none">${N[semi]}</text>`;
-
-    // Fret number
-    if (f > 0) {
-      h += `<text x="${cx}" y="${8+boardH+14}" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="rgba(200,180,150,.35)">${f}</text>`;
-    }
-  }
-
-  svg.innerHTML = h;
-  svg.setAttribute('viewBox', `0 0 ${FW * FRETS + startX + 32} ${8 + boardH + 20}`);
-})();
-
-window.playFret = midi => play(midi);
-
-// ── Progress bar ──────────────────────────────────────────────────────────────
-window.addEventListener('scroll', () => {
-  const d = document.documentElement;
-  const p = (d.scrollTop || document.body.scrollTop) / (d.scrollHeight - d.clientHeight) * 100;
-  document.getElementById('prog-bar').style.width = p + '%';
-});
-</script>
 </body>
 </html>
