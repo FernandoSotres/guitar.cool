@@ -1074,7 +1074,7 @@ function _pluck(pc,oct,when){
 async function noteClick(midi){
   if(drawTool)return;
   await Tone.start();await _initAudio();
-  const pc=midi%12, oct=Math.floor(midi/12);
+  const pc=midi%12, oct=Math.floor(midi/12)+1;
   _pluck(pc,oct,Tone.now()+0.05);
 }
 
