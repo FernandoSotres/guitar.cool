@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>guitarra.cool — Escalas</title>
+<title>guitarra.cool · Escalas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
@@ -186,7 +186,7 @@ hr.th-div.dark{background:rgba(255,255,255,.06);}
         <span class="th-label">01 · El concepto</span>
         <h2 class="th-h2">¿Qué es una escala?</h2>
         <p class="th-body">
-          Una escala es una <strong>colección ordenada de notas</strong> seleccionadas de los doce sonidos disponibles. La selección no es arbitraria — se rige por una fórmula de <strong>intervalos</strong>.
+          Una escala es una <strong>colección ordenada de notas</strong> seleccionadas de los doce sonidos disponibles. La selección no es arbitraria: se rige por una fórmula de <strong>intervalos</strong>.
         </p>
         <p class="th-body">
           Esa fórmula determina el <strong>carácter</strong> de la escala. La escala mayor suena alegre y resuelta. La menor suena oscura y emotiva. Cambia la fórmula de intervalos y cambias toda la personalidad del sonido.
@@ -359,7 +359,7 @@ hr.th-div.dark{background:rgba(255,255,255,.06);}
 
     <div class="th-callout">
       <div class="th-callout-label">El modo más usado en guitarra</div>
-      <p>El <strong>Dórico</strong> (segundo modo) es la escala favorita del rock y el blues. Es una escala menor con la sexta mayor subida — eso le da un toque brillante que la menor natural no tiene. Pienso en Carlos Santana o en el riff de "Oye Como Va".</p>
+      <p>El <strong>Dórico</strong> (segundo modo) es la escala favorita del rock y el blues. Es una escala menor con la sexta mayor subida, y eso le da un toque brillante que la menor natural no tiene. Pienso en Carlos Santana o en el riff de "Oye Como Va".</p>
     </div>
   </div>
 </section>
@@ -571,9 +571,10 @@ document.getElementById('expl-play-btn').addEventListener('click', async () => {
   whites.forEach((note,i)=>{
     const el=document.createElement('div');
     el.className='mk-w';
-    el.style.cssText=`left:${i*(WW+GAP)}px;top:0;width:${WW}px;height:${WH}px`;
+    el.style.cssText=`left:${i*(WW+GAP)}px;top:0;width:${WW}px;height:${WH}px;cursor:pointer`;
     el.dataset.semi=note.semi;
     el.dataset.oct=note.oct;
+    el.addEventListener('click',()=>playMidi(midiNote(note.oct,note.semi)));
     container.appendChild(el);
   });
   octaves.forEach((oct,oi)=>{
@@ -582,9 +583,10 @@ document.getElementById('expl-play-btn').addEventListener('click', async () => {
       const x=wi*(WW+GAP)+WW-BW/2;
       const el=document.createElement('div');
       el.className='mk-b';
-      el.style.cssText=`left:${x}px;top:0;width:${BW}px;height:${BH}px`;
+      el.style.cssText=`left:${x}px;top:0;width:${BW}px;height:${BH}px;cursor:pointer`;
       el.dataset.semi=b.s;
       el.dataset.oct=oct;
+      el.addEventListener('click',()=>playMidi(midiNote(oct,b.s)));
       container.appendChild(el);
     });
   });

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>guitarra.cool — Intervalos</title>
+<title>guitarra.cool · Intervalos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
@@ -499,7 +499,7 @@ hr.th-div.dark { background: rgba(255,255,255,.06); }
     <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:32px;flex-wrap:wrap;margin-bottom:36px">
       <h2 class="th-h2" style="max-width:480px;margin:0">Consonancia y disonancia</h2>
       <p class="th-body" style="max-width:380px;margin:0">
-        Algunos intervalos suenan <strong>estables</strong> y relajados — consonantes. Otros crean <strong>tensión</strong> y quieren resolverse — disonantes. Esta diferencia es el motor de toda la música tonal. Haz clic en cualquier intervalo para escucharlo.
+        Algunos intervalos suenan <strong>estables</strong> y relajados: consonantes. Otros crean <strong>tensión</strong> y quieren resolverse: disonantes. Esta diferencia es el motor de toda la música tonal. Haz clic en cualquier intervalo para escucharlo.
       </p>
     </div>
 
@@ -687,9 +687,10 @@ document.getElementById('btn-harmonic').addEventListener('click', async () => {
   whites.forEach((note, i) => {
     const el = document.createElement('div');
     el.className = 'mk-w';
-    el.style.cssText = `left:${i*(WW+GAP)}px;top:0;width:${WW}px;height:${WH}px`;
+    el.style.cssText = `left:${i*(WW+GAP)}px;top:0;width:${WW}px;height:${WH}px;cursor:pointer`;
     el.dataset.semi = note.semi;
     el.dataset.oct  = note.oct;
+    el.addEventListener('click', async () => await playNote(midiNote(note.oct, note.semi)));
     container.appendChild(el);
   });
   octaves.forEach((oct, oi) => {
@@ -701,6 +702,10 @@ document.getElementById('btn-harmonic').addEventListener('click', async () => {
       el.style.cssText = `left:${x}px;top:0;width:${BW}px;height:${BH}px`;
       el.dataset.semi = b.s;
       el.dataset.oct  = oct;
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', async () => {
+        await playNote(midiNote(oct, b.s));
+      });
       container.appendChild(el);
     });
   });
@@ -727,7 +732,7 @@ updateExplorer();
     {
       type: 'cons', label: 'Consonantes perfectas',
       intervals: [0,5,7],
-      desc: 'Unísono, cuarta y quinta. Estabilidad total — no crean tensión ni movimiento.'
+      desc: 'Unísono, cuarta y quinta. Estabilidad total: no crean tensión ni movimiento.'
     },
     {
       type: 'cons', label: 'Consonantes imperfectas',
@@ -737,12 +742,12 @@ updateExplorer();
     {
       type: 'diss', label: 'Disonantes suaves',
       intervals: [2,10],
-      desc: 'Segunda mayor y séptima menor. Tensión moderada — fundamentales en el jazz.'
+      desc: 'Segunda mayor y séptima menor. Tensión moderada, fundamentales en el jazz.'
     },
     {
       type: 'diss', label: 'Disonantes fuertes',
       intervals: [1,6,11],
-      desc: 'Segunda menor, tritono y séptima mayor. Tensión intensa — quieren resolver.'
+      desc: 'Segunda menor, tritono y séptima mayor. Tensión intensa: quieren resolver.'
     },
   ];
 

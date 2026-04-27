@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>guitarra.cool — Herramientas</title>
+<title>guitarra.cool · Herramientas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
@@ -967,11 +967,11 @@ function drawFretboard(){
     for(let s=0;s<NS;s++){
       const idx=si(s),y=oy+s*SH;
       for(let f=0;f<=FRETS;f++){
-        const note=(OPEN[idx]+f)%12;if(!sn.includes(note))continue;
+        const midi=OPEN[idx]+f;const note=midi%12;if(!sn.includes(note))continue;
         const deg=sn.indexOf(note);
         const col=SCALE_DEG_COLORS[deg]||'#7c5cbf',r=deg===0?11:9;
         const x=fnx(f);
-        h+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${col}" opacity=".92" filter="url(#fb-nshadow)" style="cursor:pointer" onclick="noteClick(${note})"/>`;
+        h+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${col}" opacity=".92" filter="url(#fb-nshadow)" style="cursor:pointer" onclick="noteClick(${midi})"/>`;
         h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="${deg===0?11:10}" font-weight="${deg===0?700:500}" font-family="DM Sans,sans-serif" style="pointer-events:none">${lbl[note]||NOTE_NAMES[note]}</text>`;
       }
     }
@@ -982,10 +982,10 @@ function drawFretboard(){
     for(let s=0;s<NS;s++){
       const idx=si(s),y=oy+s*SH;
       for(let f=0;f<=FRETS;f++){
-        const note=(OPEN[idx]+f)%12;if(!cn.has(note))continue;
+        const midi=OPEN[idx]+f;const note=midi%12;if(!cn.has(note))continue;
         if(voicing){if(voicing[idx]<0||voicing[idx]!==f)continue;}
         const x=fnx(f),sem=(note-root+12)%12,col=INT_COLORS[sem]||'#aaa';
-        h+=`<circle cx="${x}" cy="${y}" r="10" fill="${col}" opacity=".93" filter="url(#fb-nshadow)" style="cursor:pointer" onclick="noteClick(${note})"/>`;
+        h+=`<circle cx="${x}" cy="${y}" r="10" fill="${col}" opacity=".93" filter="url(#fb-nshadow)" style="cursor:pointer" onclick="noteClick(${midi})"/>`;
         h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="DM Sans,sans-serif" style="pointer-events:none">${lbl[note]||NOTE_NAMES[note]}</text>`;
       }
     }
@@ -994,12 +994,12 @@ function drawFretboard(){
     for(let s=0;s<NS;s++){
       const idx=si(s),y=oy+s*SH;
       for(let f=0;f<=FRETS;f++){
-        const note=(OPEN[idx]+f)%12;
+        const midi=OPEN[idx]+f;const note=midi%12;
         let col=null,r=9;
         if(note===rn){col='#e8a838';r=11;}else if(note===iNote&&semi!==0){col='#b855d8';r=10;}
         if(!col)continue;
         const x=fnx(f);
-        h+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${col}" opacity=".92" filter="url(#fb-nshadow)" style="cursor:pointer" onclick="noteClick(${note})"/>`;
+        h+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${col}" opacity=".92" filter="url(#fb-nshadow)" style="cursor:pointer" onclick="noteClick(${midi})"/>`;
         h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="${r===11?11:10}" font-weight="700" font-family="DM Sans,sans-serif" style="pointer-events:none">${lbl[note]||NOTE_NAMES[note]}</text>`;
       }
     }
@@ -1071,10 +1071,11 @@ function _pluck(pc,oct,when){
   _sampler.triggerAttackRelease(_gn(pc,oct),'2n',when);
 }
 
-async function noteClick(pc){
+async function noteClick(midi){
   if(drawTool)return;
   await Tone.start();await _initAudio();
-  _pluck(pc,3,Tone.now()+0.05);
+  const pc=midi%12, oct=Math.floor(midi/12)-1;
+  _pluck(pc,oct,Tone.now()+0.05);
 }
 
 async function playCurrentMode(){
