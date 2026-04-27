@@ -1,6 +1,7 @@
 {
   "rewrites": [
     { "source": "/herramientas", "destination": "/herramientas.html" },
-    { "source": "/piano",        "destination": "/piano.html" }
+    { "source": "/piano",        "destination": "/piano.html" },
+    { "source": "/teoria",       "destination": "/teoria.html" }
   ]
 }
