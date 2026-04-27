@@ -5,6 +5,7 @@
     { "source": "/teoria",            "destination": "/teoria.html" },
     { "source": "/teoria/notas",      "destination": "/teoria-notas.html" },
     { "source": "/teoria/intervalos", "destination": "/teoria-intervalos.html" },
-    { "source": "/teoria/escalas",    "destination": "/teoria-escalas.html" }
+    { "source": "/teoria/escalas",    "destination": "/teoria-escalas.html" },
+    { "source": "/teoria/acordes",    "destination": "/teoria-acordes.html" }
   ]
 }
