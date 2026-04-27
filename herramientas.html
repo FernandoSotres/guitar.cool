@@ -884,18 +884,6 @@ function drawFretboard(){
     h+=`<text x="${fnx(f)}" y="${oy-10}"${T(fnx(f),oy-10)} text-anchor="middle" fill="${nl}" font-size="10" font-family="DM Mono,monospace" opacity="0.65">${f}</text>`;
   }
 
-  // Position dot inlays
-  for(const df of[3,5,7,9,12,15,17]){
-    if(df>FRETS)continue;
-    const x=fnx(df),y=oy+boardH/2;
-    if(df===12){
-      h+=`<circle cx="${x}" cy="${y-SH*.7}" r="4" fill="${dot}"/>`;
-      h+=`<circle cx="${x}" cy="${y+SH*.7}" r="4" fill="${dot}"/>`;
-    } else {
-      h+=`<circle cx="${x}" cy="${y}" r="4" fill="${dot}"/>`;
-    }
-  }
-
   // Note circles
   const root=_dp.rootNote;
   if(_dp.type==='scale'){
