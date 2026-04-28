@@ -10,6 +10,7 @@
     { "source": "/teoria/escalas",        "destination": "/teoria-escalas.html" },
     { "source": "/teoria/acordes",        "destination": "/teoria-acordes.html" },
     { "source": "/teoria/armonia",        "destination": "/teoria-armonia.html" },
+    { "source": "/practica",              "destination": "/practica.html" },
     { "source": "/practica/intervalos",   "destination": "/practica-intervalos.html" },
     { "source": "/practica/escalas",      "destination": "/practica-escalas.html" }
   ]

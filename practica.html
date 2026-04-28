@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>guitarra.cool · Práctica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:#faf6f0;--paper2:#f2ece3;--paper3:#e8e0d4;--paper4:#ddd4c4;--paper5:#cec4b0;
+  --copper:#a05c20;--copper-lt:#c07830;--copper-dk:#7a4010;
+  --ink:#1a1410;--ink2:#2e2418;--ink3:#4a3c2c;--ink4:#6a5a46;--ink5:#8a7a66;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(250,246,240,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:56px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{color:var(--copper);}
+.nav-link{padding:0 16px;height:56px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+.hub-hero{background:#100a04;padding:120px 48px 100px;text-align:center;position:relative;overflow:hidden;}
+.hub-eyebrow{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:28px;display:flex;align-items:center;justify-content:center;gap:14px;}
+.hub-eyebrow::before,.hub-eyebrow::after{content:'';display:block;height:1px;width:48px;background:var(--copper-lt);opacity:.35;}
+.hub-title{font-family:var(--serif);font-size:clamp(60px,9vw,110px);font-weight:700;line-height:.88;letter-spacing:-.03em;color:var(--paper);margin-bottom:32px;}
+.hub-title em{font-style:italic;color:var(--copper-lt);}
+.hub-lead{font-family:var(--serif);font-size:clamp(17px,2vw,22px);font-style:italic;color:rgba(250,246,240,.5);max-width:560px;margin:0 auto;line-height:1.7;}
+
+.hub-path{padding:96px 48px 112px;background:var(--paper);}
+.hub-inner{max-width:900px;margin:0 auto;}
+.hub-section-label{font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--copper);margin-bottom:16px;display:block;}
+.hub-section-title{font-family:var(--serif);font-size:clamp(32px,4vw,48px);font-weight:700;line-height:1.05;letter-spacing:-.02em;color:var(--ink);margin-bottom:14px;}
+.hub-section-sub{font-size:15px;color:var(--ink4);line-height:1.7;max-width:540px;margin-bottom:56px;}
+
+.chapter-list{display:flex;flex-direction:column;gap:0;}
+.chapter-card{display:flex;align-items:stretch;gap:0;border:1px solid var(--paper4);border-radius:12px;overflow:hidden;margin-bottom:16px;transition:box-shadow .22s,border-color .22s;text-decoration:none;color:inherit;background:#fff;}
+.chapter-card:hover{border-color:var(--copper);box-shadow:0 6px 28px rgba(160,92,32,.12);}
+.chapter-card.locked{cursor:default;pointer-events:none;opacity:.55;}
+.chapter-card.locked:hover{border-color:var(--paper4);box-shadow:none;}
+
+.chapter-num{width:72px;flex-shrink:0;background:#100a04;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:500;color:rgba(250,246,240,.28);letter-spacing:.08em;}
+.chapter-card:not(.locked):hover .chapter-num{background:var(--ink2);}
+.chapter-card.available .chapter-num{color:var(--copper-lt);}
+
+.chapter-body{flex:1;padding:28px 32px;}
+.chapter-tag{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--copper);margin-bottom:10px;display:block;}
+.chapter-card.locked .chapter-tag{color:var(--ink5);}
+.chapter-title{font-family:var(--serif);font-size:30px;font-weight:700;line-height:1.1;letter-spacing:-.015em;color:var(--ink);margin-bottom:10px;}
+.chapter-desc{font-size:14px;color:var(--ink4);line-height:1.65;max-width:560px;}
+
+.chapter-arrow{width:64px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--paper4);transition:color .2s,transform .2s;}
+.chapter-card:not(.locked):hover .chapter-arrow{color:var(--copper);transform:translateX(4px);}
+.chapter-card.locked .chapter-arrow{font-size:13px;color:var(--paper5);}
+
+.hub-footer-strip{background:#100a04;padding:64px 48px;text-align:center;}
+.hub-footer-text{font-family:var(--serif);font-size:clamp(22px,3vw,34px);font-style:italic;color:rgba(250,246,240,.38);max-width:560px;margin:0 auto 32px;line-height:1.55;}
+.hub-footer-cta{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:13px;font-weight:600;padding:12px 26px;border-radius:8px;text-decoration:none;transition:background .2s;}
+.hub-footer-cta:hover{background:var(--copper-dk);}
+
+@media(max-width:768px){
+  nav{padding:0 20px;}
+  .hub-hero{padding:80px 20px 72px;}
+  .hub-path{padding:64px 20px 80px;}
+  .hub-footer-strip{padding:48px 20px;}
+  .chapter-num{width:52px;font-size:11px;}
+  .chapter-body{padding:20px 20px;}
+  .chapter-title{font-size:24px;}
+  .chapter-arrow{width:44px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">guitarra<span>.cool</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link active">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/herramientas" class="nav-cta">Herramientas →</a>
+</nav>
+
+<section class="hub-hero">
+  <div class="hub-eyebrow">guitarra.cool</div>
+  <h1 class="hub-title">Práctica<br><em>interactiva</em></h1>
+  <p class="hub-lead">Ejercicios para entrenar el oído y el diapasón. Elige un tema y empieza a practicar.</p>
+</section>
+
+<section class="hub-path">
+  <div class="hub-inner">
+    <span class="hub-section-label">Ejercicios</span>
+    <h2 class="hub-section-title">Elige qué practicar</h2>
+    <p class="hub-section-sub">Cada ejercicio se adapta a lo que quieres entrenar. Puedes configurar la dificultad desde dentro.</p>
+
+    <div class="chapter-list">
+
+      <!-- Intervalos -->
+      <a href="/practica/intervalos" class="chapter-card available">
+        <div class="chapter-num">01</div>
+        <div class="chapter-body">
+          <span class="chapter-tag">Disponible</span>
+          <div class="chapter-title">Intervalos</div>
+          <p class="chapter-desc">Encuentra notas a una distancia dada desde la raíz, o identifica el intervalo entre dos notas marcadas en el diapasón.</p>
+        </div>
+        <div class="chapter-arrow">→</div>
+      </a>
+
+      <!-- Escalas -->
+      <a href="/practica/escalas" class="chapter-card available">
+        <div class="chapter-num">02</div>
+        <div class="chapter-body">
+          <span class="chapter-tag">Disponible</span>
+          <div class="chapter-title">Escalas</div>
+          <p class="chapter-desc">Construye el patrón de una escala en una zona del diapasón, o identifica qué escala está marcada entre varias opciones.</p>
+        </div>
+        <div class="chapter-arrow">→</div>
+      </a>
+
+      <!-- Acordes (próximamente) -->
+      <div class="chapter-card locked">
+        <div class="chapter-num">03</div>
+        <div class="chapter-body">
+          <span class="chapter-tag">Próximamente</span>
+          <div class="chapter-title">Acordes</div>
+          <p class="chapter-desc">Encuentra las notas de un acorde en el diapasón o identifica acordes por su sonido y forma visual.</p>
+        </div>
+        <div class="chapter-arrow">Pronto</div>
+      </div>
+
+      <!-- Lectura de notas (próximamente) -->
+      <div class="chapter-card locked">
+        <div class="chapter-num">04</div>
+        <div class="chapter-body">
+          <span class="chapter-tag">Próximamente</span>
+          <div class="chapter-title">Notas en el diapasón</div>
+          <p class="chapter-desc">Memoriza la posición de cada nota en todas las cuerdas. Velocidad y precisión para leer el mástil a primera vista.</p>
+        </div>
+        <div class="chapter-arrow">Pronto</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="hub-footer-strip">
+  <p class="hub-footer-text">"Practicar no es repetir, es escuchar."</p>
+  <a href="/teoria" class="hub-footer-cta">Repasar teoría →</a>
+</section>
+
+</body>
+</html>
