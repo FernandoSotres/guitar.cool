@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>guitarra.cool · Práctica · Escalas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<style>
+:root {
+  --paper:#faf6f0;--paper2:#f2ece3;--paper3:#e8e0d4;--paper4:#ddd4c4;--paper5:#cec4b0;
+  --copper:#a05c20;--copper-lt:#c07830;--copper-dk:#7a4010;
+  --ink:#1a1410;--ink2:#2e2418;--ink3:#4a3c2c;--ink4:#6a5a46;--ink5:#8a7a66;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+  --green:#2a9d6e;--red:#c0392b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;overflow-x:hidden;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(250,246,240,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:56px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{color:var(--copper);}
+.nav-link{padding:0 16px;height:56px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+.breadcrumb{background:var(--paper2);border-bottom:1px solid var(--paper4);padding:0 48px;height:40px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink5);}
+.breadcrumb a{color:var(--ink5);text-decoration:none;}
+.breadcrumb a:hover{color:var(--copper);}
+.breadcrumb .sep{opacity:.45;}
+.breadcrumb .cur{color:var(--ink3);font-weight:500;}
+
+.ex-wrap{display:grid;grid-template-columns:252px 1fr;min-height:calc(100vh - 96px);}
+
+/* SIDEBAR */
+.ex-sidebar{background:var(--paper2);border-right:1px solid var(--paper4);padding:28px 20px;overflow-y:auto;}
+.ex-sidebar-sec{margin-bottom:28px;}
+.ex-sec-title{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:12px;display:block;}
+.ex-sec-sub{font-size:11px;color:var(--ink5);margin-bottom:12px;line-height:1.5;}
+
+.mode-btns{display:flex;flex-direction:column;gap:6px;}
+.mode-btn{padding:9px 12px;border-radius:7px;border:1px solid var(--paper4);background:var(--paper3);font-size:12px;font-weight:500;color:var(--ink4);cursor:pointer;font-family:var(--sans);text-align:left;transition:all .14s;}
+.mode-btn.on{background:var(--ink2);color:var(--paper);border-color:var(--ink2);}
+.mode-btn:hover:not(.on){border-color:var(--copper);color:var(--copper);}
+.mode-btn-sub{font-size:10px;font-weight:400;opacity:.65;margin-top:2px;}
+
+.sc-pills{display:flex;flex-wrap:wrap;gap:5px;}
+.sc-pill{font-family:var(--mono);font-size:11px;font-weight:600;padding:5px 9px;border-radius:6px;cursor:pointer;user-select:none;border:1px solid var(--paper4);background:var(--paper3);color:var(--ink4);transition:all .14s;}
+.sc-pill.on{background:var(--copper);color:#fff;border-color:var(--copper);}
+.sc-pill:hover:not(.on){border-color:var(--copper-lt);color:var(--copper);}
+.sc-all-btn{font-size:11px;color:var(--copper);cursor:pointer;text-decoration:underline;margin-top:8px;display:inline-block;background:none;border:none;font-family:var(--sans);padding:0;}
+
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.stat-box{background:var(--paper);border:1px solid var(--paper4);border-radius:8px;padding:12px 8px;text-align:center;}
+.stat-val{font-family:var(--mono);font-size:24px;font-weight:600;color:var(--ink);line-height:1;}
+.stat-lbl{font-size:9px;color:var(--ink5);margin-top:4px;letter-spacing:.08em;text-transform:uppercase;}
+.reset-btn{width:100%;margin-top:10px;padding:8px;border:1px solid var(--paper4);background:transparent;border-radius:7px;font-size:11px;color:var(--ink5);cursor:pointer;font-family:var(--sans);transition:all .15s;}
+.reset-btn:hover{border-color:var(--red);color:var(--red);}
+
+/* MAIN */
+.ex-main{padding:28px 36px;display:flex;flex-direction:column;gap:18px;}
+
+.ex-start{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 40px;gap:20px;flex:1;}
+.ex-start-title{font-family:var(--serif);font-size:clamp(40px,5vw,64px);font-weight:700;color:var(--ink);letter-spacing:-.025em;line-height:1.0;}
+.ex-start-title em{font-style:italic;color:var(--copper);}
+.ex-start-sub{font-size:15px;color:var(--ink4);max-width:440px;line-height:1.75;}
+.ex-start-hint{font-size:13px;color:var(--ink5);max-width:400px;line-height:1.6;}
+.ex-start-btn{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:14px;font-weight:600;padding:14px 32px;border-radius:10px;border:none;cursor:pointer;font-family:var(--sans);transition:background .2s;margin-top:8px;}
+.ex-start-btn:hover{background:var(--copper-dk);}
+
+/* QUESTION CARD */
+.ex-question{background:#100a04;border-radius:14px;padding:22px 32px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-shrink:0;}
+.ex-q-left{}
+.ex-q-label{font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:rgba(250,246,240,.3);margin-bottom:5px;}
+.ex-scale-name{font-family:var(--serif);font-size:clamp(26px,3vw,40px);font-weight:700;color:var(--paper);line-height:1;letter-spacing:-.02em;margin-bottom:6px;}
+.ex-scale-sub{font-family:var(--mono);font-size:12px;color:var(--copper-lt);letter-spacing:.04em;}
+.ex-q-divider{width:1px;height:60px;background:rgba(250,246,240,.08);flex-shrink:0;}
+.ex-q-right{text-align:center;min-width:80px;}
+.ex-root-label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(250,246,240,.28);margin-bottom:4px;}
+.ex-root-note{font-family:var(--mono);font-size:34px;font-weight:700;color:var(--copper-lt);line-height:1;}
+
+/* PROGRESS BAR (build mode) */
+.ex-progress-wrap{display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.ex-progress-bar-bg{flex:1;height:6px;background:var(--paper3);border-radius:3px;overflow:hidden;}
+.ex-progress-bar-fill{height:100%;background:var(--copper);border-radius:3px;transition:width .2s;}
+.ex-progress-text{font-family:var(--mono);font-size:12px;color:var(--ink4);white-space:nowrap;min-width:80px;text-align:right;}
+
+/* FRETBOARD */
+.ex-fretboard{background:#100a04;border-radius:14px;padding:20px 20px 14px;overflow-x:auto;flex-shrink:0;}
+.ex-fb-hint{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(250,246,240,.22);margin-bottom:14px;}
+
+/* IDENTIFY OPTIONS */
+.id-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;flex-shrink:0;}
+.id-btn{padding:13px 10px;border-radius:8px;border:1px solid var(--paper4);background:var(--paper2);font-size:14px;font-weight:600;color:var(--ink3);cursor:pointer;font-family:var(--serif);text-align:center;transition:all .14s;}
+.id-btn:hover:not(:disabled){border-color:var(--copper);color:var(--copper);}
+.id-btn.correct{background:rgba(42,157,110,.12);border-color:var(--green);color:var(--green);}
+.id-btn.wrong{background:rgba(192,57,43,.08);border-color:var(--red);color:var(--red);}
+.id-btn:disabled{cursor:default;}
+
+/* FEEDBACK */
+.ex-feedback{min-height:44px;padding:11px 18px;border-radius:9px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;transition:opacity .18s;flex-shrink:0;}
+.ex-feedback.hidden{opacity:0;pointer-events:none;background:transparent;border:1px solid transparent;}
+.ex-feedback.correct{background:rgba(42,157,110,.1);color:var(--green);border:1px solid rgba(42,157,110,.22);opacity:1;}
+.ex-feedback.wrong{background:rgba(192,57,43,.08);color:var(--red);border:1px solid rgba(192,57,43,.18);opacity:1;}
+.fb-icon{font-size:18px;line-height:1;}
+
+/* CONTROLS */
+.ex-controls{display:flex;gap:10px;align-items:center;flex-shrink:0;}
+.ex-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:var(--sans);transition:all .16s;}
+.ex-btn-listen{background:rgba(160,92,32,.1);color:var(--copper);border:1px solid rgba(160,92,32,.22);}
+.ex-btn-listen:hover{background:rgba(160,92,32,.18);}
+.ex-btn-reveal{background:rgba(255,255,255,.0);color:var(--ink5);border:1px solid var(--paper4);}
+.ex-btn-reveal:hover{border-color:var(--copper);color:var(--copper);}
+.ex-btn-next{background:var(--copper);color:#fff;}
+.ex-btn-next:hover{background:var(--copper-dk);}
+
+.ex-streak{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:5px;}
+.ex-streak-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink5);}
+.ex-streak-bar{display:flex;gap:3px;}
+.ex-streak-dot{width:7px;height:7px;border-radius:50%;background:var(--paper4);transition:background .2s,transform .15s;}
+.ex-streak-dot.on{background:var(--copper);transform:scale(1.2);}
+
+@media(max-width:900px){
+  nav{padding:0 20px;}
+  .breadcrumb{padding:0 20px;}
+  .ex-wrap{grid-template-columns:1fr;}
+  .ex-sidebar{border-right:none;border-bottom:1px solid var(--paper4);}
+  .ex-main{padding:20px 16px;}
+  .ex-question{flex-wrap:wrap;}
+  .ex-q-divider{display:none;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">guitarra<span>.cool</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica/escalas" class="nav-link active">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/herramientas" class="nav-cta">Herramientas →</a>
+</nav>
+
+<div class="breadcrumb">
+  <a href="/">Inicio</a>
+  <span class="sep">·</span>
+  <a href="/practica/intervalos">Práctica</a>
+  <span class="sep">·</span>
+  <span class="cur">Escalas en la guitarra</span>
+</div>
+
+<div class="ex-wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="ex-sidebar">
+
+    <div class="ex-sidebar-sec">
+      <span class="ex-sec-title">Modo</span>
+      <div class="mode-btns">
+        <button class="mode-btn on" id="mode-build" onclick="setMode('build')">
+          Construye la escala
+          <div class="mode-btn-sub">Encuentra todas las notas en el diapasón</div>
+        </button>
+        <button class="mode-btn" id="mode-id" onclick="setMode('identify')">
+          Identifica la escala
+          <div class="mode-btn-sub">Nombra la escala que ves marcada</div>
+        </button>
+      </div>
+    </div>
+
+    <div class="ex-sidebar-sec">
+      <span class="ex-sec-title">Escalas activas</span>
+      <p class="ex-sec-sub">Elige cuáles practicar</p>
+      <div class="sc-pills" id="sc-pills"></div>
+      <button class="sc-all-btn" onclick="toggleAll()">Seleccionar todas</button>
+    </div>
+
+    <div class="ex-sidebar-sec">
+      <span class="ex-sec-title">Estadísticas</span>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-val" id="stat-correct">0</div><div class="stat-lbl">Correctas</div></div>
+        <div class="stat-box"><div class="stat-val" id="stat-total">0</div><div class="stat-lbl">Total</div></div>
+        <div class="stat-box"><div class="stat-val" id="stat-pct">—</div><div class="stat-lbl">Precisión</div></div>
+        <div class="stat-box"><div class="stat-val" id="stat-best">0</div><div class="stat-lbl">Mejor racha</div></div>
+      </div>
+      <button class="reset-btn" onclick="resetStats()">Reiniciar estadísticas</button>
+    </div>
+
+  </aside>
+
+  <!-- MAIN -->
+  <main class="ex-main">
+
+    <!-- Start screen -->
+    <div class="ex-start" id="start-screen">
+      <div class="ex-start-title">Practica<br><em>escalas</em></div>
+      <p class="ex-start-sub">En modo "Construye", aparece una nota raíz y debes encontrar todas las notas de la escala en esa posición del diapasón.</p>
+      <p class="ex-start-hint">En modo "Identifica", verás un patrón de escala marcado y tendrás que nombrarla entre cuatro opciones.</p>
+      <button class="ex-start-btn" onclick="startExercise()">Comenzar ejercicio →</button>
+    </div>
+
+    <!-- Exercise -->
+    <div id="exercise" style="display:none;flex-direction:column;gap:18px;">
+
+      <!-- Question card -->
+      <div class="ex-question">
+        <div class="ex-q-left">
+          <div class="ex-q-label" id="q-label">Construye la escala</div>
+          <div class="ex-scale-name" id="q-scale-name">Pentatónica menor</div>
+          <div class="ex-scale-sub" id="q-scale-sub">Zona: trastes 4 · 8</div>
+        </div>
+        <div class="ex-q-divider"></div>
+        <div class="ex-q-right" id="root-wrap">
+          <div class="ex-root-label">Nota raíz</div>
+          <div class="ex-root-note" id="q-root-note">A</div>
+        </div>
+      </div>
+
+      <!-- Progress bar (build mode only) -->
+      <div class="ex-progress-wrap" id="progress-wrap">
+        <div class="ex-progress-bar-bg"><div class="ex-progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
+        <div class="ex-progress-text" id="progress-text">0 / 0 notas</div>
+      </div>
+
+      <!-- Fretboard -->
+      <div class="ex-fretboard">
+        <div class="ex-fb-hint" id="fb-hint">Haz clic en todas las notas de la escala en la zona indicada</div>
+        <div id="fretboard"></div>
+      </div>
+
+      <!-- Identify options -->
+      <div class="id-options" id="id-options" style="display:none"></div>
+
+      <!-- Feedback -->
+      <div class="ex-feedback hidden" id="feedback">
+        <span class="fb-icon" id="fb-icon"></span>
+        <span id="fb-text"></span>
+      </div>
+
+      <!-- Controls -->
+      <div class="ex-controls">
+        <button class="ex-btn ex-btn-listen" onclick="listenScale()">▶ Escuchar</button>
+        <button class="ex-btn ex-btn-reveal" id="reveal-btn" onclick="revealScale()">Revelar</button>
+        <button class="ex-btn ex-btn-next" onclick="nextQuestion()">Siguiente →</button>
+        <div class="ex-streak">
+          <span class="ex-streak-label" id="streak-label">Racha: 0</span>
+          <div class="ex-streak-bar" id="streak-bar"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+// ── Data ───────────────────────────────────────────────────────────────
+const OPEN = [40,45,50,55,59,64];
+const NOTE_NAMES = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+const APC = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+
+const SCALES = [
+  {key:'penta-min', abbr:'Pm',  name:'Pentatónica menor',  intervals:[0,3,5,7,10]},
+  {key:'penta-may', abbr:'PM',  name:'Pentatónica mayor',  intervals:[0,2,4,7,9]},
+  {key:'mayor',     abbr:'Ma',  name:'Mayor',               intervals:[0,2,4,5,7,9,11]},
+  {key:'menor',     abbr:'mn',  name:'Menor natural',       intervals:[0,2,3,5,7,8,10]},
+  {key:'blues',     abbr:'Bl',  name:'Blues',               intervals:[0,3,5,6,7,10]},
+  {key:'dorica',    abbr:'Do',  name:'Dórica',              intervals:[0,2,3,5,7,9,10]},
+  {key:'frigia',    abbr:'Fr',  name:'Frigia',              intervals:[0,1,3,5,7,8,10]},
+  {key:'lidia',     abbr:'Li',  name:'Lidia',               intervals:[0,2,4,6,7,9,11]},
+  {key:'mixolidia', abbr:'Mx',  name:'Mixolidia',           intervals:[0,2,4,5,7,9,10]},
+  {key:'menor-arm', abbr:'mA',  name:'Menor armónica',      intervals:[0,2,3,5,7,8,11]},
+];
+
+// ── State ──────────────────────────────────────────────────────────────
+const S = {
+  mode: 'build',
+  scaleKey:'', scaleName:'', scaleIntervals:[],
+  rootPc:0, rootStr:0, rootFret:0,
+  fretStart:0, fretEnd:4,
+  targetPositions:[], foundPositions:[], wrongSet: new Set(),
+  answered:false, revealed:false,
+  score:0, streak:0, bestStreak:0, total:0,
+  active: new Set(['penta-min','penta-may','mayor','menor','blues']),
+  nextTimer:null,
+};
+
+// ── Audio ──────────────────────────────────────────────────────────────
+let synth = null;
+async function initAudio() {
+  if (synth) return;
+  await Tone.start();
+  synth = new Tone.PolySynth(Tone.Synth, {
+    oscillator:{type:'triangle'},
+    envelope:{attack:0.02,decay:0.1,sustain:0.45,release:1.6}
+  }).toDestination();
+}
+function midi2note(midi){ return `${APC[midi%12]}${Math.floor(midi/12)}`; }
+async function playNote(midi, when, dur='8n') {
+  await initAudio();
+  synth.triggerAttackRelease(midi2note(midi), dur, when);
+}
+async function listenScale() {
+  await initAudio();
+  const rootMidi = OPEN[S.rootStr]+S.rootFret;
+  const now = Tone.now();
+  S.scaleIntervals.forEach((iv,i) => {
+    synth.triggerAttackRelease(midi2note(rootMidi+iv), '8n', now+0.05+i*0.22);
+  });
+}
+
+// ── Mode ───────────────────────────────────────────────────────────────
+function setMode(mode) {
+  S.mode = mode;
+  document.getElementById('mode-build').classList.toggle('on', mode==='build');
+  document.getElementById('mode-id').classList.toggle('on', mode==='identify');
+  document.getElementById('progress-wrap').style.display = mode==='build' ? '' : 'none';
+  document.getElementById('id-options').style.display = mode==='identify' ? 'grid' : 'none';
+  document.getElementById('reveal-btn').style.display = mode==='build' ? '' : 'none';
+  if (S.nextTimer) { clearTimeout(S.nextTimer); S.nextTimer=null; }
+  newQuestion();
+}
+
+// ── Pills ──────────────────────────────────────────────────────────────
+function buildPills() {
+  const c = document.getElementById('sc-pills');
+  c.innerHTML = '';
+  SCALES.forEach(sc => {
+    const el = document.createElement('div');
+    el.className = 'sc-pill' + (S.active.has(sc.key) ? ' on' : '');
+    el.textContent = sc.abbr;
+    el.title = sc.name;
+    el.onclick = () => {
+      if (S.active.has(sc.key)) {
+        if (S.active.size > 1) { S.active.delete(sc.key); el.classList.remove('on'); }
+      } else { S.active.add(sc.key); el.classList.add('on'); }
+    };
+    c.appendChild(el);
+  });
+}
+function toggleAll() {
+  const allOn = S.active.size === SCALES.length;
+  S.active = allOn ? new Set([SCALES[0].key]) : new Set(SCALES.map(s=>s.key));
+  buildPills();
+}
+
+// ── Stats ──────────────────────────────────────────────────────────────
+function updateStats() {
+  document.getElementById('stat-correct').textContent = S.score;
+  document.getElementById('stat-total').textContent = S.total;
+  document.getElementById('stat-pct').textContent = S.total>0 ? Math.round(S.score/S.total*100)+'%' : '—';
+  document.getElementById('stat-best').textContent = S.bestStreak;
+}
+function resetStats() {
+  S.score=0; S.streak=0; S.bestStreak=0; S.total=0;
+  updateStats(); updateStreak();
+}
+function updateStreak() {
+  document.getElementById('streak-label').textContent = `Racha: ${S.streak}`;
+  const bar = document.getElementById('streak-bar');
+  bar.innerHTML = '';
+  const filled = S.streak === 0 ? 0 : (S.streak%10 || 10);
+  for (let i=0; i<10; i++) {
+    const d = document.createElement('div');
+    d.className = 'ex-streak-dot' + (i < filled ? ' on':'');
+    bar.appendChild(d);
+  }
+}
+function updateProgress() {
+  const found = S.foundPositions.length, total = S.targetPositions.length;
+  const pct = total>0 ? (found/total*100) : 0;
+  document.getElementById('progress-fill').style.width = pct+'%';
+  document.getElementById('progress-text').textContent = `${found} / ${total} notas`;
+}
+function hideFeedback() { document.getElementById('feedback').className='ex-feedback hidden'; }
+function showFeedback(ok, text) {
+  const fb = document.getElementById('feedback');
+  fb.className = 'ex-feedback '+(ok?'correct':'wrong');
+  document.getElementById('fb-icon').textContent = ok ? '✓' : '✗';
+  document.getElementById('fb-text').textContent = text;
+}
+
+// ── Core question logic ────────────────────────────────────────────────
+function pickScale() {
+  const arr = SCALES.filter(s => S.active.has(s.key));
+  return arr.length ? arr[Math.floor(Math.random()*arr.length)] : SCALES[0];
+}
+
+function newQuestion() {
+  if (S.nextTimer) { clearTimeout(S.nextTimer); S.nextTimer=null; }
+  S.answered = false; S.revealed = false;
+  hideFeedback();
+  if (S.mode === 'build') newBuildQuestion();
+  else newIdentifyQuestion();
+}
+
+// ── BUILD MODE ─────────────────────────────────────────────────────────
+function newBuildQuestion() {
+  const sc = pickScale();
+  S.scaleKey=sc.key; S.scaleName=sc.name; S.scaleIntervals=sc.intervals;
+
+  // Root at fret 3-8 on any string
+  let tries=0;
+  while(tries++<200) {
+    const str = Math.floor(Math.random()*6);
+    const fret = 3 + Math.floor(Math.random()*6);
+    S.rootStr=str; S.rootFret=fret;
+    S.fretStart = fret-1; S.fretEnd = fret+3; // 5-fret window
+    break;
+  }
+
+  S.rootPc = (OPEN[S.rootStr]+S.rootFret) % 12;
+  const scaleNotes = new Set(sc.intervals.map(i=>(S.rootPc+i)%12));
+
+  // All scale positions in window
+  S.targetPositions = [];
+  for (let s=0; s<6; s++) {
+    for (let f=S.fretStart; f<=S.fretEnd; f++) {
+      if (f<0||f>12) continue;
+      const midi=OPEN[s]+f;
+      if (scaleNotes.has(midi%12)) S.targetPositions.push({s,f});
+    }
+  }
+  S.foundPositions = [];
+  S.wrongSet = new Set();
+
+  // UI
+  document.getElementById('q-label').textContent = 'Construye la escala en el diapasón';
+  document.getElementById('q-scale-name').textContent = sc.name;
+  document.getElementById('q-scale-sub').textContent = `Zona: trastes ${S.fretStart} · ${S.fretEnd}`;
+  document.getElementById('q-root-note').textContent = NOTE_NAMES[S.rootPc];
+  document.getElementById('root-wrap').style.display = '';
+  document.getElementById('fb-hint').textContent = 'Haz clic en todas las notas de la escala en la zona indicada';
+  document.getElementById('reveal-btn').style.display = '';
+  document.getElementById('id-options').style.display = 'none';
+  document.getElementById('progress-wrap').style.display = '';
+
+  updateProgress();
+  drawFretboard();
+}
+
+function handleBuildClick(s, f) {
+  if (S.answered) return;
+  if (f < S.fretStart || f > S.fretEnd) return;
+
+  const key = `${s},${f}`;
+  if (S.foundPositions.some(p=>p.s===s&&p.f===f)) return; // already found
+
+  const isTarget = S.targetPositions.some(p=>p.s===s&&p.f===f);
+
+  if (isTarget) {
+    S.foundPositions.push({s,f});
+    initAudio().then(()=>playNote(OPEN[s]+f, Tone.now()+0.05));
+    if (S.foundPositions.length === S.targetPositions.length) {
+      // Completed!
+      S.answered = true; S.total++;
+      const perfect = S.wrongSet.size === 0;
+      if (perfect) {
+        S.score++; S.streak++;
+        if (S.streak>S.bestStreak) S.bestStreak=S.streak;
+        showFeedback(true, `¡Completo! ${S.foundPositions.length} notas sin errores.`);
+      } else {
+        S.streak=0;
+        showFeedback(true, `Completo, con ${S.wrongSet.size} error${S.wrongSet.size>1?'es':''}.`);
+      }
+      updateStats(); updateStreak();
+      S.nextTimer = setTimeout(newQuestion, 2400);
+    }
+  } else {
+    // Wrong note: flash it
+    S.wrongSet.add(key);
+    flashWrong(s, f);
+    return; // don't redraw everything
+  }
+
+  updateProgress();
+  drawFretboard();
+}
+
+function revealScale() {
+  if (S.answered) return;
+  S.revealed = true; S.answered = true; S.total++;
+  S.streak = 0;
+  updateStats(); updateStreak();
+  showFeedback(false, 'Escala revelada. Sin puntos esta vez.');
+  drawFretboard();
+  S.nextTimer = setTimeout(newQuestion, 2800);
+}
+
+// Flash a wrong note red briefly
+const wrongFlash = {};
+function flashWrong(s, f) {
+  const key = `${s},${f}`;
+  wrongFlash[key] = true;
+  drawFretboard();
+  setTimeout(() => { delete wrongFlash[key]; drawFretboard(); }, 500);
+}
+
+// ── IDENTIFY MODE ──────────────────────────────────────────────────────
+function newIdentifyQuestion() {
+  const sc = pickScale();
+  S.scaleKey=sc.key; S.scaleName=sc.name; S.scaleIntervals=sc.intervals;
+
+  // Pick a root
+  S.rootStr = Math.floor(Math.random()*6);
+  S.rootFret = 3 + Math.floor(Math.random()*5);
+  S.rootPc = (OPEN[S.rootStr]+S.rootFret) % 12;
+  S.fretStart = S.rootFret - 1;
+  S.fretEnd = S.rootFret + 3;
+
+  // Build target positions (all scale notes in window)
+  const scaleNotes = new Set(sc.intervals.map(i=>(S.rootPc+i)%12));
+  S.targetPositions = [];
+  for (let s=0; s<6; s++) {
+    for (let f=S.fretStart; f<=S.fretEnd; f++) {
+      if (f<0||f>12) continue;
+      if (scaleNotes.has((OPEN[s]+f)%12)) S.targetPositions.push({s,f});
+    }
+  }
+  S.foundPositions = [...S.targetPositions]; // show all for identify mode
+
+  // 4 options: correct + 3 distractors
+  const distractors = SCALES.filter(x=>x.key!==sc.key).sort(()=>Math.random()-.5).slice(0,3);
+  const options = [sc,...distractors].sort(()=>Math.random()-.5);
+
+  // UI
+  document.getElementById('q-label').textContent = '¿Qué escala está marcada?';
+  document.getElementById('q-scale-name').textContent = NOTE_NAMES[S.rootPc] + ' · ?';
+  document.getElementById('q-scale-sub').textContent = `${sc.intervals.length} notas en el diapasón`;
+  document.getElementById('q-root-note').textContent = NOTE_NAMES[S.rootPc];
+  document.getElementById('root-wrap').style.display = '';
+  document.getElementById('fb-hint').textContent = 'Elige el nombre de la escala';
+  document.getElementById('reveal-btn').style.display = 'none';
+  document.getElementById('progress-wrap').style.display = 'none';
+
+  const idDiv = document.getElementById('id-options');
+  idDiv.style.display = 'grid';
+  idDiv.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'id-btn';
+    btn.textContent = opt.name;
+    btn.onclick = () => handleIdentifyClick(opt, btn, options, idDiv);
+    idDiv.appendChild(btn);
+  });
+
+  drawFretboard();
+}
+
+function handleIdentifyClick(opt, btn, options, idDiv) {
+  if (S.answered) return;
+  S.answered = true; S.total++;
+  const ok = opt.key === S.scaleKey;
+  if (ok) {
+    S.score++; S.streak++;
+    if (S.streak>S.bestStreak) S.bestStreak=S.streak;
+    btn.classList.add('correct');
+    showFeedback(true, `¡Correcto! ${opt.name}.`);
+  } else {
+    S.streak=0;
+    btn.classList.add('wrong');
+    Array.from(idDiv.children).forEach(b => {
+      if (b.textContent === S.scaleName) b.classList.add('correct');
+    });
+    showFeedback(false, `Incorrecto. Era ${S.scaleName}.`);
+  }
+  Array.from(idDiv.children).forEach(b=>b.disabled=true);
+  updateStats(); updateStreak();
+  initAudio().then(() => listenScale());
+  S.nextTimer = setTimeout(newQuestion, 2800);
+}
+
+// ── Fretboard SVG ──────────────────────────────────────────────────────
+const VW=720, VH=172, NX=58, FA=VW-NX-14, FW=FA/12;
+const ST=18, SB=VH-18, SG=(SB-ST)/5;
+function fx(f){ return f===0 ? 26 : NX+(f-0.5)*FW; }
+function sy(s){ return ST+s*SG; }
+
+function drawFretboard() {
+  let svg = `<svg viewBox="0 0 ${VW} ${VH}" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:${VW}px;height:auto;display:block">`;
+
+  // Defs
+  svg += `<defs>
+    <filter id="gr" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="b"/>
+      <feFlood flood-color="#c07830" flood-opacity=".5" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="s"/>
+      <feMerge><feMergeNode in="s"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="gg" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="b"/>
+      <feFlood flood-color="#2a9d6e" flood-opacity=".45" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="s"/>
+      <feMerge><feMergeNode in="s"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>`;
+
+  // Window highlight
+  const wx1 = S.fretStart===0 ? 8 : NX+(S.fretStart-1)*FW+2;
+  const wx2 = NX+S.fretEnd*FW-2;
+  svg += `<rect x="${wx1}" y="${ST-6}" width="${wx2-wx1}" height="${SB-ST+12}" rx="4" fill="rgba(255,255,255,.04)"/>`;
+
+  // Position dots
+  [3,5,7,9].forEach(f=>{svg+=`<circle cx="${NX+(f-0.5)*FW}" cy="${VH/2}" r="4.5" fill="rgba(250,246,240,.04)"/>`;});
+  [sy(1.5),sy(3.5)].forEach(y=>{svg+=`<circle cx="${NX+11.5*FW}" cy="${y}" r="4.5" fill="rgba(250,246,240,.04)"/>`;});
+
+  // Nut
+  svg += `<rect x="${NX}" y="${ST-5}" width="3.5" height="${SB-ST+10}" fill="rgba(250,246,240,.48)" rx="1.5"/>`;
+
+  // Frets
+  for (let f=1; f<=12; f++) {
+    const x=NX+f*FW;
+    svg+=`<line x1="${x}" y1="${ST-5}" x2="${x}" y2="${SB+5}" stroke="rgba(250,246,240,.16)" stroke-width="1.5"/>`;
+  }
+
+  // Strings
+  for (let s=0; s<6; s++) {
+    const y=sy(s), th=2.6-s*0.34;
+    svg+=`<line x1="8" y1="${y}" x2="${VW-6}" y2="${y}" stroke="rgba(192,120,48,${0.48-s*0.05})" stroke-width="${th}"/>`;
+  }
+
+  // Fret numbers
+  [3,5,7,9,12].forEach(f=>{
+    const inWin = f>=S.fretStart && f<=S.fretEnd;
+    svg+=`<text x="${NX+(f-0.5)*FW}" y="${VH-2}" text-anchor="middle" fill="${inWin?'rgba(250,246,240,.45)':'rgba(250,246,240,.18)'}" font-size="10" font-family="DM Mono,monospace">${f}</text>`;
+  });
+
+  // Notes
+  for (let s=0; s<6; s++) {
+    for (let f=0; f<=12; f++) {
+      const x=fx(f), y=sy(s), midi=OPEN[s]+f;
+      const isRoot = s===S.rootStr && f===S.rootFret;
+      const isFound = S.foundPositions.some(p=>p.s===s&&p.f===f);
+      const isTarget = S.targetPositions.some(p=>p.s===s&&p.f===f);
+      const inWindow = f>=S.fretStart && f<=S.fretEnd;
+      const isWrong = wrongFlash[`${s},${f}`];
+
+      if (isRoot) {
+        svg+=`<circle cx="${x}" cy="${y}" r="13" fill="#a05c20" filter="url(#gr)"/>`;
+        svg+=`<text x="${x}" y="${y+4.5}" text-anchor="middle" fill="#fff" font-size="11" font-weight="700" font-family="DM Mono,monospace">${NOTE_NAMES[midi%12]}</text>`;
+      } else if (isFound && !isRoot) {
+        // Found / revealed scale note
+        const col = S.revealed && !S.foundPositions.some(p=>p.s===s&&p.f===f&&S.mode==='build'&&!S.foundPositions.filter(fp=>fp.s===s&&fp.f===f).length) ? '#a05c20' : '#2a9d6e';
+        svg+=`<circle cx="${x}" cy="${y}" r="12" fill="${S.revealed?'rgba(160,92,32,.7)':'#2a9d6e'}" filter="url(#gg)"/>`;
+        svg+=`<text x="${x}" y="${y+4}" text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="DM Mono,monospace">${NOTE_NAMES[midi%12]}</text>`;
+      } else if (isWrong) {
+        svg+=`<circle cx="${x}" cy="${y}" r="12" fill="#c0392b"/>`;
+        svg+=`<text x="${x}" y="${y+5}" text-anchor="middle" fill="#fff" font-size="13" font-family="DM Mono,monospace">✗</text>`;
+      } else if (inWindow && !S.answered && S.mode==='build') {
+        svg+=`<circle cx="${x}" cy="${y}" r="12" fill="rgba(255,255,255,.02)" stroke="rgba(255,255,255,.08)" stroke-width="1" style="cursor:pointer" onclick="handleBuildClick(${s},${f})"/>`;
+      }
+    }
+  }
+
+  svg += '</svg>';
+  document.getElementById('fretboard').innerHTML = svg;
+}
+
+// ── Init ───────────────────────────────────────────────────────────────
+function startExercise() {
+  document.getElementById('start-screen').style.display = 'none';
+  const ex = document.getElementById('exercise');
+  ex.style.display = 'flex';
+  ex.style.flexDirection = 'column';
+  newQuestion();
+}
+function nextQuestion() { newQuestion(); }
+
+buildPills();
+updateStats();
+updateStreak();
+</script>
+</body>
+</html>
