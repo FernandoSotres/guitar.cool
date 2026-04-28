@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>guitarra.cool · Práctica · Armonía</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<style>
+:root {
+  --paper:#faf6f0;--paper2:#f2ece3;--paper3:#e8e0d4;--paper4:#ddd4c4;--paper5:#cec4b0;
+  --copper:#a05c20;--copper-lt:#c07830;--copper-dk:#7a4010;
+  --ink:#1a1410;--ink2:#2e2418;--ink3:#4a3c2c;--ink4:#6a5a46;--ink5:#8a7a66;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+  --green:#2a9d6e;--red:#c0392b;
+  --tonic:#a05c20;--subdom:#5a7abf;--dominant:#7a4abf;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;overflow-x:hidden;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(250,246,240,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:56px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{color:var(--copper);}
+.nav-link{padding:0 16px;height:56px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+.breadcrumb{background:var(--paper2);border-bottom:1px solid var(--paper4);padding:0 48px;height:40px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink5);}
+.breadcrumb a{color:var(--ink5);text-decoration:none;}
+.breadcrumb a:hover{color:var(--copper);}
+.breadcrumb .sep{opacity:.45;}
+.breadcrumb .cur{color:var(--ink3);font-weight:500;}
+
+.ex-wrap{display:grid;grid-template-columns:252px 1fr;min-height:calc(100vh - 96px);}
+
+/* SIDEBAR */
+.ex-sidebar{background:var(--paper2);border-right:1px solid var(--paper4);padding:28px 20px;overflow-y:auto;}
+.ex-sidebar-sec{margin-bottom:28px;}
+.ex-sec-title{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:12px;display:block;}
+.ex-sec-sub{font-size:11px;color:var(--ink5);margin-bottom:12px;line-height:1.5;}
+
+.mode-btns{display:flex;flex-direction:column;gap:6px;}
+.mode-btn{padding:9px 12px;border-radius:7px;border:1px solid var(--paper4);background:var(--paper3);font-size:12px;font-weight:500;color:var(--ink4);cursor:pointer;font-family:var(--sans);text-align:left;transition:all .14s;}
+.mode-btn.on{background:var(--ink2);color:var(--paper);border-color:var(--ink2);}
+.mode-btn:hover:not(.on){border-color:var(--copper);color:var(--copper);}
+.mode-btn-sub{font-size:10px;font-weight:400;opacity:.65;margin-top:2px;}
+
+.sc-pills{display:flex;flex-wrap:wrap;gap:5px;}
+.sc-pill{font-family:var(--mono);font-size:11px;font-weight:600;padding:5px 9px;border-radius:6px;cursor:pointer;user-select:none;border:1px solid var(--paper4);background:var(--paper3);color:var(--ink4);transition:all .14s;}
+.sc-pill.on{background:var(--copper);color:#fff;border-color:var(--copper);}
+.sc-pill:hover:not(.on){border-color:var(--copper-lt);color:var(--copper);}
+
+.type-toggle{display:flex;gap:6px;}
+.type-btn{flex:1;padding:8px 10px;border-radius:7px;border:1px solid var(--paper4);background:var(--paper3);font-size:12px;font-weight:500;color:var(--ink4);cursor:pointer;font-family:var(--sans);text-align:center;transition:all .14s;}
+.type-btn.on{background:var(--ink2);color:var(--paper);border-color:var(--ink2);}
+.type-btn:hover:not(.on){border-color:var(--copper);color:var(--copper);}
+
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.stat-box{background:var(--paper);border:1px solid var(--paper4);border-radius:8px;padding:12px 8px;text-align:center;}
+.stat-val{font-family:var(--mono);font-size:24px;font-weight:600;color:var(--ink);line-height:1;}
+.stat-lbl{font-size:9px;color:var(--ink5);margin-top:4px;letter-spacing:.08em;text-transform:uppercase;}
+.reset-btn{width:100%;margin-top:10px;padding:8px;border:1px solid var(--paper4);background:transparent;border-radius:7px;font-size:11px;color:var(--ink5);cursor:pointer;font-family:var(--sans);transition:all .15s;}
+.reset-btn:hover{border-color:var(--red);color:var(--red);}
+
+/* MAIN */
+.ex-main{padding:28px 36px;display:flex;flex-direction:column;gap:18px;}
+
+.ex-start{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 40px;gap:20px;flex:1;}
+.ex-start-title{font-family:var(--serif);font-size:clamp(40px,5vw,64px);font-weight:700;color:var(--ink);letter-spacing:-.025em;line-height:1.0;}
+.ex-start-title em{font-style:italic;color:var(--copper);}
+.ex-start-sub{font-size:15px;color:var(--ink4);max-width:440px;line-height:1.75;}
+.ex-start-hint{font-size:13px;color:var(--ink5);max-width:400px;line-height:1.6;}
+.ex-start-btn{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:14px;font-weight:600;padding:14px 32px;border-radius:10px;border:none;cursor:pointer;font-family:var(--sans);transition:background .2s;margin-top:8px;}
+.ex-start-btn:hover{background:var(--copper-dk);}
+
+/* QUESTION CARD */
+.ex-question{background:#100a04;border-radius:14px;padding:28px 36px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-shrink:0;}
+.ex-q-left{flex:1;}
+.ex-q-label{font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:rgba(250,246,240,.3);margin-bottom:8px;}
+.ex-q-main{font-family:var(--serif);font-size:clamp(32px,4vw,52px);font-weight:700;color:var(--paper);line-height:1;letter-spacing:-.02em;margin-bottom:8px;}
+.ex-q-sub{font-size:13px;color:rgba(250,246,240,.38);letter-spacing:.02em;}
+.ex-q-divider{width:1px;height:72px;background:rgba(250,246,240,.08);flex-shrink:0;}
+.ex-q-right{text-align:center;min-width:90px;flex-shrink:0;}
+.ex-key-label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(250,246,240,.28);margin-bottom:4px;}
+.ex-key-note{font-family:var(--mono);font-size:30px;font-weight:700;color:var(--copper-lt);line-height:1;}
+.ex-key-type{font-size:10px;color:rgba(250,246,240,.3);margin-top:4px;letter-spacing:.06em;}
+
+/* DEGREE STRIP (shown after answering in both modes) */
+.degree-strip{background:#100a04;border-radius:12px;padding:16px 20px;display:none;flex-shrink:0;}
+.degree-strip-label{font-size:9px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(250,246,240,.25);margin-bottom:12px;}
+.degree-row{display:flex;gap:6px;justify-content:space-between;}
+.degree-cell{flex:1;text-align:center;padding:8px 4px;border-radius:7px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);}
+.degree-cell.highlight{border-color:var(--copper-lt);background:rgba(160,92,32,.18);}
+.degree-cell.tonic{border-color:rgba(160,92,32,.3);}
+.degree-cell.subdom{border-color:rgba(90,122,191,.3);}
+.degree-cell.dominant{border-color:rgba(122,74,191,.3);}
+.dc-roman{font-family:var(--mono);font-size:9px;font-weight:600;color:rgba(250,246,240,.3);margin-bottom:3px;}
+.dc-roman.tonic{color:rgba(192,120,48,.7);}
+.dc-roman.subdom{color:rgba(90,122,191,.7);}
+.dc-roman.dominant{color:rgba(122,74,191,.7);}
+.dc-name{font-family:var(--serif);font-size:13px;font-weight:700;color:var(--paper);line-height:1.1;}
+.dc-type{font-size:9px;color:rgba(250,246,240,.22);text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}
+
+/* OPTIONS */
+.id-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;flex-shrink:0;}
+.id-btn{padding:16px 12px;border-radius:10px;border:1px solid var(--paper4);background:var(--paper2);font-size:15px;font-weight:600;color:var(--ink3);cursor:pointer;font-family:var(--serif);text-align:center;transition:all .14s;line-height:1.2;}
+.id-btn:hover:not(:disabled){border-color:var(--copper);color:var(--copper);}
+.id-btn.correct{background:rgba(42,157,110,.12);border-color:var(--green);color:var(--green);}
+.id-btn.wrong{background:rgba(192,57,43,.08);border-color:var(--red);color:var(--red);}
+.id-btn:disabled{cursor:default;}
+/* Roman numeral options get bigger mono font */
+.id-btn.roman{font-family:var(--mono);font-size:20px;letter-spacing:.04em;}
+
+/* FEEDBACK */
+.ex-feedback{min-height:44px;padding:11px 18px;border-radius:9px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;transition:opacity .18s;flex-shrink:0;}
+.ex-feedback.hidden{opacity:0;pointer-events:none;background:transparent;border:1px solid transparent;}
+.ex-feedback.correct{background:rgba(42,157,110,.1);color:var(--green);border:1px solid rgba(42,157,110,.22);opacity:1;}
+.ex-feedback.wrong{background:rgba(192,57,43,.08);color:var(--red);border:1px solid rgba(192,57,43,.18);opacity:1;}
+.fb-icon{font-size:18px;line-height:1;}
+
+/* CONTROLS */
+.ex-controls{display:flex;gap:10px;align-items:center;flex-shrink:0;flex-wrap:wrap;}
+.ex-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:var(--sans);transition:all .16s;}
+.ex-btn-listen{background:rgba(160,92,32,.1);color:var(--copper);border:1px solid rgba(160,92,32,.22);}
+.ex-btn-listen:hover{background:rgba(160,92,32,.18);}
+.ex-btn-context{background:rgba(90,122,191,.08);color:var(--subdom);border:1px solid rgba(90,122,191,.2);}
+.ex-btn-context:hover{background:rgba(90,122,191,.15);}
+.ex-btn-next{background:var(--copper);color:#fff;}
+.ex-btn-next:hover{background:var(--copper-dk);}
+
+.ex-streak{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:5px;}
+.ex-streak-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink5);}
+.ex-streak-bar{display:flex;gap:3px;}
+.ex-streak-dot{width:7px;height:7px;border-radius:50%;background:var(--paper4);transition:background .2s,transform .15s;}
+.ex-streak-dot.on{background:var(--copper);transform:scale(1.2);}
+
+@media(max-width:900px){
+  nav{padding:0 20px;}
+  .breadcrumb{padding:0 20px;}
+  .ex-wrap{grid-template-columns:1fr;}
+  .ex-sidebar{border-right:none;border-bottom:1px solid var(--paper4);}
+  .ex-main{padding:20px 16px;}
+  .ex-question{flex-wrap:wrap;}
+  .ex-q-divider{display:none;}
+  .degree-row{flex-wrap:wrap;}
+  .degree-cell{min-width:calc(25% - 6px);}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">guitarra<span>.cool</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link active">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/herramientas" class="nav-cta">Herramientas →</a>
+</nav>
+
+<div class="breadcrumb">
+  <a href="/">Inicio</a>
+  <span class="sep">·</span>
+  <a href="/practica">Práctica</a>
+  <span class="sep">·</span>
+  <span class="cur">Armonía tonal</span>
+</div>
+
+<div class="ex-wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="ex-sidebar">
+
+    <div class="ex-sidebar-sec">
+      <span class="ex-sec-title">Modo</span>
+      <div class="mode-btns">
+        <button class="mode-btn on" id="mode-degree" onclick="setMode('degree')">
+          Identifica el grado
+          <div class="mode-btn-sub">¿Qué cifra romana corresponde al acorde?</div>
+        </button>
+        <button class="mode-btn" id="mode-chord" onclick="setMode('chord')">
+          Nombra el acorde
+          <div class="mode-btn-sub">¿Qué acorde es el grado indicado?</div>
+        </button>
+      </div>
+    </div>
+
+    <div class="ex-sidebar-sec">
+      <span class="ex-sec-title">Tonalidad</span>
+      <p class="ex-sec-sub">Elige en qué tonalidades practicar</p>
+      <div class="sc-pills" id="key-pills"></div>
+    </div>
+
+    <div class="ex-sidebar-sec">
+      <span class="ex-sec-title">Modo de la escala</span>
+      <div class="type-toggle">
+        <button class="type-btn on" id="type-maj" onclick="setScaleType('major')">Mayor</button>
+        <button class="type-btn" id="type-min" onclick="setScaleType('minor')">Menor</button>
+      </div>
+    </div>
+
+    <div class="ex-sidebar-sec">
+      <span class="ex-sec-title">Estadísticas</span>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-val" id="stat-correct">0</div><div class="stat-lbl">Correctas</div></div>
+        <div class="stat-box"><div class="stat-val" id="stat-total">0</div><div class="stat-lbl">Total</div></div>
+        <div class="stat-box"><div class="stat-val" id="stat-pct">—</div><div class="stat-lbl">Precisión</div></div>
+        <div class="stat-box"><div class="stat-val" id="stat-best">0</div><div class="stat-lbl">Mejor racha</div></div>
+      </div>
+      <button class="reset-btn" onclick="resetStats()">Reiniciar estadísticas</button>
+    </div>
+
+  </aside>
+
+  <!-- MAIN -->
+  <main class="ex-main">
+
+    <!-- Start screen -->
+    <div class="ex-start" id="start-screen">
+      <div class="ex-start-title">Practica<br><em>armonía</em></div>
+      <p class="ex-start-sub">En modo "Identifica el grado", escucha un acorde dentro de una tonalidad y di qué cifra romana le corresponde.</p>
+      <p class="ex-start-hint">En modo "Nombra el acorde", te dan la tonalidad y el grado romano, y debes decir qué acorde es.</p>
+      <button class="ex-start-btn" onclick="startExercise()">Comenzar ejercicio →</button>
+    </div>
+
+    <!-- Exercise -->
+    <div id="exercise" style="display:none;flex-direction:column;gap:18px;">
+
+      <!-- Question card -->
+      <div class="ex-question">
+        <div class="ex-q-left">
+          <div class="ex-q-label" id="q-label">Identifica el grado</div>
+          <div class="ex-q-main" id="q-main">Re mayor</div>
+          <div class="ex-q-sub" id="q-sub">¿Qué grado es en la tonalidad?</div>
+        </div>
+        <div class="ex-q-divider"></div>
+        <div class="ex-q-right">
+          <div class="ex-key-label">Tonalidad</div>
+          <div class="ex-key-note" id="q-key-note">G</div>
+          <div class="ex-key-type" id="q-key-type">mayor</div>
+        </div>
+      </div>
+
+      <!-- Options -->
+      <div class="id-options" id="id-options"></div>
+
+      <!-- Degree strip (shown after answer) -->
+      <div class="degree-strip" id="degree-strip">
+        <div class="degree-strip-label">Acordes diatónicos de la tonalidad</div>
+        <div class="degree-row" id="degree-row"></div>
+      </div>
+
+      <!-- Feedback -->
+      <div class="ex-feedback hidden" id="feedback">
+        <span class="fb-icon" id="fb-icon"></span>
+        <span id="fb-text"></span>
+      </div>
+
+      <!-- Controls -->
+      <div class="ex-controls">
+        <button class="ex-btn ex-btn-listen" onclick="listenCurrentChord()">▶ Escuchar acorde</button>
+        <button class="ex-btn ex-btn-context" onclick="listenKeyContext()">♩ Escuchar tonalidad</button>
+        <button class="ex-btn ex-btn-next" onclick="nextQuestion()">Siguiente →</button>
+        <div class="ex-streak">
+          <span class="ex-streak-label" id="streak-label">Racha: 0</span>
+          <div class="ex-streak-bar" id="streak-bar"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+// ── Data ───────────────────────────────────────────────────────────────
+const NOTE_NAMES = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+const APC = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+
+const KEYS = [
+  {pc:0,  name:'C'},
+  {pc:2,  name:'D'},
+  {pc:4,  name:'E'},
+  {pc:5,  name:'F'},
+  {pc:7,  name:'G'},
+  {pc:9,  name:'A'},
+  {pc:11, name:'B'},
+  {pc:10, name:'B♭'},
+  {pc:3,  name:'E♭'},
+];
+
+// Diatonic degrees for major scale
+const MAJOR_DEGREES = [
+  {roman:'I',    offset:0,  type:'maj', typeLabel:'mayor',        func:'tonic'},
+  {roman:'ii',   offset:2,  type:'min', typeLabel:'menor',        func:'subdom'},
+  {roman:'iii',  offset:4,  type:'min', typeLabel:'menor',        func:'tonic'},
+  {roman:'IV',   offset:5,  type:'maj', typeLabel:'mayor',        func:'subdom'},
+  {roman:'V',    offset:7,  type:'maj', typeLabel:'mayor',        func:'dominant'},
+  {roman:'vi',   offset:9,  type:'min', typeLabel:'menor',        func:'tonic'},
+  {roman:'vii°', offset:11, type:'dim', typeLabel:'disminuido',   func:'dominant'},
+];
+
+// Diatonic degrees for natural minor scale
+const MINOR_DEGREES = [
+  {roman:'i',   offset:0,  type:'min', typeLabel:'menor',       func:'tonic'},
+  {roman:'ii°', offset:2,  type:'dim', typeLabel:'disminuido',  func:'subdom'},
+  {roman:'III', offset:3,  type:'maj', typeLabel:'mayor',       func:'tonic'},
+  {roman:'iv',  offset:5,  type:'min', typeLabel:'menor',       func:'subdom'},
+  {roman:'v',   offset:7,  type:'min', typeLabel:'menor',       func:'dominant'},
+  {roman:'VI',  offset:8,  type:'maj', typeLabel:'mayor',       func:'subdom'},
+  {roman:'VII', offset:10, type:'maj', typeLabel:'mayor',       func:'dominant'},
+];
+
+// Chord intervals
+const CHORD_IV = {maj:[0,4,7], min:[0,3,7], dim:[0,3,6]};
+
+// ── State ──────────────────────────────────────────────────────────────
+const S = {
+  mode: 'degree',         // 'degree' | 'chord'
+  scaleType: 'major',     // 'major' | 'minor'
+  keyPc: 0, keyName: 'C',
+  degree: null,           // current degree object
+  answered: false,
+  score:0, streak:0, bestStreak:0, total:0,
+  activeKeys: new Set([0, 2, 4, 5, 7, 9]), // C D E F G A
+  nextTimer: null,
+};
+
+// ── Audio ──────────────────────────────────────────────────────────────
+let synth = null;
+async function initAudio() {
+  if (synth) return;
+  await Tone.start();
+  synth = new Tone.PolySynth(Tone.Synth, {
+    oscillator:{type:'triangle'},
+    envelope:{attack:0.02,decay:0.12,sustain:0.5,release:2.0}
+  }).toDestination();
+}
+function midi2note(midi) { return `${APC[midi%12]}${Math.floor(midi/12)}`; }
+
+function chordRootMidi(keyPc, degreeOffset) {
+  // Base: MIDI 36 = C2. Adjust up so chord is in a comfortable range.
+  let root = 36 + keyPc + degreeOffset;
+  // Keep root between MIDI 36-48 (C2-C3) for rich chord sound
+  if (root > 48) root -= 12;
+  return root;
+}
+
+async function playChord(keyPc, degree, stagger=0.12) {
+  await initAudio();
+  const root = chordRootMidi(keyPc, degree.offset);
+  const ivs = CHORD_IV[degree.type];
+  const now = Tone.now();
+  ivs.forEach((iv, i) => {
+    synth.triggerAttackRelease(midi2note(root + iv), '2n', now + 0.05 + i * stagger);
+  });
+}
+
+async function listenCurrentChord() {
+  await playChord(S.keyPc, S.degree);
+}
+
+async function listenKeyContext() {
+  await initAudio();
+  const degs = S.scaleType === 'major' ? MAJOR_DEGREES : MINOR_DEGREES;
+  const root = 36 + S.keyPc;
+  const now = Tone.now();
+  let t = now + 0.05;
+
+  // Play I - IV - V - I cadence to establish key
+  const cadence = [degs[0], degs[3], degs[4], degs[0]];
+  cadence.forEach(deg => {
+    const r = chordRootMidi(S.keyPc, deg.offset);
+    CHORD_IV[deg.type].forEach((iv, i) => {
+      synth.triggerAttackRelease(midi2note(r + iv), '4n', t + i * 0.08);
+    });
+    t += 0.55;
+  });
+
+  // Then play the target chord, slightly louder/longer
+  setTimeout(async () => {
+    await playChord(S.keyPc, S.degree, 0.14);
+  }, (t - now) * 1000 + 100);
+}
+
+// ── Mode & Scale type ──────────────────────────────────────────────────
+function setMode(mode) {
+  S.mode = mode;
+  document.getElementById('mode-degree').classList.toggle('on', mode === 'degree');
+  document.getElementById('mode-chord').classList.toggle('on', mode === 'chord');
+  if (S.nextTimer) { clearTimeout(S.nextTimer); S.nextTimer = null; }
+  newQuestion();
+}
+
+function setScaleType(type) {
+  S.scaleType = type;
+  document.getElementById('type-maj').classList.toggle('on', type === 'major');
+  document.getElementById('type-min').classList.toggle('on', type === 'minor');
+  if (S.nextTimer) { clearTimeout(S.nextTimer); S.nextTimer = null; }
+  newQuestion();
+}
+
+// ── Key Pills ──────────────────────────────────────────────────────────
+function buildKeyPills() {
+  const c = document.getElementById('key-pills');
+  c.innerHTML = '';
+  KEYS.forEach(k => {
+    const el = document.createElement('div');
+    el.className = 'sc-pill' + (S.activeKeys.has(k.pc) ? ' on' : '');
+    el.textContent = k.name;
+    el.onclick = () => {
+      if (S.activeKeys.has(k.pc)) {
+        if (S.activeKeys.size > 1) { S.activeKeys.delete(k.pc); el.classList.remove('on'); }
+      } else { S.activeKeys.add(k.pc); el.classList.add('on'); }
+    };
+    c.appendChild(el);
+  });
+}
+
+// ── Stats ──────────────────────────────────────────────────────────────
+function updateStats() {
+  document.getElementById('stat-correct').textContent = S.score;
+  document.getElementById('stat-total').textContent = S.total;
+  document.getElementById('stat-pct').textContent = S.total > 0 ? Math.round(S.score / S.total * 100) + '%' : '—';
+  document.getElementById('stat-best').textContent = S.bestStreak;
+}
+function resetStats() {
+  S.score = 0; S.streak = 0; S.bestStreak = 0; S.total = 0;
+  updateStats(); updateStreak();
+}
+function updateStreak() {
+  document.getElementById('streak-label').textContent = `Racha: ${S.streak}`;
+  const bar = document.getElementById('streak-bar');
+  bar.innerHTML = '';
+  const filled = S.streak === 0 ? 0 : (S.streak % 10 || 10);
+  for (let i = 0; i < 10; i++) {
+    const d = document.createElement('div');
+    d.className = 'ex-streak-dot' + (i < filled ? ' on' : '');
+    bar.appendChild(d);
+  }
+}
+function hideFeedback() { document.getElementById('feedback').className = 'ex-feedback hidden'; }
+function showFeedback(ok, text) {
+  const fb = document.getElementById('feedback');
+  fb.className = 'ex-feedback ' + (ok ? 'correct' : 'wrong');
+  document.getElementById('fb-icon').textContent = ok ? '✓' : '✗';
+  document.getElementById('fb-text').textContent = text;
+}
+
+// ── Chord name helper ──────────────────────────────────────────────────
+function chordName(keyPc, degree) {
+  const pc = (keyPc + degree.offset) % 12;
+  return NOTE_NAMES[pc] + ' ' + degree.typeLabel;
+}
+
+// ── Degree strip (after answering) ────────────────────────────────────
+function showDegreeStrip(keyPc, degrees, highlightRoman) {
+  const strip = document.getElementById('degree-strip');
+  strip.style.display = '';
+  const row = document.getElementById('degree-row');
+  row.innerHTML = '';
+  degrees.forEach(deg => {
+    const pc = (keyPc + deg.offset) % 12;
+    const cell = document.createElement('div');
+    const isHL = deg.roman === highlightRoman;
+    cell.className = 'degree-cell' + (isHL ? ' highlight' : ' ' + deg.func);
+    cell.innerHTML = `<div class="dc-roman ${deg.func}">${deg.roman}</div>
+      <div class="dc-name">${NOTE_NAMES[pc]}</div>
+      <div class="dc-type">${deg.typeLabel}</div>`;
+    row.appendChild(cell);
+  });
+}
+function hideDegreeStrip() {
+  document.getElementById('degree-strip').style.display = 'none';
+}
+
+// ── Pick random key and degree ─────────────────────────────────────────
+function pickKeyAndDegree() {
+  const availKeys = KEYS.filter(k => S.activeKeys.has(k.pc));
+  const k = availKeys[Math.floor(Math.random() * availKeys.length)];
+  const degs = S.scaleType === 'major' ? MAJOR_DEGREES : MINOR_DEGREES;
+  const deg = degs[Math.floor(Math.random() * degs.length)];
+  return {key: k, degree: deg, degrees: degs};
+}
+
+// ── New question dispatcher ────────────────────────────────────────────
+function newQuestion() {
+  if (S.nextTimer) { clearTimeout(S.nextTimer); S.nextTimer = null; }
+  S.answered = false;
+  hideFeedback();
+  hideDegreeStrip();
+
+  const {key, degree, degrees} = pickKeyAndDegree();
+  S.keyPc = key.pc; S.keyName = key.name;
+  S.degree = degree;
+
+  // Update key display
+  document.getElementById('q-key-note').textContent = key.name;
+  document.getElementById('q-key-type').textContent = S.scaleType === 'major' ? 'mayor' : 'menor';
+
+  if (S.mode === 'degree') newDegreeQuestion(key, degree, degrees);
+  else newChordQuestion(key, degree, degrees);
+
+  // Auto-play the chord
+  initAudio().then(() => playChord(key.pc, degree));
+}
+
+// ── MODE: Identifica el grado ──────────────────────────────────────────
+function newDegreeQuestion(key, degree, degrees) {
+  // Show: chord name. Ask: what degree?
+  const name = chordName(key.pc, degree);
+
+  document.getElementById('q-label').textContent = 'Identifica el grado';
+  document.getElementById('q-main').textContent = name;
+  document.getElementById('q-sub').textContent = '¿Qué cifra romana le corresponde?';
+
+  // Options: correct roman + 3 random others
+  const others = degrees.filter(d => d.roman !== degree.roman).sort(() => Math.random() - .5).slice(0, 3);
+  const options = [degree, ...others].sort(() => Math.random() - .5);
+
+  const idDiv = document.getElementById('id-options');
+  idDiv.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'id-btn roman';
+    btn.textContent = opt.roman;
+    btn.onclick = () => handleDegreeClick(opt, btn, options, idDiv, degree, degrees, key);
+    idDiv.appendChild(btn);
+  });
+}
+
+function handleDegreeClick(opt, btn, options, idDiv, correctDegree, degrees, key) {
+  if (S.answered) return;
+  S.answered = true; S.total++;
+  const ok = opt.roman === correctDegree.roman;
+  if (ok) {
+    S.score++; S.streak++;
+    if (S.streak > S.bestStreak) S.bestStreak = S.streak;
+    btn.classList.add('correct');
+    showFeedback(true, `¡Correcto! ${chordName(key.pc, correctDegree)} es el ${correctDegree.roman} grado.`);
+  } else {
+    S.streak = 0;
+    btn.classList.add('wrong');
+    Array.from(idDiv.children).forEach(b => {
+      if (b.textContent === correctDegree.roman) b.classList.add('correct');
+    });
+    showFeedback(false, `Incorrecto. Era ${correctDegree.roman} (${chordName(key.pc, correctDegree)}).`);
+  }
+  Array.from(idDiv.children).forEach(b => b.disabled = true);
+  updateStats(); updateStreak();
+  showDegreeStrip(key.pc, degrees, correctDegree.roman);
+  S.nextTimer = setTimeout(newQuestion, 3200);
+}
+
+// ── MODE: Nombra el acorde ─────────────────────────────────────────────
+function newChordQuestion(key, degree, degrees) {
+  // Show: key + roman numeral. Ask: what chord?
+  document.getElementById('q-label').textContent = 'Nombra el acorde';
+  document.getElementById('q-main').textContent = degree.roman;
+  document.getElementById('q-sub').textContent = '¿Cuál es este acorde en la tonalidad?';
+
+  // Options: correct chord name + 3 other chords from same key
+  const others = degrees.filter(d => d.roman !== degree.roman).sort(() => Math.random() - .5).slice(0, 3);
+  const options = [degree, ...others].sort(() => Math.random() - .5);
+
+  const idDiv = document.getElementById('id-options');
+  idDiv.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'id-btn';
+    btn.textContent = chordName(key.pc, opt);
+    btn.onclick = () => handleChordClick(opt, btn, options, idDiv, degree, degrees, key);
+    idDiv.appendChild(btn);
+  });
+}
+
+function handleChordClick(opt, btn, options, idDiv, correctDegree, degrees, key) {
+  if (S.answered) return;
+  S.answered = true; S.total++;
+  const ok = opt.roman === correctDegree.roman;
+  const correctName = chordName(key.pc, correctDegree);
+  if (ok) {
+    S.score++; S.streak++;
+    if (S.streak > S.bestStreak) S.bestStreak = S.streak;
+    btn.classList.add('correct');
+    showFeedback(true, `¡Correcto! El ${correctDegree.roman} es ${correctName}.`);
+  } else {
+    S.streak = 0;
+    btn.classList.add('wrong');
+    Array.from(idDiv.children).forEach(b => {
+      if (b.textContent === correctName) b.classList.add('correct');
+    });
+    showFeedback(false, `Incorrecto. El ${correctDegree.roman} es ${correctName}.`);
+  }
+  Array.from(idDiv.children).forEach(b => b.disabled = true);
+  updateStats(); updateStreak();
+  // Play the correct chord
+  initAudio().then(() => playChord(key.pc, correctDegree));
+  showDegreeStrip(key.pc, degrees, correctDegree.roman);
+  S.nextTimer = setTimeout(newQuestion, 3200);
+}
+
+// ── Init ───────────────────────────────────────────────────────────────
+function startExercise() {
+  document.getElementById('start-screen').style.display = 'none';
+  const ex = document.getElementById('exercise');
+  ex.style.display = 'flex';
+  ex.style.flexDirection = 'column';
+  newQuestion();
+}
+function nextQuestion() { newQuestion(); }
+
+buildKeyPills();
+updateStats();
+updateStreak();
+</script>
+</body>
+</html>

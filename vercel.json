@@ -13,6 +13,7 @@
     { "source": "/practica",              "destination": "/practica.html" },
     { "source": "/practica/intervalos",   "destination": "/practica-intervalos.html" },
     { "source": "/practica/escalas",      "destination": "/practica-escalas.html" },
-    { "source": "/practica/acordes",      "destination": "/practica-acordes.html" }
+    { "source": "/practica/acordes",      "destination": "/practica-acordes.html" },
+    { "source": "/practica/armonia",      "destination": "/practica-armonia.html" }
   ]
 }
