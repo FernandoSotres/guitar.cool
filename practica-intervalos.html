@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>guitarra.cool · Práctica · Intervalos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<style>
+:root {
+  --paper:#faf6f0;--paper2:#f2ece3;--paper3:#e8e0d4;--paper4:#ddd4c4;--paper5:#cec4b0;
+  --copper:#a05c20;--copper-lt:#c07830;--copper-dk:#7a4010;
+  --ink:#1a1410;--ink2:#2e2418;--ink3:#4a3c2c;--ink4:#6a5a46;--ink5:#8a7a66;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+  --green:#2a9d6e;--red:#c0392b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;overflow-x:hidden;}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(250,246,240,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:56px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{color:var(--copper);}
+.nav-link{padding:0 16px;height:56px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+/* BREADCRUMB */
+.breadcrumb{background:var(--paper2);border-bottom:1px solid var(--paper4);padding:0 48px;height:40px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink5);}
+.breadcrumb a{color:var(--ink5);text-decoration:none;}
+.breadcrumb a:hover{color:var(--copper);}
+.breadcrumb .sep{opacity:.45;}
+.breadcrumb .cur{color:var(--ink3);font-weight:500;}
+
+/* LAYOUT */
+.ex-wrap{display:grid;grid-template-columns:252px 1fr;min-height:calc(100vh - 96px);}
+
+/* SIDEBAR */
+.ex-sidebar{background:var(--paper2);border-right:1px solid var(--paper4);padding:28px 20px;overflow-y:auto;}
+.ex-sidebar-sec{margin-bottom:32px;}
+.ex-sec-title{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:12px;display:block;}
+.ex-sec-sub{font-size:11px;color:var(--ink5);margin-bottom:12px;line-height:1.5;}
+
+.iv-pills{display:flex;flex-wrap:wrap;gap:6px;}
+.iv-pill{
+  font-family:var(--mono);font-size:11px;font-weight:600;
+  padding:5px 10px;border-radius:6px;cursor:pointer;user-select:none;
+  border:1px solid var(--paper4);background:var(--paper3);color:var(--ink4);
+  transition:all .14s;
+}
+.iv-pill.on{background:var(--copper);color:#fff;border-color:var(--copper);}
+.iv-pill:hover:not(.on){border-color:var(--copper-lt);color:var(--copper);}
+.iv-all-btn{font-size:11px;color:var(--copper);cursor:pointer;text-decoration:underline;margin-top:9px;display:inline-block;background:none;border:none;font-family:var(--sans);padding:0;}
+
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.stat-box{background:var(--paper);border:1px solid var(--paper4);border-radius:8px;padding:12px 8px;text-align:center;}
+.stat-val{font-family:var(--mono);font-size:24px;font-weight:600;color:var(--ink);line-height:1;}
+.stat-lbl{font-size:9px;color:var(--ink5);margin-top:4px;letter-spacing:.08em;text-transform:uppercase;}
+.reset-btn{width:100%;margin-top:10px;padding:8px;border:1px solid var(--paper4);background:transparent;border-radius:7px;font-size:11px;color:var(--ink5);cursor:pointer;font-family:var(--sans);transition:all .15s;letter-spacing:.04em;}
+.reset-btn:hover{border-color:var(--red);color:var(--red);}
+
+.mode-btns{display:flex;flex-direction:column;gap:6px;}
+.mode-btn{padding:9px 12px;border-radius:7px;border:1px solid var(--paper4);background:var(--paper3);font-size:12px;font-weight:500;color:var(--ink4);cursor:pointer;font-family:var(--sans);text-align:left;transition:all .14s;}
+.mode-btn.on{background:var(--ink2);color:var(--paper);border-color:var(--ink2);}
+.mode-btn:hover:not(.on){border-color:var(--copper);color:var(--copper);}
+
+/* MAIN */
+.ex-main{padding:28px 36px;display:flex;flex-direction:column;gap:18px;}
+
+/* START SCREEN */
+.ex-start{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:80px 40px;gap:20px;flex:1;
+}
+.ex-start-title{font-family:var(--serif);font-size:clamp(40px,5vw,64px);font-weight:700;color:var(--ink);letter-spacing:-.025em;line-height:1.0;}
+.ex-start-title em{font-style:italic;color:var(--copper);}
+.ex-start-sub{font-size:15px;color:var(--ink4);max-width:440px;line-height:1.75;}
+.ex-start-hint{font-size:13px;color:var(--ink5);max-width:400px;line-height:1.6;}
+.ex-start-btn{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:14px;font-weight:600;padding:14px 32px;border-radius:10px;border:none;cursor:pointer;font-family:var(--sans);transition:background .2s;margin-top:8px;}
+.ex-start-btn:hover{background:var(--copper-dk);}
+
+/* QUESTION CARD */
+.ex-question{
+  background:#100a04;border-radius:14px;
+  padding:24px 32px;
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+  flex-shrink:0;
+}
+.ex-q-label{font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:rgba(250,246,240,.3);margin-bottom:6px;}
+.ex-interval-name{font-family:var(--serif);font-size:clamp(28px,3.5vw,44px);font-weight:700;color:var(--paper);line-height:1;letter-spacing:-.02em;margin-bottom:6px;}
+.ex-interval-semi{font-family:var(--mono);font-size:12px;color:var(--copper-lt);letter-spacing:.06em;}
+.ex-q-divider{width:1px;height:64px;background:rgba(250,246,240,.08);flex-shrink:0;}
+.ex-root-wrap{text-align:center;min-width:72px;}
+.ex-root-label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(250,246,240,.28);margin-bottom:4px;}
+.ex-root-note{font-family:var(--mono);font-size:36px;font-weight:700;color:var(--copper-lt);line-height:1;}
+
+/* FRETBOARD */
+.ex-fretboard{background:#100a04;border-radius:14px;padding:20px 20px 14px;overflow-x:auto;flex-shrink:0;}
+.ex-fb-hint{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(250,246,240,.22);margin-bottom:14px;}
+
+/* FEEDBACK */
+.ex-feedback{
+  min-height:44px;padding:11px 18px;border-radius:9px;
+  font-size:13px;font-weight:600;
+  display:flex;align-items:center;gap:10px;
+  transition:opacity .18s;
+  flex-shrink:0;
+}
+.ex-feedback.hidden{opacity:0;pointer-events:none;background:transparent;border:1px solid transparent;}
+.ex-feedback.correct{background:rgba(42,157,110,.1);color:var(--green);border:1px solid rgba(42,157,110,.22);opacity:1;}
+.ex-feedback.wrong{background:rgba(192,57,43,.08);color:var(--red);border:1px solid rgba(192,57,43,.18);opacity:1;}
+.fb-icon{font-size:18px;line-height:1;}
+
+/* CONTROLS */
+.ex-controls{display:flex;gap:10px;align-items:center;flex-shrink:0;}
+.ex-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:var(--sans);transition:all .16s;}
+.ex-btn-listen{background:rgba(160,92,32,.1);color:var(--copper);border:1px solid rgba(160,92,32,.22);}
+.ex-btn-listen:hover{background:rgba(160,92,32,.18);}
+.ex-btn-next{background:var(--copper);color:#fff;}
+.ex-btn-next:hover{background:var(--copper-dk);}
+
+/* STREAK */
+.ex-streak{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:5px;}
+.ex-streak-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink5);}
+.ex-streak-bar{display:flex;gap:3px;}
+.ex-streak-dot{width:7px;height:7px;border-radius:50%;background:var(--paper4);transition:background .2s,transform .15s;}
+.ex-streak-dot.on{background:var(--copper);transform:scale(1.2);}
+
+/* NAME-THE-INTERVAL MODE */
+.nti-options{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;}
+.nti-btn{
+  padding:12px 10px;border-radius:8px;border:1px solid var(--paper4);
+  background:var(--paper2);font-size:13px;font-weight:500;color:var(--ink3);
+  cursor:pointer;font-family:var(--sans);text-align:center;transition:all .14s;
+  font-family:var(--serif);font-size:16px;
+}
+.nti-btn:hover:not(:disabled){border-color:var(--copper);color:var(--copper);}
+.nti-btn.correct{background:rgba(42,157,110,.12);border-color:var(--green);color:var(--green);}
+.nti-btn.wrong{background:rgba(192,57,43,.08);border-color:var(--red);color:var(--red);}
+.nti-btn:disabled{cursor:default;}
+
+@media(max-width:900px){
+  nav{padding:0 20px;}
+  .breadcrumb{padding:0 20px;}
+  .ex-wrap{grid-template-columns:1fr;}
+  .ex-sidebar{border-right:none;border-bottom:1px solid var(--paper4);}
+  .ex-main{padding:20px 16px;}
+  .ex-question{flex-wrap:wrap;gap:14px;}
+  .ex-q-divider{display:none;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">guitarra<span>.cool</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica/intervalos" class="nav-link active">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/herramientas" class="nav-cta">Herramientas →</a>
+</nav>
+
+<div class="breadcrumb">
+  <a href="/">Inicio</a>
+  <span class="sep">·</span>
+  <span>Práctica</span>
+  <span class="sep">·</span>
+  <span class="cur">Intervalos en la guitarra</span>
+</div>
+
+<div class="ex-wrap">
+
+  <!-- ── SIDEBAR ── -->
+  <aside class="ex-sidebar">
+
+    <div class="ex-sidebar-sec">
+      <span class="ex-sec-title">Modo</span>
+      <div class="mode-btns">
+        <button class="mode-btn on" id="mode-find" onclick="setMode('find')">
+          Encuentra la nota
+          <div style="font-size:10px;font-weight:400;color:inherit;opacity:.65;margin-top:2px">Se muestra la raíz, encuentra el intervalo</div>
+        </button>
+        <button class="mode-btn" id="mode-name" onclick="setMode('name')">
+          Nombra el intervalo
+          <div style="font-size:10px;font-weight:400;color:inherit;opacity:.65;margin-top:2px">Se muestran dos notas, identifica la distancia</div>
+        </button>
+      </div>
+    </div>
+
+    <div class="ex-sidebar-sec">
+      <span class="ex-sec-title">Intervalos activos</span>
+      <p class="ex-sec-sub">Elige cuáles practicar</p>
+      <div class="iv-pills" id="iv-pills"></div>
+      <button class="iv-all-btn" onclick="toggleAll()">Seleccionar todos</button>
+    </div>
+
+    <div class="ex-sidebar-sec">
+      <span class="ex-sec-title">Estadísticas</span>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-val" id="stat-correct">0</div><div class="stat-lbl">Correctas</div></div>
+        <div class="stat-box"><div class="stat-val" id="stat-total">0</div><div class="stat-lbl">Total</div></div>
+        <div class="stat-box"><div class="stat-val" id="stat-pct">—</div><div class="stat-lbl">Precisión</div></div>
+        <div class="stat-box"><div class="stat-val" id="stat-best">0</div><div class="stat-lbl">Mejor racha</div></div>
+      </div>
+      <button class="reset-btn" onclick="resetStats()">Reiniciar estadísticas</button>
+    </div>
+
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <main class="ex-main">
+
+    <!-- Start screen -->
+    <div class="ex-start" id="start-screen">
+      <div class="ex-start-title">Practica<br><em>intervalos</em></div>
+      <p class="ex-start-sub">Aparecerá una nota raíz en el diapasón. Haz clic en la nota que forma el intervalo pedido.</p>
+      <p class="ex-start-hint">Puedes elegir qué intervalos practicar y cambiar el modo de ejercicio desde el panel izquierdo.</p>
+      <button class="ex-start-btn" onclick="startExercise()">Comenzar ejercicio →</button>
+    </div>
+
+    <!-- Exercise (hidden until start) -->
+    <div id="exercise" style="display:none;flex-direction:column;gap:18px;">
+
+      <!-- Question -->
+      <div class="ex-question" id="question-card">
+        <div>
+          <div class="ex-q-label" id="q-label">Encuentra la nota a una</div>
+          <div class="ex-interval-name" id="q-interval-name">Quinta justa</div>
+          <div class="ex-interval-semi" id="q-interval-semi">+7 semitonos</div>
+        </div>
+        <div class="ex-q-divider"></div>
+        <div class="ex-root-wrap" id="root-wrap">
+          <div class="ex-root-label">Nota raíz</div>
+          <div class="ex-root-note" id="q-root-note">A</div>
+        </div>
+      </div>
+
+      <!-- Fretboard -->
+      <div class="ex-fretboard">
+        <div class="ex-fb-hint" id="fb-hint">Haz clic en la nota correcta</div>
+        <div id="fretboard"></div>
+      </div>
+
+      <!-- NTI options (hidden in find mode) -->
+      <div class="nti-options" id="nti-options" style="display:none"></div>
+
+      <!-- Feedback -->
+      <div class="ex-feedback hidden" id="feedback">
+        <span class="fb-icon" id="fb-icon"></span>
+        <span id="fb-text"></span>
+      </div>
+
+      <!-- Controls -->
+      <div class="ex-controls">
+        <button class="ex-btn ex-btn-listen" onclick="listenInterval()">▶ Escuchar</button>
+        <button class="ex-btn ex-btn-next" onclick="nextQuestion()">Siguiente →</button>
+        <div class="ex-streak">
+          <span class="ex-streak-label" id="streak-label">Racha: 0</span>
+          <div class="ex-streak-bar" id="streak-bar"></div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+// ── Data ───────────────────────────────────────────────────────────────
+const OPEN = [40,45,50,55,59,64]; // E2 A2 D3 G3 B3 E4 (string 6→1)
+const NOTE_NAMES = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+const APC = ['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'];
+const INTERVALS = [
+  {semi:1,  name:'Segunda menor',  abbr:'2m'},
+  {semi:2,  name:'Segunda mayor',  abbr:'2M'},
+  {semi:3,  name:'Tercera menor',  abbr:'3m'},
+  {semi:4,  name:'Tercera mayor',  abbr:'3M'},
+  {semi:5,  name:'Cuarta justa',   abbr:'4J'},
+  {semi:6,  name:'Tritono',        abbr:'TT'},
+  {semi:7,  name:'Quinta justa',   abbr:'5J'},
+  {semi:8,  name:'Sexta menor',    abbr:'6m'},
+  {semi:9,  name:'Sexta mayor',    abbr:'6M'},
+  {semi:10, name:'Séptima menor',  abbr:'7m'},
+  {semi:11, name:'Séptima mayor',  abbr:'7M'},
+  {semi:12, name:'Octava',         abbr:'8ª'},
+];
+
+// ── State ──────────────────────────────────────────────────────────────
+const S = {
+  mode: 'find',          // 'find' | 'name'
+  rootStr:0, rootFret:0, rootMidi:0,
+  noteAStr:0, noteAFret:0, noteBStr:0, noteBFret:0, // for 'name' mode
+  targetSemi:0, targetMidi:0, targetName:'',
+  correctPositions:[],
+  answered:false,
+  score:0, streak:0, bestStreak:0, total:0,
+  active: new Set([1,2,3,4,5,6,7,8,9,10,11,12]),
+  nextTimer:null,
+};
+
+// ── Audio ──────────────────────────────────────────────────────────────
+let synth = null;
+async function initAudio() {
+  if (synth) return;
+  await Tone.start();
+  synth = new Tone.PolySynth(Tone.Synth, {
+    oscillator: {type:'triangle'},
+    envelope: {attack:0.02, decay:0.12, sustain:0.45, release:1.8}
+  }).toDestination();
+}
+function midi2note(midi) {
+  return `${APC[midi%12]}${Math.floor(midi/12)}`;
+}
+async function playMidi(midi, when, dur='2n') {
+  if (!synth) return;
+  synth.triggerAttackRelease(midi2note(midi), dur, when);
+}
+async function listenInterval() {
+  await initAudio();
+  const now = Tone.now();
+  playMidi(S.rootMidi, now+0.05, '4n');
+  playMidi(S.targetMidi, now+0.85, '4n');
+}
+
+// ── Mode toggle ────────────────────────────────────────────────────────
+function setMode(mode) {
+  S.mode = mode;
+  document.getElementById('mode-find').classList.toggle('on', mode==='find');
+  document.getElementById('mode-name').classList.toggle('on', mode==='name');
+  if (S.nextTimer) { clearTimeout(S.nextTimer); S.nextTimer=null; }
+  newQuestion();
+}
+
+// ── Pills ──────────────────────────────────────────────────────────────
+function buildPills() {
+  const c = document.getElementById('iv-pills');
+  c.innerHTML = '';
+  INTERVALS.forEach(iv => {
+    const el = document.createElement('div');
+    el.className = 'iv-pill' + (S.active.has(iv.semi) ? ' on' : '');
+    el.textContent = iv.abbr;
+    el.title = iv.name;
+    el.onclick = () => {
+      if (S.active.has(iv.semi)) {
+        if (S.active.size > 1) { S.active.delete(iv.semi); el.classList.remove('on'); }
+      } else {
+        S.active.add(iv.semi); el.classList.add('on');
+      }
+    };
+    c.appendChild(el);
+  });
+}
+function toggleAll() {
+  const allOn = S.active.size === INTERVALS.length;
+  S.active = allOn ? new Set([INTERVALS[0].semi]) : new Set(INTERVALS.map(i=>i.semi));
+  buildPills();
+}
+
+// ── Stats ──────────────────────────────────────────────────────────────
+function updateStats() {
+  document.getElementById('stat-correct').textContent = S.score;
+  document.getElementById('stat-total').textContent = S.total;
+  document.getElementById('stat-pct').textContent = S.total>0 ? Math.round(S.score/S.total*100)+'%' : '—';
+  document.getElementById('stat-best').textContent = S.bestStreak;
+}
+function resetStats() {
+  S.score=0; S.streak=0; S.bestStreak=0; S.total=0;
+  updateStats(); updateStreak();
+}
+function updateStreak() {
+  document.getElementById('streak-label').textContent = `Racha: ${S.streak}`;
+  const bar = document.getElementById('streak-bar');
+  bar.innerHTML = '';
+  for (let i=0; i<10; i++) {
+    const d = document.createElement('div');
+    d.className = 'ex-streak-dot' + (i < (S.streak%10||S.streak&&S.streak%10===0?10:S.streak%10) ? ' on':'');
+    bar.appendChild(d);
+  }
+}
+
+// ── Feedback ───────────────────────────────────────────────────────────
+function showFeedback(correct, text) {
+  const fb = document.getElementById('feedback');
+  fb.className = 'ex-feedback ' + (correct ? 'correct' : 'wrong');
+  document.getElementById('fb-icon').textContent = correct ? '✓' : '✗';
+  document.getElementById('fb-text').textContent = text;
+}
+function hideFeedback() {
+  document.getElementById('feedback').className = 'ex-feedback hidden';
+}
+
+// ── FIND MODE ──────────────────────────────────────────────────────────
+function pickQuestion() {
+  const active = INTERVALS.filter(i => S.active.has(i.semi));
+  if (!active.length) return null;
+  return active[Math.floor(Math.random() * active.length)];
+}
+
+function newQuestion() {
+  if (S.nextTimer) { clearTimeout(S.nextTimer); S.nextTimer=null; }
+  S.answered = false;
+  hideFeedback();
+
+  const iv = pickQuestion();
+  if (!iv) return;
+  S.targetSemi = iv.semi;
+  S.targetName = iv.name;
+
+  if (S.mode === 'find') {
+    newFindQuestion(iv);
+  } else {
+    newNameQuestion(iv);
+  }
+}
+
+function newFindQuestion(iv) {
+  // Pick root with reachable target
+  let tries = 0;
+  while (tries++ < 300) {
+    const s = Math.floor(Math.random()*6);
+    const f = Math.floor(Math.random()*10); // root at fret 0-9
+    const rootMidi = OPEN[s]+f;
+    const targetMidi = rootMidi + iv.semi;
+    const exists = OPEN.some((o,si) => { const tf=targetMidi-o; return tf>=0&&tf<=12; });
+    if (exists) {
+      S.rootStr=s; S.rootFret=f; S.rootMidi=rootMidi; S.targetMidi=targetMidi;
+      break;
+    }
+  }
+  // All correct positions
+  S.correctPositions = [];
+  OPEN.forEach((o,s) => { const f=S.targetMidi-o; if(f>=0&&f<=12) S.correctPositions.push({s,f}); });
+
+  // UI
+  document.getElementById('q-label').textContent = 'Encuentra la nota a una';
+  document.getElementById('q-interval-name').textContent = iv.name;
+  document.getElementById('q-interval-semi').textContent = `+${iv.semi} semitono${iv.semi>1?'s':''}`;
+  document.getElementById('root-wrap').style.display = '';
+  document.getElementById('q-root-note').textContent = NOTE_NAMES[S.rootMidi%12];
+  document.getElementById('fb-hint').textContent = 'Haz clic en la nota correcta';
+  document.getElementById('nti-options').style.display = 'none';
+
+  drawFretboard(null, false);
+}
+
+function handleFindClick(s, f) {
+  if (S.answered) return;
+  S.answered = true;
+  S.total++;
+  const ok = S.correctPositions.some(p => p.s===s && p.f===f);
+  if (ok) {
+    S.score++; S.streak++;
+    if (S.streak > S.bestStreak) S.bestStreak = S.streak;
+    showFeedback(true, `¡Correcto! Es ${NOTE_NAMES[S.targetMidi%12]}.`);
+  } else {
+    S.streak = 0;
+    showFeedback(false, `Incorrecto. Las posiciones correctas están en verde.`);
+  }
+  updateStats(); updateStreak();
+  drawFretboard({s,f}, ok);
+  initAudio().then(() => {
+    const now = Tone.now();
+    playMidi(S.rootMidi, now+0.05, '8n');
+    playMidi(S.targetMidi, now+0.55, '4n');
+  });
+  S.nextTimer = setTimeout(newQuestion, 2400);
+}
+
+// ── NAME MODE ──────────────────────────────────────────────────────────
+function newNameQuestion(iv) {
+  // Pick two notes separated by iv.semi, both on fretboard
+  let tries=0;
+  while(tries++<300) {
+    const sA = Math.floor(Math.random()*6);
+    const fA = Math.floor(Math.random()*10);
+    const midiA = OPEN[sA]+fA;
+    const midiB = midiA + iv.semi;
+    // Find a position for B (prefer different string)
+    const posB = [];
+    OPEN.forEach((o,s) => { const f=midiB-o; if(f>=0&&f<=12) posB.push({s,f}); });
+    if (posB.length > 0) {
+      const pb = posB[Math.floor(Math.random()*posB.length)];
+      S.noteAStr=sA; S.noteAFret=fA; S.rootMidi=midiA;
+      S.noteBStr=pb.s; S.noteBFret=pb.f; S.targetMidi=midiB;
+      S.rootStr=sA; S.rootFret=fA;
+      S.correctPositions=[{s:pb.s,f:pb.f}];
+      break;
+    }
+  }
+
+  // Build 4 answer options: correct + 3 distractors
+  const correctIv = iv;
+  const distractors = INTERVALS.filter(i=>i.semi!==iv.semi);
+  const shuffled = distractors.sort(()=>Math.random()-.5).slice(0,3);
+  const options = [correctIv, ...shuffled].sort(()=>Math.random()-.5);
+
+  // UI
+  document.getElementById('q-label').textContent = '¿Qué intervalo forman estas dos notas?';
+  document.getElementById('q-interval-name').textContent = `${NOTE_NAMES[S.rootMidi%12]} · ${NOTE_NAMES[S.targetMidi%12]}`;
+  document.getElementById('q-interval-semi').textContent = 'Identifica la distancia entre ellas';
+  document.getElementById('root-wrap').style.display = 'none';
+  document.getElementById('fb-hint').textContent = 'Las dos notas están marcadas en el diapasón';
+
+  const ntiDiv = document.getElementById('nti-options');
+  ntiDiv.style.display = 'grid';
+  ntiDiv.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'nti-btn';
+    btn.textContent = opt.name;
+    btn.onclick = () => handleNameClick(opt, btn, options, ntiDiv);
+    ntiDiv.appendChild(btn);
+  });
+
+  drawFretboard(null, false, true);
+}
+
+function handleNameClick(opt, btn, options, ntiDiv) {
+  if (S.answered) return;
+  S.answered = true;
+  S.total++;
+  const ok = opt.semi === S.targetSemi;
+  if (ok) {
+    S.score++; S.streak++;
+    if (S.streak > S.bestStreak) S.bestStreak = S.streak;
+    btn.classList.add('correct');
+    showFeedback(true, `¡Correcto! ${opt.semi} semitono${opt.semi>1?'s':''}.`);
+  } else {
+    S.streak = 0;
+    btn.classList.add('wrong');
+    // Mark correct answer
+    Array.from(ntiDiv.children).forEach(b => {
+      const name = b.textContent;
+      const iv = INTERVALS.find(i=>i.name===name);
+      if (iv && iv.semi === S.targetSemi) b.classList.add('correct');
+    });
+    showFeedback(false, `Incorrecto. Era ${S.targetName} (+${S.targetSemi}st).`);
+  }
+  Array.from(ntiDiv.children).forEach(b => b.disabled = true);
+  updateStats(); updateStreak();
+  initAudio().then(() => {
+    const now = Tone.now();
+    playMidi(S.rootMidi, now+0.05, '8n');
+    playMidi(S.targetMidi, now+0.6, '4n');
+  });
+  S.nextTimer = setTimeout(newQuestion, 2600);
+}
+
+// ── Fretboard SVG ──────────────────────────────────────────────────────
+const VW=720, VH=172, NX=58, FA=VW-NX-14, FW=FA/12;
+const ST=18, SB=VH-18, SG=(SB-ST)/5;
+
+function fx(f){ return f===0 ? 26 : NX+(f-0.5)*FW; }
+function sy(s){ return ST+s*SG; }
+
+function drawFretboard(clicked, clickedOk, nameMode=false) {
+  let s_ = `<svg viewBox="0 0 ${VW} ${VH}" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:${VW}px;height:auto;display:block">`;
+
+  // Defs
+  s_ += `<defs>
+    <filter id="glow-root" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="blur"/>
+      <feFlood flood-color="#c07830" flood-opacity=".55" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-green" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="blur"/>
+      <feFlood flood-color="#2a9d6e" flood-opacity=".5" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="sh"/>
+      <feMerge><feMergeNode in="sh"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>`;
+
+  // Position dots
+  [3,5,7,9].forEach(f => {
+    s_ += `<circle cx="${NX+(f-0.5)*FW}" cy="${VH/2}" r="4.5" fill="rgba(250,246,240,.045)"/>`;
+  });
+  [sy(1.5),sy(3.5)].forEach(y => {
+    s_ += `<circle cx="${NX+11.5*FW}" cy="${y}" r="4.5" fill="rgba(250,246,240,.045)"/>`;
+  });
+
+  // Nut
+  s_ += `<rect x="${NX}" y="${ST-5}" width="3.5" height="${SB-ST+10}" fill="rgba(250,246,240,.48)" rx="1.5"/>`;
+
+  // Frets
+  for (let f=1; f<=12; f++) {
+    const x = NX+f*FW;
+    s_ += `<line x1="${x}" y1="${ST-5}" x2="${x}" y2="${SB+5}" stroke="rgba(250,246,240,.16)" stroke-width="1.5"/>`;
+  }
+
+  // Strings
+  for (let s=0; s<6; s++) {
+    const y=sy(s), th=2.6-s*0.34;
+    s_ += `<line x1="8" y1="${y}" x2="${VW-6}" y2="${y}" stroke="rgba(192,120,48,${0.48-s*0.05})" stroke-width="${th}"/>`;
+  }
+
+  // Fret numbers
+  [3,5,7,9,12].forEach(f => {
+    s_ += `<text x="${NX+(f-0.5)*FW}" y="${VH-2}" text-anchor="middle" fill="rgba(250,246,240,.2)" font-size="10" font-family="DM Mono,monospace">${f}</text>`;
+  });
+
+  // Notes
+  for (let str=0; str<6; str++) {
+    for (let f=0; f<=12; f++) {
+      const x=fx(f), y=sy(str), midi=OPEN[str]+f;
+      const isRoot  = str===S.rootStr && f===S.rootFret;
+      const isNoteB = nameMode && str===S.noteBStr && f===S.noteBFret;
+      const isCorrPos = S.correctPositions.some(p=>p.s===str&&p.f===f);
+      const isClicked = clicked && clicked.s===str && clicked.f===f;
+
+      if (isRoot) {
+        s_ += `<circle cx="${x}" cy="${y}" r="13" fill="#a05c20" filter="url(#glow-root)"/>`;
+        s_ += `<text x="${x}" y="${y+4.5}" text-anchor="middle" fill="#fff" font-size="11" font-weight="700" font-family="DM Mono,monospace">${NOTE_NAMES[midi%12]}</text>`;
+      } else if (nameMode && isNoteB) {
+        // Second note in name mode
+        s_ += `<circle cx="${x}" cy="${y}" r="13" fill="#c07830" filter="url(#glow-root)" opacity=".85"/>`;
+        s_ += `<text x="${x}" y="${y+4.5}" text-anchor="middle" fill="#fff" font-size="11" font-weight="700" font-family="DM Mono,monospace">${NOTE_NAMES[midi%12]}</text>`;
+      } else if (S.answered && isCorrPos) {
+        s_ += `<circle cx="${x}" cy="${y}" r="12" fill="#2a9d6e" filter="url(#glow-green)"/>`;
+        s_ += `<text x="${x}" y="${y+4}" text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="DM Mono,monospace">${NOTE_NAMES[midi%12]}</text>`;
+      } else if (S.answered && isClicked && !clickedOk) {
+        s_ += `<circle cx="${x}" cy="${y}" r="12" fill="#c0392b"/>`;
+        s_ += `<text x="${x}" y="${y+5}" text-anchor="middle" fill="#fff" font-size="13" font-weight="700" font-family="DM Mono,monospace">✗</text>`;
+      } else if (!S.answered && S.mode==='find') {
+        s_ += `<circle cx="${x}" cy="${y}" r="12" fill="rgba(255,255,255,.02)" stroke="rgba(255,255,255,.07)" stroke-width="1" style="cursor:pointer" onclick="handleFindClick(${str},${f})"/>`;
+      }
+    }
+  }
+
+  s_ += '</svg>';
+  document.getElementById('fretboard').innerHTML = s_;
+}
+
+// ── Init ───────────────────────────────────────────────────────────────
+function startExercise() {
+  document.getElementById('start-screen').style.display = 'none';
+  const ex = document.getElementById('exercise');
+  ex.style.display = 'flex';
+  ex.style.flexDirection = 'column';
+  newQuestion();
+}
+
+buildPills();
+updateStats();
+updateStreak();
+</script>
+</body>
+</html>
