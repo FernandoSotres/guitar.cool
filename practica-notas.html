@@ -104,6 +104,12 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,246,240,.94);backdrop-
 .ex-fretboard{background:#100a04;border-radius:14px;padding:20px 20px 14px;overflow-x:auto;flex-shrink:0;}
 .ex-fb-hint{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(250,246,240,.22);margin-bottom:14px;}
 
+/* VIEW TOGGLE */
+.view-toggle{display:flex;gap:4px;margin-bottom:14px;}
+.vt-btn{padding:5px 14px;border-radius:5px;border:1px solid rgba(250,246,240,.14);background:transparent;font-size:11px;font-weight:600;color:rgba(250,246,240,.32);cursor:pointer;font-family:var(--sans);transition:all .14s;letter-spacing:.04em;}
+.vt-btn.on{background:rgba(250,246,240,.1);color:rgba(250,246,240,.68);border-color:rgba(250,246,240,.22);}
+.vt-btn:hover:not(.on){color:rgba(250,246,240,.5);}
+
 /* IDENTIFY OPTIONS */
 .id-options{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;flex-shrink:0;}
 .id-btn{padding:14px 8px;border-radius:8px;border:1px solid var(--paper4);background:var(--paper2);font-size:18px;font-weight:700;color:var(--ink3);cursor:pointer;font-family:var(--mono);text-align:center;transition:all .14s;letter-spacing:.02em;}
@@ -247,6 +253,10 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,246,240,.94);backdrop-
       <!-- Fretboard -->
       <div class="ex-fretboard">
         <div class="ex-fb-hint" id="fb-hint">Haz clic en todas las posiciones de esa nota dentro de la zona</div>
+        <div class="view-toggle">
+          <button class="vt-btn on" id="vt-guitar" onclick="setView('guitar')">Guitarra</button>
+          <button class="vt-btn" id="vt-piano" onclick="setView('piano')">Piano</button>
+        </div>
         <div id="fretboard"></div>
       </div>
 
@@ -298,11 +308,13 @@ const ZONES = [
 // ── State ──────────────────────────────────────────────────────────────
 const S = {
   mode: 'find',
-  targetPc: 0,         // pitch class of target note
-  targetPositions: [], // all positions of note in zone
+  view: 'guitar',
+  piano: {},
+  targetPc: 0,
+  targetPositions: [],
   foundPositions: [],
   wrongSet: new Set(),
-  nameStr: 0, nameFret: 0,  // for name mode
+  nameStr: 0, nameFret: 0,
   answered: false, revealed: false,
   score:0, streak:0, bestStreak:0, total:0,
   activeZone: 'z1',
@@ -329,12 +341,148 @@ async function playMidi(midi, when='now', dur='2n') {
 async function listenNote() {
   await initAudio();
   if (S.mode === 'find') {
-    // Play the target note on open string 3 (G) for reference
-    const midi = 55 + S.targetPc - ((55 + S.targetPc > 67) ? 12 : 0);
-    playMidi(midi < 55 ? midi + 12 : midi);
+    if (S.view==='piano' && S.piano && S.piano.targetMidis && S.piano.targetMidis.length>0) {
+      playMidi(S.piano.targetMidis[0]);
+    } else {
+      const midi = 55 + S.targetPc - ((55 + S.targetPc > 67) ? 12 : 0);
+      playMidi(midi < 55 ? midi + 12 : midi);
+    }
   } else {
-    playMidi(OPEN[S.nameStr] + S.nameFret);
+    if (S.view==='piano' && S.piano && S.piano.targetMidi) {
+      playMidi(S.piano.targetMidi);
+    } else {
+      playMidi(OPEN[S.nameStr] + S.nameFret);
+    }
   }
+}
+
+// ── View toggle ────────────────────────────────────────────────────────
+function setView(v) {
+  S.view = v;
+  document.getElementById('vt-guitar').classList.toggle('on', v==='guitar');
+  document.getElementById('vt-piano').classList.toggle('on', v==='piano');
+  if (S.nextTimer) { clearTimeout(S.nextTimer); S.nextTimer=null; }
+  newQuestion();
+}
+function draw(...args) {
+  if (S.view==='piano') drawKeyboard();
+  else drawFretboard(...args);
+}
+
+// ── Piano constants ────────────────────────────────────────────────────
+const PK_S=48,PK_E=71,PK_OCT=2;
+const PKW=720,PKH=200;
+const WK_PC=[0,2,4,5,7,9,11];
+const BK_MAP={1:0.67,3:1.67,6:3.67,8:4.67,10:5.67};
+const WKW=PKW/(7*PK_OCT);
+const WKH=160,BKW=30,BKH=100;
+const pianoWrong={};
+
+function drawKeyboard() {
+  let svg = `<svg viewBox="0 0 ${PKW} ${PKH}" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:${PKW}px;height:auto;display:block">`;
+
+  const whiteKeys = [];
+  let wIdx = 0;
+  for (let midi = PK_S; midi <= PK_E; midi++) {
+    const pc = midi % 12;
+    if (WK_PC.includes(pc)) { whiteKeys.push({midi, wIdx}); wIdx++; }
+  }
+
+  for (const {midi, wIdx: wi} of whiteKeys) {
+    const x = wi * WKW;
+    const pc = midi % 12;
+    let fill = '#ede8e0';
+    let textFill = '#555';
+    let label = '';
+    let clickable = false;
+    let dimmed = false;
+
+    const isFound = S.piano && S.piano.foundMidis && S.piano.foundMidis.includes(midi);
+    const isWrong = pianoWrong[midi];
+    const isTarget = S.piano && S.piano.targetMidis && S.piano.targetMidis.includes(midi);
+    const isNameTarget = S.piano && S.piano.targetMidi===midi;
+
+    if (S.mode==='find') {
+      if (isFound) {
+        fill = '#2a9d6e'; textFill='#fff'; label = NOTE_NAMES[pc];
+      } else if (isWrong) {
+        fill = '#c0392b'; textFill='#fff'; label = '✗';
+      } else if (isTarget && !S.answered) {
+        clickable = true;
+      } else if (!isTarget) {
+        dimmed = true;
+      }
+    } else {
+      // name mode
+      if (isNameTarget) {
+        fill = '#a05c20'; textFill='#fff';
+        label = S.answered ? NOTE_NAMES[pc] : '?';
+      } else {
+        dimmed = true;
+      }
+    }
+
+    if (dimmed) fill = '#d8d0c8';
+    const onclick = clickable ? `onclick="handlePianoClick(${midi})"` : '';
+    const cursor = clickable ? 'cursor:pointer;' : '';
+    svg += `<rect x="${x+1.5}" y="14" width="${WKW-3}" height="${WKH}" rx="3" fill="${fill}" stroke="#bbb" stroke-width="1" style="${cursor}" ${onclick}/>`;
+
+    if (pc===0) {
+      svg += `<text x="${x+WKW/2}" y="${14+WKH-8}" text-anchor="middle" fill="rgba(80,50,20,.35)" font-size="9" font-family="DM Mono,monospace">C${Math.floor(midi/12)}</text>`;
+    }
+    if (label) {
+      svg += `<text x="${x+WKW/2}" y="${14+WKH-24}" text-anchor="middle" fill="${textFill}" font-size="11" font-weight="700" font-family="DM Mono,monospace">${label}</text>`;
+    }
+  }
+
+  for (let midi = PK_S; midi <= PK_E; midi++) {
+    const pc = midi % 12;
+    if (!BK_MAP.hasOwnProperty(pc)) continue;
+    const octaveOffset = Math.floor((midi - PK_S) / 12);
+    const posInOct = BK_MAP[pc];
+    const x = (octaveOffset * 7 + posInOct) * WKW - BKW/2;
+
+    let fill = '#14100a';
+    let textFill = '#fff';
+    let label = '';
+    let clickable = false;
+    let dimmed = false;
+
+    const isFound = S.piano && S.piano.foundMidis && S.piano.foundMidis.includes(midi);
+    const isWrong = pianoWrong[midi];
+    const isTarget = S.piano && S.piano.targetMidis && S.piano.targetMidis.includes(midi);
+    const isNameTarget = S.piano && S.piano.targetMidi===midi;
+
+    if (S.mode==='find') {
+      if (isFound) {
+        fill = '#186642'; label = NOTE_NAMES[pc];
+      } else if (isWrong) {
+        fill = '#7a1a10'; label = '✗';
+      } else if (isTarget && !S.answered) {
+        clickable = true;
+      } else if (!isTarget) {
+        dimmed = true;
+      }
+    } else {
+      if (isNameTarget) {
+        fill = '#7a4010';
+        label = S.answered ? NOTE_NAMES[pc] : '?';
+      } else {
+        dimmed = true;
+      }
+    }
+
+    if (dimmed) fill = '#3a3530';
+    const onclick = clickable ? `onclick="handlePianoClick(${midi})"` : '';
+    const cursor = clickable ? 'cursor:pointer;' : '';
+    svg += `<rect x="${x}" y="14" width="${BKW}" height="${BKH}" rx="3" fill="${fill}" style="${cursor}" ${onclick}/>`;
+    if (label) {
+      svg += `<text x="${x+BKW/2}" y="${14+BKH-8}" text-anchor="middle" fill="${textFill}" font-size="9" font-weight="700" font-family="DM Mono,monospace">${label}</text>`;
+    }
+  }
+
+  svg += '</svg>';
+  document.getElementById('fretboard').innerHTML = svg;
 }
 
 // ── Mode ───────────────────────────────────────────────────────────────
@@ -408,10 +556,18 @@ function updateStreak() {
   }
 }
 function updateProgress() {
-  const found = S.foundPositions.length, total = S.targetPositions.length;
-  const pct = total > 0 ? (found/total*100) : 0;
-  document.getElementById('progress-fill').style.width = pct+'%';
-  document.getElementById('progress-text').textContent = `${found} / ${total} posiciones`;
+  if (S.view==='piano' && S.piano && S.piano.targetMidis) {
+    const found = S.piano.foundMidis ? S.piano.foundMidis.length : 0;
+    const total = S.piano.targetMidis.length;
+    const pct = total > 0 ? (found/total*100) : 0;
+    document.getElementById('progress-fill').style.width = pct+'%';
+    document.getElementById('progress-text').textContent = `${found} / ${total} posiciones`;
+  } else {
+    const found = S.foundPositions.length, total = S.targetPositions.length;
+    const pct = total > 0 ? (found/total*100) : 0;
+    document.getElementById('progress-fill').style.width = pct+'%';
+    document.getElementById('progress-text').textContent = `${found} / ${total} posiciones`;
+  }
 }
 function hideFeedback() { document.getElementById('feedback').className='ex-feedback hidden'; }
 function showFeedback(ok, text) {
@@ -436,7 +592,6 @@ function newQuestion() {
 function newFindQuestion() {
   const zone = getZone();
 
-  // Pick a note that exists in active strings within zone
   let targetPc, positions, tries = 0;
   while (tries++ < 100) {
     targetPc = Math.floor(Math.random()*12);
@@ -466,8 +621,14 @@ function newFindQuestion() {
   document.getElementById('id-options').style.display = 'none';
   document.getElementById('progress-wrap').style.display = '';
 
+  if(S.view==='piano') {
+    S.piano={targetPc:S.targetPc, targetMidis:[], foundMidis:[], wrongMidis:new Set()};
+    for(let m=PK_S;m<=PK_E;m++) if(m%12===S.targetPc) S.piano.targetMidis.push(m);
+    document.getElementById('q-sub').textContent = 'Todas sus posiciones en el piano';
+  }
+
   updateProgress();
-  drawFretboard();
+  draw();
 }
 
 function handleFindClick(s, f) {
@@ -504,7 +665,31 @@ function handleFindClick(s, f) {
   }
 
   updateProgress();
-  drawFretboard();
+  draw();
+}
+
+function handlePianoClick(midi) {
+  if(S.mode==='find') {
+    if(S.answered||!S.piano||S.piano.foundMidis.includes(midi)) return;
+    const isT=S.piano.targetMidis.includes(midi);
+    if(isT){
+      S.piano.foundMidis.push(midi);
+      initAudio().then(()=>playMidi(midi,'now','4n'));
+      if(S.piano.foundMidis.length===S.piano.targetMidis.length){
+        S.answered=true;S.total++;
+        const perfect=S.piano.wrongMidis.size===0;
+        if(perfect){S.score++;S.streak++;if(S.streak>S.bestStreak)S.bestStreak=S.streak;showFeedback(true,`¡Perfecto! ${NOTE_NAMES[S.piano.targetPc]} en todas sus posiciones.`);}
+        else{S.streak=0;showFeedback(true,`Completo con ${S.piano.wrongMidis.size} error${S.piano.wrongMidis.size>1?'es':''}.`);}
+        updateStats();updateStreak(); S.nextTimer=setTimeout(newQuestion,2400);
+      }
+    } else {
+      S.piano.wrongMidis.add(midi);
+      pianoWrong[midi]=true; draw();
+      setTimeout(()=>{delete pianoWrong[midi];draw();},500); return;
+    }
+    updateProgress(); draw();
+  }
+  // name mode: clicking disabled, user uses buttons
 }
 
 function revealNote() {
@@ -512,8 +697,14 @@ function revealNote() {
   S.revealed = true; S.answered = true; S.total++;
   S.streak = 0;
   updateStats(); updateStreak();
-  showFeedback(false, `Revelado. ${NOTE_NAMES[S.targetPc]} aparece ${S.targetPositions.length} vez${S.targetPositions.length>1?'ces':''} en esta zona.`);
-  drawFretboard();
+  if (S.view==='piano' && S.piano && S.piano.targetMidis) {
+    showFeedback(false, `Revelado. ${NOTE_NAMES[S.targetPc]} aparece ${S.piano.targetMidis.length} vez${S.piano.targetMidis.length>1?'ces':''} en el piano.`);
+    S.piano.foundMidis = [...S.piano.targetMidis];
+  } else {
+    showFeedback(false, `Revelado. ${NOTE_NAMES[S.targetPc]} aparece ${S.targetPositions.length} vez${S.targetPositions.length>1?'ces':''} en esta zona.`);
+    S.foundPositions = [...S.targetPositions];
+  }
+  draw();
   S.nextTimer = setTimeout(newQuestion, 3000);
 }
 
@@ -521,8 +712,8 @@ const wrongFlash = {};
 function flashWrong(s, f) {
   const key = `${s},${f}`;
   wrongFlash[key] = true;
-  drawFretboard();
-  setTimeout(() => { delete wrongFlash[key]; drawFretboard(); }, 500);
+  draw();
+  setTimeout(() => { delete wrongFlash[key]; draw(); }, 500);
 }
 
 // ── NAME MODE ──────────────────────────────────────────────────────────
@@ -530,7 +721,6 @@ function newNameQuestion() {
   const zone = getZone();
   const strings = Array.from(S.activeStrings);
 
-  // Pick a random position
   const s = strings[Math.floor(Math.random()*strings.length)];
   const fret = zone.fretMin + Math.floor(Math.random()*(zone.fretMax - zone.fretMin + 1));
   const pc = (OPEN[s]+fret) % 12;
@@ -538,7 +728,7 @@ function newNameQuestion() {
   S.nameStr = s; S.nameFret = fret;
   S.targetPc = pc;
   S.targetPositions = [{s,f:fret}];
-  S.foundPositions = [{s,f:fret}]; // show it marked
+  S.foundPositions = [{s,f:fret}];
 
   document.getElementById('q-label').textContent = 'Nombra la nota';
   document.getElementById('q-note').textContent = '?';
@@ -549,9 +739,16 @@ function newNameQuestion() {
   document.getElementById('reveal-btn').style.display = 'none';
   document.getElementById('progress-wrap').style.display = 'none';
 
-  // 4 options: correct + 3 chromatic neighbours (plausible distractors)
-  const others = [...Array(12).keys()].filter(p => p !== pc).sort(() => Math.random()-.5).slice(0,3);
-  const options = [pc, ...others].sort(() => Math.random()-.5);
+  if(S.view==='piano') {
+    const m=PK_S+Math.floor(Math.random()*(PK_E-PK_S+1));
+    S.piano={targetMidi:m, targetPc:m%12, answered:false};
+    document.getElementById('q-note').textContent = '?';
+    document.getElementById('q-sub').textContent = 'Piano · ¿Qué nota es?';
+  }
+
+  const opts_pc = S.view==='piano' ? (S.piano && S.piano.targetPc) : pc;
+  const others = [...Array(12).keys()].filter(p => p !== opts_pc).sort(() => Math.random()-.5).slice(0,3);
+  const options = [opts_pc, ...others].sort(() => Math.random()-.5);
 
   const idDiv = document.getElementById('id-options');
   idDiv.style.display = 'grid';
@@ -560,11 +757,11 @@ function newNameQuestion() {
     const btn = document.createElement('button');
     btn.className = 'id-btn';
     btn.textContent = NOTE_NAMES[optPc];
-    btn.onclick = () => handleNameClick(optPc, btn, idDiv, pc, s, fret);
+    btn.onclick = () => handleNameClick(optPc, btn, idDiv, opts_pc, s, fret);
     idDiv.appendChild(btn);
   });
 
-  drawFretboard();
+  draw();
 }
 
 function handleNameClick(optPc, btn, idDiv, correctPc, s, fret) {
@@ -585,10 +782,14 @@ function handleNameClick(optPc, btn, idDiv, correctPc, s, fret) {
     showFeedback(false, `Incorrecto. Era ${NOTE_NAMES[correctPc]}.`);
   }
   Array.from(idDiv.children).forEach(b => b.disabled = true);
-  // Reveal note name on fretboard
   document.getElementById('q-note').textContent = NOTE_NAMES[correctPc];
-  initAudio().then(() => playMidi(OPEN[s]+fret, 'now', '2n'));
+  if (S.view==='piano' && S.piano) {
+    S.piano.answered = true;
+  }
+  const midiToPlay = S.view==='piano' && S.piano ? S.piano.targetMidi : OPEN[s]+fret;
+  initAudio().then(() => playMidi(midiToPlay, 'now', '2n'));
   updateStats(); updateStreak();
+  draw();
   S.nextTimer = setTimeout(newQuestion, 2600);
 }
 
@@ -596,7 +797,7 @@ function handleNameClick(optPc, btn, idDiv, correctPc, s, fret) {
 const VW=720, VH=172, NX=58, FA=VW-NX-14, FW=FA/12;
 const ST=18, SB=VH-18, SG=(SB-ST)/5;
 function fx(f){ return f===0 ? 26 : NX+(f-0.5)*FW; }
-function sy(s){ return ST+s*SG; }
+function sy(s){ return SB-s*SG; }
 
 function drawFretboard() {
   const zone = getZone();
@@ -604,7 +805,6 @@ function drawFretboard() {
 
   let svg = `<svg viewBox="0 0 ${VW} ${VH}" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:${VW}px;height:auto;display:block">`;
 
-  // Defs
   svg += `<defs>
     <filter id="gr" x="-60%" y="-60%" width="220%" height="220%">
       <feGaussianBlur in="SourceAlpha" stdDeviation="5" result="b"/>
@@ -626,12 +826,10 @@ function drawFretboard() {
     </filter>
   </defs>`;
 
-  // Zone window highlight
   const wx1 = fMin===0 ? 8 : NX+(fMin-1)*FW+2;
   const wx2 = NX+fMax*FW-2;
   svg += `<rect x="${wx1}" y="${ST-6}" width="${wx2-wx1}" height="${SB-ST+12}" rx="4" fill="rgba(255,255,255,.05)"/>`;
 
-  // Position dots
   [3,5,7,9].forEach(f=>{
     if(f>=fMin&&f<=fMax)
       svg+=`<circle cx="${NX+(f-0.5)*FW}" cy="${VH/2}" r="4.5" fill="rgba(250,246,240,.07)"/>`;
@@ -640,30 +838,25 @@ function drawFretboard() {
   });
   [sy(1.5),sy(3.5)].forEach(y=>{svg+=`<circle cx="${NX+11.5*FW}" cy="${y}" r="4.5" fill="${(12>=fMin&&12<=fMax)?'rgba(250,246,240,.07)':'rgba(250,246,240,.03)'}"/>`;});
 
-  // Nut
   svg+=`<rect x="${NX}" y="${ST-5}" width="3.5" height="${SB-ST+10}" fill="rgba(250,246,240,.48)" rx="1.5"/>`;
 
-  // Frets
   for(let f=1;f<=12;f++){
     const x=NX+f*FW;
     const inZone=f>=fMin&&f<=fMax;
     svg+=`<line x1="${x}" y1="${ST-5}" x2="${x}" y2="${SB+5}" stroke="${inZone?'rgba(250,246,240,.22)':'rgba(250,246,240,.1)'}" stroke-width="1.5"/>`;
   }
 
-  // Strings
   for(let s=0;s<6;s++){
     const y=sy(s), th=2.6-s*0.34;
     const active=S.activeStrings.has(s);
     svg+=`<line x1="8" y1="${y}" x2="${VW-6}" y2="${y}" stroke="rgba(192,120,48,${active?(0.48-s*0.05):0.15})" stroke-width="${th}"/>`;
   }
 
-  // Fret numbers
   [3,5,7,9,12].forEach(f=>{
     const inZone=f>=fMin&&f<=fMax;
     svg+=`<text x="${NX+(f-0.5)*FW}" y="${VH-2}" text-anchor="middle" fill="${inZone?'rgba(250,246,240,.45)':'rgba(250,246,240,.15)'}" font-size="10" font-family="DM Mono,monospace">${f}</text>`;
   });
 
-  // Open string labels (only if zone includes fret 0)
   if(fMin===0){
     for(let s=0;s<6;s++){
       if(!S.activeStrings.has(s)) continue;
@@ -671,7 +864,6 @@ function drawFretboard() {
     }
   }
 
-  // Notes
   for(let s=0;s<6;s++){
     const active=S.activeStrings.has(s);
     for(let f=0;f<=12;f++){
@@ -683,18 +875,14 @@ function drawFretboard() {
       const isWrong=wrongFlash[`${s},${f}`];
 
       if(isFound && S.mode==='find'){
-        // Found note: green
         svg+=`<circle cx="${x}" cy="${y}" r="12" fill="#2a9d6e" filter="url(#gg)"/>`;
         svg+=`<text x="${x}" y="${y+4}" text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="DM Mono,monospace">${NOTE_NAMES[pc]}</text>`;
       } else if(isFound && S.mode==='name'){
-        // The marked note in name mode
         const answered=S.answered;
         if(answered){
-          // Reveal: show with note name in correct colour
           svg+=`<circle cx="${x}" cy="${y}" r="13" fill="#a05c20" filter="url(#gr)"/>`;
           svg+=`<text x="${x}" y="${y+4.5}" text-anchor="middle" fill="#fff" font-size="11" font-weight="700" font-family="DM Mono,monospace">${NOTE_NAMES[pc]}</text>`;
         } else {
-          // Show as "?" to be identified
           svg+=`<circle cx="${x}" cy="${y}" r="13" fill="#a05c20" filter="url(#gr)"/>`;
           svg+=`<text x="${x}" y="${y+5}" text-anchor="middle" fill="rgba(255,255,255,.7)" font-size="14" font-weight="700" font-family="DM Mono,monospace">?</text>`;
         }
@@ -702,11 +890,9 @@ function drawFretboard() {
         svg+=`<circle cx="${x}" cy="${y}" r="12" fill="#c0392b" filter="url(#rr)"/>`;
         svg+=`<text x="${x}" y="${y+5}" text-anchor="middle" fill="#fff" font-size="13" font-family="DM Mono,monospace">✗</text>`;
       } else if(S.revealed && isTarget && S.mode==='find'){
-        // Revealed in find mode: show copper
         svg+=`<circle cx="${x}" cy="${y}" r="12" fill="rgba(160,92,32,.75)"/>`;
         svg+=`<text x="${x}" y="${y+4}" text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="DM Mono,monospace">${NOTE_NAMES[pc]}</text>`;
       } else if(inZone && active && !S.answered && S.mode==='find'){
-        // Ghost circle (clickable)
         svg+=`<circle cx="${x}" cy="${y}" r="12" fill="rgba(255,255,255,.025)" stroke="rgba(255,255,255,.1)" stroke-width="1" style="cursor:pointer" onclick="handleFindClick(${s},${f})"/>`;
       }
     }

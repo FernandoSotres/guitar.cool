@@ -145,6 +145,12 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,246,240,.94);backdrop-
 .nti-btn.wrong{background:rgba(192,57,43,.08);border-color:var(--red);color:var(--red);}
 .nti-btn:disabled{cursor:default;}
 
+/* VIEW TOGGLE */
+.view-toggle{display:flex;gap:4px;margin-bottom:14px;}
+.vt-btn{padding:5px 14px;border-radius:5px;border:1px solid rgba(250,246,240,.14);background:transparent;font-size:11px;font-weight:600;color:rgba(250,246,240,.32);cursor:pointer;font-family:var(--sans);transition:all .14s;letter-spacing:.04em;}
+.vt-btn.on{background:rgba(250,246,240,.1);color:rgba(250,246,240,.68);border-color:rgba(250,246,240,.22);}
+.vt-btn:hover:not(.on){color:rgba(250,246,240,.5);}
+
 @media(max-width:900px){
   nav{padding:0 20px;}
   .breadcrumb{padding:0 20px;}
@@ -244,6 +250,10 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,246,240,.94);backdrop-
       <!-- Fretboard -->
       <div class="ex-fretboard">
         <div class="ex-fb-hint" id="fb-hint">Haz clic en la nota correcta</div>
+        <div class="view-toggle">
+          <button class="vt-btn on" id="vt-guitar" onclick="setView('guitar')">Guitarra</button>
+          <button class="vt-btn" id="vt-piano" onclick="setView('piano')">Piano</button>
+        </div>
         <div id="fretboard"></div>
       </div>
 
@@ -293,8 +303,10 @@ const INTERVALS = [
 // ── State ──────────────────────────────────────────────────────────────
 const S = {
   mode: 'find',          // 'find' | 'name'
+  view: 'guitar',        // 'guitar' | 'piano'
+  piano: {},
   rootStr:0, rootFret:0, rootMidi:0,
-  noteAStr:0, noteAFret:0, noteBStr:0, noteBFret:0, // for 'name' mode
+  noteAStr:0, noteAFret:0, noteBStr:0, noteBFret:0,
   targetSemi:0, targetMidi:0, targetName:'',
   correctPositions:[],
   answered:false,
@@ -322,9 +334,127 @@ async function playMidi(midi, when, dur='2n') {
 }
 async function listenInterval() {
   await initAudio();
+  const rootM = S.view==='piano' && S.piano && S.piano.rootMidi ? S.piano.rootMidi : S.rootMidi;
+  const targM = S.view==='piano' && S.piano && S.piano.targetMidi ? S.piano.targetMidi : S.targetMidi;
   const now = Tone.now();
-  playMidi(S.rootMidi, now+0.05, '4n');
-  playMidi(S.targetMidi, now+0.85, '4n');
+  playMidi(rootM, now+0.05, '4n');
+  playMidi(targM, now+0.85, '4n');
+}
+
+// ── View toggle ────────────────────────────────────────────────────────
+function setView(v) {
+  S.view = v;
+  document.getElementById('vt-guitar').classList.toggle('on', v==='guitar');
+  document.getElementById('vt-piano').classList.toggle('on', v==='piano');
+  if (S.nextTimer) { clearTimeout(S.nextTimer); S.nextTimer=null; }
+  newQuestion();
+}
+function draw(...args) {
+  if (S.view==='piano') drawKeyboard();
+  else drawFretboard(...args);
+}
+
+// ── Piano constants ────────────────────────────────────────────────────
+const PK_S=48,PK_E=71,PK_OCT=2;
+const PKW=720,PKH=200;
+const WK_PC=[0,2,4,5,7,9,11];
+const BK_MAP={1:0.67,3:1.67,6:3.67,8:4.67,10:5.67};
+const WKW=PKW/(7*PK_OCT);
+const WKH=160,BKW=30,BKH=100;
+const pianoWrong={};
+
+function drawKeyboard() {
+  // Count white keys from PK_S to PK_E
+  let svg = `<svg viewBox="0 0 ${PKW} ${PKH}" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:${PKW}px;height:auto;display:block">`;
+
+  // Build white key positions
+  const whiteKeys = [];
+  let wIdx = 0;
+  for (let midi = PK_S; midi <= PK_E; midi++) {
+    const pc = midi % 12;
+    if (WK_PC.includes(pc)) {
+      whiteKeys.push({midi, wIdx});
+      wIdx++;
+    }
+  }
+
+  // Draw white keys first
+  for (const {midi, wIdx: wi} of whiteKeys) {
+    const x = wi * WKW;
+    const pc = midi % 12;
+    let fill = '#ede8e0';
+    let textFill = '#555';
+    let label = '';
+    let clickable = false;
+    let isWrong = pianoWrong[midi];
+
+    if (S.mode==='find' && S.piano && S.piano.rootMidi===midi) {
+      fill = '#a05c20'; textFill='#fff'; label = NOTE_NAMES[pc];
+    } else if (S.piano && S.piano.targetMidi===midi && S.mode==='name') {
+      fill = '#c07830'; textFill='#fff'; label = NOTE_NAMES[pc];
+    } else if (S.piano && S.piano.clickedMidi===midi && S.piano.clickedMidi!==S.piano.targetMidi) {
+      fill = '#c0392b'; textFill='#fff'; label = '✗';
+    } else if (S.answered && S.piano && S.piano.targetMidi===midi) {
+      fill = '#2a9d6e'; textFill='#fff'; label = NOTE_NAMES[pc];
+    } else if (isWrong) {
+      fill = '#c0392b'; textFill='#fff'; label = '✗';
+    } else if (!S.answered && S.mode==='find' && S.piano && S.piano.rootMidi!==midi) {
+      clickable = true;
+    }
+
+    const onclick = clickable ? `onclick="handlePianoClick(${midi})"` : '';
+    const cursor = clickable ? 'cursor:pointer;' : '';
+    svg += `<rect x="${x+1.5}" y="14" width="${WKW-3}" height="${WKH}" rx="3" fill="${fill}" stroke="#bbb" stroke-width="1" style="${cursor}" ${onclick}/>`;
+
+    // C label
+    if (pc===0) {
+      svg += `<text x="${x+WKW/2}" y="${14+WKH-8}" text-anchor="middle" fill="rgba(80,50,20,.35)" font-size="9" font-family="DM Mono,monospace">C${Math.floor(midi/12)}</text>`;
+    }
+    if (label) {
+      svg += `<text x="${x+WKW/2}" y="${14+WKH-24}" text-anchor="middle" fill="${textFill}" font-size="11" font-weight="700" font-family="DM Mono,monospace">${label}</text>`;
+    }
+  }
+
+  // Draw black keys on top
+  for (let midi = PK_S; midi <= PK_E; midi++) {
+    const pc = midi % 12;
+    if (!BK_MAP.hasOwnProperty(pc)) continue;
+
+    // Find which white key octave offset
+    const octaveOffset = Math.floor((midi - PK_S) / 12);
+    const posInOct = BK_MAP[pc];
+    const x = (octaveOffset * 7 + posInOct) * WKW - BKW/2;
+
+    let fill = '#14100a';
+    let textFill = '#fff';
+    let label = '';
+    let clickable = false;
+    let isWrong = pianoWrong[midi];
+
+    if (S.mode==='find' && S.piano && S.piano.rootMidi===midi) {
+      fill = '#7a4010'; label = NOTE_NAMES[pc];
+    } else if (S.piano && S.piano.targetMidi===midi && S.mode==='name') {
+      fill = '#8a5010'; label = NOTE_NAMES[pc];
+    } else if (S.piano && S.piano.clickedMidi===midi && S.piano.clickedMidi!==S.piano.targetMidi) {
+      fill = '#7a1a10'; label = '✗';
+    } else if (S.answered && S.piano && S.piano.targetMidi===midi) {
+      fill = '#186642'; label = NOTE_NAMES[pc];
+    } else if (isWrong) {
+      fill = '#7a1a10'; label = '✗';
+    } else if (!S.answered && S.mode==='find' && S.piano && S.piano.rootMidi!==midi) {
+      clickable = true;
+    }
+
+    const onclick = clickable ? `onclick="handlePianoClick(${midi})"` : '';
+    const cursor = clickable ? 'cursor:pointer;' : '';
+    svg += `<rect x="${x}" y="14" width="${BKW}" height="${BKH}" rx="3" fill="${fill}" style="${cursor}" ${onclick}/>`;
+    if (label) {
+      svg += `<text x="${x+BKW/2}" y="${14+BKH-8}" text-anchor="middle" fill="${textFill}" font-size="9" font-weight="700" font-family="DM Mono,monospace">${label}</text>`;
+    }
+  }
+
+  svg += '</svg>';
+  document.getElementById('fretboard').innerHTML = svg;
 }
 
 // ── Mode toggle ────────────────────────────────────────────────────────
@@ -423,7 +553,7 @@ function newFindQuestion(iv) {
   let tries = 0;
   while (tries++ < 300) {
     const s = Math.floor(Math.random()*6);
-    const f = Math.floor(Math.random()*10); // root at fret 0-9
+    const f = Math.floor(Math.random()*10);
     const rootMidi = OPEN[s]+f;
     const targetMidi = rootMidi + iv.semi;
     const exists = OPEN.some((o,si) => { const tf=targetMidi-o; return tf>=0&&tf<=12; });
@@ -445,7 +575,14 @@ function newFindQuestion(iv) {
   document.getElementById('fb-hint').textContent = 'Haz clic en la nota correcta';
   document.getElementById('nti-options').style.display = 'none';
 
-  drawFretboard(null, false);
+  if (S.view==='piano') {
+    const maxR = PK_E - iv.semi;
+    const r = PK_S + Math.floor(Math.random()*(maxR-PK_S+1));
+    S.piano = {rootMidi:r, targetMidi:r+iv.semi, clickedMidi:null};
+    document.getElementById('q-root-note').textContent = NOTE_NAMES[r%12];
+  }
+
+  draw(null, false);
 }
 
 function handleFindClick(s, f) {
@@ -462,7 +599,7 @@ function handleFindClick(s, f) {
     showFeedback(false, `Incorrecto. Las posiciones correctas están en verde.`);
   }
   updateStats(); updateStreak();
-  drawFretboard({s,f}, ok);
+  draw({s,f}, ok);
   initAudio().then(() => {
     const now = Tone.now();
     playMidi(S.rootMidi, now+0.05, '8n');
@@ -471,16 +608,27 @@ function handleFindClick(s, f) {
   S.nextTimer = setTimeout(newQuestion, 2400);
 }
 
+function handlePianoClick(midi) {
+  if (S.answered || S.mode!=='find') return;
+  if (S.piano && midi===S.piano.rootMidi) return;
+  S.answered=true; S.total++;
+  S.piano.clickedMidi=midi;
+  const ok = midi===S.piano.targetMidi;
+  if(ok){S.score++;S.streak++;if(S.streak>S.bestStreak)S.bestStreak=S.streak;showFeedback(true,`¡Correcto! Es ${NOTE_NAMES[midi%12]}.`);}
+  else{S.streak=0;showFeedback(false,`Incorrecto. Era ${NOTE_NAMES[S.piano.targetMidi%12]}.`);}
+  updateStats();updateStreak();
+  initAudio().then(()=>{const n=Tone.now();playMidi(S.piano.rootMidi,n+0.05,'8n');playMidi(S.piano.targetMidi,n+0.55,'4n');});
+  draw(); S.nextTimer=setTimeout(newQuestion,2400);
+}
+
 // ── NAME MODE ──────────────────────────────────────────────────────────
 function newNameQuestion(iv) {
-  // Pick two notes separated by iv.semi, both on fretboard
   let tries=0;
   while(tries++<300) {
     const sA = Math.floor(Math.random()*6);
     const fA = Math.floor(Math.random()*10);
     const midiA = OPEN[sA]+fA;
     const midiB = midiA + iv.semi;
-    // Find a position for B (prefer different string)
     const posB = [];
     OPEN.forEach((o,s) => { const f=midiB-o; if(f>=0&&f<=12) posB.push({s,f}); });
     if (posB.length > 0) {
@@ -493,7 +641,13 @@ function newNameQuestion(iv) {
     }
   }
 
-  // Build 4 answer options: correct + 3 distractors
+  if (S.view==='piano') {
+    const maxR = PK_E - iv.semi;
+    const r = PK_S + Math.floor(Math.random()*(maxR-PK_S+1));
+    S.piano = {rootMidi:r, targetMidi:r+iv.semi, clickedMidi:null};
+  }
+
+  // Build 4 answer options
   const correctIv = iv;
   const distractors = INTERVALS.filter(i=>i.semi!==iv.semi);
   const shuffled = distractors.sort(()=>Math.random()-.5).slice(0,3);
@@ -504,7 +658,7 @@ function newNameQuestion(iv) {
   document.getElementById('q-interval-name').textContent = `${NOTE_NAMES[S.rootMidi%12]} · ${NOTE_NAMES[S.targetMidi%12]}`;
   document.getElementById('q-interval-semi').textContent = 'Identifica la distancia entre ellas';
   document.getElementById('root-wrap').style.display = 'none';
-  document.getElementById('fb-hint').textContent = 'Las dos notas están marcadas en el diapasón';
+  document.getElementById('fb-hint').textContent = S.view==='piano' ? 'Las dos notas están marcadas en el piano' : 'Las dos notas están marcadas en el diapasón';
 
   const ntiDiv = document.getElementById('nti-options');
   ntiDiv.style.display = 'grid';
@@ -517,7 +671,7 @@ function newNameQuestion(iv) {
     ntiDiv.appendChild(btn);
   });
 
-  drawFretboard(null, false, true);
+  draw(null, false, true);
 }
 
 function handleNameClick(opt, btn, options, ntiDiv) {
@@ -533,7 +687,6 @@ function handleNameClick(opt, btn, options, ntiDiv) {
   } else {
     S.streak = 0;
     btn.classList.add('wrong');
-    // Mark correct answer
     Array.from(ntiDiv.children).forEach(b => {
       const name = b.textContent;
       const iv = INTERVALS.find(i=>i.name===name);
@@ -548,6 +701,7 @@ function handleNameClick(opt, btn, options, ntiDiv) {
     playMidi(S.rootMidi, now+0.05, '8n');
     playMidi(S.targetMidi, now+0.6, '4n');
   });
+  draw(null, false, true);
   S.nextTimer = setTimeout(newQuestion, 2600);
 }
 
@@ -556,7 +710,7 @@ const VW=720, VH=172, NX=58, FA=VW-NX-14, FW=FA/12;
 const ST=18, SB=VH-18, SG=(SB-ST)/5;
 
 function fx(f){ return f===0 ? 26 : NX+(f-0.5)*FW; }
-function sy(s){ return ST+s*SG; }
+function sy(s){ return SB-s*SG; }
 
 function drawFretboard(clicked, clickedOk, nameMode=false) {
   let s_ = `<svg viewBox="0 0 ${VW} ${VH}" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:${VW}px;height:auto;display:block">`;
@@ -618,7 +772,6 @@ function drawFretboard(clicked, clickedOk, nameMode=false) {
         s_ += `<circle cx="${x}" cy="${y}" r="13" fill="#a05c20" filter="url(#glow-root)"/>`;
         s_ += `<text x="${x}" y="${y+4.5}" text-anchor="middle" fill="#fff" font-size="11" font-weight="700" font-family="DM Mono,monospace">${NOTE_NAMES[midi%12]}</text>`;
       } else if (nameMode && isNoteB) {
-        // Second note in name mode
         s_ += `<circle cx="${x}" cy="${y}" r="13" fill="#c07830" filter="url(#glow-root)" opacity=".85"/>`;
         s_ += `<text x="${x}" y="${y+4.5}" text-anchor="middle" fill="#fff" font-size="11" font-weight="700" font-family="DM Mono,monospace">${NOTE_NAMES[midi%12]}</text>`;
       } else if (S.answered && isCorrPos) {
@@ -645,6 +798,8 @@ function startExercise() {
   ex.style.flexDirection = 'column';
   newQuestion();
 }
+
+function nextQuestion() { newQuestion(); }
 
 buildPills();
 updateStats();
