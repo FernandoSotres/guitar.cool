@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>guitarra.cool · Círculo de Quintas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#faf6f0;--paper2:#f2ece3;--paper3:#e8e0d4;--paper4:#ddd4c4;--paper5:#cec4b0;
+  --copper:#a05c20;--copper-lt:#c07830;--copper-dk:#7a4010;
+  --ink:#1a1410;--ink2:#2e2418;--ink3:#4a3c2c;--ink4:#6a5a46;--ink5:#8a7a66;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(250,246,240,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:56px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{color:var(--copper);}
+.nav-link{padding:0 16px;height:56px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+
+.ex-page{max-width:860px;margin:0 auto;padding:48px 24px 80px;}
+
+.ex-header{display:flex;align-items:flex-start;gap:20px;margin-bottom:32px;flex-wrap:wrap;}
+.ex-back{font-size:13px;color:var(--ink4);text-decoration:none;display:flex;align-items:center;gap:6px;padding-top:6px;transition:color .2s;white-space:nowrap;}
+.ex-back:hover{color:var(--copper);}
+.ex-title-block{flex:1;min-width:200px;}
+.ex-eyebrow{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:6px;}
+.ex-title{font-family:var(--serif);font-size:clamp(28px,4vw,40px);font-weight:700;line-height:1.05;letter-spacing:-.02em;}
+.ex-score-block{display:flex;align-items:center;gap:8px;padding-top:4px;}
+.score-chip{font-family:var(--mono);font-size:13px;background:var(--paper3);padding:6px 14px;border-radius:20px;white-space:nowrap;}
+.score-chip .c-ok{color:#4a7c59;}
+.score-chip .c-tot{color:var(--ink5);}
+
+.mode-bar{display:flex;gap:6px;margin-bottom:36px;flex-wrap:wrap;}
+.mode-btn{font-size:12px;font-weight:600;padding:7px 15px;border:1.5px solid var(--paper4);border-radius:20px;background:transparent;color:var(--ink4);cursor:pointer;transition:all .18s;letter-spacing:.02em;font-family:var(--sans);}
+.mode-btn:hover{border-color:var(--copper-lt);color:var(--copper);}
+.mode-btn.active{border-color:var(--copper);background:var(--copper);color:#fff;}
+
+.ex-main{display:flex;flex-direction:column;align-items:center;gap:28px;}
+
+.question-card{text-align:center;padding:28px 40px;background:#fff;border:1px solid var(--paper3);border-radius:16px;width:100%;max-width:520px;min-height:110px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.q-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:10px;}
+.q-text{font-family:var(--serif);font-size:clamp(22px,4vw,30px);font-weight:700;line-height:1.3;color:var(--ink);}
+.q-hint{font-size:13px;color:var(--ink4);margin-top:8px;font-style:italic;}
+
+.circle-wrap{display:flex;align-items:center;justify-content:center;}
+.circle-wrap svg{max-width:500px;width:100%;height:auto;}
+
+/* sig mode answer buttons */
+.sig-choices{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:400px;}
+.sig-choice-btn{font-family:var(--mono);font-size:15px;font-weight:600;padding:10px 22px;border:2px solid var(--paper4);border-radius:8px;background:#fff;color:var(--ink);cursor:pointer;transition:all .18s;min-width:80px;}
+.sig-choice-btn:hover:not(:disabled){border-color:var(--copper);color:var(--copper);}
+.sig-choice-btn.correct{border-color:#4a7c59;background:#4a7c59;color:#fff;cursor:default;}
+.sig-choice-btn.wrong{border-color:#c0392b;background:#c0392b;color:#fff;cursor:default;}
+.sig-choice-btn:disabled{cursor:default;}
+
+.feedback-msg{font-size:15px;font-weight:500;text-align:center;min-height:22px;}
+.feedback-msg.ok{color:#4a7c59;}
+.feedback-msg.bad{color:#c0392b;}
+
+.btn-next{background:var(--copper);color:#fff;font-size:14px;font-weight:600;padding:12px 32px;border:none;border-radius:8px;cursor:pointer;transition:background .2s;font-family:var(--sans);display:none;}
+.btn-next:hover{background:var(--copper-dk);}
+.btn-next.show{display:inline-block;}
+
+.start-overlay{text-align:center;}
+.btn-start{background:var(--copper);color:#fff;font-size:15px;font-weight:600;padding:14px 44px;border:none;border-radius:10px;cursor:pointer;transition:background .2s;font-family:var(--sans);}
+.btn-start:hover{background:var(--copper-dk);}
+.start-hint{font-size:14px;color:var(--ink4);margin-top:16px;font-style:italic;}
+
+@media(max-width:600px){
+  nav{padding:0 16px;}
+  .ex-page{padding:32px 16px 64px;}
+  .question-card{padding:20px 20px;}
+  .ex-header{gap:12px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">guitarra<span>.cool</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link active">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+</nav>
+
+<div class="ex-page">
+
+  <div class="ex-header">
+    <a href="/practica" class="ex-back">← Práctica</a>
+    <div class="ex-title-block">
+      <div class="ex-eyebrow">Teoría Visual</div>
+      <h1 class="ex-title">Círculo de Quintas</h1>
+    </div>
+    <div class="ex-score-block">
+      <div class="score-chip">
+        <span class="c-ok" id="score-correct">0</span>
+        <span class="c-tot" id="score-total"> / 0</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="mode-bar">
+    <button class="mode-btn active" data-mode="armadura">Armadura → Tonalidad</button>
+    <button class="mode-btn" data-mode="relativa">Relativa menor</button>
+    <button class="mode-btn" data-mode="vecino-up">Quinta arriba</button>
+    <button class="mode-btn" data-mode="vecino-down">Quinta abajo</button>
+    <button class="mode-btn" data-mode="sig">Tonalidad → Armadura</button>
+  </div>
+
+  <div class="ex-main" id="ex-main">
+    <div class="question-card" id="question-card" style="visibility:hidden;">
+      <div class="q-label" id="q-label">Identifica</div>
+      <div class="q-text" id="q-text">—</div>
+      <div class="q-hint" id="q-hint"></div>
+    </div>
+
+    <div class="circle-wrap">
+      <svg id="circle-svg" viewBox="0 0 600 600" width="500" height="500"></svg>
+    </div>
+
+    <div class="sig-choices" id="sig-choices" style="display:none;"></div>
+
+    <div class="feedback-msg" id="feedback"></div>
+
+    <div class="start-overlay" id="start-overlay">
+      <button class="btn-start" id="btn-start">Empezar ejercicio</button>
+      <p class="start-hint">Haz clic en el segmento correcto del círculo</p>
+    </div>
+
+    <button class="btn-next" id="btn-next">Siguiente →</button>
+  </div>
+
+</div>
+
+<script>
+// ── Data ─────────────────────────────────────────────────────────────────────
+const KEYS = [
+  { major:'C',   minor:'Am',   sig:0,  sigTxt:'0',   sigLabel:'ninguno' },
+  { major:'G',   minor:'Em',   sig:1,  sigTxt:'1♯',  sigLabel:'1 sostenido' },
+  { major:'D',   minor:'Bm',   sig:2,  sigTxt:'2♯',  sigLabel:'2 sostenidos' },
+  { major:'A',   minor:'F♯m',  sig:3,  sigTxt:'3♯',  sigLabel:'3 sostenidos' },
+  { major:'E',   minor:'C♯m',  sig:4,  sigTxt:'4♯',  sigLabel:'4 sostenidos' },
+  { major:'B',   minor:'G♯m',  sig:5,  sigTxt:'5♯',  sigLabel:'5 sostenidos' },
+  { major:'F♯',  minor:'D♯m',  sig:6,  sigTxt:'6♯',  sigLabel:'6 sostenidos' },
+  { major:'D♭',  minor:'B♭m',  sig:-5, sigTxt:'5♭',  sigLabel:'5 bemoles' },
+  { major:'A♭',  minor:'Fm',   sig:-4, sigTxt:'4♭',  sigLabel:'4 bemoles' },
+  { major:'E♭',  minor:'Cm',   sig:-3, sigTxt:'3♭',  sigLabel:'3 bemoles' },
+  { major:'B♭',  minor:'Gm',   sig:-2, sigTxt:'2♭',  sigLabel:'2 bemoles' },
+  { major:'F',   minor:'Dm',   sig:-1, sigTxt:'1♭',  sigLabel:'1 bemol' },
+];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+const S = {
+  mode: 'armadura',
+  started: false,
+  answered: false,
+  qIdx: null,       // question key index
+  ansIdx: null,     // correct answer index
+  scoreOk: 0,
+  scoreTotal: 0,
+};
+
+// ── SVG geometry ──────────────────────────────────────────────────────────────
+const CX = 300, CY = 300;
+const RO1 = 186, RO2 = 256;  // outer ring: major keys
+const RM1 = 137, RM2 = 181;  // middle ring: relative minors
+const RI1 = 98,  RI2 = 132;  // inner ring: key signatures
+const RC = 93;               // center circle radius
+const HALF = 13;             // half of each segment in degrees (leaving 4° gaps)
+
+function segPath(r1, r2, midDeg) {
+  const toR = d => d * Math.PI / 180;
+  const s = toR(midDeg - HALF), e = toR(midDeg + HALF);
+  const x1=CX+r1*Math.cos(s),y1=CY+r1*Math.sin(s);
+  const x2=CX+r2*Math.cos(s),y2=CY+r2*Math.sin(s);
+  const x3=CX+r2*Math.cos(e),y3=CY+r2*Math.sin(e);
+  const x4=CX+r1*Math.cos(e),y4=CY+r1*Math.sin(e);
+  return `M${x1},${y1}L${x2},${y2}A${r2},${r2} 0 0,1 ${x3},${y3}L${x4},${y4}A${r1},${r1} 0 0,0 ${x1},${y1}Z`;
+}
+
+function midAngle(i) { return -90 + i * 30; }
+
+function textPos(r, i) {
+  const a = midAngle(i) * Math.PI / 180;
+  return { x: CX + r * Math.cos(a), y: CY + r * Math.sin(a) };
+}
+
+// ── Build SVG ─────────────────────────────────────────────────────────────────
+function buildSVG() {
+  const svg = document.getElementById('circle-svg');
+  svg.innerHTML = '';
+
+  const ns = 'http://www.w3.org/2000/svg';
+  const el = (tag, attrs) => {
+    const e = document.createElementNS(ns, tag);
+    for (const [k,v] of Object.entries(attrs)) e.setAttribute(k, v);
+    return e;
+  };
+
+  // Background circle
+  svg.appendChild(el('circle', {cx:CX,cy:CY,r:258,fill:'var(--paper)',stroke:'var(--paper4)',['stroke-width']:'1.5'}));
+
+  // Render each of the 12 key positions
+  for (let i = 0; i < 12; i++) {
+    const mid = midAngle(i);
+
+    // ── Outer ring (major keys) ──────────────────
+    const gOuter = el('g', {class:`seg-outer seg-${i}`, 'data-i':i, cursor:'pointer'});
+    const pathOuter = el('path', {
+      d: segPath(RO1, RO2, mid),
+      fill: 'var(--paper3)',
+      stroke: 'var(--paper)',
+      'stroke-width': '2.5',
+      class: 'seg-fill',
+    });
+    gOuter.appendChild(pathOuter);
+    // Major key label
+    const pO = textPos((RO1+RO2)/2, i);
+    const tO = el('text', {
+      x:pO.x, y:pO.y,
+      'text-anchor':'middle','dominant-baseline':'central',
+      'font-family':'var(--serif)','font-size':'17','font-weight':'600',
+      fill:'var(--ink)', class:'seg-txt', 'pointer-events':'none',
+    });
+    tO.textContent = KEYS[i].major;
+    gOuter.appendChild(tO);
+    svg.appendChild(gOuter);
+
+    // ── Middle ring (relative minors) ─────────────
+    const gMid = el('g', {class:`seg-minor seg-minor-${i}`, 'data-i':i, cursor:'pointer'});
+    const pathMid = el('path', {
+      d: segPath(RM1, RM2, mid),
+      fill: 'var(--paper2)',
+      stroke: 'var(--paper)',
+      'stroke-width': '2.5',
+      class: 'seg-fill',
+    });
+    gMid.appendChild(pathMid);
+    // Minor key label
+    const pM = textPos((RM1+RM2)/2, i);
+    const tM = el('text', {
+      x:pM.x, y:pM.y,
+      'text-anchor':'middle','dominant-baseline':'central',
+      'font-family':'var(--sans)','font-size':'11.5','font-weight':'500',
+      fill:'var(--ink3)', class:'seg-txt', 'pointer-events':'none',
+    });
+    tM.textContent = KEYS[i].minor;
+    gMid.appendChild(tM);
+    svg.appendChild(gMid);
+
+    // ── Inner ring (key signatures) ────────────────
+    const gInner = el('g', {class:`seg-sig seg-sig-${i}`, 'data-i':i});
+    const pathInner = el('path', {
+      d: segPath(RI1, RI2, mid),
+      fill: 'var(--paper)',
+      stroke: 'var(--paper3)',
+      'stroke-width': '2',
+      class: 'seg-fill',
+    });
+    gInner.appendChild(pathInner);
+    const pI = textPos((RI1+RI2)/2, i);
+    const tI = el('text', {
+      x:pI.x, y:pI.y,
+      'text-anchor':'middle','dominant-baseline':'central',
+      'font-family':'var(--mono)','font-size':'10','font-weight':'400',
+      fill:'var(--ink5)', class:'seg-txt', 'pointer-events':'none',
+    });
+    tI.textContent = KEYS[i].sigTxt;
+    gInner.appendChild(tI);
+    svg.appendChild(gInner);
+  }
+
+  // Center circle
+  const centerCircle = el('circle',{cx:CX,cy:CY,r:RC,fill:'var(--paper2)',stroke:'var(--paper3)','stroke-width':'1.5'});
+  svg.appendChild(centerCircle);
+
+  // Center label (multi-line)
+  const cg = el('g',{id:'center-g'});
+  svg.appendChild(cg);
+  updateCenter('—','');
+
+  // Click handlers
+  svg.querySelectorAll('.seg-outer').forEach(g => {
+    g.addEventListener('click', () => handleSegClick('major', parseInt(g.dataset.i)));
+    g.addEventListener('mouseenter', () => hoverSeg(g, true));
+    g.addEventListener('mouseleave', () => hoverSeg(g, false));
+  });
+  svg.querySelectorAll('.seg-minor').forEach(g => {
+    g.addEventListener('click', () => handleSegClick('minor', parseInt(g.dataset.i)));
+    g.addEventListener('mouseenter', () => hoverSeg(g, true));
+    g.addEventListener('mouseleave', () => hoverSeg(g, false));
+  });
+}
+
+function updateCenter(line1, line2) {
+  const ns = 'http://www.w3.org/2000/svg';
+  const el = (tag, attrs) => {
+    const e = document.createElementNS(ns, tag);
+    for (const [k,v] of Object.entries(attrs)) e.setAttribute(k, v);
+    return e;
+  };
+  const cg = document.getElementById('center-g');
+  if (!cg) return;
+  cg.innerHTML = '';
+  const t1 = el('text',{x:CX,y:line2?CY-10:CY,'text-anchor':'middle','dominant-baseline':'central',
+    'font-family':'var(--serif)','font-size':'24','font-weight':'700','fill':'var(--ink)'});
+  t1.textContent = line1;
+  cg.appendChild(t1);
+  if (line2) {
+    const t2 = el('text',{x:CX,y:CY+18,'text-anchor':'middle','dominant-baseline':'central',
+      'font-family':'var(--sans)','font-size':'11','font-weight':'400','fill':'var(--ink4)'});
+    t2.textContent = line2;
+    cg.appendChild(t2);
+  }
+}
+
+function hoverSeg(g, on) {
+  if (S.answered || !S.started) return;
+  const fill = g.querySelector('.seg-fill');
+  if (!fill) return;
+  // Only highlight if not already colored by question/answer
+  const curFill = fill.getAttribute('fill');
+  if (curFill !== 'var(--paper3)' && curFill !== 'var(--paper2)' && curFill !== 'var(--paper)') return;
+  const isOuter = g.classList.contains('seg-outer');
+  fill.setAttribute('fill', on
+    ? (isOuter ? '#ede5d8' : '#e8e0d4')
+    : (isOuter ? 'var(--paper3)' : 'var(--paper2)'));
+}
+
+// ── Segment coloring helpers ──────────────────────────────────────────────────
+function setSegColor(ring, i, fill, textFill) {
+  const cls = ring === 'major' ? `.seg-outer.seg-${i}` :
+              ring === 'minor' ? `.seg-minor.seg-minor-${i}` :
+              `.seg-sig.seg-sig-${i}`;
+  const g = document.querySelector(cls);
+  if (!g) return;
+  g.querySelector('.seg-fill').setAttribute('fill', fill);
+  const txt = g.querySelector('.seg-txt');
+  if (txt) txt.setAttribute('fill', textFill || 'var(--ink)');
+}
+
+function resetAllColors() {
+  for (let i = 0; i < 12; i++) {
+    setSegColor('major', i, 'var(--paper3)', 'var(--ink)');
+    setSegColor('minor', i, 'var(--paper2)', 'var(--ink3)');
+    setSegColor('sig',   i, 'var(--paper)',  'var(--ink5)');
+  }
+}
+
+// ── Question generation ───────────────────────────────────────────────────────
+function newQuestion() {
+  S.answered = false;
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('feedback').className = 'feedback-msg';
+  document.getElementById('btn-next').classList.remove('show');
+  document.getElementById('sig-choices').style.display = 'none';
+  document.getElementById('sig-choices').innerHTML = '';
+  document.getElementById('question-card').style.visibility = 'visible';
+
+  resetAllColors();
+
+  const i = Math.floor(Math.random() * 12);
+  S.qIdx = i;
+  const k = KEYS[i];
+
+  const qlabel = document.getElementById('q-label');
+  const qtext  = document.getElementById('q-text');
+  const qhint  = document.getElementById('q-hint');
+
+  if (S.mode === 'armadura') {
+    // Given key signature → click major key
+    S.ansIdx = i;
+    const sigStr = k.sigTxt === '0' ? 'sin accidentales' : k.sigTxt;
+    qlabel.textContent = 'Armadura';
+    qtext.textContent  = `¿Qué tonalidad mayor tiene ${sigStr}?`;
+    qhint.textContent  = 'Haz clic en el anillo exterior';
+    // Highlight sig ring for the question key
+    setSegColor('sig', i, 'var(--copper)', '#fff');
+    updateCenter(k.sigTxt, 'accidentales');
+
+  } else if (S.mode === 'relativa') {
+    // Given major key → click relative minor
+    S.ansIdx = i;
+    qlabel.textContent = 'Relativa menor';
+    qtext.textContent  = `Relativa menor de ${k.major} mayor`;
+    qhint.textContent  = 'Haz clic en el anillo interior';
+    // Highlight outer (question)
+    setSegColor('major', i, 'var(--copper)', '#fff');
+    updateCenter(k.major, 'mayor');
+
+  } else if (S.mode === 'vecino-up') {
+    // Given major key → click the key a 5th above (next clockwise)
+    S.ansIdx = (i + 1) % 12;
+    qlabel.textContent = 'Quinta arriba';
+    qtext.textContent  = `Quinta arriba de ${k.major} mayor`;
+    qhint.textContent  = 'Haz clic en el anillo exterior';
+    setSegColor('major', i, 'var(--copper)', '#fff');
+    updateCenter(k.major, '5ª arriba →');
+
+  } else if (S.mode === 'vecino-down') {
+    // Given major key → click the key a 5th below (previous, counter-clockwise)
+    S.ansIdx = (i + 11) % 12;
+    qlabel.textContent = 'Quinta abajo';
+    qtext.textContent  = `Quinta abajo de ${k.major} mayor`;
+    qhint.textContent  = 'Haz clic en el anillo exterior';
+    setSegColor('major', i, 'var(--copper)', '#fff');
+    updateCenter(k.major, '← 5ª abajo');
+
+  } else if (S.mode === 'sig') {
+    // Given major key → choose key signature from buttons
+    S.ansIdx = i;
+    qlabel.textContent = 'Armadura';
+    qtext.textContent  = `¿Cuántos accidentales tiene ${k.major} mayor?`;
+    qhint.textContent  = 'Elige la respuesta correcta';
+    setSegColor('major', i, 'var(--copper)', '#fff');
+    updateCenter(k.major, 'mayor');
+    buildSigChoices(i);
+  }
+}
+
+function buildSigChoices(correctIdx) {
+  const box = document.getElementById('sig-choices');
+  box.style.display = 'flex';
+
+  // Pick 3 wrong indices
+  const pool = [];
+  for (let x = 0; x < 12; x++) if (x !== correctIdx) pool.push(x);
+  // Shuffle and pick 3
+  for (let j = pool.length - 1; j > 0; j--) {
+    const k = Math.floor(Math.random() * (j+1));
+    [pool[j], pool[k]] = [pool[k], pool[j]];
+  }
+  const choices = [correctIdx, pool[0], pool[1], pool[2]];
+  // Sort by sig value for display
+  choices.sort((a,b) => KEYS[a].sig - KEYS[b].sig);
+
+  choices.forEach(idx => {
+    const btn = document.createElement('button');
+    btn.className = 'sig-choice-btn';
+    btn.textContent = KEYS[idx].sigTxt === '0' ? '0 (Do)' : KEYS[idx].sigTxt;
+    btn.dataset.idx = idx;
+    btn.addEventListener('click', () => handleSigChoice(idx, correctIdx));
+    box.appendChild(btn);
+  });
+}
+
+// ── Click handlers ────────────────────────────────────────────────────────────
+function handleSegClick(ring, i) {
+  if (!S.started || S.answered) return;
+  const isCorrectRing =
+    (S.mode === 'relativa' && ring === 'minor') ||
+    (S.mode !== 'relativa' && ring === 'major');
+  if (!isCorrectRing) return;
+  if (S.mode === 'sig') return; // sig uses buttons
+
+  S.answered = true;
+  S.scoreTotal++;
+  const correct = i === S.ansIdx;
+  if (correct) S.scoreOk++;
+  updateScoreDisplay();
+
+  if (correct) {
+    setSegColor(ring, i, '#4a7c59', '#fff');
+    document.getElementById('feedback').textContent = '¡Correcto!';
+    document.getElementById('feedback').className = 'feedback-msg ok';
+    // update center
+    if (ring === 'major') updateCenter(KEYS[i].major, 'mayor');
+    else updateCenter(KEYS[i].minor, 'relativa');
+  } else {
+    setSegColor(ring, i, '#c0392b', '#fff');
+    // Show correct
+    setSegColor(ring, S.ansIdx, '#4a7c59', '#fff');
+    const ansKey = KEYS[S.ansIdx];
+    const correctStr = ring === 'minor' ? ansKey.minor : ansKey.major;
+    document.getElementById('feedback').textContent = `No. Era ${correctStr}`;
+    document.getElementById('feedback').className = 'feedback-msg bad';
+    if (ring === 'major') updateCenter(ansKey.major, 'correcto');
+    else updateCenter(ansKey.minor, 'correcto');
+  }
+
+  document.getElementById('btn-next').classList.add('show');
+}
+
+function handleSigChoice(idx, correctIdx) {
+  if (!S.started || S.answered) return;
+  S.answered = true;
+  S.scoreTotal++;
+  const correct = idx === correctIdx;
+  if (correct) S.scoreOk++;
+  updateScoreDisplay();
+
+  const buttons = document.querySelectorAll('.sig-choice-btn');
+  buttons.forEach(btn => {
+    btn.disabled = true;
+    const bi = parseInt(btn.dataset.idx);
+    if (bi === correctIdx) btn.classList.add('correct');
+    else if (bi === idx && !correct) btn.classList.add('wrong');
+  });
+
+  // Highlight correct sig ring segment
+  setSegColor('sig', correctIdx, '#4a7c59', '#fff');
+
+  if (correct) {
+    document.getElementById('feedback').textContent = `¡Correcto! ${KEYS[correctIdx].sigLabel}`;
+    document.getElementById('feedback').className = 'feedback-msg ok';
+  } else {
+    document.getElementById('feedback').textContent = `No. ${KEYS[correctIdx].major} tiene ${KEYS[correctIdx].sigLabel}`;
+    document.getElementById('feedback').className = 'feedback-msg bad';
+  }
+
+  updateCenter(KEYS[correctIdx].sigTxt, KEYS[correctIdx].sigLabel);
+  document.getElementById('btn-next').classList.add('show');
+}
+
+function updateScoreDisplay() {
+  document.getElementById('score-correct').textContent = S.scoreOk;
+  document.getElementById('score-total').textContent = ' / ' + S.scoreTotal;
+}
+
+// ── Mode buttons ──────────────────────────────────────────────────────────────
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    S.mode = btn.dataset.mode;
+    if (S.started) newQuestion();
+  });
+});
+
+// ── Start / Next ──────────────────────────────────────────────────────────────
+document.getElementById('btn-start').addEventListener('click', () => {
+  S.started = true;
+  document.getElementById('start-overlay').style.display = 'none';
+  newQuestion();
+});
+
+document.getElementById('btn-next').addEventListener('click', () => {
+  newQuestion();
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+buildSVG();
+</script>
+</body>
+</html>

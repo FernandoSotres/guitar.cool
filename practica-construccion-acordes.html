@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>guitarra.cool · Construcción de Acordes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#faf6f0;--paper2:#f2ece3;--paper3:#e8e0d4;--paper4:#ddd4c4;--paper5:#cec4b0;
+  --copper:#a05c20;--copper-lt:#c07830;--copper-dk:#7a4010;
+  --ink:#1a1410;--ink2:#2e2418;--ink3:#4a3c2c;--ink4:#6a5a46;--ink5:#8a7a66;
+  --green:#4a7c59;--green-lt:#c8e6d0;
+  --red:#c0392b;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(250,246,240,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:56px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{color:var(--copper);}
+.nav-link{padding:0 16px;height:56px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+
+.ex-page{max-width:860px;margin:0 auto;padding:48px 24px 80px;}
+
+.ex-header{display:flex;align-items:flex-start;gap:20px;margin-bottom:32px;flex-wrap:wrap;}
+.ex-back{font-size:13px;color:var(--ink4);text-decoration:none;display:flex;align-items:center;gap:6px;padding-top:6px;transition:color .2s;white-space:nowrap;}
+.ex-back:hover{color:var(--copper);}
+.ex-title-block{flex:1;min-width:200px;}
+.ex-eyebrow{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:6px;}
+.ex-title{font-family:var(--serif);font-size:clamp(28px,4vw,40px);font-weight:700;line-height:1.05;letter-spacing:-.02em;}
+.ex-score-block{display:flex;align-items:center;gap:8px;padding-top:4px;}
+.score-chip{font-family:var(--mono);font-size:13px;background:var(--paper3);padding:6px 14px;border-radius:20px;white-space:nowrap;}
+.score-chip .c-ok{color:var(--green);}
+.score-chip .c-tot{color:var(--ink5);}
+
+.mode-bar{display:flex;gap:6px;margin-bottom:36px;flex-wrap:wrap;}
+.mode-btn{font-size:12px;font-weight:600;padding:7px 15px;border:1.5px solid var(--paper4);border-radius:20px;background:transparent;color:var(--ink4);cursor:pointer;transition:all .18s;letter-spacing:.02em;font-family:var(--sans);}
+.mode-btn:hover{border-color:var(--copper-lt);color:var(--copper);}
+.mode-btn.active{border-color:var(--copper);background:var(--copper);color:#fff;}
+
+.ex-main{display:flex;flex-direction:column;align-items:center;gap:24px;}
+
+.question-card{text-align:center;padding:24px 40px;background:#fff;border:1px solid var(--paper3);border-radius:16px;width:100%;max-width:540px;min-height:100px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.q-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:8px;}
+.q-text{font-family:var(--serif);font-size:clamp(22px,4vw,30px);font-weight:700;line-height:1.3;color:var(--ink);}
+.q-sub{font-size:13px;color:var(--ink4);margin-top:6px;}
+
+.circle-wrap{display:flex;align-items:center;justify-content:center;}
+.circle-wrap svg{max-width:500px;width:100%;height:auto;}
+
+/* Chord name buttons for "identifica" mode */
+.chord-choices{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:500px;}
+.chord-btn{font-family:var(--sans);font-size:14px;font-weight:600;padding:10px 20px;border:2px solid var(--paper4);border-radius:8px;background:#fff;color:var(--ink);cursor:pointer;transition:all .18s;min-width:110px;text-align:center;}
+.chord-btn:hover:not(:disabled){border-color:var(--copper);color:var(--copper);}
+.chord-btn.correct{border-color:var(--green);background:var(--green);color:#fff;cursor:default;}
+.chord-btn.wrong{border-color:var(--red);background:var(--red);color:#fff;cursor:default;}
+.chord-btn:disabled{cursor:default;}
+
+/* Interval choices */
+.interval-choices{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:480px;}
+.interval-btn{font-family:var(--sans);font-size:13px;font-weight:600;padding:9px 16px;border:2px solid var(--paper4);border-radius:8px;background:#fff;color:var(--ink);cursor:pointer;transition:all .18s;text-align:center;}
+.interval-btn:hover:not(:disabled){border-color:var(--copper);color:var(--copper);}
+.interval-btn.correct{border-color:var(--green);background:var(--green);color:#fff;cursor:default;}
+.interval-btn.wrong{border-color:var(--red);background:var(--red);color:#fff;cursor:default;}
+.interval-btn:disabled{cursor:default;}
+
+.counter{font-family:var(--mono);font-size:13px;color:var(--ink4);text-align:center;}
+.counter.done{color:var(--green);font-weight:600;}
+
+.feedback-msg{font-size:15px;font-weight:500;text-align:center;min-height:22px;}
+.feedback-msg.ok{color:var(--green);}
+.feedback-msg.bad{color:var(--red);}
+
+.btn-next{background:var(--copper);color:#fff;font-size:14px;font-weight:600;padding:12px 32px;border:none;border-radius:8px;cursor:pointer;transition:background .2s;font-family:var(--sans);display:none;}
+.btn-next:hover{background:var(--copper-dk);}
+.btn-next.show{display:inline-block;}
+
+.btn-reveal{background:transparent;color:var(--ink4);font-size:13px;font-weight:500;padding:8px 20px;border:1.5px solid var(--paper4);border-radius:8px;cursor:pointer;transition:all .18s;font-family:var(--sans);display:none;}
+.btn-reveal:hover{border-color:var(--copper-lt);color:var(--copper);}
+.btn-reveal.show{display:inline-block;}
+
+.action-row{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;}
+
+.start-overlay{text-align:center;}
+.btn-start{background:var(--copper);color:#fff;font-size:15px;font-weight:600;padding:14px 44px;border:none;border-radius:10px;cursor:pointer;transition:background .2s;font-family:var(--sans);}
+.btn-start:hover{background:var(--copper-dk);}
+.start-hint{font-size:14px;color:var(--ink4);margin-top:16px;font-style:italic;}
+
+/* Flash animation for wrong clicks */
+@keyframes wrongFlash {
+  0%{fill:#c0392b;} 60%{fill:#c0392b;} 100%{fill:var(--paper2);}
+}
+.note-circle.flash-wrong { animation: wrongFlash 0.5s ease forwards; }
+
+@media(max-width:600px){
+  nav{padding:0 16px;}
+  .ex-page{padding:32px 16px 64px;}
+  .question-card{padding:20px 20px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">guitarra<span>.cool</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link active">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+</nav>
+
+<div class="ex-page">
+
+  <div class="ex-header">
+    <a href="/practica" class="ex-back">← Práctica</a>
+    <div class="ex-title-block">
+      <div class="ex-eyebrow">Teoría Visual</div>
+      <h1 class="ex-title">Construcción de Acordes</h1>
+    </div>
+    <div class="ex-score-block">
+      <div class="score-chip">
+        <span class="c-ok" id="score-correct">0</span>
+        <span class="c-tot" id="score-total"> / 0</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="mode-bar">
+    <button class="mode-btn active" data-mode="construye">Construye el acorde</button>
+    <button class="mode-btn" data-mode="identifica">Identifica el acorde</button>
+    <button class="mode-btn" data-mode="intervalo">Ubica el intervalo</button>
+  </div>
+
+  <div class="ex-main" id="ex-main">
+    <div class="question-card" id="question-card" style="visibility:hidden;">
+      <div class="q-label" id="q-label">Acorde</div>
+      <div class="q-text" id="q-text">—</div>
+      <div class="q-sub" id="q-sub"></div>
+    </div>
+
+    <div class="circle-wrap">
+      <svg id="circle-svg" viewBox="0 0 600 600" width="500" height="500"></svg>
+    </div>
+
+    <div class="counter" id="counter" style="display:none;"></div>
+    <div class="chord-choices" id="chord-choices" style="display:none;"></div>
+    <div class="interval-choices" id="interval-choices" style="display:none;"></div>
+
+    <div class="feedback-msg" id="feedback"></div>
+
+    <div class="start-overlay" id="start-overlay">
+      <button class="btn-start" id="btn-start">Empezar ejercicio</button>
+      <p class="start-hint">Construye acordes sin instrumento, solo teoría</p>
+    </div>
+
+    <div class="action-row" id="action-row" style="display:none;">
+      <button class="btn-reveal show" id="btn-reveal">Revelar</button>
+      <button class="btn-next" id="btn-next">Siguiente →</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── Data ──────────────────────────────────────────────────────────────────────
+const NOTES = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+
+const CHORDS = [
+  { name:'Mayor',        symbol:'',    intervals:[0,4,7],    label:'Mayor' },
+  { name:'menor',        symbol:'m',   intervals:[0,3,7],    label:'menor' },
+  { name:'disminuido',   symbol:'°',   intervals:[0,3,6],    label:'Disminuido' },
+  { name:'aumentado',    symbol:'+',   intervals:[0,4,8],    label:'Aumentado' },
+  { name:'dominante 7ª', symbol:'7',   intervals:[0,4,7,10], label:'Dom7' },
+  { name:'mayor 7ª',     symbol:'M7',  intervals:[0,4,7,11], label:'Maj7' },
+  { name:'menor 7ª',     symbol:'m7',  intervals:[0,3,7,10], label:'m7' },
+  { name:'semidisminuido',symbol:'ø7', intervals:[0,3,6,10], label:'m7♭5' },
+];
+
+const INTERVALS = [
+  { name:'2ª menor',  semis:1 },
+  { name:'2ª mayor',  semis:2 },
+  { name:'3ª menor',  semis:3 },
+  { name:'3ª mayor',  semis:4 },
+  { name:'4ª justa',  semis:5 },
+  { name:'tritono',   semis:6 },
+  { name:'5ª justa',  semis:7 },
+  { name:'6ª menor',  semis:8 },
+  { name:'6ª mayor',  semis:9 },
+  { name:'7ª menor',  semis:10 },
+  { name:'7ª mayor',  semis:11 },
+];
+
+// ── State ──────────────────────────────────────────────────────────────────────
+const S = {
+  mode: 'construye',
+  started: false,
+  answered: false,
+  rootIdx: 0,
+  chordIdx: 0,
+  intervalSemis: 0,
+  targetNotes: [],   // set of note indices that should be selected (for construye)
+  selected: new Set(),  // notes currently selected by user
+  needed: 0,         // non-root notes to select
+  scoreOk: 0,
+  scoreTotal: 0,
+};
+
+// ── SVG ────────────────────────────────────────────────────────────────────────
+const CX=300, CY=300, R_NOTES=200, R_NOTE=26;
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+function svgEl(tag, attrs) {
+  const e = document.createElementNS(SVG_NS, tag);
+  for (const [k,v] of Object.entries(attrs)) e.setAttribute(k,v);
+  return e;
+}
+
+function noteAngle(i) { return -90 + i * 30; } // degrees
+
+function notePos(i) {
+  const a = noteAngle(i) * Math.PI / 180;
+  return { x: CX + R_NOTES * Math.cos(a), y: CY + R_NOTES * Math.sin(a) };
+}
+
+function buildSVG() {
+  const svg = document.getElementById('circle-svg');
+  svg.innerHTML = '';
+
+  // Background
+  svg.appendChild(svgEl('circle', {cx:CX,cy:CY,r:R_NOTES+R_NOTE+10,
+    fill:'var(--paper2)',stroke:'var(--paper4)','stroke-width':'1.5'}));
+
+  // Center display
+  svg.appendChild(svgEl('circle',{cx:CX,cy:CY,r:R_NOTES-R_NOTE-18,
+    fill:'var(--paper)',stroke:'var(--paper3)','stroke-width':'1.5'}));
+
+  // Connection lines (light) from center to notes
+  for (let i=0;i<12;i++){
+    const p=notePos(i);
+    const inner = R_NOTES - R_NOTE - 20;
+    const a = noteAngle(i)*Math.PI/180;
+    const xi = CX + inner*Math.cos(a), yi = CY + inner*Math.sin(a);
+    const xo = CX + (R_NOTES - R_NOTE - 4)*Math.cos(a), yo = CY + (R_NOTES - R_NOTE - 4)*Math.sin(a);
+    svg.appendChild(svgEl('line',{x1:xi,y1:yi,x2:xo,y2:yo,
+      stroke:'var(--paper4)','stroke-width':'1',opacity:'0.5'}));
+  }
+
+  // Note circles
+  for (let i=0;i<12;i++){
+    const p = notePos(i);
+    const g = svgEl('g',{class:`note-g note-g-${i}`,'data-i':i,cursor:'pointer'});
+    // outer glow circle (shown on selection)
+    const glow = svgEl('circle',{cx:p.x,cy:p.y,r:R_NOTE+4,
+      fill:'transparent',stroke:'transparent','stroke-width':'2',class:'note-glow'});
+    g.appendChild(glow);
+    // main circle
+    const c = svgEl('circle',{cx:p.x,cy:p.y,r:R_NOTE,
+      fill:'var(--paper2)',stroke:'var(--paper4)','stroke-width':'2',class:'note-circle'});
+    g.appendChild(c);
+    // label
+    const t = svgEl('text',{x:p.x,y:p.y,
+      'text-anchor':'middle','dominant-baseline':'central',
+      'font-family':'var(--serif)','font-size':'14','font-weight':'600',
+      fill:'var(--ink)',class:'note-label','pointer-events':'none'});
+    t.textContent = NOTES[i];
+    g.appendChild(t);
+    svg.appendChild(g);
+    g.addEventListener('click',() => handleNoteClick(i));
+  }
+
+  // Center text group
+  const cg = svgEl('g',{id:'center-g','pointer-events':'none'});
+  svg.appendChild(cg);
+  setCenterText('—','');
+}
+
+function setCenterText(line1, line2) {
+  const cg = document.getElementById('center-g');
+  if(!cg) return;
+  cg.innerHTML='';
+  const t1=svgEl('text',{x:CX,y:line2?CY-11:CY,
+    'text-anchor':'middle','dominant-baseline':'central',
+    'font-family':'var(--serif)','font-size':'22','font-weight':'700',
+    fill:'var(--ink)'});
+  t1.textContent=line1;
+  cg.appendChild(t1);
+  if(line2){
+    const t2=svgEl('text',{x:CX,y:CY+14,
+      'text-anchor':'middle','dominant-baseline':'central',
+      'font-family':'var(--sans)','font-size':'11','font-weight':'400',
+      fill:'var(--ink4)'});
+    t2.textContent=line2;
+    cg.appendChild(t2);
+  }
+}
+
+function setNoteColor(i, fill, strokeColor, textFill) {
+  const g = document.querySelector(`.note-g-${i}`);
+  if(!g) return;
+  g.querySelector('.note-circle').setAttribute('fill', fill);
+  g.querySelector('.note-circle').setAttribute('stroke', strokeColor||'var(--paper4)');
+  g.querySelector('.note-label').setAttribute('fill', textFill||'var(--ink)');
+}
+
+function setNoteGlow(i, color) {
+  const g = document.querySelector(`.note-g-${i}`);
+  if(!g) return;
+  g.querySelector('.note-glow').setAttribute('stroke', color||'transparent');
+}
+
+function resetAllNotes() {
+  for(let i=0;i<12;i++){
+    setNoteColor(i,'var(--paper2)','var(--paper4)','var(--ink)');
+    setNoteGlow(i,'transparent');
+  }
+}
+
+// ── Question logic ─────────────────────────────────────────────────────────────
+function newQuestion() {
+  S.answered = false;
+  S.selected = new Set();
+  document.getElementById('feedback').textContent='';
+  document.getElementById('feedback').className='feedback-msg';
+  document.getElementById('btn-next').classList.remove('show');
+  document.getElementById('btn-reveal').classList.add('show');
+  document.getElementById('chord-choices').style.display='none';
+  document.getElementById('chord-choices').innerHTML='';
+  document.getElementById('interval-choices').style.display='none';
+  document.getElementById('interval-choices').innerHTML='';
+  document.getElementById('counter').style.display='none';
+  document.getElementById('action-row').style.display='flex';
+  document.getElementById('question-card').style.visibility='visible';
+  resetAllNotes();
+
+  const rootIdx = Math.floor(Math.random()*12);
+  const chordIdx = Math.floor(Math.random()*CHORDS.length);
+  S.rootIdx = rootIdx;
+  S.chordIdx = chordIdx;
+
+  const chord = CHORDS[chordIdx];
+  const rootName = NOTES[rootIdx];
+
+  const qlabel = document.getElementById('q-label');
+  const qtext  = document.getElementById('q-text');
+  const qsub   = document.getElementById('q-sub');
+
+  if (S.mode === 'construye') {
+    S.targetNotes = chord.intervals.map(iv => (rootIdx + iv) % 12);
+    S.needed = S.targetNotes.length - 1; // non-root notes
+    S.selected.add(rootIdx);
+
+    qlabel.textContent = 'Construye el acorde';
+    qtext.textContent = `${rootName} ${chord.name}`;
+    qsub.textContent = `Notas del acorde: ${chord.intervals.length}`;
+
+    // Highlight root
+    setNoteColor(rootIdx,'var(--copper)','var(--copper-dk)','#fff');
+    setCenterText(rootName, chord.name);
+    updateCounter();
+
+  } else if (S.mode === 'identifica') {
+    S.targetNotes = chord.intervals.map(iv => (rootIdx + iv) % 12);
+
+    qlabel.textContent = 'Identifica el acorde';
+    qtext.textContent = `¿Qué tipo de acorde es?`;
+    qsub.textContent = `Raíz: ${rootName}`;
+
+    // Show all chord notes
+    setNoteColor(rootIdx,'var(--copper)','var(--copper-dk)','#fff');
+    S.targetNotes.slice(1).forEach(ni => {
+      setNoteColor(ni,'#d4a86a','#a07040','var(--ink2)');
+    });
+    setCenterText(rootName,'?');
+    buildChordChoices(chordIdx);
+    document.getElementById('btn-reveal').classList.remove('show');
+
+  } else if (S.mode === 'intervalo') {
+    const ivIdx = Math.floor(Math.random()*INTERVALS.length);
+    const iv = INTERVALS[ivIdx];
+    S.intervalSemis = iv.semis;
+    S.ansNote = (rootIdx + iv.semis) % 12;
+
+    qlabel.textContent = 'Intervalo';
+    qtext.textContent = `${iv.name} de ${rootName}`;
+    qsub.textContent = 'Haz clic en la nota correcta';
+
+    setNoteColor(rootIdx,'var(--copper)','var(--copper-dk)','#fff');
+    setCenterText(rootName, iv.name);
+    document.getElementById('btn-reveal').classList.remove('show');
+  }
+}
+
+function updateCounter() {
+  if(S.mode !== 'construye') return;
+  const remaining = S.targetNotes.filter(n => !S.selected.has(n)).length;
+  const ctr = document.getElementById('counter');
+  ctr.style.display = 'block';
+  if(remaining === 0) {
+    ctr.textContent = '¡Acorde completo!';
+    ctr.className = 'counter done';
+  } else {
+    ctr.textContent = `Faltan ${remaining} nota${remaining===1?'':'s'}`;
+    ctr.className = 'counter';
+  }
+}
+
+function buildChordChoices(correctIdx) {
+  const box = document.getElementById('chord-choices');
+  box.style.display='flex';
+
+  // Pick 3 wrong options
+  const pool=[];
+  for(let x=0;x<CHORDS.length;x++) if(x!==correctIdx) pool.push(x);
+  for(let j=pool.length-1;j>0;j--){
+    const k=Math.floor(Math.random()*(j+1));
+    [pool[j],pool[k]]=[pool[k],pool[j]];
+  }
+  const choices=[correctIdx,pool[0],pool[1],pool[2]];
+  // Shuffle choices
+  for(let j=choices.length-1;j>0;j--){
+    const k=Math.floor(Math.random()*(j+1));
+    [choices[j],choices[k]]=[choices[k],choices[j]];
+  }
+
+  choices.forEach(idx=>{
+    const btn=document.createElement('button');
+    btn.className='chord-btn';
+    btn.textContent=CHORDS[idx].name;
+    btn.dataset.idx=idx;
+    btn.addEventListener('click',()=>handleChordChoice(idx,correctIdx));
+    box.appendChild(btn);
+  });
+}
+
+// ── Click handlers ─────────────────────────────────────────────────────────────
+function handleNoteClick(i) {
+  if(!S.started || S.answered) return;
+
+  if(S.mode === 'construye') {
+    if(S.selected.has(i)) return; // already selected
+    if(S.targetNotes.includes(i)) {
+      // Correct note
+      S.selected.add(i);
+      setNoteColor(i,'#4a7c59','#2d5e40','#fff');
+      setNoteGlow(i,'rgba(74,124,89,0.3)');
+      updateCounter();
+      // Check completion
+      const remaining = S.targetNotes.filter(n=>!S.selected.has(n)).length;
+      if(remaining===0) {
+        S.answered = true;
+        S.scoreOk++;
+        S.scoreTotal++;
+        updateScoreDisplay();
+        document.getElementById('feedback').textContent='¡Perfecto! Acorde completo.';
+        document.getElementById('feedback').className='feedback-msg ok';
+        document.getElementById('btn-next').classList.add('show');
+        document.getElementById('btn-reveal').classList.remove('show');
+        // Show chord name in center
+        setCenterText(NOTES[S.rootIdx], CHORDS[S.chordIdx].name);
+      }
+    } else {
+      // Wrong note - flash red
+      const g = document.querySelector(`.note-g-${i}`);
+      const c = g.querySelector('.note-circle');
+      c.setAttribute('fill','#c0392b');
+      c.setAttribute('stroke','#922b21');
+      g.querySelector('.note-label').setAttribute('fill','#fff');
+      setTimeout(()=>{
+        if(!S.selected.has(i)){
+          setNoteColor(i,'var(--paper2)','var(--paper4)','var(--ink)');
+        }
+      },500);
+    }
+  } else if(S.mode === 'intervalo') {
+    if(S.answered) return;
+    S.answered = true;
+    S.scoreTotal++;
+    if(i===S.ansNote){
+      S.scoreOk++;
+      setNoteColor(i,'#4a7c59','#2d5e40','#fff');
+      document.getElementById('feedback').textContent='¡Correcto!';
+      document.getElementById('feedback').className='feedback-msg ok';
+      setCenterText(NOTES[i],'✓');
+    } else {
+      setNoteColor(i,'#c0392b','#922b21','#fff');
+      setNoteColor(S.ansNote,'#4a7c59','#2d5e40','#fff');
+      document.getElementById('feedback').textContent=`No. Era ${NOTES[S.ansNote]}`;
+      document.getElementById('feedback').className='feedback-msg bad';
+      setCenterText(NOTES[S.ansNote],'correcto');
+    }
+    updateScoreDisplay();
+    document.getElementById('btn-next').classList.add('show');
+    document.getElementById('btn-reveal').classList.remove('show');
+  }
+}
+
+function handleChordChoice(idx, correctIdx) {
+  if(!S.started||S.answered) return;
+  S.answered=true;
+  S.scoreTotal++;
+  if(idx===correctIdx) S.scoreOk++;
+  updateScoreDisplay();
+
+  document.querySelectorAll('.chord-btn').forEach(btn=>{
+    btn.disabled=true;
+    const bi=parseInt(btn.dataset.idx);
+    if(bi===correctIdx) btn.classList.add('correct');
+    else if(bi===idx&&idx!==correctIdx) btn.classList.add('wrong');
+  });
+
+  if(idx===correctIdx){
+    document.getElementById('feedback').textContent=`¡Correcto! ${CHORDS[correctIdx].name}`;
+    document.getElementById('feedback').className='feedback-msg ok';
+    setCenterText(NOTES[S.rootIdx],CHORDS[correctIdx].symbol||'M');
+  } else {
+    document.getElementById('feedback').textContent=`No. Es ${CHORDS[correctIdx].name}`;
+    document.getElementById('feedback').className='feedback-msg bad';
+    setCenterText(NOTES[S.rootIdx],CHORDS[correctIdx].symbol||'M');
+  }
+  document.getElementById('btn-next').classList.add('show');
+}
+
+function revealAnswer() {
+  if(S.answered) return;
+  S.answered = true;
+  S.scoreTotal++;
+  updateScoreDisplay();
+  document.getElementById('btn-reveal').classList.remove('show');
+
+  if(S.mode==='construye'){
+    S.targetNotes.forEach(ni=>{
+      if(!S.selected.has(ni)){
+        setNoteColor(ni,'#c0392b','#922b21','#fff');
+      }
+    });
+    document.getElementById('feedback').textContent='Las notas del acorde están marcadas';
+    document.getElementById('feedback').className='feedback-msg bad';
+    document.getElementById('counter').style.display='none';
+  }
+  document.getElementById('btn-next').classList.add('show');
+}
+
+function updateScoreDisplay() {
+  document.getElementById('score-correct').textContent=S.scoreOk;
+  document.getElementById('score-total').textContent=' / '+S.scoreTotal;
+}
+
+// ── Mode & controls ────────────────────────────────────────────────────────────
+document.querySelectorAll('.mode-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    S.mode=btn.dataset.mode;
+    if(S.started) newQuestion();
+  });
+});
+
+document.getElementById('btn-start').addEventListener('click',()=>{
+  S.started=true;
+  document.getElementById('start-overlay').style.display='none';
+  newQuestion();
+});
+
+document.getElementById('btn-reveal').addEventListener('click',()=>revealAnswer());
+document.getElementById('btn-next').addEventListener('click',()=>newQuestion());
+
+// ── Init ───────────────────────────────────────────────────────────────────────
+buildSVG();
+</script>
+</body>
+</html>

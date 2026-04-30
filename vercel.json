@@ -15,6 +15,9 @@
     { "source": "/practica/escalas",      "destination": "/practica-escalas.html" },
     { "source": "/practica/acordes",      "destination": "/practica-acordes.html" },
     { "source": "/practica/armonia",      "destination": "/practica-armonia.html" },
-    { "source": "/practica/notas",        "destination": "/practica-notas.html" }
+    { "source": "/practica/notas",        "destination": "/practica-notas.html" },
+    { "source": "/practica/circulo",                "destination": "/practica-circulo.html" },
+    { "source": "/practica/construccion-acordes",   "destination": "/practica-construccion-acordes.html" },
+    { "source": "/practica/progresiones",           "destination": "/practica-progresiones.html" }
   ]
 }
