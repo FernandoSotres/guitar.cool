@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>guitarra.cool · Círculo de Quintas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#faf6f0;--paper2:#f2ece3;--paper3:#e8e0d4;--paper4:#ddd4c4;--paper5:#cec4b0;
+  --copper:#a05c20;--copper-lt:#c07830;--copper-dk:#7a4010;
+  --ink:#1a1410;--ink2:#2e2418;--ink3:#4a3c2c;--ink4:#6a5a46;--ink5:#8a7a66;
+  --tonic:#a05c20;--subdom:#5a7abf;--dominant:#7a4abf;--relative:#4a7c59;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(250,246,240,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:56px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{color:var(--copper);}
+.nav-link{padding:0 16px;height:56px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+.th-progress{position:fixed;top:56px;left:0;right:0;height:2px;background:rgba(160,92,32,.12);z-index:99;}
+.th-progress-bar{height:100%;background:var(--copper);width:0%;transition:width .08s linear;}
+
+.th-breadcrumb{background:var(--paper2);border-bottom:1px solid var(--paper4);padding:0 48px;height:40px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink5);}
+.th-breadcrumb a{color:var(--ink5);text-decoration:none;}
+.th-breadcrumb a:hover{color:var(--copper);}
+.th-breadcrumb .sep{opacity:.5;}
+.th-breadcrumb .current{color:var(--ink3);font-weight:500;}
+
+.th-hero{background:#100a04;padding:110px 48px 90px;text-align:center;overflow:hidden;}
+.th-chapter{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:28px;display:flex;align-items:center;justify-content:center;gap:14px;}
+.th-chapter::before,.th-chapter::after{content:'';display:block;height:1px;width:48px;background:var(--copper-lt);opacity:.35;}
+.th-title{font-family:var(--serif);font-size:clamp(54px,7.5vw,92px);font-weight:700;line-height:.92;letter-spacing:-.025em;color:var(--paper);margin-bottom:28px;}
+.th-title em{font-style:italic;color:var(--copper-lt);}
+.th-lead{font-family:var(--serif);font-size:clamp(17px,2vw,22px);font-style:italic;color:rgba(250,246,240,.58);max-width:580px;margin:0 auto 44px;line-height:1.65;}
+.th-scroll-hint{font-size:11px;color:rgba(250,246,240,.22);letter-spacing:.14em;text-transform:uppercase;}
+
+.th-section{padding:88px 48px;}
+.th-section.dark{background:#100a04;}
+.th-inner{max-width:1080px;margin:0 auto;}
+.th-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;display:block;}
+.th-section.dark .th-label{color:var(--copper-lt);}
+.th-h2{font-family:var(--serif);font-size:clamp(34px,4.5vw,56px);font-weight:700;line-height:1.02;letter-spacing:-.025em;color:var(--ink);margin-bottom:22px;}
+.th-section.dark .th-h2{color:var(--paper);}
+.th-body{font-size:15px;color:var(--ink3);line-height:1.85;max-width:600px;}
+.th-body+.th-body{margin-top:14px;}
+.th-section.dark .th-body{color:rgba(250,246,240,.58);}
+.th-body strong{color:var(--ink2);font-weight:600;}
+.th-section.dark .th-body strong{color:rgba(250,246,240,.92);}
+.th-split{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:center;}
+.th-callout{border-left:3px solid var(--copper);border-radius:0 8px 8px 0;padding:16px 20px;margin:28px 0;background:rgba(160,92,32,.07);}
+.th-section.dark .th-callout{background:rgba(255,255,255,.05);border-left-color:var(--copper-lt);}
+.th-callout-label{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);margin-bottom:7px;}
+.th-section.dark .th-callout-label{color:var(--copper-lt);}
+.th-callout p{font-size:14px;color:var(--ink3);line-height:1.65;}
+.th-section.dark .th-callout p{color:rgba(250,246,240,.58);}
+
+/* ── CIRCLE SVG WRAPPERS ── */
+.circle-stage{display:flex;justify-content:center;align-items:flex-start;gap:40px;flex-wrap:wrap;}
+.circle-stage svg{max-width:480px;width:100%;height:auto;flex-shrink:0;}
+.circle-info-panel{flex:1;min-width:220px;max-width:340px;padding-top:24px;}
+.circle-info-key{font-family:var(--serif);font-size:44px;font-weight:700;color:var(--paper);line-height:1;margin-bottom:6px;}
+.circle-info-sub{font-size:12px;color:rgba(250,246,240,.36);letter-spacing:.1em;text-transform:uppercase;margin-bottom:20px;}
+.circle-info-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);}
+.circle-info-row:last-child{border-bottom:none;}
+.cir-il{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgba(250,246,240,.28);width:70px;flex-shrink:0;}
+.cir-iv{font-family:var(--mono);font-size:13px;color:rgba(250,246,240,.8);}
+
+/* ── KEY SIGNATURE TABLE ── */
+.sig-table{width:100%;border-collapse:collapse;font-size:14px;margin:24px 0;}
+.sig-table th{font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--ink5);padding:8px 12px;text-align:left;border-bottom:1px solid var(--paper4);}
+.sig-table td{padding:10px 12px;border-bottom:1px solid var(--paper3);color:var(--ink3);}
+.sig-table tr:hover td{background:var(--paper2);}
+.sig-table .note-name{font-family:var(--serif);font-size:17px;font-weight:700;color:var(--ink);}
+.sig-table .sig-val{font-family:var(--mono);font-size:13px;font-weight:600;}
+.sig-table .sig-sharp{color:var(--copper);}
+.sig-table .sig-flat{color:#5a7abf;}
+.sig-table .sig-none{color:var(--ink5);}
+.sig-table .minor-name{font-size:13px;color:var(--ink4);}
+
+/* ── RELATIVE PAIRS ── */
+.rel-pairs{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:28px 0;}
+.rel-pair{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:18px 16px;display:flex;align-items:center;gap:16px;}
+.rel-major{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--paper);flex:1;}
+.rel-minor{font-family:var(--serif);font-size:18px;font-weight:600;color:rgba(250,246,240,.5);flex:1;text-align:right;}
+.rel-arrow{color:rgba(250,246,240,.2);font-size:14px;}
+.rel-sig{font-family:var(--mono);font-size:10px;color:rgba(250,246,240,.28);margin-top:3px;}
+
+/* ── PROGRESSION SECTION ── */
+.prog-explorer{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:32px;margin:32px 0;}
+.prog-row{display:flex;align-items:center;gap:16px;margin-bottom:24px;flex-wrap:wrap;}
+.prog-row label{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(250,246,240,.4);}
+.prog-select{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(250,246,240,.88);font-family:var(--sans);font-size:14px;padding:8px 36px 8px 14px;border-radius:8px;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a7a66' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
+.prog-select option{background:#1c1008;}
+.prog-presets{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;}
+.prog-preset-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(250,246,240,.55);font-family:var(--mono);font-size:11px;padding:7px 14px;border-radius:6px;cursor:pointer;transition:all .15s;}
+.prog-preset-btn:hover{background:rgba(160,92,32,.18);border-color:rgba(192,120,48,.4);color:rgba(250,246,240,.9);}
+.prog-preset-btn.active{background:var(--copper);border-color:var(--copper-dk);color:#fff;}
+.prog-chord-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px;}
+.prog-chip{border-radius:8px;padding:12px 18px;text-align:center;min-width:72px;border:1.5px solid transparent;}
+.prog-chip.t{background:rgba(160,92,32,.18);border-color:rgba(160,92,32,.4);}
+.prog-chip.s{background:rgba(90,122,191,.18);border-color:rgba(90,122,191,.4);}
+.prog-chip.d{background:rgba(122,74,191,.18);border-color:rgba(122,74,191,.4);}
+.prog-chip.r{background:rgba(74,124,89,.18);border-color:rgba(74,124,89,.4);}
+.prog-chip .pc-roman{font-family:var(--mono);font-size:10px;color:rgba(250,246,240,.3);margin-bottom:4px;}
+.prog-chip .pc-name{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--paper);}
+.prog-chip.t .pc-roman{color:rgba(160,92,32,.7);}
+.prog-chip.s .pc-roman{color:rgba(90,122,191,.8);}
+.prog-chip.d .pc-roman{color:rgba(122,74,191,.8);}
+.prog-chip.r .pc-roman{color:rgba(74,124,89,.8);}
+.prog-legend{display:flex;gap:20px;flex-wrap:wrap;margin-top:20px;}
+.prog-leg-item{display:flex;align-items:center;gap:7px;font-size:11px;color:rgba(250,246,240,.38);}
+.prog-leg-dot{width:8px;height:8px;border-radius:50%;}
+
+/* ── MODULATION SECTION ── */
+.mod-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin:28px 0;}
+.mod-card{border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:22px 20px;background:rgba(255,255,255,.03);}
+.mod-type{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:8px;}
+.mod-title{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--paper);margin-bottom:10px;}
+.mod-desc{font-size:13px;color:rgba(250,246,240,.45);line-height:1.6;margin-bottom:12px;}
+.mod-example{font-family:var(--mono);font-size:12px;color:rgba(250,246,240,.35);padding:8px 12px;background:rgba(255,255,255,.04);border-radius:6px;}
+
+/* ── NEIGHBOR VISUAL ── */
+.neighbor-vis{display:flex;align-items:center;justify-content:center;gap:0;margin:24px 0;flex-wrap:wrap;}
+.nb-key{border-radius:10px;padding:16px 20px;text-align:center;min-width:100px;}
+.nb-key.center{background:rgba(160,92,32,.2);border:1.5px solid rgba(160,92,32,.5);}
+.nb-key.neighbor{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.12);}
+.nb-arrow{padding:0 12px;color:rgba(250,246,240,.2);font-size:20px;}
+.nb-label{font-size:10px;color:rgba(250,246,240,.3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;font-size:9px;}
+.nb-note{font-family:var(--serif);font-size:24px;font-weight:700;color:var(--paper);}
+.nb-diff{font-family:var(--mono);font-size:10px;margin-top:4px;}
+.nb-key.center .nb-diff{color:rgba(160,92,32,.7);}
+.nb-key.neighbor .nb-diff{color:rgba(250,246,240,.28);}
+
+/* ── NEXT ── */
+.th-next{background:var(--ink);padding:88px 48px;text-align:center;}
+.th-next-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink5);margin-bottom:18px;display:block;}
+.th-next-title{font-family:var(--serif);font-size:clamp(36px,5vw,56px);font-weight:700;color:var(--paper);margin-bottom:10px;letter-spacing:-.02em;}
+.th-next-sub{font-size:14px;color:var(--ink4);margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.th-next-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.th-next-btn{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:13px;font-weight:600;padding:13px 28px;border-radius:8px;text-decoration:none;transition:background .2s;}
+.th-next-btn:hover{background:var(--copper-dk);}
+.th-next-btn.sec{background:transparent;color:rgba(250,246,240,.5);border:1px solid rgba(255,255,255,.12);}
+.th-next-btn.sec:hover{color:var(--paper);border-color:rgba(255,255,255,.3);}
+
+@media(max-width:768px){
+  nav{padding:0 20px;}
+  .th-breadcrumb{padding:0 20px;}
+  .th-hero{padding:80px 20px 64px;}
+  .th-section{padding:64px 20px;}
+  .th-split{grid-template-columns:1fr;gap:44px;}
+  .th-next{padding:64px 20px;}
+  .circle-stage{flex-direction:column;align-items:center;}
+  .circle-info-panel{width:100%;max-width:100%;}
+  .prog-explorer{padding:20px 16px;}
+  .rel-pairs{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">guitarra<span>.cool</span></a>
+  <a href="/teoria" class="nav-link active">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<div class="th-progress"><div class="th-progress-bar" id="prog-bar"></div></div>
+
+<div class="th-breadcrumb">
+  <a href="/teoria">Teoría musical</a>
+  <span class="sep">›</span>
+  <span class="current">Capítulo 6 · Círculo de Quintas</span>
+</div>
+
+<!-- HERO -->
+<section class="th-hero">
+  <div class="th-chapter">Teoría musical · Capítulo 6</div>
+  <h1 class="th-title">El mapa de<br><em>la tonalidad</em></h1>
+  <p class="th-lead">El círculo de quintas organiza las 12 tonalidades en un diagrama que revela sus armaduras, relativas, vecinas y el movimiento natural de la armonía.</p>
+  <div class="th-scroll-hint">↓ leer</div>
+</section>
+
+<!-- SECCIÓN 1: La quinta como motor -->
+<section class="th-section">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">El principio</span>
+        <h2 class="th-h2">Una quinta a la vez</h2>
+        <p class="th-body">Una <strong>quinta justa</strong> sube 7 semitonos — la distancia entre Do y Sol, entre Sol y Re, entre Re y La. Si sigues añadiendo quintas justas sin detenerte, algo sorprendente ocurre: tras 12 pasos, regresas exactamente donde empezaste.</p>
+        <p class="th-body" style="margin-top:14px;">C → G → D → A → E → B → F♯ → D♭ → A♭ → E♭ → B♭ → F → C. Doce tonalidades, un círculo cerrado. Esto es posible gracias al <strong>temperamento igual</strong> que divide la octava en 12 semitonos iguales.</p>
+        <div class="th-callout" style="margin-top:24px;">
+          <div class="th-callout-label">Dato histórico</div>
+          <p>Johann David Heinichen dibujó el primer círculo de quintas en 1711. Desde entonces es la herramienta más usada en teoría musical occidental para entender la relación entre tonalidades.</p>
+        </div>
+      </div>
+      <div>
+        <!-- Quintas chain visual -->
+        <div id="chain-visual" style="display:flex;flex-direction:column;gap:6px;align-items:flex-start;"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 2: El círculo interactivo -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">El diagrama</span>
+    <h2 class="th-h2">Los tres anillos</h2>
+    <p class="th-body" style="margin-bottom:36px;">El círculo tiene tres capas. El <strong>anillo exterior</strong> muestra las tonalidades mayores. El <strong>anillo medio</strong> muestra la relativa menor de cada tonalidad. El <strong>anillo interior</strong> indica cuántos sostenidos o bemoles tiene cada armadura. Pasa el cursor por cualquier segmento para explorar.</p>
+
+    <div class="circle-stage">
+      <svg id="circle-main" viewBox="0 0 600 600" width="480" height="480"></svg>
+      <div class="circle-info-panel">
+        <div class="circle-info-key" id="ci-key">C</div>
+        <div class="circle-info-sub" id="ci-sub">mayor</div>
+        <div class="circle-info-row">
+          <span class="cir-il">Armadura</span>
+          <span class="cir-iv" id="ci-sig">0 accidentales</span>
+        </div>
+        <div class="circle-info-row">
+          <span class="cir-il">Relativa</span>
+          <span class="cir-iv" id="ci-rel">Am</span>
+        </div>
+        <div class="circle-info-row">
+          <span class="cir-il">5ª arriba</span>
+          <span class="cir-iv" id="ci-up">G mayor</span>
+        </div>
+        <div class="circle-info-row">
+          <span class="cir-il">5ª abajo</span>
+          <span class="cir-iv" id="ci-dn">F mayor</span>
+        </div>
+        <div class="circle-info-row" style="margin-top:10px;">
+          <span class="cir-il" style="font-size:9px;">Leyenda</span>
+          <span class="cir-iv" style="font-size:11px;color:rgba(250,246,240,.3);line-height:1.5;">Exterior: mayor<br>Medio: relativa menor<br>Interior: armadura</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 3: Armaduras de clave -->
+<section class="th-section">
+  <div class="th-inner">
+    <span class="th-label">Armaduras</span>
+    <h2 class="th-h2">Los sostenidos y bemoles</h2>
+    <p class="th-body">El círculo revela el patrón de las armaduras. Moviéndote <strong>hacia la derecha</strong> (hacia el lado de los sostenidos), cada paso añade un sostenido. Hacia la <strong>izquierda</strong> (hacia los bemoles), cada paso añade un bemol.</p>
+    <p class="th-body" style="margin-top:14px;">Hay un truco para memorizar el orden: <strong>Fa-Do-Sol-Re-La-Mi-Si</strong> es el orden en que se añaden los sostenidos (y al revés, el orden de los bemoles). Fácil de recordar con "Fa Como Suenan Diferentes Las Músicas Iguales".</p>
+
+    <div class="th-callout">
+      <div class="th-callout-label">La regla de las enarmónicas</div>
+      <p>F♯ mayor y G♭ mayor suenan idénticas pero se escriben diferente — una tiene 6 sostenidos y la otra 6 bemoles. En la práctica se usa la que resulta más simple para el contexto musical. En el círculo coinciden en la posición de las 6 (como las 6 del reloj).</p>
+    </div>
+
+    <table class="sig-table">
+      <thead>
+        <tr>
+          <th>Tonalidad mayor</th>
+          <th>Armadura</th>
+          <th>Notas alteradas</th>
+          <th>Relativa menor</th>
+        </tr>
+      </thead>
+      <tbody id="sig-table-body"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- SECCIÓN 4: Relativas -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Tonalidades relativas</span>
+    <h2 class="th-h2">Mayor y menor, la misma armadura</h2>
+    <p class="th-body">Cada tonalidad mayor comparte su armadura con una tonalidad menor: su <strong>relativa menor</strong>. La relativa siempre empieza en el <strong>sexto grado</strong> de la escala mayor — 3 semitonos abajo de la tónica (o 9 semitonos arriba).</p>
+    <p class="th-body" style="margin-top:14px;">Do mayor y La menor usan exactamente las mismas notas (sin sostenidos ni bemoles), pero suenan completamente distintas porque su <strong>centro de gravedad tonal</strong> es diferente: Do en una, La en la otra. En el círculo la relativa menor aparece en el anillo interior.</p>
+
+    <div class="rel-pairs" id="rel-pairs"></div>
+
+    <div class="th-callout" style="margin-top:8px;">
+      <div class="th-callout-label">Modo Eólico</div>
+      <p>La escala menor natural no es más que la escala mayor empezando desde el sexto grado. La menor = Do mayor empezando en La. Por eso la relativa existe: comparten exactamente las mismas 7 notas.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 5: Progresiones -->
+<section class="th-section">
+  <div class="th-inner">
+    <span class="th-label">Composición</span>
+    <h2 class="th-h2">Progresiones que el círculo explica</h2>
+    <p class="th-body">El movimiento de quintas es el motor de la armonía occidental. La progresión <strong>V → I</strong> (dominante a tónica) es la cadencia más usada en música — y es exactamente un paso en el círculo de quintas. Las progresiones más comunes siguen el movimiento natural del círculo.</p>
+    <p class="th-body" style="margin-top:14px;">Los <strong>tres acordes principales</strong> de cualquier tonalidad (I, IV y V) son los tres vecinos inmediatos en el círculo: el propio acorde, el que está una quinta a la izquierda (IV) y el que está una quinta a la derecha (V). Todo lo demás se construye sobre esa base.</p>
+
+    <div style="background:#100a04;border-radius:16px;padding:36px;margin-top:32px;">
+      <div class="prog-row">
+        <label>Tonalidad</label>
+        <select class="prog-select" id="prog-key-sel"></select>
+        <label style="margin-left:8px;">Progresión</label>
+      </div>
+      <div class="prog-presets" id="prog-presets"></div>
+      <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;">
+        <svg id="circle-prog" viewBox="0 0 600 600" style="max-width:320px;width:100%;height:auto;flex-shrink:0;"></svg>
+        <div style="flex:1;min-width:200px;">
+          <div class="prog-chord-row" id="prog-chord-row"></div>
+          <div class="prog-legend" id="prog-legend"></div>
+          <p style="font-size:13px;color:rgba(250,246,240,.35);margin-top:18px;line-height:1.6;" id="prog-desc"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 6: Modulación -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Modulación</span>
+    <h2 class="th-h2">Moverse entre tonalidades</h2>
+    <p class="th-body"><strong>Modular</strong> es cambiar de tonalidad durante una pieza. El círculo de quintas muestra exactamente qué tan "lejos" están dos tonalidades: las <strong>vecinas</strong> (un paso en el círculo) comparten seis de las siete notas, lo que hace la transición casi imperceptible. Las tonalidades opuestas en el círculo no comparten ninguna nota.</p>
+
+    <div style="margin:32px 0;">
+      <p style="font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(250,246,240,.28);margin-bottom:16px;">Ejemplo: Do mayor y sus vecinos</p>
+      <div class="neighbor-vis">
+        <div class="nb-key neighbor">
+          <div class="nb-label">5ª abajo</div>
+          <div class="nb-note">F</div>
+          <div class="nb-diff" style="color:rgba(90,122,191,.6);">1♭ — difiere en 1 nota</div>
+        </div>
+        <div class="nb-arrow">←</div>
+        <div class="nb-key center">
+          <div class="nb-label">Tónica</div>
+          <div class="nb-note">C</div>
+          <div class="nb-diff">0 accidentales</div>
+        </div>
+        <div class="nb-arrow">→</div>
+        <div class="nb-key neighbor">
+          <div class="nb-label">5ª arriba</div>
+          <div class="nb-note">G</div>
+          <div class="nb-diff" style="color:rgba(160,92,32,.6);">1♯ — difiere en 1 nota</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mod-grid">
+      <div class="mod-card">
+        <div class="mod-type">Modulación suave</div>
+        <div class="mod-title">Hacia el vecino</div>
+        <div class="mod-desc">Un paso en el círculo cambia solo una nota de la escala. La transición es fluida y casi no se percibe como un cambio drástico.</div>
+        <div class="mod-example">Do → Sol: solo cambia Fa → Fa♯<br>Do → Fa: solo cambia Si → Si♭</div>
+      </div>
+      <div class="mod-card">
+        <div class="mod-type">Modulación expresiva</div>
+        <div class="mod-title">Relativa mayor/menor</div>
+        <div class="mod-desc">Cambiar entre mayor y su relativa menor — misma armadura, diferente tónica — es muy común en canciones. Crea contraste emocional sin cambiar ninguna nota.</div>
+        <div class="mod-example">Do mayor ↔ La menor<br>Sol mayor ↔ Mi menor</div>
+      </div>
+      <div class="mod-card">
+        <div class="mod-type">Modulación dramática</div>
+        <div class="mod-title">Paralela mayor/menor</div>
+        <div class="mod-desc">Cambiar entre una tonalidad mayor y su homónima menor (misma tónica, diferente armadura) crea un contraste fuerte. Muy usada en rock y metal.</div>
+        <div class="mod-example">La mayor → La menor<br>Mi mayor → Mi menor</div>
+      </div>
+      <div class="mod-card">
+        <div class="mod-type">Técnica armónica</div>
+        <div class="mod-title">Acorde pivote</div>
+        <div class="mod-desc">Un acorde que existe en dos tonalidades diferentes actúa como puente. Estás en una tonalidad, pero de repente ese acorde resuena como perteneciente a otra.</div>
+        <div class="mod-example">Do mayor: IV = F mayor<br>F mayor: I = F mayor ✓</div>
+      </div>
+    </div>
+
+    <div class="th-callout">
+      <div class="th-callout-label">En la guitarra</div>
+      <p>Modular una quinta arriba equivale a tocar los mismos acordes 2 trastes más arriba sin cejilla — o con una cejilla. Por eso cambiar la posición de la cejilla en la guitarra cambia la tonalidad: estás moviéndote por el círculo de quintas.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER / NEXT -->
+<section class="th-next">
+  <span class="th-next-label">¿Y ahora qué?</span>
+  <h2 class="th-next-title">Practica el círculo</h2>
+  <p class="th-next-sub">Saber el círculo es una cosa. Tenerlo en los dedos es otra. Entra al ejercicio interactivo y entrena hasta que sea automático.</p>
+  <div class="th-next-btns">
+    <a href="/practica/circulo" class="th-next-btn">Practicar el círculo →</a>
+    <a href="/teoria" class="th-next-btn sec">← Volver a teoría</a>
+  </div>
+</section>
+
+<script>
+// ── Data ──────────────────────────────────────────────────────────────────────
+const KEYS=[
+  {major:'C',  minor:'Am',  sig:0,  sigTxt:'0',        sigLabel:'0 accidentales',  sharps:[],                    flats:[]},
+  {major:'G',  minor:'Em',  sig:1,  sigTxt:'1♯',       sigLabel:'1 sostenido',     sharps:['F♯'],                flats:[]},
+  {major:'D',  minor:'Bm',  sig:2,  sigTxt:'2♯',       sigLabel:'2 sostenidos',    sharps:['F♯','C♯'],           flats:[]},
+  {major:'A',  minor:'F♯m', sig:3,  sigTxt:'3♯',       sigLabel:'3 sostenidos',    sharps:['F♯','C♯','G♯'],      flats:[]},
+  {major:'E',  minor:'C♯m', sig:4,  sigTxt:'4♯',       sigLabel:'4 sostenidos',    sharps:['F♯','C♯','G♯','D♯'], flats:[]},
+  {major:'B',  minor:'G♯m', sig:5,  sigTxt:'5♯',       sigLabel:'5 sostenidos',    sharps:['F♯','C♯','G♯','D♯','A♯'],flats:[]},
+  {major:'F♯', minor:'D♯m', sig:6,  sigTxt:'6♯',       sigLabel:'6 sostenidos',    sharps:['F♯','C♯','G♯','D♯','A♯','E♯'],flats:[]},
+  {major:'D♭', minor:'B♭m', sig:-5, sigTxt:'5♭',       sigLabel:'5 bemoles',       sharps:[],                    flats:['B♭','E♭','A♭','D♭','G♭']},
+  {major:'A♭', minor:'Fm',  sig:-4, sigTxt:'4♭',       sigLabel:'4 bemoles',       sharps:[],                    flats:['B♭','E♭','A♭','D♭']},
+  {major:'E♭', minor:'Cm',  sig:-3, sigTxt:'3♭',       sigLabel:'3 bemoles',       sharps:[],                    flats:['B♭','E♭','A♭']},
+  {major:'B♭', minor:'Gm',  sig:-2, sigTxt:'2♭',       sigLabel:'2 bemoles',       sharps:[],                    flats:['B♭','E♭']},
+  {major:'F',  minor:'Dm',  sig:-1, sigTxt:'1♭',       sigLabel:'1 bemol',         sharps:[],                    flats:['B♭']},
+];
+
+const KEY_NAMES_ES=['Do','Do♯/Re♭','Re','Re♯/Mi♭','Mi','Fa','Fa♯/Sol♭','Sol','Sol♯/La♭','La','La♯/Si♭','Si'];
+const SCALE_IVS=[0,2,4,5,7,9,11];
+const DEGREE_Q=['M','m','m','M','M','m','°'];
+const NOTES=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+
+const PROGRESSIONS=[
+  {name:'I - IV - V',     degrees:[0,3,4],   desc:'La base del blues, el rock y casi todo lo demás. El IV (subdominante) aleja de la tónica, el V (dominante) crea tensión que resuelve en I.'},
+  {name:'I - V - VI - IV',degrees:[0,4,5,3], desc:'La "progresión de los 4 acordes" que está en miles de canciones pop. El VI añade el sabor menor que crea melancolía.'},
+  {name:'II - V - I',     degrees:[1,4,0],   desc:'El movimiento más importante del jazz. Dos pasos de quinta hacia la derecha en el círculo. La tensión acumulada del IIm y el V resuelve perfectamente en I.'},
+  {name:'I - VI - IV - V',degrees:[0,5,3,4], desc:'Progresión del rock\'n\'roll clásico, los años 50 y el doo-wop. El VI actúa como punto de giro hacia la zona subdominante.'},
+  {name:'VI - IV - I - V', degrees:[5,3,0,4], desc:'La misma colección de acordes que I-V-VI-IV pero empezando en el VI. Suena más oscura y reflectiva al iniciar en el acorde menor.'},
+];
+
+const FUNC_CLASS={0:'t',3:'s',4:'d',5:'r',1:'s',2:'r',6:'d'};
+
+// ── Progress bar ──────────────────────────────────────────────────────────────
+window.addEventListener('scroll',()=>{
+  const h=document.documentElement.scrollHeight-window.innerHeight;
+  const pct=h>0?Math.round(window.scrollY/h*100):0;
+  document.getElementById('prog-bar').style.width=pct+'%';
+});
+
+// ── Chain visual ──────────────────────────────────────────────────────────────
+function buildChainVisual(){
+  const container=document.getElementById('chain-visual');
+  const chain=['C','G','D','A','E','B','F♯','D♭','A♭','E♭','B♭','F','C'];
+  chain.forEach((n,i)=>{
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:12px;';
+    const note=document.createElement('div');
+    note.style.cssText=`
+      background:${i===0||i===12?'rgba(160,92,32,.25)':'var(--paper3)'};
+      border:1.5px solid ${i===0||i===12?'var(--copper)':'var(--paper4)'};
+      color:${i===0||i===12?'var(--copper)':'var(--ink)'};
+      border-radius:8px;padding:8px 16px;
+      font-family:var(--serif);font-size:${i===0||i===12?'22px':'18px'};
+      font-weight:700;min-width:60px;text-align:center;
+    `;
+    note.textContent=n;
+    row.appendChild(note);
+    if(i<12){
+      const arrow=document.createElement('div');
+      arrow.style.cssText='font-size:11px;color:var(--ink5);letter-spacing:.05em;font-family:var(--mono);';
+      arrow.textContent='+5ª →';
+      row.appendChild(arrow);
+    }
+    container.appendChild(row);
+  });
+}
+
+// ── SVG helpers ────────────────────────────────────────────────────────────────
+const NS='http://www.w3.org/2000/svg';
+const CX=300,CY=300;
+const RO1=186,RO2=256,RM1=137,RM2=181,RI1=98,RI2=132,RC=93;
+const HALF=13;
+
+function svgEl(tag,attrs){
+  const e=document.createElementNS(NS,tag);
+  for(const[k,v]of Object.entries(attrs))e.setAttribute(k,v);
+  return e;
+}
+
+function segPath(r1,r2,midDeg){
+  const s=(midDeg-HALF)*Math.PI/180, e=(midDeg+HALF)*Math.PI/180;
+  const x1=CX+r1*Math.cos(s),y1=CY+r1*Math.sin(s);
+  const x2=CX+r2*Math.cos(s),y2=CY+r2*Math.sin(s);
+  const x3=CX+r2*Math.cos(e),y3=CY+r2*Math.sin(e);
+  const x4=CX+r1*Math.cos(e),y4=CY+r1*Math.sin(e);
+  return `M${x1},${y1}L${x2},${y2}A${r2},${r2} 0 0,1 ${x3},${y3}L${x4},${y4}A${r1},${r1} 0 0,0 ${x1},${y1}Z`;
+}
+
+function midAngle(i){return -90+i*30;}
+
+function textPos(r,i){
+  const a=midAngle(i)*Math.PI/180;
+  return{x:CX+r*Math.cos(a),y:CY+r*Math.sin(a)};
+}
+
+function buildCircle(svgId, opts){
+  const svg=document.getElementById(svgId);
+  svg.innerHTML='';
+  opts=opts||{};
+
+  // BG
+  svg.appendChild(svgEl('circle',{cx:CX,cy:CY,r:258,fill:opts.dark?'rgba(255,255,255,.03)':'var(--paper2)',stroke:opts.dark?'rgba(255,255,255,.08)':'var(--paper4)','stroke-width':'1.5'}));
+
+  for(let i=0;i<12;i++){
+    const mid=midAngle(i);
+
+    // Outer (major)
+    const gO=svgEl('g',{class:`co co-${i}`,'data-i':i});
+    const fillO=opts.progColors&&opts.progColors[i]?opts.progColors[i]:(opts.dark?'rgba(255,255,255,.05)':'var(--paper3)');
+    const pO=svgEl('path',{d:segPath(RO1,RO2,mid),fill:fillO,stroke:opts.dark?'rgba(16,10,4,.8)':'var(--paper)','stroke-width':'2.5',class:'co-fill'});
+    gO.appendChild(pO);
+    const tOp=textPos((RO1+RO2)/2,i);
+    const tO=svgEl('text',{x:tOp.x,y:tOp.y,'text-anchor':'middle','dominant-baseline':'central',
+      'font-family':'var(--serif)','font-size':'17','font-weight':'600',
+      fill:opts.progColors&&opts.progColors[i]?'#fff':(opts.dark?'rgba(250,246,240,.85)':'var(--ink)'),
+      class:'co-txt','pointer-events':'none'});
+    tO.textContent=KEYS[i].major;
+    gO.appendChild(tO);
+    svg.appendChild(gO);
+
+    // Middle (minor)
+    const gM=svgEl('g',{class:`cm cm-${i}`,'data-i':i});
+    const pM=svgEl('path',{d:segPath(RM1,RM2,mid),fill:opts.dark?'rgba(255,255,255,.04)':'var(--paper2)',stroke:opts.dark?'rgba(16,10,4,.8)':'var(--paper)','stroke-width':'2.5',class:'cm-fill'});
+    gM.appendChild(pM);
+    const tMp=textPos((RM1+RM2)/2,i);
+    const tM=svgEl('text',{x:tMp.x,y:tMp.y,'text-anchor':'middle','dominant-baseline':'central',
+      'font-family':'var(--sans)','font-size':'11','font-weight':'500',
+      fill:opts.dark?'rgba(250,246,240,.4)':'var(--ink4)','pointer-events':'none'});
+    tM.textContent=KEYS[i].minor;
+    gM.appendChild(tM);
+    svg.appendChild(gM);
+
+    // Inner (sig)
+    const gI=svgEl('g',{class:`ci ci-${i}`,'data-i':i});
+    const pI=svgEl('path',{d:segPath(RI1,RI2,mid),fill:opts.dark?'rgba(255,255,255,.03)':'var(--paper)',stroke:opts.dark?'rgba(16,10,4,.8)':'var(--paper3)','stroke-width':'2',class:'ci-fill'});
+    gI.appendChild(pI);
+    const tIp=textPos((RI1+RI2)/2,i);
+    const tI=svgEl('text',{x:tIp.x,y:tIp.y,'text-anchor':'middle','dominant-baseline':'central',
+      'font-family':'var(--mono)','font-size':'10','font-weight':'400',
+      fill:opts.dark?'rgba(250,246,240,.25)':'var(--ink5)','pointer-events':'none'});
+    tI.textContent=KEYS[i].sigTxt;
+    gI.appendChild(tI);
+    svg.appendChild(gI);
+  }
+
+  // Center
+  svg.appendChild(svgEl('circle',{cx:CX,cy:CY,r:RC,fill:opts.dark?'rgba(255,255,255,.03)':'var(--paper2)',stroke:opts.dark?'rgba(255,255,255,.06)':'var(--paper3)','stroke-width':'1.5'}));
+  svg.appendChild(svgEl('g',{id:svgId+'-cg'}));
+  updateCenter(svgId,'C','mayor',opts.dark);
+}
+
+function updateCenter(svgId,line1,line2,dark){
+  const cg=document.getElementById(svgId+'-cg');
+  if(!cg)return;
+  cg.innerHTML='';
+  const col=dark?'rgba(250,246,240,.8)':'var(--ink)';
+  const col2=dark?'rgba(250,246,240,.3)':'var(--ink5)';
+  const t1=svgEl('text',{x:CX,y:line2?CY-10:CY,'text-anchor':'middle','dominant-baseline':'central',
+    'font-family':'var(--serif)','font-size':'22','font-weight':'700',fill:col,'pointer-events':'none'});
+  t1.textContent=line1;
+  cg.appendChild(t1);
+  if(line2){
+    const t2=svgEl('text',{x:CX,y:CY+16,'text-anchor':'middle','dominant-baseline':'central',
+      'font-family':'var(--sans)','font-size':'11',fill:col2,'pointer-events':'none'});
+    t2.textContent=line2;
+    cg.appendChild(t2);
+  }
+}
+
+// ── Main interactive circle ────────────────────────────────────────────────────
+let lockedIdx=-1;
+
+function highlightMain(i){
+  for(let x=0;x<12;x++){
+    const g=document.querySelector(`#circle-main .co-${x}`);
+    const fill=g.querySelector('.co-fill');
+    const txt=g.querySelector('.co-txt');
+    if(x===i){
+      fill.setAttribute('fill','var(--copper)');
+      txt.setAttribute('fill','#fff');
+    } else {
+      fill.setAttribute('fill','rgba(255,255,255,.05)');
+      txt.setAttribute('fill','rgba(250,246,240,.85)');
+    }
+  }
+}
+
+function showKeyInfo(i){
+  const k=KEYS[i];
+  document.getElementById('ci-key').textContent=k.major;
+  document.getElementById('ci-sub').textContent='mayor';
+  document.getElementById('ci-sig').textContent=k.sigLabel;
+  document.getElementById('ci-rel').textContent=k.minor+' menor';
+  const up=KEYS[(i+1)%12];
+  const dn=KEYS[(i+11)%12];
+  document.getElementById('ci-up').textContent=up.major+' mayor';
+  document.getElementById('ci-dn').textContent=dn.major+' mayor';
+}
+
+function attachMainEvents(){
+  for(let i=0;i<12;i++){
+    const gO=document.querySelector(`#circle-main .co-${i}`);
+    gO.style.cursor='pointer';
+    gO.addEventListener('mouseenter',()=>{if(lockedIdx<0){highlightMain(i);showKeyInfo(i);updateCenter('circle-main',KEYS[i].major,'mayor',true);}});
+    gO.addEventListener('mouseleave',()=>{if(lockedIdx<0){highlightMain(-1);updateCenter('circle-main','C','mayor',true);}});
+    gO.addEventListener('click',()=>{
+      if(lockedIdx===i){lockedIdx=-1;highlightMain(-1);showKeyInfo(0);updateCenter('circle-main','C','mayor',true);}
+      else{lockedIdx=i;highlightMain(i);showKeyInfo(i);updateCenter('circle-main',KEYS[i].major,'mayor',true);}
+    });
+    // Minor segments hover too
+    const gM=document.querySelector(`#circle-main .cm-${i}`);
+    gM.style.cursor='pointer';
+    gM.addEventListener('mouseenter',()=>{if(lockedIdx<0){highlightMain(i);showKeyInfo(i);updateCenter('circle-main',KEYS[i].minor,'menor',true);}});
+    gM.addEventListener('mouseleave',()=>{if(lockedIdx<0){highlightMain(-1);updateCenter('circle-main','C','mayor',true);}});
+    gM.addEventListener('click',()=>{
+      if(lockedIdx===i){lockedIdx=-1;highlightMain(-1);showKeyInfo(0);updateCenter('circle-main','C','mayor',true);}
+      else{lockedIdx=i;highlightMain(i);showKeyInfo(i);updateCenter('circle-main',KEYS[i].minor,'menor',true);}
+    });
+  }
+}
+
+// ── Signature table ────────────────────────────────────────────────────────────
+function buildSigTable(){
+  const tbody=document.getElementById('sig-table-body');
+  KEYS.forEach(k=>{
+    const tr=document.createElement('tr');
+    const altered=[...k.sharps,...k.flats];
+    tr.innerHTML=`
+      <td><span class="note-name">${k.major}</span> mayor</td>
+      <td class="sig-val ${k.sig>0?'sig-sharp':k.sig<0?'sig-flat':'sig-none'}">${k.sigTxt}</td>
+      <td style="font-family:var(--mono);font-size:12px;color:var(--ink5);">${altered.length?altered.join(' · '):'—'}</td>
+      <td class="minor-name">${k.minor} menor</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// ── Relative pairs ─────────────────────────────────────────────────────────────
+function buildRelPairs(){
+  const box=document.getElementById('rel-pairs');
+  // Show all 12 pairs
+  KEYS.forEach(k=>{
+    const d=document.createElement('div');
+    d.className='rel-pair';
+    d.innerHTML=`
+      <div>
+        <div class="rel-major">${k.major}</div>
+        <div class="rel-sig" style="color:rgba(250,246,240,.28);">${k.sigTxt}</div>
+      </div>
+      <div class="rel-arrow">↔</div>
+      <div style="text-align:right;">
+        <div class="rel-minor">${k.minor}</div>
+        <div class="rel-sig">${k.sigTxt}</div>
+      </div>
+    `;
+    box.appendChild(d);
+  });
+}
+
+// ── Progression explorer ───────────────────────────────────────────────────────
+let selProgKey=0;
+let selProgIdx=0;
+
+function buildProgKeySel(){
+  const sel=document.getElementById('prog-key-sel');
+  KEYS.forEach((k,i)=>{
+    const opt=document.createElement('option');
+    opt.value=i;
+    opt.textContent=k.major+' mayor';
+    sel.appendChild(opt);
+  });
+  sel.addEventListener('change',e=>{selProgKey=parseInt(e.target.value);renderProg();});
+}
+
+function buildProgPresets(){
+  const box=document.getElementById('prog-presets');
+  PROGRESSIONS.forEach((p,i)=>{
+    const btn=document.createElement('button');
+    btn.className='prog-preset-btn'+(i===0?' active':'');
+    btn.textContent=p.name;
+    btn.addEventListener('click',()=>{
+      selProgIdx=i;
+      document.querySelectorAll('.prog-preset-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      renderProg();
+    });
+    box.appendChild(btn);
+  });
+}
+
+function renderProg(){
+  const k=KEYS[selProgKey];
+  const prog=PROGRESSIONS[selProgIdx];
+  const rootIdx=selProgKey;
+
+  // Map scale degrees to note indices and key indices
+  const degNotes=SCALE_IVS.map(iv=>(rootIdx+iv)%12);
+  const chords=prog.degrees.map(d=>{
+    const ni=degNotes[d];
+    // Find which KEYS entry matches this note
+    const ki=KEYS.findIndex(x=>x.major===NOTES[ni]||
+      (d===5&&DEGREE_Q[d]==='m')// handle minor quality
+    );
+    return{degIdx:d,noteIdx:ni,quality:DEGREE_Q[d],roman:['I','II','III','IV','V','VI','VII'][d]};
+  });
+
+  // Color map for circle
+  const colors={};
+  chords.forEach(c=>{
+    const ni=degNotes[c.degIdx];
+    const ci=KEYS.findIndex(x=>(NOTES.indexOf(x.major)===ni)||(x.major===NOTES[ni]));
+    if(ci>=0){
+      const fc=FUNC_CLASS[c.degIdx]||'t';
+      const colMap={t:'rgba(160,92,32,.7)',s:'rgba(90,122,191,.7)',d:'rgba(122,74,191,.7)',r:'rgba(74,124,89,.7)'};
+      colors[ci]=colMap[fc];
+    }
+  });
+  // Also highlight the root key
+  colors[rootIdx]='rgba(160,92,32,.7)';
+
+  buildCircle('circle-prog',{dark:true,progColors:colors});
+  updateCenter('circle-prog',k.major,'mayor',true);
+
+  // Chord row
+  const row=document.getElementById('prog-chord-row');
+  row.innerHTML='';
+  chords.forEach(c=>{
+    const ni=degNotes[c.degIdx];
+    const noteName=NOTES[ni];
+    const qSuffix=c.quality==='m'?'m':c.quality==='°'?'°':'';
+    const fc=FUNC_CLASS[c.degIdx]||'t';
+    const chip=document.createElement('div');
+    chip.className=`prog-chip ${fc}`;
+    chip.innerHTML=`<div class="pc-roman">${c.roman}</div><div class="pc-name">${noteName}${qSuffix}</div>`;
+    row.appendChild(chip);
+  });
+
+  // Legend
+  const legend=document.getElementById('prog-legend');
+  legend.innerHTML='';
+  const used=new Set(chords.map(c=>FUNC_CLASS[c.degIdx]||'t'));
+  const legData={t:{col:'rgba(160,92,32,.8)',lbl:'Tónica'},s:{col:'rgba(90,122,191,.8)',lbl:'Subdominante'},d:{col:'rgba(122,74,191,.8)',lbl:'Dominante'},r:{col:'rgba(74,124,89,.8)',lbl:'Relativa'}};
+  used.forEach(fc=>{
+    const li=document.createElement('div');
+    li.className='prog-leg-item';
+    li.innerHTML=`<div class="prog-leg-dot" style="background:${legData[fc].col}"></div>${legData[fc].lbl}`;
+    legend.appendChild(li);
+  });
+
+  document.getElementById('prog-desc').textContent=prog.desc;
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────────
+buildChainVisual();
+buildCircle('circle-main',{dark:true});
+attachMainEvents();
+showKeyInfo(0);
+buildSigTable();
+buildRelPairs();
+buildCircle('circle-prog',{dark:true});
+buildProgKeySel();
+buildProgPresets();
+renderProg();
+</script>
+</body>
+</html>
