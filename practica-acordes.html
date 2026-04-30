@@ -302,28 +302,45 @@ const S = {
   nextTimer:null,
 };
 
-// ── Audio ──────────────────────────────────────────────────────────────
-let synth = null;
+// ── Audio (idéntica cadena que herramientas-guitarra.html) ──────────────
+const _SPC = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+let _sampler = null, _samplerReady = false, _pluckQ = [];
 async function initAudio() {
-  if (synth) return;
+  if (_sampler) return;
   await Tone.start();
-  synth = new Tone.PolySynth(Tone.Synth, {
-    oscillator:{type:'triangle'},
-    envelope:{attack:0.02,decay:0.1,sustain:0.45,release:1.8}
-  }).toDestination();
+  const limiter = new Tone.Limiter(-2).toDestination();
+  const comp    = new Tone.Compressor({ threshold:-22, ratio:4, attack:0.005, release:0.12 }).connect(limiter);
+  const reverb  = new Tone.Freeverb({ roomSize:0.38, dampening:3200, wet:0.14 }).connect(comp);
+  _sampler = new Tone.Sampler({
+    urls: {
+      'E2':'E2.mp3','A2':'A2.mp3','D3':'D3.mp3','G3':'G3.mp3',
+      'B3':'B3.mp3','E4':'E4.mp3','A4':'A4.mp3','D5':'D5.mp3',
+      'G5':'G5.mp3','B5':'B5.mp3',
+    },
+    baseUrl: 'https://cdn.jsdelivr.net/gh/gleitz/midi-js-soundfonts@gh-pages/FluidR3_GM/acoustic_guitar_nylon-mp3/',
+    onload: () => {
+      _samplerReady = true;
+      _pluckQ.forEach(m => _pluck(m));
+      _pluckQ = [];
+    },
+    onerror: (e) => console.warn('Error cargando muestra:', e),
+  }).connect(reverb);
 }
-function midi2note(midi){ return `${APC[midi%12]}${Math.floor(midi/12)+1}`; }
-async function playNote(midi, when, dur='4n') {
+function _pluck(midi, when) {
+  if (!_sampler) return;
+  if (!_samplerReady) { _pluckQ.push(midi); return; }
+  const pc = midi % 12, oct = Math.floor(midi/12) + 1;
+  _sampler.triggerAttackRelease(`${_SPC[pc]}${oct}`, '2n', when || Tone.now()+0.05);
+}
+async function playNote(midi, when) {
   await initAudio();
-  synth.triggerAttackRelease(midi2note(midi), dur, when);
+  _pluck(midi, when);
 }
 async function listenChord() {
   await initAudio();
   const rootMidi = (S.view==='piano' && S.piano && S.piano.rootMidi) ? S.piano.rootMidi : OPEN[S.rootStr] + S.rootFret;
   const now = Tone.now();
-  S.chordIntervals.forEach((iv, i) => {
-    synth.triggerAttackRelease(midi2note(rootMidi + iv), '4n', now + 0.05 + i * 0.18);
-  });
+  S.chordIntervals.forEach((iv, i) => _pluck(rootMidi + iv, now + 0.05 + i * 0.18));
 }
 
 // ── View toggle ────────────────────────────────────────────────────────
@@ -386,7 +403,7 @@ function drawKeyboard() {
     svg += `<rect x="${x+1.5}" y="14" width="${WKW-3}" height="${WKH}" rx="3" fill="${fill}" stroke="#bbb" stroke-width="1" style="${cursor}" ${onclick}/>`;
 
     if (pc===0) {
-      svg += `<text x="${x+WKW/2}" y="${14+WKH-8}" text-anchor="middle" fill="rgba(80,50,20,.35)" font-size="9" font-family="DM Mono,monospace">C${Math.floor(midi/12)}</text>`;
+      svg += `<text x="${x+WKW/2}" y="${14+WKH-8}" text-anchor="middle" fill="rgba(80,50,20,.35)" font-size="9" font-family="DM Mono,monospace">C${Math.floor(midi/12)-1}</text>`;
     }
     if (label) {
       svg += `<text x="${x+WKW/2}" y="${14+WKH-24}" text-anchor="middle" fill="${textFill}" font-size="11" font-weight="700" font-family="DM Mono,monospace">${label}</text>`;
@@ -546,7 +563,7 @@ function newBuildQuestion() {
       if (chordNotes.has(midi % 12)) S.targetPositions.push({s, f});
     }
   }
-  S.foundPositions = [];
+  S.foundPositions = [{s: S.rootStr, f: S.rootFret}];
   S.wrongSet = new Set();
 
   document.getElementById('q-label').textContent = 'Construye el acorde en el diapasón';
@@ -561,7 +578,7 @@ function newBuildQuestion() {
 
   if (S.view==='piano') {
     const r = PK_S + Math.floor(Math.random()*12);
-    S.piano={rootMidi:r, targetMidis:[], foundMidis:[], wrongMidis:new Set()};
+    S.piano={rootMidi:r, targetMidis:[], foundMidis:[r], wrongMidis:new Set()};
     const chNotes=new Set(S.chordIntervals.map(i=>(r%12+i)%12));
     for(let m=r;m<=r+11&&m<=PK_E;m++) if(chNotes.has(m%12)) S.piano.targetMidis.push(m);
     document.getElementById('q-root-note').textContent = NOTE_NAMES[r%12];
@@ -615,7 +632,7 @@ function handlePianoClick(midi) {
   const isT=S.piano.targetMidis.includes(midi);
   if(isT){
     S.piano.foundMidis.push(midi);
-    initAudio().then(()=>synth.triggerAttackRelease(midi2note(midi),'8n',Tone.now()+0.05));
+    initAudio().then(()=>_pluck(midi));
     if(S.piano.foundMidis.length===S.piano.targetMidis.length){
       S.answered=true;S.total++;
       const perfect=S.piano.wrongMidis.size===0;
@@ -636,6 +653,11 @@ function revealChord() {
   if (S.answered) return;
   S.revealed = true; S.answered = true; S.total++;
   S.streak = 0;
+  if (S.view==='piano' && S.piano && S.piano.targetMidis) {
+    S.piano.foundMidis = [...S.piano.targetMidis];
+  } else {
+    S.foundPositions = [...S.targetPositions];
+  }
   updateStats(); updateStreak();
   showFeedback(false, 'Acorde revelado. Sin puntos esta vez.');
   draw();
@@ -809,6 +831,7 @@ function drawFretboard() {
 
 // ── Init ───────────────────────────────────────────────────────────────
 function startExercise() {
+  initAudio(); // pre-carga samples en el primer gesto del usuario
   document.getElementById('start-screen').style.display = 'none';
   const ex = document.getElementById('exercise');
   ex.style.display = 'flex';
