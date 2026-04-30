@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>guitarra.cool · Grados de la Escala</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<style>
+:root{
+  --paper:#faf6f0;--paper2:#f2ece3;--paper3:#e8e0d4;--paper4:#ddd4c4;--paper5:#cec4b0;
+  --copper:#a05c20;--copper-lt:#c07830;--copper-dk:#7a4010;
+  --ink:#1a1410;--ink2:#2e2418;--ink3:#4a3c2c;--ink4:#6a5a46;--ink5:#8a7a66;
+  --tonic:#a05c20;--subdom:#5a7abf;--dominant:#7a4abf;--relative:#4a7c59;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(250,246,240,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:56px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{color:var(--copper);}
+.nav-link{padding:0 16px;height:56px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+.th-progress{position:fixed;top:56px;left:0;right:0;height:2px;background:rgba(160,92,32,.12);z-index:99;}
+.th-progress-bar{height:100%;background:var(--copper);width:0%;transition:width .08s linear;}
+
+.th-breadcrumb{background:var(--paper2);border-bottom:1px solid var(--paper4);padding:0 48px;height:40px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink5);}
+.th-breadcrumb a{color:var(--ink5);text-decoration:none;}
+.th-breadcrumb a:hover{color:var(--copper);}
+.th-breadcrumb .sep{opacity:.5;}
+.th-breadcrumb .current{color:var(--ink3);font-weight:500;}
+
+.th-hero{background:#100a04;padding:110px 48px 90px;text-align:center;overflow:hidden;}
+.th-chapter{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:28px;display:flex;align-items:center;justify-content:center;gap:14px;}
+.th-chapter::before,.th-chapter::after{content:'';display:block;height:1px;width:48px;background:var(--copper-lt);opacity:.35;}
+.th-title{font-family:var(--serif);font-size:clamp(54px,7.5vw,92px);font-weight:700;line-height:.92;letter-spacing:-.025em;color:var(--paper);margin-bottom:28px;}
+.th-title em{font-style:italic;color:var(--copper-lt);}
+.th-lead{font-family:var(--serif);font-size:clamp(17px,2vw,22px);font-style:italic;color:rgba(250,246,240,.58);max-width:580px;margin:0 auto 44px;line-height:1.65;}
+.th-scroll-hint{font-size:11px;color:rgba(250,246,240,.22);letter-spacing:.14em;text-transform:uppercase;}
+
+.th-section{padding:88px 48px;}
+.th-section.dark{background:#100a04;}
+.th-inner{max-width:1080px;margin:0 auto;}
+.th-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;display:block;}
+.th-section.dark .th-label{color:var(--copper-lt);}
+.th-h2{font-family:var(--serif);font-size:clamp(34px,4.5vw,56px);font-weight:700;line-height:1.02;letter-spacing:-.025em;color:var(--ink);margin-bottom:22px;}
+.th-section.dark .th-h2{color:var(--paper);}
+.th-body{font-size:15px;color:var(--ink3);line-height:1.85;max-width:640px;}
+.th-body+.th-body{margin-top:14px;}
+.th-section.dark .th-body{color:rgba(250,246,240,.58);}
+.th-body strong{color:var(--ink2);font-weight:600;}
+.th-section.dark .th-body strong{color:rgba(250,246,240,.92);}
+.th-split{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;}
+.th-callout{border-left:3px solid var(--copper);border-radius:0 8px 8px 0;padding:16px 20px;margin:28px 0;background:rgba(160,92,32,.07);}
+.th-section.dark .th-callout{background:rgba(255,255,255,.05);border-left-color:var(--copper-lt);}
+.th-callout-label{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);margin-bottom:7px;}
+.th-section.dark .th-callout-label{color:var(--copper-lt);}
+.th-callout p{font-size:14px;color:var(--ink3);line-height:1.65;}
+.th-section.dark .th-callout p{color:rgba(250,246,240,.58);}
+
+/* ── KEY SELECTOR ── */
+.key-sel-row{display:flex;align-items:center;gap:14px;margin-bottom:32px;flex-wrap:wrap;}
+.key-sel-row label{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--ink5);}
+.th-section.dark .key-sel-row label{color:rgba(250,246,240,.3);}
+.key-select{background:var(--paper2);border:1px solid var(--paper4);color:var(--ink2);font-family:var(--sans);font-size:14px;padding:8px 36px 8px 14px;border-radius:8px;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a7a66' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
+.th-section.dark .key-select{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.15);color:var(--paper);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23c07830' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
+
+/* ── DEGREE GRID ── */
+.deg-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:10px;}
+.deg-card{
+  border-radius:12px;padding:18px 8px 16px;text-align:center;cursor:pointer;
+  background:var(--paper2);border:2px solid var(--paper4);
+  transition:border-color .18s,box-shadow .18s,transform .14s;
+  position:relative;
+}
+.deg-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.08);}
+.deg-card.tonic-fn  {border-color:rgba(160,92,32,.3);background:rgba(160,92,32,.06);}
+.deg-card.subdom-fn {border-color:rgba(90,122,191,.3);background:rgba(90,122,191,.06);}
+.deg-card.dominant-fn{border-color:rgba(122,74,191,.3);background:rgba(122,74,191,.06);}
+.deg-card.playing{transform:translateY(-4px);box-shadow:0 8px 24px rgba(160,92,32,.2);}
+.deg-card.tonic-fn.playing  {border-color:var(--tonic);box-shadow:0 8px 24px rgba(160,92,32,.25);}
+.deg-card.subdom-fn.playing {border-color:var(--subdom);box-shadow:0 8px 24px rgba(90,122,191,.25);}
+.deg-card.dominant-fn.playing{border-color:var(--dominant);box-shadow:0 8px 24px rgba(122,74,191,.25);}
+
+.deg-roman{font-family:var(--serif);font-size:14px;font-weight:700;margin-bottom:6px;letter-spacing:.02em;}
+.tonic-fn   .deg-roman{color:var(--tonic);}
+.subdom-fn  .deg-roman{color:var(--subdom);}
+.dominant-fn .deg-roman{color:var(--dominant);}
+
+.deg-name{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-bottom:4px;line-height:1;}
+.deg-quality{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink5);margin-bottom:10px;}
+.deg-char{font-size:11px;font-weight:600;color:var(--ink4);line-height:1.3;}
+.tonic-fn   .deg-char{color:rgba(160,92,32,.8);}
+.subdom-fn  .deg-char{color:rgba(90,122,191,.9);}
+.dominant-fn .deg-char{color:rgba(122,74,191,.9);}
+
+.deg-play-btn{
+  display:block;width:28px;height:28px;border-radius:50%;
+  border:none;cursor:pointer;margin:10px auto 0;
+  font-size:11px;transition:all .15s;
+  background:var(--paper3);color:var(--ink4);
+}
+.deg-card:hover .deg-play-btn{background:var(--paper4);}
+.deg-card.playing .deg-play-btn{background:var(--copper);color:#fff;}
+
+/* Expanded description panel */
+.deg-desc-panel{
+  background:#fff;border:1px solid var(--paper3);border-radius:12px;
+  padding:24px 28px;margin-top:12px;
+  display:none;
+  animation:fadeIn .2s ease;
+}
+.deg-desc-panel.open{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.ddp-roman{font-family:var(--serif);font-size:18px;font-weight:700;margin-bottom:4px;}
+.ddp-roman.tonic-fn{color:var(--tonic);}
+.ddp-roman.subdom-fn{color:var(--subdom);}
+.ddp-roman.dominant-fn{color:var(--dominant);}
+.ddp-title{font-family:var(--serif);font-size:28px;font-weight:700;color:var(--ink);margin-bottom:10px;}
+.ddp-fn{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;padding:3px 10px;border-radius:10px;margin-bottom:14px;}
+.ddp-fn.tonic-fn{background:rgba(160,92,32,.12);color:var(--tonic);}
+.ddp-fn.subdom-fn{background:rgba(90,122,191,.12);color:var(--subdom);}
+.ddp-fn.dominant-fn{background:rgba(122,74,191,.12);color:var(--dominant);}
+.ddp-body{font-size:14px;color:var(--ink3);line-height:1.75;max-width:680px;margin-bottom:14px;}
+.ddp-eg{font-family:var(--mono);font-size:12px;color:var(--ink5);padding:8px 14px;background:var(--paper2);border-radius:6px;display:inline-block;}
+
+/* ── FUNCTION CARDS ── */
+.func-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:28px 0;}
+.func-card{border-radius:12px;padding:24px 20px;}
+.func-card.tonic-fn{background:rgba(160,92,32,.08);border:1.5px solid rgba(160,92,32,.25);}
+.func-card.subdom-fn{background:rgba(90,122,191,.08);border:1.5px solid rgba(90,122,191,.25);}
+.func-card.dominant-fn{background:rgba(122,74,191,.08);border:1.5px solid rgba(122,74,191,.25);}
+.func-name{font-family:var(--serif);font-size:24px;font-weight:700;margin-bottom:5px;}
+.func-card.tonic-fn .func-name{color:var(--tonic);}
+.func-card.subdom-fn .func-name{color:var(--subdom);}
+.func-card.dominant-fn .func-name{color:var(--dominant);}
+.func-degrees{font-family:var(--mono);font-size:12px;font-weight:600;margin-bottom:12px;}
+.func-card.tonic-fn .func-degrees{color:rgba(160,92,32,.7);}
+.func-card.subdom-fn .func-degrees{color:rgba(90,122,191,.8);}
+.func-card.dominant-fn .func-degrees{color:rgba(122,74,191,.8);}
+.func-desc{font-size:13px;color:var(--ink4);line-height:1.65;}
+.func-sense{font-size:11px;font-style:italic;color:var(--ink5);margin-top:8px;}
+
+/* ── EAR TRAINING TABLE ── */
+.ear-table{width:100%;border-collapse:collapse;margin:24px 0;}
+.ear-table th{font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:10px 14px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);color:rgba(250,246,240,.3);}
+.ear-table td{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:top;}
+.ear-table tr:last-child td{border-bottom:none;}
+.ear-table tr:hover td{background:rgba(255,255,255,.03);}
+.et-deg{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--paper);white-space:nowrap;}
+.et-solfege{font-family:var(--mono);font-size:11px;color:rgba(250,246,240,.3);margin-top:2px;}
+.et-sense{font-size:13px;color:rgba(250,246,240,.5);line-height:1.55;}
+.et-song{font-size:12px;color:rgba(250,246,240,.28);font-style:italic;margin-top:4px;}
+.et-badge{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:2px 7px;border-radius:8px;vertical-align:middle;margin-left:4px;}
+.et-badge.stable{background:rgba(160,92,32,.2);color:rgba(160,92,32,.9);}
+.et-badge.tension{background:rgba(122,74,191,.2);color:rgba(160,130,210,.9);}
+.et-badge.color{background:rgba(90,122,191,.2);color:rgba(90,140,200,.9);}
+
+/* ── TRANSPOSER ── */
+.transposer{background:var(--paper2);border:1px solid var(--paper3);border-radius:16px;padding:36px;margin:32px 0;}
+.trans-key-row{display:flex;align-items:center;gap:16px;margin-bottom:28px;flex-wrap:wrap;}
+.trans-key-row label{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--ink5);}
+.trans-prog-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;}
+.trans-prog-btn{font-family:var(--mono);font-size:11px;font-weight:600;padding:7px 14px;border:1.5px solid var(--paper4);border-radius:6px;background:transparent;color:var(--ink4);cursor:pointer;transition:all .15s;}
+.trans-prog-btn:hover{border-color:var(--copper-lt);color:var(--copper);}
+.trans-prog-btn.active{background:var(--copper);border-color:var(--copper-dk);color:#fff;}
+.trans-display{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+.trans-chord{border-radius:10px;padding:16px 12px;min-width:80px;text-align:center;border:2px solid transparent;transition:all .2s;}
+.trans-chord.fn-t{background:rgba(160,92,32,.1);border-color:rgba(160,92,32,.25);}
+.trans-chord.fn-s{background:rgba(90,122,191,.1);border-color:rgba(90,122,191,.25);}
+.trans-chord.fn-d{background:rgba(122,74,191,.1);border-color:rgba(122,74,191,.25);}
+.trans-chord.fn-r{background:rgba(74,124,89,.1);border-color:rgba(74,124,89,.25);}
+.trans-roman{font-family:var(--mono);font-size:10px;font-weight:700;margin-bottom:6px;}
+.trans-chord.fn-t .trans-roman{color:rgba(160,92,32,.7);}
+.trans-chord.fn-s .trans-roman{color:rgba(90,122,191,.8);}
+.trans-chord.fn-d .trans-roman{color:rgba(122,74,191,.8);}
+.trans-chord.fn-r .trans-roman{color:rgba(74,124,89,.8);}
+.trans-name{font-family:var(--serif);font-size:24px;font-weight:700;color:var(--ink);}
+.trans-insight{font-size:13px;color:var(--ink4);text-align:center;margin-top:18px;line-height:1.6;font-style:italic;}
+
+/* ── NEXT ── */
+.th-next{background:var(--ink);padding:88px 48px;text-align:center;}
+.th-next-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink5);margin-bottom:18px;display:block;}
+.th-next-title{font-family:var(--serif);font-size:clamp(36px,5vw,56px);font-weight:700;color:var(--paper);margin-bottom:10px;letter-spacing:-.02em;}
+.th-next-sub{font-size:14px;color:var(--ink4);margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.th-next-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.th-next-btn{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:13px;font-weight:600;padding:13px 28px;border-radius:8px;text-decoration:none;transition:background .2s;}
+.th-next-btn:hover{background:var(--copper-dk);}
+.th-next-btn.sec{background:transparent;color:rgba(250,246,240,.5);border:1px solid rgba(255,255,255,.12);}
+.th-next-btn.sec:hover{color:var(--paper);border-color:rgba(255,255,255,.3);}
+
+@media(max-width:768px){
+  nav{padding:0 20px;}
+  .th-breadcrumb{padding:0 20px;}
+  .th-hero{padding:80px 20px 64px;}
+  .th-section{padding:64px 20px;}
+  .th-split{grid-template-columns:1fr;gap:40px;}
+  .deg-grid{grid-template-columns:repeat(4,1fr);}
+  .func-grid{grid-template-columns:1fr;}
+  .transposer{padding:22px 16px;}
+  .th-next{padding:64px 20px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">guitarra<span>.cool</span></a>
+  <a href="/teoria" class="nav-link active">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<div class="th-progress"><div class="th-progress-bar" id="prog-bar"></div></div>
+
+<div class="th-breadcrumb">
+  <a href="/teoria">Teoría musical</a>
+  <span class="sep">›</span>
+  <span class="current">Capítulo 6 · Grados de la Escala</span>
+</div>
+
+<!-- HERO -->
+<section class="th-hero">
+  <div class="th-chapter">Teoría musical · Capítulo 6</div>
+  <h1 class="th-title">El idioma que<br><em>ya habla tu oído</em></h1>
+  <p class="th-lead">Antes de saber en qué tonalidad está una canción, tu oído ya reconoce algo más fundamental: la relación entre los acordes. Eso son los grados.</p>
+  <div class="th-scroll-hint">↓ leer</div>
+</section>
+
+<!-- SECCIÓN 1: Por qué los grados primero -->
+<section class="th-section">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">El concepto clave</span>
+        <h2 class="th-h2">Tu oído escucha relaciones, no notas</h2>
+        <p class="th-body">Cuando escuchas una melodía familiar en un piano y luego en una guitarra, aunque estén en tonalidades distintas, la reconoces igual. Eso no es posible si el oído escuchara notas absolutas — es posible porque el oído escucha <strong>patrones relativos</strong>.</p>
+        <p class="th-body" style="margin-top:14px;">Esos patrones son los <strong>grados</strong>: la posición de cada nota o acorde dentro de la tonalidad. El primer grado siempre es el hogar. El quinto siempre crea tensión. El sexto siempre aporta melancolía. No importa en qué tonalidad estés — esas cualidades no cambian.</p>
+        <p class="th-body" style="margin-top:14px;">Esta es la razón por la que un músico con buen oído puede transcribir una canción que nunca ha visto: no identifica notas, identifica grados. Y esa habilidad se entrena aprendiendo exactamente qué "sabor" tiene cada uno.</p>
+        <div class="th-callout" style="margin-top:24px;">
+          <div class="th-callout-label">La tonalidad es el contexto, los grados son el contenido</div>
+          <p>Saber que una canción está en Sol mayor te dice cuáles son las notas. Saber que usa I-V-VI-IV te dice cómo suena — y eso puedes reconocerlo en cualquier tonalidad sin saber cuál es.</p>
+        </div>
+      </div>
+      <div>
+        <!-- Relative pitch visual: same pattern, different keys -->
+        <div style="background:var(--paper2);border:1px solid var(--paper3);border-radius:14px;padding:28px 24px;">
+          <p style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:20px;">El mismo patrón en tres tonalidades</p>
+          <div id="pattern-demo"></div>
+          <p style="font-size:12px;color:var(--ink5);margin-top:16px;font-style:italic;line-height:1.6;">Los acordes cambian, los grados permanecen. La emoción es idéntica.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 2: Los 7 grados — grid interactivo -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Los 7 grados</span>
+    <h2 class="th-h2">Cada grado, un carácter propio</h2>
+    <p class="th-body" style="margin-bottom:32px;">En la escala mayor los siete grados producen acordes de tres calidades distintas: <strong>mayor</strong>, <strong>menor</strong> y <strong>disminuido</strong>. Esa combinación de posición y calidad es lo que define el carácter de cada uno. Haz clic en cualquier grado para escucharlo y leer su descripción.</p>
+
+    <div class="key-sel-row">
+      <label>Tonalidad</label>
+      <select class="key-select" id="deg-key-sel"></select>
+    </div>
+
+    <div class="deg-grid" id="deg-grid"></div>
+    <div class="deg-desc-panel" id="deg-desc-panel"></div>
+
+    <div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:18px;">
+      <div style="display:flex;align-items:center;gap:7px;font-size:11px;color:rgba(250,246,240,.35);"><div style="width:10px;height:10px;border-radius:50%;background:rgba(160,92,32,.7)"></div>Función tónica</div>
+      <div style="display:flex;align-items:center;gap:7px;font-size:11px;color:rgba(250,246,240,.35);"><div style="width:10px;height:10px;border-radius:50%;background:rgba(90,122,191,.7)"></div>Función subdominante</div>
+      <div style="display:flex;align-items:center;gap:7px;font-size:11px;color:rgba(250,246,240,.35);"><div style="width:10px;height:10px;border-radius:50%;background:rgba(122,74,191,.7)"></div>Función dominante</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 3: Funciones armónicas -->
+<section class="th-section">
+  <div class="th-inner">
+    <span class="th-label">Funciones armónicas</span>
+    <h2 class="th-h2">Tres familias, tres sensaciones</h2>
+    <p class="th-body">Los siete grados se agrupan en tres familias funcionales. Cada familia crea una sensación distinta en el oyente — y esa sensación es lo que el oído reconoce antes que ninguna otra cosa.</p>
+
+    <div class="func-grid" style="margin-top:32px;">
+      <div class="func-card tonic-fn">
+        <div class="func-name">Tónica</div>
+        <div class="func-degrees">I · III · VI</div>
+        <div class="func-desc">Sensación de reposo y estabilidad. El oído puede detenerse en estos acordes sin incomodidad. El I es el reposo absoluto; el III y el VI añaden color y profundidad emocional sin perder esa calma.</div>
+        <div class="func-sense">"Ya llegamos"</div>
+      </div>
+      <div class="func-card subdom-fn">
+        <div class="func-name">Subdominante</div>
+        <div class="func-degrees">II · IV</div>
+        <div class="func-desc">Sensación de movimiento y alejamiento de la tónica, sin la urgencia de la dominante. Estos acordes crean expectativa suave. Son el punto de partida del arco tensión-resolución que estructura cualquier frase musical.</div>
+        <div class="func-sense">"Nos movemos"</div>
+      </div>
+      <div class="func-card dominant-fn">
+        <div class="func-name">Dominante</div>
+        <div class="func-degrees">V · VII</div>
+        <div class="func-desc">Máxima tensión. El V contiene la nota sensible, que está a un semitono del I — una atracción casi física. El oído no puede quedarse quieto en la dominante: necesita resolver. Este movimiento V→I es el pulso de la música tonal.</div>
+        <div class="func-sense">"Tenemos que volver"</div>
+      </div>
+    </div>
+
+    <div class="th-callout">
+      <div class="th-callout-label">El arco fundamental</div>
+      <p>Tónica → Subdominante → Dominante → Tónica. Ese ciclo describe el movimiento armónico de miles de canciones: partes de casa (I), te alejas (IV), creas tensión (V), regresas (I). Los grados son los actores de esa historia, en cualquier tonalidad.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 4: Grados en la melodía / oído relativo -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Oído relativo</span>
+    <h2 class="th-h2">Escuchar grados</h2>
+    <p class="th-body" style="margin-bottom:8px;">El <strong>oído relativo</strong> es la capacidad de reconocer grados sin conocer la tonalidad. Es una habilidad entrenada, no innata, y la herramienta principal para desarrollarla es asociar cada grado con un sonido familiar.</p>
+    <p class="th-body" style="margin-bottom:32px;">No se trata de memorizar canciones, sino de usar esas referencias para anclar la sensación de cada grado en tu memoria auditiva. Con el tiempo, esa sensación surge sola — antes del razonamiento.</p>
+
+    <table class="ear-table">
+      <thead>
+        <tr>
+          <th>Grado</th>
+          <th>Sensación melódica</th>
+          <th>Referencia para el oído</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="et-deg">I · Do</div><div class="et-solfege">tónica</div></td>
+          <td><span class="et-badge stable">estable</span><div class="et-sense">Punto de llegada. El oído descansa aquí sin ninguna tensión pendiente.</div></td>
+          <td class="et-song">Base de toda referencia. El "do" del solfeo.</td>
+        </tr>
+        <tr>
+          <td><div class="et-deg">II · Re</div><div class="et-solfege">supertónica</div></td>
+          <td><span class="et-badge color">color</span><div class="et-sense">Un paso fuera de casa. Ligeramente inestable, tiende hacia el I o el III.</div></td>
+          <td class="et-song">"Happy Birthday" sube Do-Do-<strong>Re</strong> al inicio.</td>
+        </tr>
+        <tr>
+          <td><div class="et-deg">III · Mi</div><div class="et-solfege">mediante</div></td>
+          <td><span class="et-badge stable">estable</span><div class="et-sense">Interior, meditativo. Estabiliza sin la firmeza del I; sugiere el mundo de la relativa menor.</div></td>
+          <td class="et-song">"Mary Had a Little Lamb" empieza en <strong>Mi</strong>-Re-Do-Re.</td>
+        </tr>
+        <tr>
+          <td><div class="et-deg">IV · Fa</div><div class="et-solfege">subdominante</div></td>
+          <td><span class="et-badge color">expansión</span><div class="et-sense">Luminoso y ascendente. Se aleja con dignidad. El oído lo siente como apertura.</div></td>
+          <td class="et-song">"Here Comes the Bride" salta Do-Do-Do-<strong>Fa</strong>.</td>
+        </tr>
+        <tr>
+          <td><div class="et-deg">V · Sol</div><div class="et-solfege">dominante</div></td>
+          <td><span class="et-badge stable">anclaje</span><div class="et-sense">El segundo centro de gravedad de la tonalidad. Estable pero siempre apuntando al I.</div></td>
+          <td class="et-song">"Twinkle Twinkle" va Do-Do-<strong>Sol</strong>-Sol desde el inicio.</td>
+        </tr>
+        <tr>
+          <td><div class="et-deg">VI · La</div><div class="et-solfege">superdominante</div></td>
+          <td><span class="et-badge color">nostalgia</span><div class="et-sense">Cálido pero sombrío. El sexto grado es donde viven la melancolía y la emoción profunda.</div></td>
+          <td class="et-song">"My Bonnie Lies Over the Ocean" asciende hasta el <strong>La</strong>.</td>
+        </tr>
+        <tr>
+          <td><div class="et-deg">VII · Si</div><div class="et-solfege">sensible</div></td>
+          <td><span class="et-badge tension">tensión</span><div class="et-sense">La nota más inestable de la escala. Está a un semitono del I y casi siempre resuelve hacia él.</div></td>
+          <td class="et-song">La nota que "quema" en una melodía — busca el Do por semitono.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="th-callout">
+      <div class="th-callout-label">El truco del solfeo</div>
+      <p>El nombre de las notas en solfeo (Do-Re-Mi-Fa-Sol-La-Si) no describe notas absolutas — describe grados. Cada sílaba tiene una "sensación" que puedes cultivar. Cuando dices "Sol", no solo nombras una nota: activas la memoria de ese sonido en el contexto de la tónica.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 5: El transpositor — mismo patrón, cualquier tonalidad -->
+<section class="th-section">
+  <div class="th-inner">
+    <span class="th-label">La prueba</span>
+    <h2 class="th-h2">Mismos grados, cualquier tonalidad</h2>
+    <p class="th-body">Cambia la tonalidad y observa cómo los acordes cambian pero los grados — y la sensación — permanecen. Eso es exactamente lo que hace tu oído cuando reconoce una canción en cualquier contexto.</p>
+
+    <div class="transposer" style="margin-top:28px;">
+      <div class="trans-key-row">
+        <label>Tonalidad</label>
+        <select class="key-select" id="trans-key-sel"></select>
+      </div>
+      <div class="trans-prog-btns" id="trans-prog-btns"></div>
+      <div class="trans-display" id="trans-display"></div>
+      <p class="trans-insight" id="trans-insight"></p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER / NEXT -->
+<section class="th-next">
+  <span class="th-next-label">¿Y ahora qué?</span>
+  <h2 class="th-next-title">El mapa completo</h2>
+  <p class="th-next-sub">Los grados organizan la tonalidad. El círculo de quintas organiza todas las tonalidades entre sí — y lo hace usando exactamente el mismo lenguaje.</p>
+  <div class="th-next-btns">
+    <a href="/teoria/circulo" class="th-next-btn">Círculo de Quintas →</a>
+    <a href="/practica/progresiones" class="th-next-btn sec">Practicar grados →</a>
+  </div>
+</section>
+
+<script>
+// ── Data ──────────────────────────────────────────────────────────────────────
+const NOTES=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+const KEY_NAMES=['Do','Do♯','Re','Re♯','Mi','Fa','Fa♯','Sol','Sol♯','La','La♯','Si'];
+const SCALE_IVS=[0,2,4,5,7,9,11];
+
+const DEGREES=[
+  {
+    roman:'I', q:'M', fn:'tonic-fn', char:'Reposo · Hogar',
+    desc:'El punto de llegada de toda tensión armónica. El I es el hogar: todo lo que ocurre en una progresión ocurre en relación a este acorde. No necesita resolver porque ya está en reposo.',
+    example:'Sobre el I aterriza casi toda canción. Es la respuesta a la pregunta que la música ha ido haciendo.',
+    chordSemis:[0,4,7],
+  },{
+    roman:'II', q:'m', fn:'subdom-fn', char:'Preparación',
+    desc:'El primer paso para alejarse de la tónica. Como grado subdominante, crea una tensión suave y dirigida. En jazz, el II es el punto de partida del movimiento II–V–I, la cadencia más estudiada de la armonía moderna.',
+    example:'El IIm–V–I es el corazón del jazz. "Autumn Leaves", "All The Things You Are" — todo gira alrededor de ese movimiento.',
+    chordSemis:[0,3,7],
+  },{
+    roman:'III', q:'m', fn:'tonic-fn', char:'Ambigüedad · Color',
+    desc:'El grado más difícil de caracterizar. Pertenece a la función tónica pero está a medio camino entre el I y el V, lo que le da una cualidad ambigua e interior. Puede abrir la puerta hacia el mundo del relativo menor.',
+    example:'Muchos puentes de canciones pop usan el III como punto de partida. Crea una sensación de introspección o de giro inesperado.',
+    chordSemis:[0,3,7],
+  },{
+    roman:'IV', q:'M', fn:'subdom-fn', char:'Expansión · Luminosidad',
+    desc:'El acorde de los himnos, las aperturas, las llegadas emotivas. Se aleja de la tónica con dignidad — no con la urgencia del V. El movimiento I–IV es uno de los más usados en la música popular de todos los tiempos.',
+    example:'"Let It Be" (Beatles), "Amazing Grace", "Here Comes the Sun" — todos tienen el IV en el centro de sus momentos más memorables.',
+    chordSemis:[0,4,7],
+  },{
+    roman:'V', q:'M', fn:'dominant-fn', char:'Tensión · Urgencia',
+    desc:'La función dominante en su forma más pura. El V contiene la nota sensible — un semitono por debajo del I — que crea una atracción gravitacional irresistible. Toda la música tonal occidental está organizada en torno al movimiento V→I.',
+    example:'La cadencia auténtica (V–I) es el cierre de cualquier frase musical. El V crea la pregunta; el I es la respuesta.',
+    chordSemis:[0,4,7],
+  },{
+    roman:'VI', q:'m', fn:'tonic-fn', char:'Melancolía · Emoción',
+    desc:'El relativo menor de la tónica. Comparte su armadura pero tiene una profundidad emocional distinta. En la progresión I–V–VI–IV es exactamente el VI el que convierte la alegría en algo más complejo y emotivo.',
+    example:'"Losing My Religion", "Wonderwall", "No Woman No Cry" — el VI es el acorde de la nostalgia y el sentimiento profundo en el pop.',
+    chordSemis:[0,3,7],
+  },{
+    roman:'VII', q:'°', fn:'dominant-fn', char:'Inestabilidad',
+    desc:'El acorde más tenso de la tonalidad. El intervalo de tritono entre su primera y quinta nota lo hace inestable por naturaleza. Casi nunca se usa como acorde de reposo — siempre está pasando, siempre queriendo resolver.',
+    example:'En la práctica moderna, el VII° se usa más como nota de paso en melodías o en voicings. Como acorde completo es raro pero muy expresivo.',
+    chordSemis:[0,3,6],
+  },
+];
+
+const FUNC_CLASS={0:'fn-t',3:'fn-s',4:'fn-d',5:'fn-r',1:'fn-s',2:'fn-t',6:'fn-d'};
+const ROMAN=['I','II','III','IV','V','VI','VII'];
+
+const PROGRESSIONS=[
+  {name:'I – IV – V',    degrees:[0,3,4], insight:'La progresión más usada en la historia de la música: blues, rock, country. Los tres vecinos en el círculo de quintas.'},
+  {name:'I – V – VI – IV',degrees:[0,4,5,3],insight:'La "progresión de los 4 acordes". Suena igual en Do que en Sol que en La♭ — el patrón emocional es el mismo en todas las tonalidades.'},
+  {name:'II – V – I',   degrees:[1,4,0], insight:'El movimiento fundamental del jazz. Dos pasos de quinta hacia la tónica. La tensión acumulada en IIm y V resuelve perfectamente en I.'},
+  {name:'VI – IV – I – V',degrees:[5,3,0,4],insight:'La misma colección que I–V–VI–IV empezando en el acorde menor. La sensación cambia completamente aunque sean los mismos cuatro acordes.'},
+];
+
+// ── Progress bar ──────────────────────────────────────────────────────────────
+window.addEventListener('scroll',()=>{
+  const h=document.documentElement.scrollHeight-window.innerHeight;
+  document.getElementById('prog-bar').style.width=(h>0?Math.round(window.scrollY/h*100):0)+'%';
+});
+
+// ── Audio ─────────────────────────────────────────────────────────────────────
+let synth=null;
+async function initAudio(){
+  if(synth)return;
+  await Tone.start();
+  const reverb=new Tone.Freeverb({roomSize:0.32,wet:0.15}).toDestination();
+  const comp=new Tone.Compressor({threshold:-22,ratio:4}).connect(reverb);
+  synth=new Tone.PolySynth(Tone.Synth,{
+    oscillator:{type:'triangle'},
+    envelope:{attack:0.008,decay:0.5,sustain:0.15,release:2.5},
+    volume:-8,
+  }).connect(comp);
+}
+
+function midiToNote(midi){
+  const pc=midi%12,oct=Math.floor(midi/12)-1;
+  const names=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  return names[pc]+oct;
+}
+
+function playChord(rootMidi,semis){
+  if(!synth)return;
+  const notes=semis.map(s=>midiToNote(rootMidi+s));
+  const now=Tone.now()+0.05;
+  synth.triggerAttackRelease(notes,'4n',now);
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function getChordName(rootIdx,degIdx){
+  const ni=(rootIdx+SCALE_IVS[degIdx])%12;
+  const q=DEGREES[degIdx].q;
+  return NOTES[ni]+(q==='m'?' menor':q==='°'?' dim.':' mayor');
+}
+
+function getShortName(rootIdx,degIdx){
+  const ni=(rootIdx+SCALE_IVS[degIdx])%12;
+  const q=DEGREES[degIdx].q;
+  return NOTES[ni]+(q==='m'?'m':q==='°'?'°':'');
+}
+
+// ── Pattern demo (section 1) ──────────────────────────────────────────────────
+function buildPatternDemo(){
+  const box=document.getElementById('pattern-demo');
+  const prog=[0,4,5,3]; // I-V-VI-IV
+  const keys=[0,7,9]; // C, G, A
+  keys.forEach(ki=>{
+    const row=document.createElement('div');
+    row.style.cssText='margin-bottom:14px;';
+    const label=document.createElement('div');
+    label.style.cssText='font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--copper);margin-bottom:8px;';
+    label.textContent=KEY_NAMES[ki]+' mayor';
+    row.appendChild(label);
+    const chords=document.createElement('div');
+    chords.style.cssText='display:flex;gap:6px;';
+    prog.forEach((di,pi)=>{
+      const ni=(ki+SCALE_IVS[di])%12;
+      const q=DEGREES[di].q;
+      const chip=document.createElement('div');
+      chip.style.cssText=`
+        border-radius:8px;padding:8px 10px;text-align:center;min-width:52px;
+        background:${pi===0?'rgba(160,92,32,.12)':pi===3?'rgba(90,122,191,.1)':pi===2?'rgba(74,124,89,.1)':'rgba(122,74,191,.1)'};
+        border:1.5px solid ${pi===0?'rgba(160,92,32,.25)':pi===3?'rgba(90,122,191,.2)':pi===2?'rgba(74,124,89,.2)':'rgba(122,74,191,.2)'};
+      `;
+      chip.innerHTML=`
+        <div style="font-family:var(--mono);font-size:9px;color:var(--ink5);margin-bottom:3px;">${ROMAN[di]}</div>
+        <div style="font-family:var(--serif);font-size:15px;font-weight:700;color:var(--ink);">${NOTES[ni]}${q==='m'?'m':q==='°'?'°':''}</div>
+      `;
+      chords.appendChild(chip);
+    });
+    row.appendChild(chords);
+    box.appendChild(row);
+  });
+}
+
+// ── Degree key selector ───────────────────────────────────────────────────────
+let degKey=0;
+let openDeg=-1;
+
+function buildDegKeySel(){
+  const sel=document.getElementById('deg-key-sel');
+  NOTES.forEach((n,i)=>{
+    const opt=document.createElement('option');
+    opt.value=i;
+    opt.textContent=KEY_NAMES[i]+' mayor';
+    sel.appendChild(opt);
+  });
+  sel.addEventListener('change',e=>{degKey=parseInt(e.target.value);buildDegGrid();});
+}
+
+function buildDegGrid(){
+  const grid=document.getElementById('deg-grid');
+  grid.innerHTML='';
+  DEGREES.forEach((d,i)=>{
+    const chordName=getChordName(degKey,i);
+    const shortName=getShortName(degKey,i);
+    const card=document.createElement('div');
+    card.className=`deg-card ${d.fn}`;
+    card.innerHTML=`
+      <div class="deg-roman">${d.roman}</div>
+      <div class="deg-name">${shortName}</div>
+      <div class="deg-quality">${d.q==='M'?'mayor':d.q==='m'?'menor':'dim.'}</div>
+      <div class="deg-char">${d.char}</div>
+      <button class="deg-play-btn" title="Escuchar">▶</button>
+    `;
+    card.querySelector('.deg-play-btn').addEventListener('click',async e=>{
+      e.stopPropagation();
+      await initAudio();
+      const rootMidi=48+SCALE_IVS[i]+((degKey<=5?0:0));
+      // use a comfortable octave
+      const baseMidi=48+(degKey+SCALE_IVS[i])%12;
+      playChord(baseMidi,d.chordSemis);
+      card.classList.add('playing');
+      setTimeout(()=>card.classList.remove('playing'),1200);
+    });
+    card.addEventListener('click',()=>toggleDegDesc(i,d,chordName));
+    grid.appendChild(card);
+  });
+  // Re-open if one was open
+  if(openDeg>=0) toggleDegDesc(openDeg,DEGREES[openDeg],getChordName(degKey,openDeg),true);
+}
+
+function toggleDegDesc(i,d,chordName,forceOpen){
+  const panel=document.getElementById('deg-desc-panel');
+  if(openDeg===i&&!forceOpen){openDeg=-1;panel.classList.remove('open');return;}
+  openDeg=i;
+  panel.className=`deg-desc-panel open`;
+  panel.innerHTML=`
+    <div class="ddp-roman ${d.fn}">${d.roman}</div>
+    <div class="ddp-title">${chordName}</div>
+    <div class="ddp-fn ${d.fn}">${d.fn==='tonic-fn'?'Función Tónica':d.fn==='subdom-fn'?'Función Subdominante':'Función Dominante'}</div>
+    <p class="ddp-body">${d.desc}</p>
+    <div class="ddp-eg">${d.example}</div>
+  `;
+}
+
+// ── Transposer ────────────────────────────────────────────────────────────────
+let transKey=0, transProgIdx=0;
+
+function buildTransKeySel(){
+  const sel=document.getElementById('trans-key-sel');
+  NOTES.forEach((n,i)=>{
+    const opt=document.createElement('option');
+    opt.value=i;
+    opt.textContent=KEY_NAMES[i]+' mayor';
+    sel.appendChild(opt);
+  });
+  sel.addEventListener('change',e=>{transKey=parseInt(e.target.value);renderTrans();});
+}
+
+function buildTransProgBtns(){
+  const box=document.getElementById('trans-prog-btns');
+  PROGRESSIONS.forEach((p,i)=>{
+    const btn=document.createElement('button');
+    btn.className='trans-prog-btn'+(i===0?' active':'');
+    btn.textContent=p.name;
+    btn.addEventListener('click',()=>{
+      transProgIdx=i;
+      document.querySelectorAll('.trans-prog-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      renderTrans();
+    });
+    box.appendChild(btn);
+  });
+}
+
+function renderTrans(){
+  const prog=PROGRESSIONS[transProgIdx];
+  const display=document.getElementById('trans-display');
+  display.innerHTML='';
+  prog.degrees.forEach(di=>{
+    const ni=(transKey+SCALE_IVS[di])%12;
+    const q=DEGREES[di].q;
+    const fn=FUNC_CLASS[di];
+    const chip=document.createElement('div');
+    chip.className=`trans-chord ${fn}`;
+    chip.innerHTML=`
+      <div class="trans-roman">${ROMAN[di]}</div>
+      <div class="trans-name">${NOTES[ni]}${q==='m'?'m':q==='°'?'°':''}</div>
+    `;
+    display.appendChild(chip);
+  });
+  document.getElementById('trans-insight').textContent=prog.insight;
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+buildPatternDemo();
+buildDegKeySel();
+buildDegGrid();
+buildTransKeySel();
+buildTransProgBtns();
+renderTrans();
+</script>
+</body>
+</html>
