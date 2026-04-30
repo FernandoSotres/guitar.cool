@@ -322,15 +322,16 @@ const S = {
   nextTimer: null,
 };
 
-// ── Audio (idéntica cadena que herramientas-guitarra.html) ──────────────
+// ── Audio ──────────────────────────────────────────────────────────────
 const _SPC = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 let _sampler = null, _samplerReady = false, _pluckQ = [];
+let _pianoSynth = null;
 async function initAudio() {
   if (_sampler) return;
   await Tone.start();
   const limiter = new Tone.Limiter(-2).toDestination();
   const comp    = new Tone.Compressor({ threshold:-22, ratio:4, attack:0.005, release:0.12 }).connect(limiter);
-  const reverb  = new Tone.Freeverb({ roomSize:0.38, dampening:3200, wet:0.14 }).connect(comp);
+  const gRev = new Tone.Freeverb({ roomSize:0.38, dampening:3200, wet:0.14 }).connect(comp);
   _sampler = new Tone.Sampler({
     urls: {
       'E2':'E2.mp3','A2':'A2.mp3','D3':'D3.mp3','G3':'G3.mp3',
@@ -338,19 +339,27 @@ async function initAudio() {
       'G5':'G5.mp3','B5':'B5.mp3',
     },
     baseUrl: 'https://cdn.jsdelivr.net/gh/gleitz/midi-js-soundfonts@gh-pages/FluidR3_GM/acoustic_guitar_nylon-mp3/',
-    onload: () => {
-      _samplerReady = true;
-      _pluckQ.forEach(m => _pluck(m));
-      _pluckQ = [];
-    },
+    onload: () => { _samplerReady = true; _pluckQ.forEach(m => _pluck(m)); _pluckQ = []; },
     onerror: (e) => console.warn('Error cargando muestra:', e),
-  }).connect(reverb);
+  }).connect(gRev);
+  const pRev = new Tone.Freeverb({ roomSize:0.28, dampening:5000, wet:0.18 }).connect(comp);
+  _pianoSynth = new Tone.PolySynth(Tone.Synth, {
+    oscillator: { type: 'triangle' },
+    envelope: { attack: 0.003, decay: 0.6, sustain: 0.04, release: 2.5 }
+  }).connect(pRev);
 }
 function _pluck(midi, when) {
+  const t = when || Tone.now()+0.05;
+  if (S.view === 'piano') {
+    if (!_pianoSynth) return;
+    const pc = midi%12, oct = Math.floor(midi/12)-1;
+    _pianoSynth.triggerAttackRelease(`${_SPC[pc]}${oct}`, '4n', t);
+    return;
+  }
   if (!_sampler) return;
   if (!_samplerReady) { _pluckQ.push(midi); return; }
-  const pc = midi % 12, oct = Math.floor(midi/12) + 1;
-  _sampler.triggerAttackRelease(`${_SPC[pc]}${oct}`, '2n', when || Tone.now()+0.05);
+  const pc = midi%12, oct = Math.floor(midi/12)-1;
+  _sampler.triggerAttackRelease(`${_SPC[pc]}${oct}`, '2n', t);
 }
 async function playMidi(midi, when) {
   await initAudio();
