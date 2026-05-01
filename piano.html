@@ -217,7 +217,7 @@ select.full:hover { border-color:var(--accent2); }
       <div class="panel-title">Escala</div>
       <select class="full" id="scale-sel" onchange="update()">
         <optgroup label="Mayores">
-          <option value="major">Mayor</option>
+          <option value="major" selected>Mayor</option>
           <option value="lydian">Lidio</option>
           <option value="mixolydian">Mixolidio</option>
           <option value="lydian_dom">Lidio dominante</option>
@@ -225,7 +225,7 @@ select.full:hover { border-color:var(--accent2); }
           <option value="mixo_b6">Mixolidio b6</option>
         </optgroup>
         <optgroup label="Menores">
-          <option value="minor" selected>Menor natural</option>
+          <option value="minor">Menor natural</option>
           <option value="hminor">Menor armónica</option>
           <option value="mminor">Menor melódica</option>
           <option value="dorian">Dórico</option>
@@ -899,13 +899,17 @@ function applyMobileLayout(){
   const mob=window.innerWidth<=768;
   const scroll=document.querySelector('.keys-scroll');
   const area=document.querySelector('.piano-area');
+  const pianoSvg=document.getElementById('piano-svg');
   if(!scroll||!area) return;
   if(!mob){
     scroll.style.position='';scroll.style.width='';scroll.style.height='';
     scroll.style.top='';scroll.style.left='';
     scroll.style.transform='';scroll.style.transformOrigin='';
+    if(pianoSvg){pianoSvg.style.transform='';pianoSvg.style.transformOrigin='';}
     return;
   }
+  // Mobile: reduce piano 30%
+  if(pianoSvg){pianoSvg.style.transform='scale(0.7)';pianoSvg.style.transformOrigin='left top';}
   const W=area.clientWidth, H=area.clientHeight;
   if(!W||!H) return;
   scroll.style.position='absolute';
