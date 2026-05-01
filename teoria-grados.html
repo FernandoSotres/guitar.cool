@@ -77,7 +77,7 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,246,240,.94);backdrop-
 /* ── DEGREE GRID ── */
 .deg-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:10px;}
 .deg-card{
-  border-radius:12px;padding:18px 8px 16px;text-align:center;cursor:pointer;
+  border-radius:12px;padding:18px 8px 20px;text-align:center;cursor:pointer;
   background:var(--paper2);border:2px solid var(--paper4);
   transition:border-color .18s,box-shadow .18s,transform .14s;
   position:relative;
@@ -102,15 +102,6 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,246,240,.94);backdrop-
 .tonic-fn   .deg-char{color:rgba(160,92,32,.8);}
 .subdom-fn  .deg-char{color:rgba(90,122,191,.9);}
 .dominant-fn .deg-char{color:rgba(122,74,191,.9);}
-
-.deg-play-btn{
-  display:block;width:28px;height:28px;border-radius:50%;
-  border:none;cursor:pointer;margin:10px auto 0;
-  font-size:11px;transition:all .15s;
-  background:var(--paper3);color:var(--ink4);
-}
-.deg-card:hover .deg-play-btn{background:var(--paper4);}
-.deg-card.playing .deg-play-btn{background:var(--copper);color:#fff;}
 
 /* Expanded description panel */
 .deg-desc-panel{
@@ -503,6 +494,13 @@ function playChord(rootMidi,semis){
   synth.triggerAttackRelease(notes,'4n',now);
 }
 
+function playNote(midi){
+  if(!synth)return;
+  synth.triggerAttackRelease(midiToNote(midi),'2n',Tone.now()+0.05);
+}
+
+function noteIdxToMidi(ni){return ni<=6?60+ni:48+ni;}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function getChordName(rootIdx,degIdx){
   const ni=(rootIdx+SCALE_IVS[degIdx])%12;
@@ -543,6 +541,14 @@ function buildPatternDemo(){
         <div style="font-family:var(--mono);font-size:9px;color:var(--ink5);margin-bottom:3px;">${ROMAN[di]}</div>
         <div style="font-family:var(--serif);font-size:15px;font-weight:700;color:var(--ink);">${NOTES[ni]}${q==='m'?'m':q==='°'?'°':''}</div>
       `;
+      chip.style.cursor='pointer';
+      chip.title=`Escuchar ${NOTES[ni]}${q==='m'?'m':q==='°'?'°':''}`;
+      chip.addEventListener('click',async()=>{
+        await initAudio();
+        playChord(noteIdxToMidi(ni),DEGREES[di].chordSemis);
+        chip.style.opacity='.7';
+        setTimeout(()=>chip.style.opacity='',300);
+      });
       chords.appendChild(chip);
     });
     row.appendChild(chords);
@@ -578,19 +584,16 @@ function buildDegGrid(){
       <div class="deg-name">${shortName}</div>
       <div class="deg-quality">${d.q==='M'?'mayor':d.q==='m'?'menor':'dim.'}</div>
       <div class="deg-char">${d.char}</div>
-      <button class="deg-play-btn" title="Escuchar">▶</button>
     `;
-    card.querySelector('.deg-play-btn').addEventListener('click',async e=>{
-      e.stopPropagation();
+    card.addEventListener('click',async()=>{
+      const ni=(degKey+SCALE_IVS[i])%12;
+      const baseMidi=noteIdxToMidi(ni);
       await initAudio();
-      const rootMidi=48+SCALE_IVS[i]+((degKey<=5?0:0));
-      // use a comfortable octave
-      const baseMidi=48+(degKey+SCALE_IVS[i])%12;
       playChord(baseMidi,d.chordSemis);
       card.classList.add('playing');
       setTimeout(()=>card.classList.remove('playing'),1200);
+      toggleDegDesc(i,d,chordName);
     });
-    card.addEventListener('click',()=>toggleDegDesc(i,d,chordName));
     grid.appendChild(card);
   });
   // Re-open if one was open
@@ -675,6 +678,19 @@ buildDegGrid();
 buildTransKeySel();
 buildTransProgBtns();
 renderTrans();
+
+// ── Ear table: click each row to hear the scale degree note (C major) ─────────
+const EAR_MIDIS=[60,62,64,65,67,69,71]; // C D E F G A B (degree notes in C4)
+document.querySelectorAll('.ear-table tbody tr').forEach((tr,i)=>{
+  tr.style.cursor='pointer';
+  tr.addEventListener('click',async()=>{
+    await initAudio();
+    // Play the note + the chord of that degree in C major
+    playChord(EAR_MIDIS[i], DEGREES[i].chordSemis);
+    tr.style.background='rgba(255,255,255,.06)';
+    setTimeout(()=>tr.style.background='',900);
+  });
+});
 </script>
 </body>
 </html>
