@@ -161,7 +161,9 @@ hr.th-div.dark{background:rgba(255,255,255,.06);}
 .th-next-btn.back:hover{color:var(--paper);border-color:rgba(255,255,255,.28);}
 
 @media(max-width:768px){
-  nav{padding:0 20px;}
+  nav{padding:0 16px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav>*{flex-shrink:0;}
   .th-breadcrumb{padding:0 20px;}
   .th-hero{padding:80px 20px 64px;}
   .th-section{padding:64px 20px;}

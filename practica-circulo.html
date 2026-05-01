@@ -76,7 +76,9 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,246,240,.94);backdrop-
 .start-hint{font-size:14px;color:var(--ink4);margin-top:16px;font-style:italic;}
 
 @media(max-width:600px){
-  nav{padding:0 16px;}
+  nav{padding:0 16px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav>*{flex-shrink:0;}
   .ex-page{padding:32px 16px 64px;}
   .question-card{padding:20px 20px;}
   .ex-header{gap:12px;}

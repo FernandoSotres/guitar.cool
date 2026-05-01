@@ -133,7 +133,9 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,246,240,.94);backdrop-
 .ex-streak-dot.on{background:var(--copper);transform:scale(1.2);}
 
 @media(max-width:900px){
-  nav{padding:0 20px;}
+  nav{padding:0 16px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav>*{flex-shrink:0;}
   .breadcrumb{padding:0 20px;}
   .ex-wrap{grid-template-columns:1fr;}
   .ex-sidebar{border-right:none;border-bottom:1px solid var(--paper4);}

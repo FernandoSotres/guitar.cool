@@ -166,7 +166,9 @@ nav {
 .hub-footer-cta:hover { background: var(--copper-dk); }
 
 @media (max-width: 768px) {
-  nav { padding: 0 20px; }
+  nav { padding: 0 16px; overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; scrollbar-width: none; }
+  nav::-webkit-scrollbar { display: none; }
+  nav > * { flex-shrink: 0; }
   .hub-hero { padding: 80px 20px 72px; }
   .hub-path { padding: 64px 20px 80px; }
   .hub-footer-strip { padding: 48px 20px; }

@@ -127,7 +127,9 @@ nav {
 .res-card.coming .res-card-arrow { font-size: 12px; color: var(--paper5); letter-spacing: .05em; font-family: var(--mono); }
 
 @media (max-width: 768px) {
-  nav { padding: 0 20px; }
+  nav { padding: 0 16px; overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; scrollbar-width: none; }
+  nav::-webkit-scrollbar { display: none; }
+  nav > * { flex-shrink: 0; }
   .hub-hero { padding: 80px 20px 72px; }
   .resources-section { padding: 60px 20px 80px; }
   .res-card-body { padding: 22px 20px; }
