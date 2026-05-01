@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>guitarra.cool · Las 12 notas — Historia de la Música</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -121,6 +122,16 @@ nav {
   font-style: italic; color: var(--ink2); line-height: 1.55; margin: 0 !important;
 }
 
+/* ── SECTION PHOTO ── */
+.ch-section-photo {
+  width: 100%; height: 220px; overflow: hidden;
+  border-radius: 10px; margin-bottom: 28px;
+}
+.ch-section-photo img {
+  width: 100%; height: 100%; object-fit: cover; object-position: center;
+  display: block;
+}
+
 /* ── VISUAL BLOCKS ── */
 .ch-visual-wrap {
   max-width: 860px; margin: 0 auto; padding: 0 48px 72px;
@@ -130,15 +141,17 @@ nav {
   border-radius: 14px; overflow: hidden;
 }
 .ch-visual-header {
-  padding: 16px 24px 14px;
+  padding: 13px 20px;
   border-bottom: 1px solid var(--paper3);
-  display: flex; align-items: center; gap: 10px;
+  display: flex; align-items: center; justify-content: space-between;
 }
-.ch-visual-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--paper4); }
-.ch-visual-dot:first-child { background: var(--copper-lt); opacity: .6; }
 .ch-visual-title {
   font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
-  color: var(--ink5); flex: 1; text-align: center;
+  color: var(--ink5);
+}
+.ch-audio-hint {
+  font-size: 11px; color: var(--copper); font-weight: 500; font-style: italic;
+  letter-spacing: .02em;
 }
 .ch-visual-body { padding: 28px 24px; overflow-x: auto; }
 .ch-visual-caption {
@@ -247,6 +260,7 @@ nav {
 <!-- ── SECCIÓN 1 ── -->
 <div class="ch-body">
 <div class="ch-section">
+  <div class="ch-section-photo"><img src="/img/hist-traste.jpg" alt="Trastes de guitarra" loading="lazy"></div>
   <span class="ch-section-label">El punto de partida</span>
   <h2 class="ch-h2">Cada vez que pisas un traste,<br>tocas el resultado de<br><em>2.500 años de discusión.</em></h2>
 
@@ -261,6 +275,7 @@ nav {
 <!-- ── SECCIÓN 2 ── -->
 <div class="ch-body">
 <div class="ch-section">
+  <div class="ch-section-photo"><img src="/img/hist-pitagoras.jpg" alt="Pitágoras y el monocordio" loading="lazy"></div>
   <span class="ch-section-label">Grecia · ~500 a.C.</span>
   <h2 class="ch-h2">Pitágoras y el monocordio:<br><em>los números detrás del sonido</em></h2>
 
@@ -274,14 +289,11 @@ nav {
 <div class="ch-visual-wrap">
 <div class="ch-visual">
   <div class="ch-visual-header">
-    <div class="ch-visual-dot"></div>
-    <div class="ch-visual-dot"></div>
-    <div class="ch-visual-dot"></div>
     <span class="ch-visual-title">El monocordio — proporciones que suenan consonantes</span>
+    <span class="ch-audio-hint">♪ toca cada cuerda</span>
   </div>
   <div class="ch-visual-body">
-    <svg viewBox="0 0 760 260" width="100%" style="display:block;min-width:460px;max-width:760px">
-      <!-- Background -->
+    <svg id="svg-mono" viewBox="0 0 760 260" width="100%" style="display:block;min-width:460px;max-width:760px">
       <rect width="760" height="260" fill="#f2ece3" rx="8"/>
 
       <!-- Row labels (left) -->
@@ -295,32 +307,37 @@ nav {
       <line x1="730" y1="32" x2="730" y2="218" stroke="#cec4b0" stroke-width="1"/>
 
       <!-- Row 1: Full string (C) -->
-      <rect x="130" y="43" width="600" height="14" rx="3" fill="#e8a838" opacity=".85"/>
+      <rect id="mono-r1" x="130" y="43" width="600" height="14" rx="3" fill="#e8a838" opacity=".85"/>
       <text x="730" y="50" font-family="DM Sans,sans-serif" font-size="11" font-weight="700" fill="#a05c20" dominant-baseline="middle" text-anchor="start" dx="8">Do</text>
 
       <!-- Row 2: Half string (C octave) -->
-      <rect x="130" y="93" width="300" height="14" rx="3" fill="#e8a838" opacity=".5"/>
+      <rect id="mono-r2a" x="130" y="93" width="300" height="14" rx="3" fill="#e8a838" opacity=".5"/>
       <rect x="430" y="93" width="300" height="14" rx="3" fill="#ddd4c4" opacity=".5"/>
       <line x1="430" y1="88" x2="430" y2="112" stroke="#a05c20" stroke-width="1.5" stroke-dasharray="3,2"/>
       <text x="730" y="100" font-family="DM Sans,sans-serif" font-size="11" font-weight="700" fill="#a05c20" dominant-baseline="middle" text-anchor="start" dx="8">Do (8va)</text>
       <text x="280" y="108" font-family="DM Mono,monospace" font-size="9" fill="#8a7a66" text-anchor="middle">mitad</text>
 
       <!-- Row 3: 2/3 string (G, fifth) -->
-      <rect x="130" y="143" width="400" height="14" rx="3" fill="#9868d4" opacity=".6"/>
+      <rect id="mono-r3a" x="130" y="143" width="400" height="14" rx="3" fill="#9868d4" opacity=".6"/>
       <rect x="530" y="143" width="200" height="14" rx="3" fill="#ddd4c4" opacity=".5"/>
       <line x1="530" y1="138" x2="530" y2="162" stroke="#6040a0" stroke-width="1.5" stroke-dasharray="3,2"/>
       <text x="730" y="150" font-family="DM Sans,sans-serif" font-size="11" font-weight="700" fill="#6040a0" dominant-baseline="middle" text-anchor="start" dx="8">Sol</text>
       <text x="330" y="158" font-family="DM Mono,monospace" font-size="9" fill="#8a7a66" text-anchor="middle">2/3</text>
 
       <!-- Row 4: 3/4 string (F, fourth) -->
-      <rect x="130" y="193" width="450" height="14" rx="3" fill="#50c490" opacity=".6"/>
+      <rect id="mono-r4a" x="130" y="193" width="450" height="14" rx="3" fill="#50c490" opacity=".6"/>
       <rect x="580" y="193" width="150" height="14" rx="3" fill="#ddd4c4" opacity=".5"/>
       <line x1="580" y1="188" x2="580" y2="212" stroke="#2a7a50" stroke-width="1.5" stroke-dasharray="3,2"/>
       <text x="730" y="200" font-family="DM Sans,sans-serif" font-size="11" font-weight="700" fill="#2a7a50" dominant-baseline="middle" text-anchor="start" dx="8">Fa</text>
       <text x="355" y="208" font-family="DM Mono,monospace" font-size="9" fill="#8a7a66" text-anchor="middle">3/4</text>
 
-      <!-- Arrow/legend bottom -->
       <text x="430" y="240" font-family="DM Sans,sans-serif" font-size="11" fill="#8a7a66" text-anchor="middle" font-style="italic">La cuerda más corta vibra más rápido → sonido más agudo</text>
+
+      <!-- Invisible click zones for each row -->
+      <rect data-midi="60" x="130" y="34" width="600" height="30" fill="transparent" style="cursor:pointer" class="mono-hit"/>
+      <rect data-midi="72" x="130" y="84" width="600" height="30" fill="transparent" style="cursor:pointer" class="mono-hit"/>
+      <rect data-midi="67" x="130" y="134" width="600" height="30" fill="transparent" style="cursor:pointer" class="mono-hit"/>
+      <rect data-midi="65" x="130" y="184" width="600" height="30" fill="transparent" style="cursor:pointer" class="mono-hit"/>
     </svg>
   </div>
   <div class="ch-visual-caption">
@@ -346,6 +363,7 @@ nav {
 <!-- ── SECCIÓN 3 ── -->
 <div class="ch-body">
 <div class="ch-section">
+  <div class="ch-section-photo"><img src="/img/hist-coma.jpg" alt="Manuscrito medieval de teoría musical" loading="lazy"></div>
   <span class="ch-section-label">El problema central</span>
   <h2 class="ch-h2">La coma pitagórica:<br><em>el error que lo complica todo</em></h2>
 
@@ -357,10 +375,8 @@ nav {
 <div class="ch-visual-wrap">
 <div class="ch-visual">
   <div class="ch-visual-header">
-    <div class="ch-visual-dot"></div>
-    <div class="ch-visual-dot"></div>
-    <div class="ch-visual-dot"></div>
     <span class="ch-visual-title">La espiral de quintas — el viaje que no cierra</span>
+    <span class="ch-audio-hint">♪ toca cada nota</span>
   </div>
   <div class="ch-visual-body">
     <svg viewBox="0 0 760 200" width="100%" style="display:block;min-width:460px;max-width:760px">
@@ -438,6 +454,20 @@ nav {
       <!-- Gap label -->
       <text x="725" y="155" font-family="DM Sans,sans-serif" font-size="11" fill="#e07040" text-anchor="middle" font-style="italic">Coma pitagórica</text>
       <text x="725" y="170" font-family="DM Mono,monospace" font-size="10" fill="#e07040" text-anchor="middle">≈ 23 cents</text>
+
+      <!-- Invisible click zones for each note circle -->
+      <circle data-midi="60" cx="35"  cy="80" r="20" fill="transparent" style="cursor:pointer" class="spiral-hit"/>
+      <circle data-midi="67" cx="95"  cy="80" r="20" fill="transparent" style="cursor:pointer" class="spiral-hit"/>
+      <circle data-midi="62" cx="155" cy="80" r="20" fill="transparent" style="cursor:pointer" class="spiral-hit"/>
+      <circle data-midi="69" cx="215" cy="80" r="20" fill="transparent" style="cursor:pointer" class="spiral-hit"/>
+      <circle data-midi="64" cx="275" cy="80" r="20" fill="transparent" style="cursor:pointer" class="spiral-hit"/>
+      <circle data-midi="71" cx="335" cy="80" r="20" fill="transparent" style="cursor:pointer" class="spiral-hit"/>
+      <circle data-midi="66" cx="395" cy="80" r="20" fill="transparent" style="cursor:pointer" class="spiral-hit"/>
+      <circle data-midi="61" cx="455" cy="80" r="20" fill="transparent" style="cursor:pointer" class="spiral-hit"/>
+      <circle data-midi="68" cx="515" cy="80" r="20" fill="transparent" style="cursor:pointer" class="spiral-hit"/>
+      <circle data-midi="63" cx="575" cy="80" r="20" fill="transparent" style="cursor:pointer" class="spiral-hit"/>
+      <circle data-midi="70" cx="635" cy="80" r="20" fill="transparent" style="cursor:pointer" class="spiral-hit"/>
+      <circle data-midi="65" cx="695" cy="80" r="20" fill="transparent" style="cursor:pointer" class="spiral-hit"/>
     </svg>
   </div>
   <div class="ch-visual-caption">
@@ -466,6 +496,7 @@ nav {
 <!-- ── SECCIÓN 4 ── -->
 <div class="ch-body">
 <div class="ch-section">
+  <div class="ch-section-photo"><img src="/img/hist-medieval.jpg" alt="Órgano barroco" loading="lazy"></div>
   <span class="ch-section-label">Edad Media — s. XVIII</span>
   <h2 class="ch-h2">Siglos buscando<br><em>el compromiso perfecto</em></h2>
 
@@ -486,6 +517,7 @@ nav {
 <!-- ── SECCIÓN 5 ── -->
 <div class="ch-body">
 <div class="ch-section">
+  <div class="ch-section-photo"><img src="/img/hist-clave.jpg" alt="Clavicémbalo barroco" loading="lazy"></div>
   <span class="ch-section-label">Johann Sebastian Bach · 1722</span>
   <h2 class="ch-h2">El Clave Bien Temperado:<br><em>la demostración más famosa de la historia</em></h2>
 
@@ -500,6 +532,7 @@ nav {
 <!-- ── SECCIÓN 6 ── -->
 <div class="ch-body">
 <div class="ch-section">
+  <div class="ch-section-photo"><img src="/img/hist-tempe.jpg" alt="Teclas de piano" loading="lazy"></div>
   <span class="ch-section-label">Siglos XVIII–XIX · El acuerdo final</span>
   <h2 class="ch-h2">El temperamento igual:<br><em>todo un poco impuro, todo igualmente usable</em></h2>
 
@@ -515,10 +548,8 @@ nav {
 <div class="ch-visual-wrap">
 <div class="ch-visual">
   <div class="ch-visual-header">
-    <div class="ch-visual-dot"></div>
-    <div class="ch-visual-dot"></div>
-    <div class="ch-visual-dot"></div>
     <span class="ch-visual-title">El temperamento igual — 12 semitonos idénticos</span>
+    <span class="ch-audio-hint">♪ toca cada semitono</span>
   </div>
   <div class="ch-visual-body">
     <svg viewBox="0 0 760 200" width="100%" style="display:block;min-width:460px;max-width:760px">
@@ -581,6 +612,20 @@ nav {
       <!-- Brace showing one octave -->
       <path d="M 30,128 L 30,138 Q 30,145 38,145 L 374,145 Q 382,145 382,138 L 382,135 M 382,135 L 382,138 Q 382,145 390,145 L 714,145 Q 722,145 722,138 L 722,128" fill="none" stroke="#cec4b0" stroke-width="1.5"/>
       <text x="380" y="162" font-family="DM Sans,sans-serif" font-size="12" fill="#8a7a66" text-anchor="middle" font-style="italic">1 octava = 12 semitonos = frecuencia × 2</text>
+
+      <!-- Invisible click zones for each semitone block -->
+      <rect data-midi="60" x="30"  y="55" width="57" height="50" fill="transparent" style="cursor:pointer" class="semi-hit"/>
+      <rect data-midi="61" x="88"  y="55" width="57" height="50" fill="transparent" style="cursor:pointer" class="semi-hit"/>
+      <rect data-midi="62" x="146" y="55" width="57" height="50" fill="transparent" style="cursor:pointer" class="semi-hit"/>
+      <rect data-midi="63" x="204" y="55" width="57" height="50" fill="transparent" style="cursor:pointer" class="semi-hit"/>
+      <rect data-midi="64" x="261" y="55" width="57" height="50" fill="transparent" style="cursor:pointer" class="semi-hit"/>
+      <rect data-midi="65" x="319" y="55" width="57" height="50" fill="transparent" style="cursor:pointer" class="semi-hit"/>
+      <rect data-midi="66" x="377" y="55" width="57" height="50" fill="transparent" style="cursor:pointer" class="semi-hit"/>
+      <rect data-midi="67" x="434" y="55" width="57" height="50" fill="transparent" style="cursor:pointer" class="semi-hit"/>
+      <rect data-midi="68" x="492" y="55" width="57" height="50" fill="transparent" style="cursor:pointer" class="semi-hit"/>
+      <rect data-midi="69" x="549" y="55" width="57" height="50" fill="transparent" style="cursor:pointer" class="semi-hit"/>
+      <rect data-midi="70" x="607" y="55" width="57" height="50" fill="transparent" style="cursor:pointer" class="semi-hit"/>
+      <rect data-midi="71" x="664" y="55" width="57" height="50" fill="transparent" style="cursor:pointer" class="semi-hit"/>
     </svg>
   </div>
   <div class="ch-visual-caption">
@@ -600,6 +645,7 @@ nav {
 <!-- ── SECCIÓN 7 ── -->
 <div class="ch-body">
 <div class="ch-section">
+  <div class="ch-section-photo"><img src="/img/hist-guitarra.jpg" alt="Mano en el diapasón" loading="lazy"></div>
   <span class="ch-section-label">Lo que significa para ti hoy</span>
   <h2 class="ch-h2">Tu guitarra<br><em>es un instrumento de compromiso</em></h2>
 
@@ -638,5 +684,50 @@ nav {
   </div>
 </div>
 
+<script>
+(function () {
+  var _synth = null;
+
+  function _midiNote(m) {
+    var names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    return names[m % 12] + (Math.floor(m / 12) - 1);
+  }
+
+  async function _initAudio() {
+    if (_synth) return;
+    await Tone.start();
+    var comp   = new Tone.Compressor(-18, 4).toDestination();
+    var reverb = new Tone.Freeverb({ roomSize: 0.28, dampening: 3800, wet: 0.16 }).connect(comp);
+    _synth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'triangle' },
+      envelope:   { attack: 0.008, decay: 0.4, sustain: 0.15, release: 1.6 }
+    }).connect(reverb);
+  }
+
+  async function playNote(midi) {
+    try {
+      await _initAudio();
+      _synth.triggerAttackRelease(_midiNote(midi), '2n');
+    } catch(e) { /* ignore audio errors */ }
+  }
+
+  // Flash helper — briefly highlights the hit element
+  function flash(el) {
+    el.style.transition = 'opacity .08s';
+    el.style.opacity = '0.25';
+    setTimeout(function() { el.style.opacity = '0'; el.style.transition = ''; }, 180);
+  }
+
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-midi]');
+    if (!el) return;
+    var midi = parseInt(el.getAttribute('data-midi'), 10);
+    if (!isNaN(midi)) {
+      flash(el);
+      playNote(midi);
+    }
+  });
+})();
+</script>
 </body>
 </html>
