@@ -306,6 +306,44 @@ a.nav-logo { color: var(--ink); }
 .tp-feats { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 8px; }
 .tp-feats .ph-card { aspect-ratio: 3/2; }
 
+/* ── VISIÓN ── */
+.vision {
+  padding: 100px 48px 90px;
+  background: var(--paper2);
+  text-align: center;
+}
+.vision-inner { max-width: 1040px; margin: 0 auto; }
+.vision-rule {
+  display: flex; align-items: center; gap: 20px;
+  justify-content: center; margin-bottom: 36px;
+}
+.vision-line { height: 1px; background: var(--paper4); width: 60px; }
+.vision-eyebrow {
+  font-size: 11px; font-weight: 600; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--copper);
+}
+.vision-h2 {
+  font-family: var(--serif);
+  font-size: clamp(34px, 5vw, 60px);
+  font-weight: 700; color: var(--ink);
+  line-height: 1.06; letter-spacing: -.02em;
+  margin-bottom: 58px;
+}
+.vision-h2 em { font-style: italic; color: var(--copper); }
+.vision-cols {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 40px 52px;
+  text-align: left; border-top: 1px solid var(--paper4); padding-top: 48px;
+}
+.vision-col p {
+  font-size: 15px; color: var(--ink3); line-height: 1.85;
+}
+.vision-col p + p { margin-top: 16px; }
+.vision-col-num {
+  font-family: var(--serif); font-size: 11px; font-weight: 600;
+  letter-spacing: .2em; text-transform: uppercase;
+  color: var(--copper); margin-bottom: 14px; display: block;
+}
+
 /* ── PHOTO GALLERY ── */
 .pg-label {
   background: var(--paper); padding: 48px 48px 0;
@@ -325,25 +363,45 @@ a.nav-logo { color: var(--ink); }
 .pg-item {
   overflow: hidden;
   position: relative;
+  display: block; text-decoration: none;
 }
 .pg-item img {
   width: 100%; height: 100%;
   object-fit: cover; object-position: center;
   display: block;
   transition: transform .7s cubic-bezier(.22,.68,0,1);
-  /* placeholder color while image loads */
   background: #160e06;
 }
-.pg-item:hover img { transform: scale(1.04); }
-.pg-item::after {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(to bottom, transparent 60%, rgba(10,6,3,.3) 100%);
-  pointer-events: none;
+.pg-item:hover img { transform: scale(1.06); }
+.pg-cover {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 90px 28px 34px;
+  background: linear-gradient(to top, rgba(10,6,3,.84) 0%, rgba(10,6,3,.28) 65%, transparent 100%);
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  transition: background .4s;
 }
+.pg-item:hover .pg-cover {
+  background: linear-gradient(to top, rgba(10,6,3,.93) 0%, rgba(10,6,3,.52) 72%, rgba(10,6,3,.08) 100%);
+}
+.pg-cover-title {
+  font-family: var(--serif); font-size: 30px; font-weight: 700;
+  color: #fff; letter-spacing: -.01em; margin-bottom: 10px;
+  transition: transform .32s;
+}
+.pg-item:hover .pg-cover-title { transform: translateY(-5px); }
+.pg-cover-cta {
+  font-size: 11px; font-weight: 700; letter-spacing: .15em;
+  text-transform: uppercase; color: var(--copper-lt);
+  opacity: 0; transform: translateY(7px);
+  transition: opacity .3s .06s, transform .3s .06s;
+}
+.pg-item:hover .pg-cover-cta { opacity: 1; transform: translateY(0); }
 @media (max-width: 768px) {
   .photo-gallery { grid-template-columns: 1fr; height: auto; }
   .pg-item { height: 260px; }
+  .pg-cover-cta { opacity: 1; transform: none; }
+  .vision { padding: 60px 20px; }
+  .vision-cols { grid-template-columns: 1fr; gap: 28px; }
 }
 
 /* ── FOOTER ── */
@@ -815,17 +873,61 @@ footer .f-copy { font-size: 12px; color: var(--ink5); }
   </div>
 </section>
 
+<!-- ── VISIÓN ── -->
+<section class="vision">
+  <div class="vision-inner">
+    <div class="vision-rule">
+      <div class="vision-line"></div>
+      <span class="vision-eyebrow">Nuestra filosofía</span>
+      <div class="vision-line"></div>
+    </div>
+    <h2 class="vision-h2">
+      Aprende música<br>
+      como se aprende de verdad:<br>
+      <em>tocándola.</em>
+    </h2>
+    <div class="vision-cols">
+      <div class="vision-col">
+        <span class="vision-col-num">01 · Sin rigor innecesario</span>
+        <p>No necesitas leer partituras para entender música. Lo que necesitas es ver la teoría, tocarla, escucharla y sentirla en tu instrumento — hasta que deje de ser teoría y se vuelva intuición.</p>
+        <p>Aquí la armonía no es un conjunto de reglas. Es un lenguaje que aprendes hablándolo.</p>
+      </div>
+      <div class="vision-col">
+        <span class="vision-col-num">02 · El instrumento como mapa</span>
+        <p>La guitarra y el piano son las interfaces físicas y visuales de la música. En el diapasón y el teclado, los intervalos se ven, las escalas cobran forma y los acordes revelan su lógica sin necesidad de abstracción académica.</p>
+        <p>Aquí la teoría se aprende en el lugar donde vas a aplicarla: en tus manos.</p>
+      </div>
+      <div class="vision-col">
+        <span class="vision-col-num">03 · Libertad creativa real</span>
+        <p>El objetivo no es dominar la teoría — es usarla. Comprender lo suficiente para improvisar, componer y explorar sin restricciones. Esa libertad se construye tocando con propósito, escuchando con atención y entendiendo lo que estás haciendo mientras lo haces.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ── PHOTO GALLERY ── -->
 <div class="photo-gallery">
-  <div class="pg-item">
-    <img src="/img/estudio1.jpg" alt="Estudio de grabación" loading="lazy">
-  </div>
-  <div class="pg-item">
-    <img src="/img/photo-guitars.jpg" alt="Guitarras en el estudio" loading="lazy">
-  </div>
-  <div class="pg-item">
-    <img src="/img/photo-piano.jpg" alt="Manos tocando el piano" loading="lazy">
-  </div>
+  <a href="/teoria" class="pg-item">
+    <img src="/img/estudio1.jpg" alt="Teoría Musical" loading="lazy">
+    <div class="pg-cover">
+      <div class="pg-cover-title">Teoría</div>
+      <div class="pg-cover-cta">Explorar →</div>
+    </div>
+  </a>
+  <a href="/practica" class="pg-item">
+    <img src="/img/photo-guitars.jpg" alt="Práctica" loading="lazy">
+    <div class="pg-cover">
+      <div class="pg-cover-title">Práctica</div>
+      <div class="pg-cover-cta">Explorar →</div>
+    </div>
+  </a>
+  <a href="/herramientas" class="pg-item">
+    <img src="/img/photo-piano.jpg" alt="Herramientas" loading="lazy">
+    <div class="pg-cover">
+      <div class="pg-cover-title">Herramientas</div>
+      <div class="pg-cover-cta">Explorar →</div>
+    </div>
+  </a>
 </div>
 
 <!-- ── PIANO KEYBOARD DIVIDER ── -->
