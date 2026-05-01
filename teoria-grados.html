@@ -174,7 +174,8 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,246,240,.94);backdrop-
 .trans-prog-btn:hover{border-color:var(--copper-lt);color:var(--copper);}
 .trans-prog-btn.active{background:var(--copper);border-color:var(--copper-dk);color:#fff;}
 .trans-display{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
-.trans-chord{border-radius:10px;padding:16px 12px;min-width:80px;text-align:center;border:2px solid transparent;transition:all .2s;}
+.trans-chord{border-radius:10px;padding:16px 12px;min-width:80px;text-align:center;border:2px solid transparent;transition:all .2s;cursor:pointer;}
+.trans-chord:hover{filter:brightness(1.2);}
 .trans-chord.fn-t{background:rgba(160,92,32,.1);border-color:rgba(160,92,32,.25);}
 .trans-chord.fn-s{background:rgba(90,122,191,.1);border-color:rgba(90,122,191,.25);}
 .trans-chord.fn-d{background:rgba(122,74,191,.1);border-color:rgba(122,74,191,.25);}
@@ -648,12 +649,20 @@ function renderTrans(){
     const ni=(transKey+SCALE_IVS[di])%12;
     const q=DEGREES[di].q;
     const fn=FUNC_CLASS[di];
+    const semis=DEGREES[di].chordSemis;
     const chip=document.createElement('div');
     chip.className=`trans-chord ${fn}`;
+    chip.style.cursor='pointer';
+    chip.title=`Escuchar ${NOTES[ni]}${q==='m'?'m':q==='°'?'°':''}`;
     chip.innerHTML=`
       <div class="trans-roman">${ROMAN[di]}</div>
       <div class="trans-name">${NOTES[ni]}${q==='m'?'m':q==='°'?'°':''}</div>
     `;
+    chip.addEventListener('click',async()=>{
+      await initAudio();
+      const rootMidi=ni<=6?60+ni:48+ni;
+      playChord(rootMidi,semis);
+    });
     display.appendChild(chip);
   });
   document.getElementById('trans-insight').textContent=prog.insight;

@@ -6,6 +6,7 @@
 <title>guitarra.cool · Círculo de Quintas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
 <style>
 :root{
   --paper:#faf6f0;--paper2:#f2ece3;--paper3:#e8e0d4;--paper4:#ddd4c4;--paper5:#cec4b0;
@@ -91,7 +92,8 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,246,240,.94);backdrop-
 
 /* ── RELATIVE PAIRS ── */
 .rel-pairs{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:28px 0;}
-.rel-pair{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:18px 16px;display:flex;align-items:center;gap:16px;}
+.rel-pair{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:18px 16px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:border-color .18s,background .18s;}
+.rel-pair:hover{background:rgba(255,255,255,.08);border-color:rgba(192,120,48,.4);}
 .rel-major{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--paper);flex:1;}
 .rel-minor{font-family:var(--serif);font-size:18px;font-weight:600;color:rgba(250,246,240,.5);flex:1;text-align:right;}
 .rel-arrow{color:rgba(250,246,240,.2);font-size:14px;}
@@ -133,7 +135,8 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,246,240,.94);backdrop-
 
 /* ── NEIGHBOR VISUAL ── */
 .neighbor-vis{display:flex;align-items:center;justify-content:center;gap:0;margin:24px 0;flex-wrap:wrap;}
-.nb-key{border-radius:10px;padding:16px 20px;text-align:center;min-width:100px;}
+.nb-key{border-radius:10px;padding:16px 20px;text-align:center;min-width:100px;cursor:pointer;transition:filter .18s;}
+.nb-key:hover{filter:brightness(1.25);}
 .nb-key.center{background:rgba(160,92,32,.2);border:1.5px solid rgba(160,92,32,.5);}
 .nb-key.neighbor{background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.12);}
 .nb-arrow{padding:0 12px;color:rgba(250,246,240,.2);font-size:20px;}
@@ -400,6 +403,41 @@ nav{position:sticky;top:0;z-index:100;background:rgba(250,246,240,.94);backdrop-
 </section>
 
 <script>
+// ── Audio ─────────────────────────────────────────────────────────────────────
+// Note idx → comfortable MIDI range (C4=60 down to G3=55 across the chromatic scale)
+function _noteIdxToMidi(n){return n<=6?60+n:48+n;}
+function _midiNote(m){
+  const n=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  return n[m%12]+(Math.floor(m/12)-1);
+}
+// KEYS array note indices: C G D A E B F# Db Ab Eb Bb F
+const KEY_NOTE_IDX=[0,7,2,9,4,11,6,1,8,3,10,5];
+let _poly=null;
+async function _initAudio(){
+  if(_poly)return;
+  await Tone.start();
+  const rev=new Tone.Freeverb({roomSize:.28,wet:.15}).toDestination();
+  const comp=new Tone.Compressor(-16,4).connect(rev);
+  _poly=new Tone.PolySynth(Tone.Synth,{
+    oscillator:{type:'triangle'},
+    envelope:{attack:.04,decay:.28,sustain:.38,release:1.4},
+    volume:-9
+  }).connect(comp);
+}
+function playNote(midi){_initAudio().then(()=>_poly.triggerAttackRelease(_midiNote(midi),'1n'));}
+function playMajorChord(root){_initAudio().then(()=>_poly.triggerAttackRelease([root,root+4,root+7].map(_midiNote),'1n'));}
+function playMinorChord(root){_initAudio().then(()=>_poly.triggerAttackRelease([root,root+3,root+7].map(_midiNote),'1n'));}
+function playDimChord(root){_initAudio().then(()=>_poly.triggerAttackRelease([root,root+3,root+6].map(_midiNote),'1n'));}
+function playRelPair(majorRoot){
+  _initAudio().then(()=>{
+    const now=Tone.now();
+    _poly.triggerAttackRelease([majorRoot,majorRoot+4,majorRoot+7].map(_midiNote),'2n',now);
+    // Relative minor root = major root - 3 semitones
+    const mr=majorRoot-3;
+    _poly.triggerAttackRelease([mr,mr+3,mr+7].map(_midiNote),'2n',now+0.78);
+  });
+}
+
 // ── Data ──────────────────────────────────────────────────────────────────────
 const KEYS=[
   {major:'C',  minor:'Am',  sig:0,  sigTxt:'0',        sigLabel:'0 accidentales',  sharps:[],                    flats:[]},
@@ -439,6 +477,9 @@ window.addEventListener('scroll',()=>{
 });
 
 // ── Chain visual ──────────────────────────────────────────────────────────────
+// Chromatic semitone index for each note name (handles enharmonics)
+const CHAIN_MIDI={'C':60,'G':55,'D':62,'A':57,'E':64,'B':59,'F♯':66,'D♭':61,'A♭':56,'E♭':63,'B♭':58,'F':65};
+
 function buildChainVisual(){
   const container=document.getElementById('chain-visual');
   const chain=['C','G','D','A','E','B','F♯','D♭','A♭','E♭','B♭','F','C'];
@@ -453,8 +494,16 @@ function buildChainVisual(){
       border-radius:8px;padding:8px 16px;
       font-family:var(--serif);font-size:${i===0||i===12?'22px':'18px'};
       font-weight:700;min-width:60px;text-align:center;
+      cursor:pointer;transition:filter .15s;
     `;
     note.textContent=n;
+    note.title=`Escuchar ${n}`;
+    note.addEventListener('click',()=>{
+      const midi=CHAIN_MIDI[n]||(n==='C'?60:60);
+      playNote(midi);
+    });
+    note.addEventListener('mouseenter',()=>{note.style.filter='brightness(1.2)';});
+    note.addEventListener('mouseleave',()=>{note.style.filter='';});
     row.appendChild(note);
     if(i<12){
       const arrow=document.createElement('div');
@@ -605,6 +654,8 @@ function attachMainEvents(){
     gO.addEventListener('mouseenter',()=>{if(lockedIdx<0){highlightMain(i);showKeyInfo(i);updateCenter('circle-main',KEYS[i].major,'mayor',true);}});
     gO.addEventListener('mouseleave',()=>{if(lockedIdx<0){highlightMain(-1);updateCenter('circle-main','C','mayor',true);}});
     gO.addEventListener('click',()=>{
+      const root=_noteIdxToMidi(KEY_NOTE_IDX[i]);
+      playMajorChord(root);
       if(lockedIdx===i){lockedIdx=-1;highlightMain(-1);showKeyInfo(0);updateCenter('circle-main','C','mayor',true);}
       else{lockedIdx=i;highlightMain(i);showKeyInfo(i);updateCenter('circle-main',KEYS[i].major,'mayor',true);}
     });
@@ -614,6 +665,9 @@ function attachMainEvents(){
     gM.addEventListener('mouseenter',()=>{if(lockedIdx<0){highlightMain(i);showKeyInfo(i);updateCenter('circle-main',KEYS[i].minor,'menor',true);}});
     gM.addEventListener('mouseleave',()=>{if(lockedIdx<0){highlightMain(-1);updateCenter('circle-main','C','mayor',true);}});
     gM.addEventListener('click',()=>{
+      // Relative minor root = major root - 3
+      const minorRoot=_noteIdxToMidi(KEY_NOTE_IDX[i])-3;
+      playMinorChord(minorRoot);
       if(lockedIdx===i){lockedIdx=-1;highlightMain(-1);showKeyInfo(0);updateCenter('circle-main','C','mayor',true);}
       else{lockedIdx=i;highlightMain(i);showKeyInfo(i);updateCenter('circle-main',KEYS[i].minor,'menor',true);}
     });
@@ -640,20 +694,25 @@ function buildSigTable(){
 function buildRelPairs(){
   const box=document.getElementById('rel-pairs');
   // Show all 12 pairs
-  KEYS.forEach(k=>{
+  KEYS.forEach((k,i)=>{
     const d=document.createElement('div');
     d.className='rel-pair';
+    d.title=`Escuchar ${k.major} mayor y ${k.minor} menor`;
     d.innerHTML=`
       <div>
         <div class="rel-major">${k.major}</div>
         <div class="rel-sig" style="color:rgba(250,246,240,.28);">${k.sigTxt}</div>
       </div>
-      <div class="rel-arrow">↔</div>
+      <div class="rel-arrow" style="font-size:18px;">♪</div>
       <div style="text-align:right;">
         <div class="rel-minor">${k.minor}</div>
         <div class="rel-sig">${k.sigTxt}</div>
       </div>
     `;
+    d.addEventListener('click',()=>{
+      const majorRoot=_noteIdxToMidi(KEY_NOTE_IDX[i]);
+      playRelPair(majorRoot);
+    });
     box.appendChild(d);
   });
 }
@@ -732,7 +791,15 @@ function renderProg(){
     const fc=FUNC_CLASS[c.degIdx]||'t';
     const chip=document.createElement('div');
     chip.className=`prog-chip ${fc}`;
+    chip.style.cursor='pointer';
+    chip.title=`Escuchar ${noteName}${qSuffix}`;
     chip.innerHTML=`<div class="pc-roman">${c.roman}</div><div class="pc-name">${noteName}${qSuffix}</div>`;
+    chip.addEventListener('click',()=>{
+      const root=_noteIdxToMidi(ni);
+      if(c.quality==='m') playMinorChord(root);
+      else if(c.quality==='°') playDimChord(root);
+      else playMajorChord(root);
+    });
     row.appendChild(chip);
   });
 
@@ -762,6 +829,23 @@ buildCircle('circle-prog',{dark:true});
 buildProgKeySel();
 buildProgPresets();
 renderProg();
+
+// ── Neighbor key audio ────────────────────────────────────────────────────────
+// Static neighbor visual: F (left), C (center), G (right)
+const nbKeys=document.querySelectorAll('.nb-key');
+const NB_MIDIS={0:65,1:60,2:55}; // F=65, C=60, G=55
+nbKeys.forEach((el,idx)=>{
+  el.addEventListener('click',()=>playMajorChord(NB_MIDIS[idx]||60));
+});
+
+// ── Sig table row audio ────────────────────────────────────────────────────────
+document.querySelectorAll('#sig-table-body tr').forEach((tr,i)=>{
+  tr.style.cursor='pointer';
+  tr.addEventListener('click',()=>{
+    const root=_noteIdxToMidi(KEY_NOTE_IDX[i]);
+    playMajorChord(root);
+  });
+});
 </script>
 </body>
 </html>
