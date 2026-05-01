@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>guitarra.cool · Recursos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:    #faf6f0; --paper2: #f2ece3; --paper3: #e8e0d4;
+  --paper4:   #ddd4c4; --paper5: #cec4b0;
+  --copper:   #a05c20; --copper-lt: #c07830; --copper-dk: #7a4010;
+  --ink:      #1a1410; --ink2: #2e2418; --ink3: #4a3c2c;
+  --ink4:     #6a5a46; --ink5: #8a7a66;
+  --serif: 'Cormorant Garamond', Georgia, serif;
+  --sans:  'DM Sans', system-ui, sans-serif;
+  --mono:  'DM Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+
+/* ── NAV ── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(250,246,240,.94); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--paper4);
+  padding: 0 48px; display: flex; align-items: center; height: 56px; gap: 0;
+}
+.nav-logo { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--ink); margin-right: 36px; letter-spacing: -.01em; text-decoration: none; }
+.nav-logo span { color: var(--copper); }
+.nav-link { padding: 0 16px; height: 56px; display: flex; align-items: center; font-size: 13px; font-weight: 500; color: var(--ink4); text-decoration: none; border-bottom: 2px solid transparent; transition: color .2s, border-color .2s; }
+.nav-link:hover { color: var(--ink2); }
+.nav-link.active { color: var(--copper); border-bottom-color: var(--copper); }
+.nav-cta { margin-left: auto; background: var(--copper); color: #fff; font-size: 12px; font-weight: 600; padding: 7px 18px; border-radius: 6px; text-decoration: none; transition: background .2s; }
+.nav-cta:hover { background: var(--copper-dk); }
+
+/* ── HERO ── */
+.hub-hero {
+  background: #0d0804; padding: 120px 48px 100px; text-align: center;
+  position: relative; overflow: hidden;
+}
+.hub-hero::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 110%, rgba(100,60,20,.3) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hub-eyebrow {
+  font-size: 11px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--copper-lt); margin-bottom: 28px;
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+}
+.hub-eyebrow::before, .hub-eyebrow::after {
+  content: ''; display: block; height: 1px; width: 48px; background: var(--copper-lt); opacity: .35;
+}
+.hub-title {
+  font-family: var(--serif); font-size: clamp(52px, 8vw, 96px);
+  font-weight: 700; line-height: .9; letter-spacing: -.03em;
+  color: var(--paper); margin-bottom: 28px;
+}
+.hub-title em { font-style: italic; color: var(--copper-lt); }
+.hub-lead {
+  font-family: var(--serif); font-size: clamp(16px, 2vw, 20px); font-style: italic;
+  color: rgba(250,246,240,.46); max-width: 500px; margin: 0 auto; line-height: 1.75;
+}
+
+/* ── RESOURCE CARDS ── */
+.resources-section { padding: 96px 48px 112px; background: var(--paper); }
+.resources-inner { max-width: 900px; margin: 0 auto; }
+.res-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--copper); margin-bottom: 16px; display: block;
+}
+.res-title {
+  font-family: var(--serif); font-size: clamp(30px, 4vw, 44px);
+  font-weight: 700; line-height: 1.05; letter-spacing: -.02em;
+  color: var(--ink); margin-bottom: 12px;
+}
+.res-sub {
+  font-size: 15px; color: var(--ink4); line-height: 1.7; max-width: 520px; margin-bottom: 56px;
+}
+
+.res-grid { display: flex; flex-direction: column; gap: 12px; }
+
+.res-card {
+  display: flex; align-items: stretch; gap: 0;
+  border: 1px solid var(--paper4); border-radius: 14px;
+  overflow: hidden; text-decoration: none; color: inherit; background: #fff;
+  transition: box-shadow .22s, border-color .22s;
+}
+.res-card:hover {
+  border-color: var(--copper);
+  box-shadow: 0 6px 28px rgba(160,92,32,.11);
+}
+.res-card.coming {
+  cursor: default; pointer-events: none; opacity: .5;
+}
+
+.res-card-accent {
+  width: 6px; flex-shrink: 0;
+  background: var(--copper);
+}
+.res-card.coming .res-card-accent { background: var(--paper4); }
+
+.res-card-body { flex: 1; padding: 30px 32px; }
+.res-card-tag {
+  font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--copper); margin-bottom: 8px; display: block;
+}
+.res-card.coming .res-card-tag { color: var(--ink5); }
+.res-card-title {
+  font-family: var(--serif); font-size: 28px; font-weight: 700;
+  line-height: 1.1; letter-spacing: -.015em; color: var(--ink); margin-bottom: 10px;
+}
+.res-card-desc { font-size: 14px; color: var(--ink4); line-height: 1.65; max-width: 560px; }
+.res-card-meta {
+  margin-top: 14px; font-size: 12px; color: var(--ink5); font-family: var(--mono);
+}
+
+.res-card-arrow {
+  width: 64px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: var(--paper4);
+  transition: color .2s, transform .2s;
+}
+.res-card:not(.coming):hover .res-card-arrow { color: var(--copper); transform: translateX(4px); }
+.res-card.coming .res-card-arrow { font-size: 12px; color: var(--paper5); letter-spacing: .05em; font-family: var(--mono); }
+
+@media (max-width: 768px) {
+  nav { padding: 0 20px; }
+  .hub-hero { padding: 80px 20px 72px; }
+  .resources-section { padding: 60px 20px 80px; }
+  .res-card-body { padding: 22px 20px; }
+  .res-card-title { font-size: 22px; }
+  .res-card-arrow { width: 44px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">guitarra<span>.cool</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link active">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<section class="hub-hero">
+  <div class="hub-eyebrow">guitarra.cool</div>
+  <h1 class="hub-title">Otros<br><em>recursos</em></h1>
+  <p class="hub-lead">Contexto, historia y perspectiva para ir más allá de la técnica.</p>
+</section>
+
+<section class="resources-section">
+  <div class="resources-inner">
+    <span class="res-label">Colecciones</span>
+    <h2 class="res-title">Explora los recursos</h2>
+    <p class="res-sub">Material complementario que amplía la teoría y la práctica: historia, contexto cultural y todo lo que hace que la música tenga sentido más allá de las notas.</p>
+
+    <div class="res-grid">
+
+      <a href="/recursos/historia" class="res-card">
+        <div class="res-card-accent"></div>
+        <div class="res-card-body">
+          <span class="res-card-tag">Disponible · 5 capítulos</span>
+          <div class="res-card-title">Historia de la Música</div>
+          <p class="res-card-desc">De Pitágoras al pop: la historia de cómo llegaron a existir los recursos que usas cada vez que tocas. Lecciones narrativas con elementos teóricos visuales.</p>
+          <div class="res-card-meta">01 Las 12 notas · 02 Barroco y Clásico · 03 Romanticismo · 04 Blues y Jazz · 05 Rock, Pop y Electrónica</div>
+        </div>
+        <div class="res-card-arrow">→</div>
+      </a>
+
+      <div class="res-card coming">
+        <div class="res-card-accent"></div>
+        <div class="res-card-body">
+          <span class="res-card-tag">Próximamente</span>
+          <div class="res-card-title">Géneros y Estilos</div>
+          <p class="res-card-desc">Flamenco, bossa nova, metal progresivo, música clásica india. Cómo cada tradición musical construyó su propio sistema teórico y qué puedes tomar de cada uno.</p>
+        </div>
+        <div class="res-card-arrow">pronto</div>
+      </div>
+
+      <div class="res-card coming">
+        <div class="res-card-accent"></div>
+        <div class="res-card-body">
+          <span class="res-card-tag">Próximamente</span>
+          <div class="res-card-title">Guías de Escucha</div>
+          <p class="res-card-desc">Playlists curatoriales con análisis teórico: qué escuchar para entender cada concepto, con contexto sobre lo que pasa en la música mientras la escuchas.</p>
+        </div>
+        <div class="res-card-arrow">pronto</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

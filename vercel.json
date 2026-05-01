@@ -20,6 +20,8 @@
     { "source": "/practica/notas",        "destination": "/practica-notas.html" },
     { "source": "/practica/circulo",                "destination": "/practica-circulo.html" },
     { "source": "/practica/construccion-acordes",   "destination": "/practica-construccion-acordes.html" },
-    { "source": "/practica/progresiones",           "destination": "/practica-progresiones.html" }
+    { "source": "/practica/progresiones",           "destination": "/practica-progresiones.html" },
+    { "source": "/recursos",                         "destination": "/recursos.html" },
+    { "source": "/recursos/historia",                "destination": "/recursos-historia.html" }
   ]
 }
