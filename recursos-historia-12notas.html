@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>guitarra.cool · Las 12 notas — Historia de la Música</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:    #faf6f0; --paper2: #f2ece3; --paper3: #e8e0d4;
+  --paper4:   #ddd4c4; --paper5: #cec4b0;
+  --copper:   #a05c20; --copper-lt: #c07830; --copper-dk: #7a4010;
+  --ink:      #1a1410; --ink2: #2e2418; --ink3: #4a3c2c;
+  --ink4:     #6a5a46; --ink5: #8a7a66;
+  --serif: 'Cormorant Garamond', Georgia, serif;
+  --sans:  'DM Sans', system-ui, sans-serif;
+  --mono:  'DM Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+
+/* ── NAV ── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(250,246,240,.94); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--paper4);
+  padding: 0 48px; display: flex; align-items: center; height: 56px; gap: 0;
+}
+.nav-logo { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--ink); margin-right: 36px; letter-spacing: -.01em; text-decoration: none; }
+.nav-logo span { color: var(--copper); }
+.nav-link { padding: 0 16px; height: 56px; display: flex; align-items: center; font-size: 13px; font-weight: 500; color: var(--ink4); text-decoration: none; border-bottom: 2px solid transparent; transition: color .2s, border-color .2s; }
+.nav-link:hover { color: var(--ink2); }
+.nav-link.active { color: var(--copper); border-bottom-color: var(--copper); }
+.nav-cta { margin-left: auto; background: var(--copper); color: #fff; font-size: 12px; font-weight: 600; padding: 7px 18px; border-radius: 6px; text-decoration: none; transition: background .2s; }
+.nav-cta:hover { background: var(--copper-dk); }
+
+/* ── CHAPTER HERO ── */
+.ch-hero {
+  background: #0d0804;
+  padding: 80px 48px 90px;
+  position: relative; overflow: hidden;
+}
+.ch-hero::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 70% 50% at 50% 120%, rgba(100,60,20,.4) 0%, transparent 70%);
+  pointer-events: none;
+}
+.ch-breadcrumb {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+  color: rgba(250,246,240,.35); margin-bottom: 40px;
+}
+.ch-breadcrumb a { color: var(--copper-lt); text-decoration: none; transition: opacity .2s; }
+.ch-breadcrumb a:hover { opacity: .8; }
+.ch-breadcrumb span { color: rgba(250,246,240,.2); }
+
+.ch-meta {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+}
+.ch-num {
+  font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .1em;
+  color: var(--copper-lt); border: 1px solid rgba(192,120,48,.3);
+  padding: 4px 10px; border-radius: 4px;
+}
+.ch-era {
+  font-size: 12px; color: rgba(250,246,240,.35); font-style: italic;
+}
+
+.ch-title {
+  font-family: var(--serif); font-size: clamp(42px, 6vw, 80px);
+  font-weight: 700; line-height: .92; letter-spacing: -.025em;
+  color: var(--paper); max-width: 760px; margin-bottom: 12px;
+}
+.ch-title em { font-style: italic; color: var(--copper-lt); }
+.ch-subtitle {
+  font-family: var(--serif); font-size: clamp(18px, 2vw, 24px);
+  font-style: italic; color: rgba(250,246,240,.42); margin-bottom: 36px;
+}
+
+.ch-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.ch-tag {
+  font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 20px;
+  background: rgba(250,246,240,.07); color: rgba(250,246,240,.45);
+  border: 1px solid rgba(250,246,240,.1);
+}
+
+/* ── ARTICLE BODY ── */
+.ch-body {
+  max-width: 720px; margin: 0 auto; padding: 80px 48px 0;
+}
+
+.ch-section { margin-bottom: 72px; }
+
+.ch-section-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--copper); margin-bottom: 14px; display: block;
+}
+.ch-h2 {
+  font-family: var(--serif); font-size: clamp(28px, 3.5vw, 40px);
+  font-weight: 700; line-height: 1.06; letter-spacing: -.02em;
+  color: var(--ink); margin-bottom: 24px;
+}
+.ch-h2 em { font-style: italic; color: var(--copper); }
+
+.ch-body p {
+  font-size: 16px; color: var(--ink3); line-height: 1.85; margin-bottom: 22px;
+}
+.ch-body p:last-child { margin-bottom: 0; }
+.ch-body strong { font-weight: 600; color: var(--ink2); }
+
+.ch-pullquote {
+  border-left: 3px solid var(--copper);
+  padding: 16px 24px; background: var(--paper2);
+  border-radius: 0 8px 8px 0; margin: 36px 0;
+}
+.ch-pullquote p {
+  font-family: var(--serif); font-size: 21px !important;
+  font-style: italic; color: var(--ink2); line-height: 1.55; margin: 0 !important;
+}
+
+/* ── VISUAL BLOCKS ── */
+.ch-visual-wrap {
+  max-width: 860px; margin: 0 auto; padding: 0 48px 72px;
+}
+.ch-visual {
+  background: var(--paper2); border: 1px solid var(--paper3);
+  border-radius: 14px; overflow: hidden;
+}
+.ch-visual-header {
+  padding: 16px 24px 14px;
+  border-bottom: 1px solid var(--paper3);
+  display: flex; align-items: center; gap: 10px;
+}
+.ch-visual-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--paper4); }
+.ch-visual-dot:first-child { background: var(--copper-lt); opacity: .6; }
+.ch-visual-title {
+  font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--ink5); flex: 1; text-align: center;
+}
+.ch-visual-body { padding: 28px 24px; overflow-x: auto; }
+.ch-visual-caption {
+  padding: 12px 24px 16px;
+  border-top: 1px solid var(--paper3);
+  font-size: 12px; color: var(--ink5); font-style: italic; line-height: 1.5;
+}
+
+/* ── THEORY CONNECTION BOX ── */
+.ch-theory-link {
+  background: #100a04; border-radius: 12px;
+  padding: 28px 32px; margin: 36px 0;
+  display: flex; align-items: flex-start; gap: 20px;
+}
+.ch-theory-icon {
+  font-size: 22px; flex-shrink: 0; margin-top: 2px;
+}
+.ch-theory-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--copper-lt); margin-bottom: 6px; display: block;
+}
+.ch-theory-text {
+  font-size: 14px; color: rgba(250,246,240,.55); line-height: 1.7; margin-bottom: 12px;
+}
+.ch-theory-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600; color: var(--copper-lt);
+  text-decoration: none; border-bottom: 1px solid rgba(192,120,48,.35);
+  padding-bottom: 1px; transition: border-color .2s;
+}
+.ch-theory-btn:hover { border-color: var(--copper-lt); }
+
+/* ── CHAPTER NAV ── */
+.ch-nav {
+  max-width: 860px; margin: 0 auto;
+  padding: 0 48px 80px;
+  display: flex; justify-content: space-between; align-items: center; gap: 20px;
+}
+.ch-nav-back, .ch-nav-next {
+  display: flex; flex-direction: column; gap: 4px;
+  text-decoration: none; padding: 20px 24px; border-radius: 12px;
+  border: 1px solid var(--paper4); transition: border-color .2s, box-shadow .2s;
+  max-width: 48%;
+}
+.ch-nav-back:hover, .ch-nav-next:hover {
+  border-color: var(--copper);
+  box-shadow: 0 4px 16px rgba(160,92,32,.1);
+}
+.ch-nav-next { align-items: flex-end; opacity: .45; pointer-events: none; }
+.ch-nav-dir {
+  font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--copper);
+}
+.ch-nav-name {
+  font-family: var(--serif); font-size: 16px; font-weight: 700;
+  color: var(--ink); line-height: 1.2;
+}
+.ch-nav-desc { font-size: 12px; color: var(--ink5); }
+
+@media (max-width: 768px) {
+  nav { padding: 0 20px; }
+  .ch-hero { padding: 60px 20px 72px; }
+  .ch-body { padding: 56px 20px 0; }
+  .ch-visual-wrap { padding: 0 20px 56px; }
+  .ch-nav { padding: 0 20px 60px; flex-direction: column; }
+  .ch-nav-back, .ch-nav-next { max-width: 100%; width: 100%; }
+  .ch-nav-next { align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">guitarra<span>.cool</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link active">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="ch-hero">
+  <div class="ch-breadcrumb">
+    <a href="/recursos">Recursos</a>
+    <span>·</span>
+    <a href="/recursos/historia">Historia de la Música</a>
+    <span>·</span>
+    <span style="color:rgba(250,246,240,.5)">Capítulo 01</span>
+  </div>
+  <div class="ch-meta">
+    <span class="ch-num">Cap. 01</span>
+    <span class="ch-era">Antigüedad · Edad Media · siglos XVI–XIX</span>
+  </div>
+  <h1 class="ch-title">Las 12 notas</h1>
+  <p class="ch-subtitle">El acuerdo que tardó siglos</p>
+  <div class="ch-tags">
+    <span class="ch-tag">Afinación</span>
+    <span class="ch-tag">Serie de armónicos</span>
+    <span class="ch-tag">Escala cromática</span>
+    <span class="ch-tag">Temperamento igual</span>
+    <span class="ch-tag">Coma pitagórica</span>
+  </div>
+</section>
+
+<!-- ── SECCIÓN 1 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">El punto de partida</span>
+  <h2 class="ch-h2">Cada vez que pisas un traste,<br>tocas el resultado de<br><em>2.500 años de discusión.</em></h2>
+
+  <p>¿Quién decidió dónde están las notas? ¿Cómo sabe tu afinador que la cuerda Mi suena a exactamente 329,63 Hz? ¿Por qué el piano tiene exactamente 12 notas por octava y no 17, ni 9, ni 31?</p>
+
+  <p>La respuesta no es obvia. Durante la mayor parte de la historia, las culturas musicales usaron sistemas de afinación completamente distintos. El do chino no era el mismo do que el griego. El re de un laudista renacentista no era el re que escuchabas en la catedral de al lado. <strong>Las notas que hoy damos por sentadas son el resultado de un compromiso que a la humanidad le costó más de dos milenios acordar.</strong></p>
+
+  <p>Esta es esa historia.</p>
+</div>
+</div>
+
+<!-- ── SECCIÓN 2 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Grecia · ~500 a.C.</span>
+  <h2 class="ch-h2">Pitágoras y el monocordio:<br><em>los números detrás del sonido</em></h2>
+
+  <p>La leyenda dice que Pitágoras pasó frente a una herrería y escuchó que algunos golpes de martillo sonaban consonantes entre sí y otros no. Curioso, investigó y descubrió que los martillos que sonaban bien tenían pesos en proporciones simples: uno pesaba el doble que otro, otro pesaba tres cuartos del primero.</p>
+
+  <p>La misma relación aparecía en las cuerdas. Pitágoras construyó el <strong>monocordio</strong>: una caja resonante con una sola cuerda y un puente móvil. Al dividir la cuerda en proporciones exactas, encontró algo extraordinario.</p>
+</div>
+</div>
+
+<!-- VISUAL 1: Monocordio -->
+<div class="ch-visual-wrap">
+<div class="ch-visual">
+  <div class="ch-visual-header">
+    <div class="ch-visual-dot"></div>
+    <div class="ch-visual-dot"></div>
+    <div class="ch-visual-dot"></div>
+    <span class="ch-visual-title">El monocordio — proporciones que suenan consonantes</span>
+  </div>
+  <div class="ch-visual-body">
+    <svg viewBox="0 0 760 260" width="100%" style="display:block;min-width:460px;max-width:760px">
+      <!-- Background -->
+      <rect width="760" height="260" fill="#f2ece3" rx="8"/>
+
+      <!-- Row labels (left) -->
+      <text x="22" y="50"  font-family="DM Mono,monospace" font-size="10" fill="#8a7a66" dominant-baseline="middle">Fundamental</text>
+      <text x="22" y="100" font-family="DM Mono,monospace" font-size="10" fill="#8a7a66" dominant-baseline="middle">Octava  2:1</text>
+      <text x="22" y="150" font-family="DM Mono,monospace" font-size="10" fill="#8a7a66" dominant-baseline="middle">Quinta  3:2</text>
+      <text x="22" y="200" font-family="DM Mono,monospace" font-size="10" fill="#8a7a66" dominant-baseline="middle">Cuarta  4:3</text>
+
+      <!-- String support lines -->
+      <line x1="130" y1="32" x2="130" y2="218" stroke="#cec4b0" stroke-width="1"/>
+      <line x1="730" y1="32" x2="730" y2="218" stroke="#cec4b0" stroke-width="1"/>
+
+      <!-- Row 1: Full string (C) -->
+      <rect x="130" y="43" width="600" height="14" rx="3" fill="#e8a838" opacity=".85"/>
+      <text x="730" y="50" font-family="DM Sans,sans-serif" font-size="11" font-weight="700" fill="#a05c20" dominant-baseline="middle" text-anchor="start" dx="8">Do</text>
+
+      <!-- Row 2: Half string (C octave) -->
+      <rect x="130" y="93" width="300" height="14" rx="3" fill="#e8a838" opacity=".5"/>
+      <rect x="430" y="93" width="300" height="14" rx="3" fill="#ddd4c4" opacity=".5"/>
+      <line x1="430" y1="88" x2="430" y2="112" stroke="#a05c20" stroke-width="1.5" stroke-dasharray="3,2"/>
+      <text x="730" y="100" font-family="DM Sans,sans-serif" font-size="11" font-weight="700" fill="#a05c20" dominant-baseline="middle" text-anchor="start" dx="8">Do (8va)</text>
+      <text x="280" y="108" font-family="DM Mono,monospace" font-size="9" fill="#8a7a66" text-anchor="middle">mitad</text>
+
+      <!-- Row 3: 2/3 string (G, fifth) -->
+      <rect x="130" y="143" width="400" height="14" rx="3" fill="#9868d4" opacity=".6"/>
+      <rect x="530" y="143" width="200" height="14" rx="3" fill="#ddd4c4" opacity=".5"/>
+      <line x1="530" y1="138" x2="530" y2="162" stroke="#6040a0" stroke-width="1.5" stroke-dasharray="3,2"/>
+      <text x="730" y="150" font-family="DM Sans,sans-serif" font-size="11" font-weight="700" fill="#6040a0" dominant-baseline="middle" text-anchor="start" dx="8">Sol</text>
+      <text x="330" y="158" font-family="DM Mono,monospace" font-size="9" fill="#8a7a66" text-anchor="middle">2/3</text>
+
+      <!-- Row 4: 3/4 string (F, fourth) -->
+      <rect x="130" y="193" width="450" height="14" rx="3" fill="#50c490" opacity=".6"/>
+      <rect x="580" y="193" width="150" height="14" rx="3" fill="#ddd4c4" opacity=".5"/>
+      <line x1="580" y1="188" x2="580" y2="212" stroke="#2a7a50" stroke-width="1.5" stroke-dasharray="3,2"/>
+      <text x="730" y="200" font-family="DM Sans,sans-serif" font-size="11" font-weight="700" fill="#2a7a50" dominant-baseline="middle" text-anchor="start" dx="8">Fa</text>
+      <text x="355" y="208" font-family="DM Mono,monospace" font-size="9" fill="#8a7a66" text-anchor="middle">3/4</text>
+
+      <!-- Arrow/legend bottom -->
+      <text x="430" y="240" font-family="DM Sans,sans-serif" font-size="11" fill="#8a7a66" text-anchor="middle" font-style="italic">La cuerda más corta vibra más rápido → sonido más agudo</text>
+    </svg>
+  </div>
+  <div class="ch-visual-caption">
+    Pitágoras descubrió que al dividir una cuerda en proporciones simples obtenía siempre los mismos intervalos consonantes. La mitad produce una octava (Do). Dos tercios producen una quinta (Sol). Tres cuartos producen una cuarta (Fa). La naturaleza ya tenía las respuestas.
+  </div>
+</div>
+</div>
+
+<div class="ch-body">
+<div class="ch-section">
+  <p>Esta relación entre números simples y consonancia no era coincidencia. Cuando dos cuerdas vibran en proporción 2:1, sus vibraciones se alinean perfectamente — el cerebro las percibe como "el mismo sonido en dos alturas". Cuando vibran en 3:2, se alinean casi perfectamente. Cuanto más complicada la proporción, más disonante el intervalo.</p>
+
+  <div class="ch-pullquote">
+    <p>La música consonante, descubrió Pitágoras, era matemática. La armonía no era una opinión estética — era una propiedad del universo.</p>
+  </div>
+
+  <p>Con este descubrimiento podías construir una escala. Empiezas en Do, subes una quinta y llegas a Sol. Subes otra quinta y llegas a Re. Otra y llegas a La. Sigues subiendo quintas y vas generando notas nuevas. Doce quintas después, deberías volver exactamente al Do de origen, siete octavas más arriba.</p>
+
+  <p><strong>Pero no vuelves.</strong></p>
+</div>
+</div>
+
+<!-- ── SECCIÓN 3 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">El problema central</span>
+  <h2 class="ch-h2">La coma pitagórica:<br><em>el error que lo complica todo</em></h2>
+
+  <p>Si subimos doce quintas perfectas (multiplicando por 3/2 doce veces), recorremos el siguiente camino:</p>
+</div>
+</div>
+
+<!-- VISUAL 2: Cadena de quintas -->
+<div class="ch-visual-wrap">
+<div class="ch-visual">
+  <div class="ch-visual-header">
+    <div class="ch-visual-dot"></div>
+    <div class="ch-visual-dot"></div>
+    <div class="ch-visual-dot"></div>
+    <span class="ch-visual-title">La espiral de quintas — el viaje que no cierra</span>
+  </div>
+  <div class="ch-visual-body">
+    <svg viewBox="0 0 760 200" width="100%" style="display:block;min-width:460px;max-width:760px">
+      <rect width="760" height="200" fill="#f2ece3" rx="8"/>
+
+      <!-- The 12 notes as circles in a chain -->
+      <!-- Each circle at x = 20 + i*60, y=80 -->
+      <!-- Notes: C G D A E B F# C# G# D# A# F C* -->
+
+      <defs>
+        <marker id="arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#cec4b0"/>
+        </marker>
+        <marker id="arr-gap" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#e07040"/>
+        </marker>
+      </defs>
+
+      <!-- Arrows between notes (regular) -->
+      <!-- 12 arrows at y=80, each from circle edge to next circle edge -->
+      <!-- circle r=18, centers at x=35,95,155,215,275,335,395,455,515,575,635,695 -->
+
+      <!-- Regular arrows C→G→...→F -->
+      <line x1="53" y1="80" x2="77" y2="80" stroke="#cec4b0" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="113" y1="80" x2="137" y2="80" stroke="#cec4b0" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="173" y1="80" x2="197" y2="80" stroke="#cec4b0" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="233" y1="80" x2="257" y2="80" stroke="#cec4b0" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="293" y1="80" x2="317" y2="80" stroke="#cec4b0" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="353" y1="80" x2="377" y2="80" stroke="#cec4b0" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="413" y1="80" x2="437" y2="80" stroke="#cec4b0" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="473" y1="80" x2="497" y2="80" stroke="#cec4b0" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="533" y1="80" x2="557" y2="80" stroke="#cec4b0" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="593" y1="80" x2="617" y2="80" stroke="#cec4b0" stroke-width="1.5" marker-end="url(#arr)"/>
+      <line x1="653" y1="80" x2="677" y2="80" stroke="#cec4b0" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- Gap arrow: F → C* (orange, gap indication) -->
+      <!-- Curved arc below -->
+      <path d="M 713,90 Q 738,140 725,80" stroke="#e07040" stroke-width="2" fill="none" stroke-dasharray="5,3" marker-end="url(#arr-gap)"/>
+
+      <!-- Note circles -->
+      <circle cx="35"  cy="80" r="18" fill="#e8a838"/>
+      <circle cx="95"  cy="80" r="18" fill="#160e06" stroke="#cec4b0" stroke-width="1"/>
+      <circle cx="155" cy="80" r="18" fill="#160e06" stroke="#cec4b0" stroke-width="1"/>
+      <circle cx="215" cy="80" r="18" fill="#160e06" stroke="#cec4b0" stroke-width="1"/>
+      <circle cx="275" cy="80" r="18" fill="#160e06" stroke="#cec4b0" stroke-width="1"/>
+      <circle cx="335" cy="80" r="18" fill="#160e06" stroke="#cec4b0" stroke-width="1"/>
+      <circle cx="395" cy="80" r="18" fill="#160e06" stroke="#cec4b0" stroke-width="1"/>
+      <circle cx="455" cy="80" r="18" fill="#160e06" stroke="#cec4b0" stroke-width="1"/>
+      <circle cx="515" cy="80" r="18" fill="#160e06" stroke="#cec4b0" stroke-width="1"/>
+      <circle cx="575" cy="80" r="18" fill="#160e06" stroke="#cec4b0" stroke-width="1"/>
+      <circle cx="635" cy="80" r="18" fill="#160e06" stroke="#cec4b0" stroke-width="1"/>
+      <circle cx="695" cy="80" r="18" fill="#160e06" stroke="#cec4b0" stroke-width="1"/>
+      <!-- C* (should-be C but isn't) — slightly displaced -->
+      <circle cx="725" cy="62" r="16" fill="#e07040" opacity=".3" stroke="#e07040" stroke-width="1.5"/>
+
+      <!-- Note labels -->
+      <text x="35"  y="80" font-family="DM Mono,monospace" font-size="10" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">C</text>
+      <text x="95"  y="80" font-family="DM Mono,monospace" font-size="10" fill="#cec4b0" text-anchor="middle" dominant-baseline="middle">G</text>
+      <text x="155" y="80" font-family="DM Mono,monospace" font-size="10" fill="#cec4b0" text-anchor="middle" dominant-baseline="middle">D</text>
+      <text x="215" y="80" font-family="DM Mono,monospace" font-size="10" fill="#cec4b0" text-anchor="middle" dominant-baseline="middle">A</text>
+      <text x="275" y="80" font-family="DM Mono,monospace" font-size="10" fill="#cec4b0" text-anchor="middle" dominant-baseline="middle">E</text>
+      <text x="335" y="80" font-family="DM Mono,monospace" font-size="10" fill="#cec4b0" text-anchor="middle" dominant-baseline="middle">B</text>
+      <text x="395" y="80" font-family="DM Mono,monospace" font-size="9"  fill="#cec4b0" text-anchor="middle" dominant-baseline="middle">F#</text>
+      <text x="455" y="80" font-family="DM Mono,monospace" font-size="9"  fill="#cec4b0" text-anchor="middle" dominant-baseline="middle">C#</text>
+      <text x="515" y="80" font-family="DM Mono,monospace" font-size="9"  fill="#cec4b0" text-anchor="middle" dominant-baseline="middle">G#</text>
+      <text x="575" y="80" font-family="DM Mono,monospace" font-size="9"  fill="#cec4b0" text-anchor="middle" dominant-baseline="middle">D#</text>
+      <text x="635" y="80" font-family="DM Mono,monospace" font-size="9"  fill="#cec4b0" text-anchor="middle" dominant-baseline="middle">A#</text>
+      <text x="695" y="80" font-family="DM Mono,monospace" font-size="10" fill="#cec4b0" text-anchor="middle" dominant-baseline="middle">F</text>
+      <text x="725" y="62" font-family="DM Mono,monospace" font-size="10" fill="#e07040" text-anchor="middle" dominant-baseline="middle">C?</text>
+
+      <!-- Label under chain -->
+      <text x="365" y="118" font-family="DM Sans,sans-serif" font-size="11" fill="#8a7a66" text-anchor="middle">12 quintas perfectas</text>
+      <text x="365" y="133" font-family="DM Mono,monospace" font-size="10" fill="#8a7a66" text-anchor="middle">(3/2)¹² = 129.75 ≠ 2⁷ = 128</text>
+
+      <!-- Gap label -->
+      <text x="725" y="155" font-family="DM Sans,sans-serif" font-size="11" fill="#e07040" text-anchor="middle" font-style="italic">Coma pitagórica</text>
+      <text x="725" y="170" font-family="DM Mono,monospace" font-size="10" fill="#e07040" text-anchor="middle">≈ 23 cents</text>
+    </svg>
+  </div>
+  <div class="ch-visual-caption">
+    Doce quintas perfectas deberían sumar exactamente siete octavas. No suman. La diferencia — la coma pitagórica — es de aproximadamente 23 centésimas de semitono. Pequeña pero audible. Este pequeño error es el origen de todos los sistemas de afinación de la historia.
+  </div>
+</div>
+</div>
+
+<div class="ch-body">
+<div class="ch-section">
+  <p>El problema práctico: si un instrumento de teclado se afina con quintas perfectas, <strong>la mayoría de las tonalidades suenan bien pero al menos una suena terrible</strong>. El intervalo que absorbe toda la desafinación acumulada se llama "quinta del lobo" — un sonido áspero, disonante, que hacía a los oyentes del Renacimiento taparse los oídos.</p>
+
+  <p>Podías tocar música hermosa en Do mayor. Pero en Fa sostenido mayor, todo sonaba roto. Los instrumentistas de la época simplemente evitaban esas tonalidades.</p>
+
+  <div class="ch-theory-link">
+    <div class="ch-theory-icon">◎</div>
+    <div>
+      <span class="ch-theory-label">Concepto relacionado · Teoría</span>
+      <p class="ch-theory-text">El círculo de quintas que ves en la sección de teoría es exactamente el recorrido de estas doce quintas. La razón por la que tiene forma circular — y no de espiral — es porque el temperamento igual resolvió este problema haciendo que la última quinta cierre perfectamente.</p>
+      <a href="/teoria/circulo" class="ch-theory-btn">Ver el Círculo de Quintas →</a>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 4 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Edad Media — s. XVIII</span>
+  <h2 class="ch-h2">Siglos buscando<br><em>el compromiso perfecto</em></h2>
+
+  <p>Durante más de mil años, músicos y matemáticos de toda Europa propusieron soluciones distintas. Cada una era un compromiso diferente: ¿qué intervalos sacrificas para que los demás suenen bien?</p>
+
+  <p><strong>La afinación pitagórica</strong> (Edad Media): quintas perfectas, pero las terceras mayores suenan ásperas. Funcionaba bien para el canto gregoriano y la música polifónica temprana, que usaba muchas quintas y pocas terceras.</p>
+
+  <p><strong>El temperamento mesotónico</strong> (Renacimiento, s. XV–XVI): se achican ligeramente las quintas para que las terceras mayores sean más puras. La música coral renacentista, con sus ricos acordes de tres voces, sonaba exquisita — pero sólo en las tonalidades "cómodas". En las distantes, el lobo seguía aullando.</p>
+
+  <p><strong>Los temperamentos bien temperados</strong> (s. XVII–XVIII): una familia de soluciones que distribuían la coma de forma desigual. Cada tonalidad tenía su propio carácter: Do mayor sonaba brillante y abierta, Mi mayor sonaba densa y apasionada, Si menor sonaba sombría. Los compositores elegían las tonalidades por su color emocional, no sólo por conveniencia.</p>
+
+  <div class="ch-pullquote">
+    <p>En el siglo XVII, cambiar de tonalidad no era sólo un truco técnico. Era un cambio de color, de temperatura, de estado de ánimo.</p>
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 5 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Johann Sebastian Bach · 1722</span>
+  <h2 class="ch-h2">El Clave Bien Temperado:<br><em>la demostración más famosa de la historia</em></h2>
+
+  <p>En 1722, Johann Sebastian Bach publicó el primer volumen del <em>Clave Bien Temperado</em>: 24 preludios y fugas, uno en cada una de las 24 tonalidades mayores y menores. Era una demostración deliberada y brillante.</p>
+
+  <p>El mensaje era claro: <strong>con un sistema de afinación bien diseñado, un solo instrumento puede tocar en todas las tonalidades</strong>. No perfectamente igual en todas — Bach probablemente usaba algún temperamento bien temperado, no el igual — pero de forma musicalmente satisfactoria en cada una.</p>
+
+  <p>El Clave Bien Temperado no inventó el temperamento igual, pero mostró al mundo lo que era posible cuando dejas de evitar tonalidades. Fue uno de los argumentos más persuasivos de la historia de la música, expresado enteramente en sonido.</p>
+</div>
+</div>
+
+<!-- ── SECCIÓN 6 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Siglos XVIII–XIX · El acuerdo final</span>
+  <h2 class="ch-h2">El temperamento igual:<br><em>todo un poco impuro, todo igualmente usable</em></h2>
+
+  <p>El temperamento igual — 12-TET en inglés — tiene una lógica elegante y brutal: divide la octava en 12 partes <em>exactamente iguales</em>. Cada semitono es la raíz doceava de 2, aproximadamente 1.05946.</p>
+
+  <p>Las consecuencias son matemáticamente inevitables: <strong>en el temperamento igual, ningún intervalo es puro</strong> (excepto la octava). La quinta queda 2 centésimas de semitono por debajo de la perfecta. La tercera mayor queda 14 centésimas por encima de la justa. Son diferencias pequeñas, pero están ahí.</p>
+
+  <p>A cambio, ganas algo enorme: <strong>todos los semitonos son idénticos, todas las tonalidades suenan igual, y la modulación es completamente libre</strong>. Puedes empezar una canción en Do y terminarla en Si sin que nada suene desafinado.</p>
+</div>
+</div>
+
+<!-- VISUAL 3: Los 12 semitonos -->
+<div class="ch-visual-wrap">
+<div class="ch-visual">
+  <div class="ch-visual-header">
+    <div class="ch-visual-dot"></div>
+    <div class="ch-visual-dot"></div>
+    <div class="ch-visual-dot"></div>
+    <span class="ch-visual-title">El temperamento igual — 12 semitonos idénticos</span>
+  </div>
+  <div class="ch-visual-body">
+    <svg viewBox="0 0 760 200" width="100%" style="display:block;min-width:460px;max-width:760px">
+      <rect width="760" height="200" fill="#f2ece3" rx="8"/>
+
+      <!-- Axis line -->
+      <line x1="30" y1="80" x2="730" y2="80" stroke="#cec4b0" stroke-width="1.5"/>
+
+      <!-- 13 tick marks + notes (C to C) -->
+      <!-- x positions: 30 + i*57.69 for i=0..12 -->
+      <!-- i=0:30  i=1:88  i=2:146 i=3:204 i=4:261 i=5:319 i=6:377 i=7:434 i=8:492 i=9:549 i=10:607 i=11:664 i=12:722 -->
+
+      <!-- Rectangles for each semitone interval -->
+      <rect x="30"  y="60" width="57" height="40" rx="4" fill="#e8a838" opacity=".15"/>
+      <rect x="88"  y="60" width="57" height="40" rx="4" fill="#4a9ed8" opacity=".1"/>
+      <rect x="146" y="60" width="57" height="40" rx="4" fill="#50c490" opacity=".1"/>
+      <rect x="204" y="60" width="57" height="40" rx="4" fill="#e07040" opacity=".1"/>
+      <rect x="261" y="60" width="57" height="40" rx="4" fill="#9868d4" opacity=".1"/>
+      <rect x="319" y="60" width="57" height="40" rx="4" fill="#4a9ed8" opacity=".1"/>
+      <rect x="377" y="60" width="57" height="40" rx="4" fill="#e0589a" opacity=".1"/>
+      <rect x="434" y="60" width="57" height="40" rx="4" fill="#a8c840" opacity=".1"/>
+      <rect x="492" y="60" width="57" height="40" rx="4" fill="#4a9ed8" opacity=".1"/>
+      <rect x="549" y="60" width="57" height="40" rx="4" fill="#50c490" opacity=".1"/>
+      <rect x="607" y="60" width="57" height="40" rx="4" fill="#9868d4" opacity=".1"/>
+      <rect x="664" y="60" width="57" height="40" rx="4" fill="#e07040" opacity=".1"/>
+
+      <!-- Tick marks at each semitone position -->
+      <line x1="30"  y1="70" x2="30"  y2="90" stroke="#a05c20" stroke-width="2"/>
+      <line x1="88"  y1="70" x2="88"  y2="90" stroke="#8a7a66" stroke-width="1"/>
+      <line x1="146" y1="70" x2="146" y2="90" stroke="#8a7a66" stroke-width="1"/>
+      <line x1="204" y1="70" x2="204" y2="90" stroke="#8a7a66" stroke-width="1"/>
+      <line x1="261" y1="70" x2="261" y2="90" stroke="#8a7a66" stroke-width="1"/>
+      <line x1="319" y1="70" x2="319" y2="90" stroke="#8a7a66" stroke-width="1"/>
+      <line x1="377" y1="70" x2="377" y2="90" stroke="#8a7a66" stroke-width="1"/>
+      <line x1="434" y1="70" x2="434" y2="90" stroke="#8a7a66" stroke-width="1"/>
+      <line x1="492" y1="70" x2="492" y2="90" stroke="#8a7a66" stroke-width="1"/>
+      <line x1="549" y1="70" x2="549" y2="90" stroke="#8a7a66" stroke-width="1"/>
+      <line x1="607" y1="70" x2="607" y2="90" stroke="#8a7a66" stroke-width="1"/>
+      <line x1="664" y1="70" x2="664" y2="90" stroke="#8a7a66" stroke-width="1"/>
+      <line x1="722" y1="70" x2="722" y2="90" stroke="#a05c20" stroke-width="2"/>
+
+      <!-- Note names above -->
+      <text x="30"  y="54" font-family="DM Mono,monospace" font-size="11" font-weight="700" fill="#a05c20" text-anchor="middle">C</text>
+      <text x="88"  y="54" font-family="DM Mono,monospace" font-size="10" fill="#6a5a46" text-anchor="middle">C#</text>
+      <text x="146" y="54" font-family="DM Mono,monospace" font-size="11" fill="#6a5a46" text-anchor="middle">D</text>
+      <text x="204" y="54" font-family="DM Mono,monospace" font-size="10" fill="#6a5a46" text-anchor="middle">D#</text>
+      <text x="261" y="54" font-family="DM Mono,monospace" font-size="11" fill="#6a5a46" text-anchor="middle">E</text>
+      <text x="319" y="54" font-family="DM Mono,monospace" font-size="11" fill="#6a5a46" text-anchor="middle">F</text>
+      <text x="377" y="54" font-family="DM Mono,monospace" font-size="10" fill="#6a5a46" text-anchor="middle">F#</text>
+      <text x="434" y="54" font-family="DM Mono,monospace" font-size="11" fill="#6a5a46" text-anchor="middle">G</text>
+      <text x="492" y="54" font-family="DM Mono,monospace" font-size="10" fill="#6a5a46" text-anchor="middle">G#</text>
+      <text x="549" y="54" font-family="DM Mono,monospace" font-size="11" fill="#6a5a46" text-anchor="middle">A</text>
+      <text x="607" y="54" font-family="DM Mono,monospace" font-size="10" fill="#6a5a46" text-anchor="middle">A#</text>
+      <text x="664" y="54" font-family="DM Mono,monospace" font-size="11" fill="#6a5a46" text-anchor="middle">B</text>
+      <text x="722" y="54" font-family="DM Mono,monospace" font-size="11" font-weight="700" fill="#a05c20" text-anchor="middle">C</text>
+
+      <!-- Formula below axis -->
+      <text x="380" y="112" font-family="DM Mono,monospace" font-size="11" fill="#8a7a66" text-anchor="middle">cada semitono = 2^(1/12) ≈ ×1.05946</text>
+
+      <!-- Brace showing one octave -->
+      <path d="M 30,128 L 30,138 Q 30,145 38,145 L 374,145 Q 382,145 382,138 L 382,135 M 382,135 L 382,138 Q 382,145 390,145 L 714,145 Q 722,145 722,138 L 722,128" fill="none" stroke="#cec4b0" stroke-width="1.5"/>
+      <text x="380" y="162" font-family="DM Sans,sans-serif" font-size="12" fill="#8a7a66" text-anchor="middle" font-style="italic">1 octava = 12 semitonos = frecuencia × 2</text>
+    </svg>
+  </div>
+  <div class="ch-visual-caption">
+    En el temperamento igual, cada semitono es exactamente igual al anterior: la frecuencia se multiplica por 2^(1/12). Doce semitonos después, la frecuencia se ha doblado exactamente — una octava perfecta. Cada nota es la misma distancia de la siguiente, sin excepciones.
+  </div>
+</div>
+</div>
+
+<div class="ch-body">
+<div class="ch-section">
+  <p>El temperamento igual ya existía como concepto matemático desde el siglo XVI — el teórico chino Zhu Zaiyu lo calculó en 1584, y Marin Mersenne en Francia llegó a los mismos números independientemente. Pero <strong>la adopción universal tardó otros tres siglos</strong>. Los músicos profesionales notaban la diferencia y muchos preferían sus temperamentos tradicionales.</p>
+
+  <p>Lo que finalmente impuso el temperamento igual fue la industria. A mediados del siglo XIX, la fabricación de pianos a escala industrial necesitaba un estándar único. Las orquestas, cada vez más grandes y viajeras, necesitaban que todos los instrumentos afinaran igual. En 1939, una conferencia internacional fijó oficialmente el La a 440 Hz. <strong>La humanidad, por fin, se había puesto de acuerdo.</strong></p>
+</div>
+</div>
+
+<!-- ── SECCIÓN 7 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Lo que significa para ti hoy</span>
+  <h2 class="ch-h2">Tu guitarra<br><em>es un instrumento de compromiso</em></h2>
+
+  <p>Los trastes de tu guitarra no están colocados al azar. Cada uno está en la posición exacta que resulta de multiplicar la longitud de cuerda por 2^(1/12). Es la fórmula del temperamento igual, incrustada en madera y metal.</p>
+
+  <p>Cuando usas un afinador, te compara con las frecuencias del temperamento igual: Mi = 329.63 Hz, Si = 246.94 Hz, Sol = 196.00 Hz. Cada número es una potencia de 2^(1/12) a partir de alguna frecuencia base.</p>
+
+  <p>Pero la guitarra tiene una característica que el piano no tiene: <strong>puedes doblar las cuerdas</strong>. Cuando un guitarrista de blues hace un bend, está saliendo del temperamento igual y acercándose a un intervalo más puro. La "nota azul" del blues — ese sonido intermedio entre el Mi y el Mi bemol — existe precisamente porque la guitarra puede ir entre los trastes, en los espacios que el temperamento igual no reconoce.</p>
+
+  <div class="ch-pullquote">
+    <p>El compromiso que adoptó la humanidad suena correcto porque lo hemos escuchado toda la vida. Pero la música que te emociona — el bend, el vibrato, el portamento — siempre está buscando escapar de él.</p>
+  </div>
+
+  <div class="ch-theory-link">
+    <div class="ch-theory-icon">◎</div>
+    <div>
+      <span class="ch-theory-label">Concepto relacionado · Teoría</span>
+      <p class="ch-theory-text">La escala cromática — las 12 notas que estudiamos en el capítulo de Notas Musicales — es exactamente el sistema de 12 semitonos iguales que nació de este proceso. Cada semitono es 2^(1/12) multiplicado sucesivamente.</p>
+      <a href="/teoria/notas" class="ch-theory-btn">Ver Notas Musicales →</a>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ── CHAPTER NAV ── -->
+<div class="ch-nav">
+  <a href="/recursos/historia" class="ch-nav-back">
+    <span class="ch-nav-dir">← Volver</span>
+    <span class="ch-nav-name">Historia de la Música</span>
+    <span class="ch-nav-desc">Ver todos los capítulos</span>
+  </a>
+  <div class="ch-nav-next">
+    <span class="ch-nav-dir">Siguiente →</span>
+    <span class="ch-nav-name">El Barroco y el Clásico</span>
+    <span class="ch-nav-desc">Próximamente</span>
+  </div>
+</div>
+
+</body>
+</html>

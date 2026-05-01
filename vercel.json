@@ -22,6 +22,7 @@
     { "source": "/practica/construccion-acordes",   "destination": "/practica-construccion-acordes.html" },
     { "source": "/practica/progresiones",           "destination": "/practica-progresiones.html" },
     { "source": "/recursos",                         "destination": "/recursos.html" },
-    { "source": "/recursos/historia",                "destination": "/recursos-historia.html" }
+    { "source": "/recursos/historia",                "destination": "/recursos-historia.html" },
+    { "source": "/recursos/historia/12-notas",       "destination": "/recursos-historia-12notas.html" }
   ]
 }
