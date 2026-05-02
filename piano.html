@@ -106,6 +106,9 @@ select.full:hover { border-color:var(--accent2); }
 #piano-svg { display:block; flex-shrink:0; }
 
 .info-bar { background:var(--surface); border-top:1px solid var(--hl); padding:5px 14px; font-size:12px; color:var(--text2); flex-shrink:0; min-height:28px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; width:100%; }
+.midi-badge { font-size:11px; font-family:'DM Mono',monospace; padding:2px 8px; border-radius:10px; border:1px solid var(--hl); background:var(--bg); color:var(--text2); transition:all .3s; white-space:nowrap; }
+.midi-badge.connected { background:#1a3a1a; border-color:#4caf50; color:#4caf50; }
+.midi-badge.active { background:#2a1a0a; border-color:#ff9800; color:#ff9800; }
 .info-tag { background:var(--surface2); border-radius:4px; padding:2px 7px; color:var(--accent); font-weight:600; }
 
 /* Octave selector */
@@ -308,7 +311,10 @@ select.full:hover { border-color:var(--accent2); }
     <div class="keys-scroll">
       <svg id="piano-svg" xmlns="http://www.w3.org/2000/svg"></svg>
     </div>
-    <div class="info-bar" id="info-bar">Selecciona una tonalidad y modo para comenzar.</div>
+    <div class="info-bar" id="info-bar">
+      <span id="midi-badge" class="midi-badge" title="Controlador MIDI">MIDI ○</span>
+      <span id="info-text">Selecciona una tonalidad y modo para comenzar.</span>
+    </div>
   </div>
 </div>
 
@@ -575,18 +581,19 @@ function drawPiano(){
   h += '<g id="annotation-layer"></g><g id="draw-preview"></g>';
   svg.innerHTML=h;
   renderAnnotations();
+  redrawMidiOverlays();
 }
 
 // ── UPDATE ────────────────────────────────────────────────────────────────────
 function update(){
   const root=getKey();
-  const infoBar=document.getElementById('info-bar');
+  const infoText=document.getElementById('info-text');
 
   if(mode==='scale'){
     const sk=document.getElementById('scale-sel').value;
     const sn=(SCALES[sk]||[]).map(i=>(root+i)%12);
     const _snSet=new Set(sn);
-    infoBar.innerHTML=`<span class="info-tag">${nn(root,root,_snSet)} ${SCALE_NAMES[sk]||sk}</span> ${sn.map(n=>nn(n,root,_snSet)).join(' – ')}`;
+    infoText.innerHTML=`<span class="info-tag">${nn(root,root,_snSet)} ${SCALE_NAMES[sk]||sk}</span> ${sn.map(n=>nn(n,root,_snSet)).join(' – ')}`;
   } else if(mode==='chord'){
     const intervals=customIntervals||CHORD_TYPES[chordType]?.intervals||[0,3,7];
     const ct=CHORD_TYPES[chordType];
@@ -603,11 +610,11 @@ function update(){
     // Info
     const name=ct?ct.name:(customIntervals?'Custom':'?');
     const _cnSet=new Set(intervals.map(i=>(root+i)%12));
-    infoBar.innerHTML=`<span class="info-tag">${nn(root,root,_cnSet)} ${name}</span> ${intervals.map(i=>nn((root+i)%12,root,_cnSet)).join(' – ')}`;
+    infoText.innerHTML=`<span class="info-tag">${nn(root,root,_cnSet)} ${name}</span> ${intervals.map(i=>nn((root+i)%12,root,_cnSet)).join(' – ')}`;
   } else {
     const iv=NOTE_INTERVALS.find(x=>x.semi===selectedInterval);
     const _nSet2=new Set([selectedNoteRoot,(selectedNoteRoot+selectedInterval)%12]);
-    infoBar.innerHTML=`<span class="info-tag">${nn(selectedNoteRoot,selectedNoteRoot,_nSet2)}</span> Raíz &nbsp;|&nbsp; <span class="info-tag" style="background:rgba(184,85,216,.2);color:#b855d8">${nn((selectedNoteRoot+selectedInterval)%12,selectedNoteRoot,_nSet2)}</span> ${iv?iv.label:''}`;
+    infoText.innerHTML=`<span class="info-tag">${nn(selectedNoteRoot,selectedNoteRoot,_nSet2)}</span> Raíz &nbsp;|&nbsp; <span class="info-tag" style="background:rgba(184,85,216,.2);color:#b855d8">${nn((selectedNoteRoot+selectedInterval)%12,selectedNoteRoot,_nSet2)}</span> ${iv?iv.label:''}`;
   }
   drawPiano();
 }
@@ -850,6 +857,7 @@ buildChordSelect();
 buildIBuilderGrid();
 buildNoteGrids();
 update();
+initMIDI();
 
 // Conectar eventos de dibujo al SVG del piano (el elemento persiste entre redraws)
 (()=>{
@@ -925,6 +933,125 @@ function toggleMobSidebar(){
 }
 window.addEventListener('resize',applyMobileLayout);
 setTimeout(applyMobileLayout,150);
+
+// ── MIDI CONTROLLER ───────────────────────────────────────────────────────────
+var midiPressedKeys = new Map(); // midi note → SVG rect element
+
+function _midiGn(m){
+  var names=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  return names[m%12]+(Math.floor(m/12)-1);
+}
+
+function _keyXY(m){
+  // Returns {x, y, w, h} of the SVG rect for MIDI note m
+  var pc=m%12;
+  var midiOct=Math.floor(m/12)-1; // Tone.js: C4=60 → floor(60/12)-1 = 4
+  var oct=midiOct-START_OCT;
+  if(oct<0||oct>=getOctaves()) return null;
+  var isBlack=[false,true,false,true,false,false,true,false,true,false,true,false][pc];
+  if(isBlack){
+    var bOff=BLACK_X[pc];
+    if(bOff==null) return null;
+    return {x:oct*OCTAVE_W+bOff, y:6, w:BW, h:BH, black:true};
+  } else {
+    var wIdx=WHITE_PCS.indexOf(pc);
+    if(wIdx<0) return null;
+    return {x:oct*OCTAVE_W+wIdx*STEP, y:6, w:WW, h:WH, black:false};
+  }
+}
+
+function redrawMidiOverlays(){
+  var svg=document.getElementById('piano-svg');
+  if(!svg) return;
+  // Remove old overlays
+  svg.querySelectorAll('.midi-press').forEach(function(el){el.remove();});
+  // Re-add for each pressed key
+  midiPressedKeys.forEach(function(_, m){
+    _addMidiRect(m);
+  });
+}
+
+function _addMidiRect(m){
+  var svg=document.getElementById('piano-svg');
+  if(!svg) return;
+  var k=_keyXY(m);
+  if(!k) return;
+  var rect=document.createElementNS('http://www.w3.org/2000/svg','rect');
+  rect.setAttribute('x',k.x);
+  rect.setAttribute('y',k.y);
+  rect.setAttribute('width',k.w);
+  rect.setAttribute('height',k.h);
+  rect.setAttribute('rx','3');
+  rect.setAttribute('fill', k.black ? 'rgba(255,165,0,0.55)' : 'rgba(255,165,0,0.38)');
+  rect.setAttribute('pointer-events','none');
+  rect.classList.add('midi-press');
+  rect.dataset.midiNote=m;
+  svg.appendChild(rect);
+  midiPressedKeys.set(m, rect);
+}
+
+async function midiNoteOn(m, vel){
+  if(vel===0){ midiNoteOff(m); return; }
+  if(!_sampler||!_samplerReady) return;
+  try {
+    await Tone.start();
+    _sampler.triggerAttack(_midiGn(m));
+  } catch(e){}
+  // Visual overlay
+  var svg=document.getElementById('piano-svg');
+  if(svg){
+    var existing=svg.querySelector('.midi-press[data-midi-note="'+m+'"]');
+    if(existing) existing.remove();
+    _addMidiRect(m);
+  }
+}
+
+function midiNoteOff(m){
+  if(_sampler&&_samplerReady){
+    try{ _sampler.triggerRelease(_midiGn(m)); }catch(e){}
+  }
+  var svg=document.getElementById('piano-svg');
+  if(svg){
+    var el=svg.querySelector('.midi-press[data-midi-note="'+m+'"]');
+    if(el) el.remove();
+  }
+  midiPressedKeys.delete(m);
+}
+
+function handleMIDIMessage(ev){
+  var data=ev.data;
+  var status=data[0]&0xf0;
+  var note=data[1];
+  var vel=data[2];
+  if(status===0x90){ midiNoteOn(note,vel); }
+  else if(status===0x80){ midiNoteOff(note); }
+}
+
+function initMIDI(){
+  if(!navigator.requestMIDIAccess){ return; }
+  var badge=document.getElementById('midi-badge');
+  navigator.requestMIDIAccess().then(function(access){
+    function connectAll(){
+      access.inputs.forEach(function(input){
+        input.onmidimessage=handleMIDIMessage;
+      });
+      if(access.inputs.size>0){
+        if(badge){ badge.textContent='MIDI ●'; badge.className='midi-badge connected'; }
+      } else {
+        if(badge){ badge.textContent='MIDI ○'; badge.className='midi-badge'; }
+      }
+    }
+    connectAll();
+    access.onstatechange=function(e){
+      connectAll();
+      if(e.port.type==='input'&&e.port.state==='connected'){
+        e.port.onmidimessage=handleMIDIMessage;
+      }
+    };
+  }, function(){
+    if(badge){ badge.title='MIDI no disponible en este navegador'; }
+  });
+}
 
 async function playCurrentMode(){
   if(!_sampler||!_samplerReady)return;
