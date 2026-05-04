@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>guitarra.cool · Herramientas</title>
+<title>tremolo.mx · Herramientas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
@@ -38,7 +38,7 @@ body { background:var(--bg); color:var(--text); font-family:var(--sans); height:
 
 header { background:var(--surface); padding:7px 14px; border-bottom:1px solid var(--hl); display:flex; align-items:center; gap:9px; flex-shrink:0; flex-wrap:wrap; transition:background .25s,border-color .25s; }
 .logo { font-family:var(--serif); font-size:18px; font-weight:700; color:var(--text); margin-right:4px; letter-spacing:-.01em; }
-.logo span { color:var(--accent); }
+.logo span { font-family:var(--mono); font-size:.52em; font-weight:400; color:var(--text2); letter-spacing:0; margin-left:2px; }
 .logo-sub { font-size:10px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--text2); padding:2px 8px; background:var(--surface2); border:1px solid var(--hl); border-radius:4px; }
 .h-label { font-size:11px; color:var(--text2); }
 .hsel { background:var(--surface2); border:1px solid var(--hl); color:var(--text); border-radius:5px; padding:3px 6px; font-size:12px; cursor:pointer; outline:none; font-family:var(--sans); }
@@ -165,7 +165,7 @@ select.full:hover { border-color:var(--accent2); }
 <body>
 
 <header>
-  <a href="/" style="text-decoration:none"><div class="logo">guitarra<span>.cool</span></div></a>
+  <a href="/" style="text-decoration:none"><div class="logo">tr<svg width="10" height="10" viewBox="0 0 22 22" style="display:inline-block;vertical-align:middle;margin:0 1px 2px 1px"><path d="M2 11 Q 5.5 4, 9 11 T 16 11 T 20 11" stroke="var(--accent)" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>molo<span>.mx</span></div></a>
   <span class="logo-sub">Herramientas</span>
   <span class="h-label">Instrumento</span>
   <select class="hsel" id="instrument-sel" onchange="setInstrument(this.value)">
