@@ -13,7 +13,7 @@
 
   // ── ESTILOS ──────────────────────────────────────────────────────────────────
   const CSS = `
-    .tm-user-wrap { position: relative; margin-left: auto; flex-shrink: 0; }
+    .tm-user-wrap { position: relative; flex-shrink: 0; }
 
     .tm-auth-btn {
       font-family: 'JetBrains Mono', monospace;
@@ -30,6 +30,19 @@
     header .tm-auth-btn        { color: var(--text2, #8a7a6e); border-color: var(--hl, #3a3026); }
     header .tm-auth-btn:hover  { color: var(--accent, #d68838); border-color: var(--accent, #d68838); }
     header .tm-auth-btn.active { color: var(--accent, #d68838); border-color: var(--accent, #d68838); }
+
+    .tm-signup-btn {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; font-weight: 600; letter-spacing: .04em;
+      padding: 6px 14px; border-radius: 4px; border: none;
+      cursor: pointer; white-space: nowrap;
+      display: inline-flex; align-items: center;
+      transition: background .2s;
+    }
+    nav .tm-signup-btn       { background: var(--copper, #a85a1e); color: #fff; }
+    nav .tm-signup-btn:hover { background: var(--copper-dk, #7a3e10); }
+    header .tm-signup-btn       { background: var(--accent, #d68838); color: #13100c; }
+    header .tm-signup-btn:hover { background: #eaa55a; }
 
     .tm-user-drop {
       position: absolute; top: calc(100% + 8px); right: 0;
@@ -296,7 +309,20 @@
     });
   }
 
-  function openModal()  { document.getElementById('tm-overlay')?.classList.add('open'); }
+  function openModal(tab) {
+    const overlay = document.getElementById('tm-overlay');
+    if (!overlay) return;
+    if (tab) {
+      overlay.querySelectorAll('.tm-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.tab === tab);
+      });
+      document.getElementById('tm-submit').textContent = tab === 'login' ? 'Entrar' : 'Crear cuenta';
+      document.getElementById('tm-pass').autocomplete = tab === 'login' ? 'current-password' : 'new-password';
+      document.getElementById('tm-consent-block').style.display = tab === 'signup' ? 'block' : 'none';
+      clearMsg();
+    }
+    overlay.classList.add('open');
+  }
   function closeModal() { document.getElementById('tm-overlay')?.classList.remove('open'); }
   function showMsg(txt, type) {
     const el = document.getElementById('tm-msg');
@@ -317,8 +343,11 @@
 
     const wrap = document.createElement('div');
     wrap.className = 'tm-user-wrap';
+    wrap.style.cssText = 'display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0;';
     wrap.innerHTML = `
-      <button class="tm-auth-btn" id="tm-nav-btn">Entrar</button>
+      <button class="tm-auth-btn" id="tm-nav-login" style="display:none">Entrar</button>
+      <button class="tm-signup-btn" id="tm-nav-signup" style="display:none">Registrarse</button>
+      <button class="tm-auth-btn" id="tm-nav-btn" style="display:none"></button>
       <div class="tm-user-drop" id="tm-user-drop">
         <div class="tm-drop-email" id="tm-drop-email"></div>
         <div class="tm-drop-plan"  id="tm-drop-plan">Plan free</div>
@@ -326,12 +355,14 @@
       </div>`;
     nav.appendChild(wrap);
 
+    document.getElementById('tm-nav-login').addEventListener('click', function () {
+      openModal('login');
+    });
+    document.getElementById('tm-nav-signup').addEventListener('click', function () {
+      openModal('signup');
+    });
     document.getElementById('tm-nav-btn').addEventListener('click', function () {
-      if (_session) {
-        document.getElementById('tm-user-drop').classList.toggle('open');
-      } else {
-        openModal();
-      }
+      document.getElementById('tm-user-drop').classList.toggle('open');
     });
 
     document.getElementById('tm-logout').addEventListener('click', async function () {
@@ -347,25 +378,29 @@
   }
 
   function updateNav(session) {
-    const btn   = document.getElementById('tm-nav-btn');
-    const email = document.getElementById('tm-drop-email');
-    const plan  = document.getElementById('tm-drop-plan');
-    if (!btn) return;
+    const userBtn  = document.getElementById('tm-nav-btn');
+    const loginBtn = document.getElementById('tm-nav-login');
+    const signupBtn= document.getElementById('tm-nav-signup');
+    const email    = document.getElementById('tm-drop-email');
+    const plan     = document.getElementById('tm-drop-plan');
+    if (!userBtn) return;
     if (session) {
       const addr = session.user.email || '';
-      btn.textContent = addr[0]?.toUpperCase() || '●';
-      btn.classList.add('active');
-      btn.title = addr;
+      userBtn.textContent = addr[0]?.toUpperCase() || '●';
+      userBtn.classList.add('active');
+      userBtn.title = addr;
+      userBtn.style.display = 'inline-flex';
+      if (loginBtn)  loginBtn.style.display  = 'none';
+      if (signupBtn) signupBtn.style.display = 'none';
       if (email) email.textContent = addr;
-      // Fetch plan from profiles
       sb.from('profiles').select('plan').eq('id', session.user.id).single()
         .then(({ data }) => {
           if (plan && data?.plan) plan.textContent = 'Plan ' + data.plan;
         });
     } else {
-      btn.textContent = 'Entrar';
-      btn.classList.remove('active');
-      btn.title = '';
+      userBtn.style.display  = 'none';
+      if (loginBtn)  loginBtn.style.display  = 'inline-flex';
+      if (signupBtn) signupBtn.style.display = 'inline-flex';
     }
   }
 
@@ -422,6 +457,12 @@
     buildModal();
     buildNavButton();
     buildCookieBanner();
+
+    // Global handler for [data-tm-open] buttons (e.g. hero CTAs)
+    document.addEventListener('click', function (e) {
+      const trigger = e.target.closest('[data-tm-open]');
+      if (trigger && !_session) openModal(trigger.dataset.tmOpen);
+    });
 
     const { data: { session } } = await sb.auth.getSession();
     _session = session;
