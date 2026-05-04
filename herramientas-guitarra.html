@@ -5,27 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>guitarra.cool · Herramientas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
 <style>
 /* ── Tokens ── */
 :root {
-  --serif:'Cormorant Garamond',Georgia,serif;
-  --sans:'DM Sans','Segoe UI',system-ui,sans-serif;
-  --mono:'DM Mono',monospace;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
 }
 
 /* Dark — Estudio de grabación (Propuesta A) */
 [data-theme="dark"] {
-  --bg:#090807; --surface:#141210; --surface2:#1e1a17;
-  --accent:#c8874a; --accent2:#7c5cbf;
+  --bg:#13100c; --surface:#1c1812; --surface2:#26201a;
+  --accent:#d68838; --accent2:#7c5cbf;
   --text:#f5ede2; --text2:#8a7a6e; --hl:#2e2820;
   --wood:#1e1408; --board-bg:#090807;
 }
 /* Light — Papel y cobre (Propuesta C) */
 [data-theme="light"] {
-  --bg:#f5ede2; --surface:#ede4d8; --surface2:#dfd4c4;
-  --accent:#8c4c14; --accent2:#4a2e90;
+  --bg:#f4ece0; --surface:#ebe1d2; --surface2:#ddd1bd;
+  --accent:#a85a1e; --accent2:#4a2e90;
   --text:#0e0c0a; --text2:#6a5a4a; --hl:#c8baa8;
   --wood:#d8c8ac; --board-bg:#f5ede2;
 }
@@ -993,12 +993,12 @@ function drawFretboard(){
     const idx=si(s),y=oy+s*SH;
     h+=`<line x1="${flx(0)}" y1="${y}" x2="${flx(FRETS)}" y2="${y}" stroke="${nstr}" stroke-width="${THICK[idx]}"/>`;
     const lx=flx(0)-14;
-    h+=`<text x="${lx}" y="${y+4}"${T(lx,y+4)} text-anchor="middle" fill="${nstr}" font-size="10" font-family="DM Mono,monospace" opacity="0.8">${SNAMES[idx]}</text>`;
+    h+=`<text x="${lx}" y="${y+4}"${T(lx,y+4)} text-anchor="middle" fill="${nstr}" font-size="10" font-family="JetBrains Mono,monospace" opacity="0.8">${SNAMES[idx]}</text>`;
   }
 
   // Fret numbers
   for(let f=1;f<=FRETS;f++){
-    h+=`<text x="${fnx(f)}" y="${oy-10}"${T(fnx(f),oy-10)} text-anchor="middle" fill="${nl}" font-size="10" font-family="DM Mono,monospace" opacity="0.65">${f}</text>`;
+    h+=`<text x="${fnx(f)}" y="${oy-10}"${T(fnx(f),oy-10)} text-anchor="middle" fill="${nl}" font-size="10" font-family="JetBrains Mono,monospace" opacity="0.65">${f}</text>`;
   }
 
   // Note circles
@@ -1013,7 +1013,7 @@ function drawFretboard(){
         const col=SCALE_DEG_COLORS[deg]||'#7c5cbf',r=deg===0?11:9;
         const x=fnx(f);
         h+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${col}" opacity=".92" filter="url(#fb-nshadow)" style="cursor:pointer" onclick="noteClick(${midi})"/>`;
-        h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="${deg===0?11:10}" font-weight="${deg===0?700:500}" font-family="DM Sans,sans-serif" style="pointer-events:none">${lbl[note]||NOTE_NAMES[note]}</text>`;
+        h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="${deg===0?11:10}" font-weight="${deg===0?700:500}" font-family="Inter,sans-serif" style="pointer-events:none">${lbl[note]||NOTE_NAMES[note]}</text>`;
       }
     }
   }else if(_dp.type==='chord-all'||_dp.type==='chord-iso'){
@@ -1027,7 +1027,7 @@ function drawFretboard(){
         if(voicing){if(voicing[idx]<0||voicing[idx]!==f)continue;}
         const x=fnx(f),sem=(note-root+12)%12,col=INT_COLORS[sem]||'#aaa';
         h+=`<circle cx="${x}" cy="${y}" r="10" fill="${col}" opacity=".93" filter="url(#fb-nshadow)" style="cursor:pointer" onclick="noteClick(${midi})"/>`;
-        h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="DM Sans,sans-serif" style="pointer-events:none">${lbl[note]||NOTE_NAMES[note]}</text>`;
+        h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="Inter,sans-serif" style="pointer-events:none">${lbl[note]||NOTE_NAMES[note]}</text>`;
       }
     }
   }else if(_dp.type==='note'){
@@ -1041,7 +1041,7 @@ function drawFretboard(){
         if(!col)continue;
         const x=fnx(f);
         h+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${col}" opacity=".92" filter="url(#fb-nshadow)" style="cursor:pointer" onclick="noteClick(${midi})"/>`;
-        h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="${r===11?11:10}" font-weight="700" font-family="DM Sans,sans-serif" style="pointer-events:none">${lbl[note]||NOTE_NAMES[note]}</text>`;
+        h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="${r===11?11:10}" font-weight="700" font-family="Inter,sans-serif" style="pointer-events:none">${lbl[note]||NOTE_NAMES[note]}</text>`;
       }
     }
   }

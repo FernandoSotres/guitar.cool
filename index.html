@@ -5,29 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>guitarra.cool · Aprende música</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --paper:    #faf6f0;
-  --paper2:   #f2ece3;
-  --paper3:   #e8e0d4;
-  --paper4:   #ddd4c4;
-  --paper5:   #cec4b0;
-  --copper:   #a05c20;
-  --copper-lt:#c07830;
-  --copper-dk:#7a4010;
+  --paper:    #f4ece0;
+  --paper2:   #ebe1d2;
+  --paper3:   #ddd1bd;
+  --paper4:   #c8b99f;
+  --paper5:   #b8a890;
+  --copper:   #a85a1e;
+  --copper-lt:#c47a36;
+  --copper-dk:#7a3e10;
   --amber:    #c09030;
   --ember:    #b04820;
-  --ink:      #1a1410;
+  --ink:      #1c1410;
   --ink2:     #2e2418;
-  --ink3:     #4a3c2c;
-  --ink4:     #6a5a46;
-  --ink5:     #8a7a66;
+  --ink3:     #5a4a38;
+  --ink4:     #8a7a64;
+  --ink5:     #a09080;
   --violet:   #6040a0;
   --green:    #2a7a50;
-  --serif: 'Cormorant Garamond', Georgia, serif;
-  --sans:  'DM Sans', system-ui, sans-serif;
-  --mono:  'DM Mono', monospace;
+  --serif: 'Marcellus', Georgia, serif;
+  --sans:  'Inter', system-ui, sans-serif;
+  --mono:  'JetBrains Mono', monospace;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
@@ -36,11 +36,11 @@ body { background: var(--paper); color: var(--ink); font-family: var(--sans); fo
 /* ── NAV ── */
 nav {
   position: sticky; top: 0; z-index: 100;
-  background: rgba(250,246,240,.94);
+  background: rgba(244,236,224,.94);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--paper4);
   padding: 0 48px;
-  display: flex; align-items: center; height: 56px; gap: 0;
+  display: flex; align-items: center; height: 60px; gap: 0;
 }
 .nav-logo {
   font-family: var(--serif); font-size: 22px; font-weight: 700;
@@ -78,7 +78,7 @@ a.nav-logo { color: var(--ink); }
   text-align: center;
   padding: 100px 32px 80px;
   position: relative; overflow: hidden;
-  background: #100a04;
+  background: #13100c;
 }
 .hero-bg {
   position: absolute; inset: 0; z-index: 0;
@@ -227,7 +227,7 @@ a.nav-logo { color: var(--ink); }
 /* ── TOOLS PREVIEW ── */
 .tools-preview {
   padding: 100px 48px;
-  background: #100a04;
+  background: #13100c;
 }
 .tp-inner { max-width: 1100px; margin: 0 auto; }
 .tp-header { text-align: center; margin-bottom: 52px; }
@@ -722,17 +722,17 @@ footer .f-copy { font-size: 12px; color: var(--ink5); }
           <rect x="0" y="18" width="40" height="214" fill="#0e0804" opacity=".55"/>
 
           <!-- Open string label strip -->
-          <text x="20" y="14" text-anchor="middle" font-size="7.5" fill="#6a5a46" font-family="DM Mono,monospace" font-weight="500">abierta</text>
+          <text x="20" y="14" text-anchor="middle" font-size="7.5" fill="#6a5a46" font-family="JetBrains Mono,monospace" font-weight="500">abierta</text>
 
           <!-- Fret number labels -->
-          <text x="20"  y="250" text-anchor="middle" font-size="9" fill="#6a5a46" font-family="DM Mono,monospace">○</text>
-          <text x="108" y="250" text-anchor="middle" font-size="9" fill="#6a5a46" font-family="DM Mono,monospace">I</text>
-          <text x="241" y="250" text-anchor="middle" font-size="9" fill="#6a5a46" font-family="DM Mono,monospace">II</text>
-          <text x="367" y="250" text-anchor="middle" font-size="9" fill="#c09030" font-family="DM Mono,monospace" font-weight="700">III</text>
-          <text x="485" y="250" text-anchor="middle" font-size="9" fill="#6a5a46" font-family="DM Mono,monospace">IV</text>
-          <text x="596" y="250" text-anchor="middle" font-size="9" fill="#c09030" font-family="DM Mono,monospace" font-weight="700">V</text>
-          <text x="702" y="250" text-anchor="middle" font-size="9" fill="#6a5a46" font-family="DM Mono,monospace">VI</text>
-          <text x="802" y="250" text-anchor="middle" font-size="9" fill="#c09030" font-family="DM Mono,monospace" font-weight="700">VII</text>
+          <text x="20"  y="250" text-anchor="middle" font-size="9" fill="#6a5a46" font-family="JetBrains Mono,monospace">○</text>
+          <text x="108" y="250" text-anchor="middle" font-size="9" fill="#6a5a46" font-family="JetBrains Mono,monospace">I</text>
+          <text x="241" y="250" text-anchor="middle" font-size="9" fill="#6a5a46" font-family="JetBrains Mono,monospace">II</text>
+          <text x="367" y="250" text-anchor="middle" font-size="9" fill="#c09030" font-family="JetBrains Mono,monospace" font-weight="700">III</text>
+          <text x="485" y="250" text-anchor="middle" font-size="9" fill="#6a5a46" font-family="JetBrains Mono,monospace">IV</text>
+          <text x="596" y="250" text-anchor="middle" font-size="9" fill="#c09030" font-family="JetBrains Mono,monospace" font-weight="700">V</text>
+          <text x="702" y="250" text-anchor="middle" font-size="9" fill="#6a5a46" font-family="JetBrains Mono,monospace">VI</text>
+          <text x="802" y="250" text-anchor="middle" font-size="9" fill="#c09030" font-family="JetBrains Mono,monospace" font-weight="700">VII</text>
 
           <!-- ═══════════════════════════════════════════════════════════════ -->
           <!-- C MAJOR: C=#e8a838(I) D=#4a9ed8(II) E=#50c490(III) F=#e07040(IV) -->
@@ -743,79 +743,79 @@ footer .f-copy { font-size: 12px; color: var(--ink5); }
 
           <!-- OPEN STRINGS (x=20): E(III) B(VII) G(V) D(II) A(VI) E(III) -->
           <circle cx="20" cy="40"  r="9"  fill="#50c490"/><!-- s1: E=III -->
-          <text x="20" y="40"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">E</text>
+          <text x="20" y="40"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="Inter,sans-serif">E</text>
           <circle cx="20" cy="76"  r="9"  fill="#a8c840"/><!-- s2: B=VII -->
-          <text x="20" y="76"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#333" font-family="DM Sans,sans-serif">B</text>
+          <text x="20" y="76"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#333" font-family="Inter,sans-serif">B</text>
           <circle cx="20" cy="112" r="9"  fill="#9868d4"/><!-- s3: G=V -->
-          <text x="20" y="112" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">G</text>
+          <text x="20" y="112" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="Inter,sans-serif">G</text>
           <circle cx="20" cy="148" r="9"  fill="#4a9ed8"/><!-- s4: D=II -->
-          <text x="20" y="148" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">D</text>
+          <text x="20" y="148" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="Inter,sans-serif">D</text>
           <circle cx="20" cy="184" r="9"  fill="#e0589a"/><!-- s5: A=VI -->
-          <text x="20" y="184" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">A</text>
+          <text x="20" y="184" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="Inter,sans-serif">A</text>
           <circle cx="20" cy="220" r="9"  fill="#50c490"/><!-- s6: E=III -->
-          <text x="20" y="220" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">E</text>
+          <text x="20" y="220" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="Inter,sans-serif">E</text>
 
           <!-- FRET I (x=108): s1=F(IV) s2=C(I ROOT) s6=F(IV) -->
           <circle cx="108" cy="40"  r="9"  fill="#e07040"/><!-- s1: F=IV -->
-          <text x="108" y="40"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">F</text>
+          <text x="108" y="40"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="Inter,sans-serif">F</text>
           <circle cx="108" cy="76"  r="11" fill="#e8a838"/><!-- s2: C=I ROOT -->
-          <text x="108" y="76"  text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">C</text>
+          <text x="108" y="76"  text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700" fill="#fff" font-family="Inter,sans-serif">C</text>
           <circle cx="108" cy="220" r="9"  fill="#e07040"/><!-- s6: F=IV -->
-          <text x="108" y="220" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">F</text>
+          <text x="108" y="220" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="Inter,sans-serif">F</text>
 
           <!-- FRET II (x=241): s3=A(VI) s4=E(III) s5=B(VII) -->
           <circle cx="241" cy="112" r="9"  fill="#e0589a"/><!-- s3: A=VI -->
-          <text x="241" y="112" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">A</text>
+          <text x="241" y="112" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="Inter,sans-serif">A</text>
           <circle cx="241" cy="148" r="9"  fill="#50c490"/><!-- s4: E=III -->
-          <text x="241" y="148" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">E</text>
+          <text x="241" y="148" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="Inter,sans-serif">E</text>
           <circle cx="241" cy="184" r="9"  fill="#a8c840"/><!-- s5: B=VII -->
-          <text x="241" y="184" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#333" font-family="DM Sans,sans-serif">B</text>
+          <text x="241" y="184" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#333" font-family="Inter,sans-serif">B</text>
 
           <!-- FRET III (x=367): s1=G(V) s2=D(II) s4=F(IV) s5=C(I ROOT) s6=G(V) -->
           <circle cx="367" cy="40"  r="9"  fill="#9868d4"/><!-- s1: G=V -->
-          <text x="367" y="40"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">G</text>
+          <text x="367" y="40"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="Inter,sans-serif">G</text>
           <circle cx="367" cy="76"  r="9"  fill="#4a9ed8"/><!-- s2: D=II -->
-          <text x="367" y="76"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">D</text>
+          <text x="367" y="76"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="Inter,sans-serif">D</text>
           <circle cx="367" cy="148" r="9"  fill="#e07040"/><!-- s4: F=IV -->
-          <text x="367" y="148" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">F</text>
+          <text x="367" y="148" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="Inter,sans-serif">F</text>
           <circle cx="367" cy="184" r="11" fill="#e8a838"/><!-- s5: C=I ROOT -->
-          <text x="367" y="184" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">C</text>
+          <text x="367" y="184" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700" fill="#fff" font-family="Inter,sans-serif">C</text>
           <circle cx="367" cy="220" r="9"  fill="#9868d4"/><!-- s6: G=V -->
-          <text x="367" y="220" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">G</text>
+          <text x="367" y="220" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="Inter,sans-serif">G</text>
 
           <!-- FRET IV (x=485): s3=B(VII) -->
           <circle cx="485" cy="112" r="9"  fill="#a8c840"/><!-- s3: B=VII -->
-          <text x="485" y="112" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#333" font-family="DM Sans,sans-serif">B</text>
+          <text x="485" y="112" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#333" font-family="Inter,sans-serif">B</text>
 
           <!-- FRET V (x=596): s1=A(VI) s2=E(III) s3=C(I ROOT) s4=G(V) s5=D(II) s6=A(VI) -->
           <circle cx="596" cy="40"  r="9"  fill="#e0589a"/><!-- s1: A=VI -->
-          <text x="596" y="40"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">A</text>
+          <text x="596" y="40"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="Inter,sans-serif">A</text>
           <circle cx="596" cy="76"  r="9"  fill="#50c490"/><!-- s2: E=III -->
-          <text x="596" y="76"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">E</text>
+          <text x="596" y="76"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="Inter,sans-serif">E</text>
           <circle cx="596" cy="112" r="11" fill="#e8a838"/><!-- s3: C=I ROOT -->
-          <text x="596" y="112" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">C</text>
+          <text x="596" y="112" text-anchor="middle" dominant-baseline="central" font-size="9" font-weight="700" fill="#fff" font-family="Inter,sans-serif">C</text>
           <circle cx="596" cy="148" r="9"  fill="#9868d4"/><!-- s4: G=V -->
-          <text x="596" y="148" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">G</text>
+          <text x="596" y="148" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="Inter,sans-serif">G</text>
           <circle cx="596" cy="184" r="9"  fill="#4a9ed8"/><!-- s5: D=II -->
-          <text x="596" y="184" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">D</text>
+          <text x="596" y="184" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="Inter,sans-serif">D</text>
           <circle cx="596" cy="220" r="9"  fill="#e0589a"/><!-- s6: A=VI -->
-          <text x="596" y="220" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">A</text>
+          <text x="596" y="220" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="Inter,sans-serif">A</text>
 
           <!-- FRET VI (x=702): s2=F(IV) -->
           <circle cx="702" cy="76"  r="9"  fill="#e07040"/><!-- s2: F=IV -->
-          <text x="702" y="76"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">F</text>
+          <text x="702" y="76"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="Inter,sans-serif">F</text>
 
           <!-- FRET VII (x=802): s1=B(VII) s3=D(II) s4=A(VI) s5=E(III) s6=B(VII) -->
           <circle cx="802" cy="40"  r="9"  fill="#a8c840"/><!-- s1: B=VII -->
-          <text x="802" y="40"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#333" font-family="DM Sans,sans-serif">B</text>
+          <text x="802" y="40"  text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#333" font-family="Inter,sans-serif">B</text>
           <circle cx="802" cy="112" r="9"  fill="#4a9ed8"/><!-- s3: D=II -->
-          <text x="802" y="112" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">D</text>
+          <text x="802" y="112" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="Inter,sans-serif">D</text>
           <circle cx="802" cy="148" r="9"  fill="#e0589a"/><!-- s4: A=VI -->
-          <text x="802" y="148" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">A</text>
+          <text x="802" y="148" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="Inter,sans-serif">A</text>
           <circle cx="802" cy="184" r="9"  fill="#50c490"/><!-- s5: E=III -->
-          <text x="802" y="184" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">E</text>
+          <text x="802" y="184" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#fff" font-family="Inter,sans-serif">E</text>
           <circle cx="802" cy="220" r="9"  fill="#a8c840"/><!-- s6: B=VII -->
-          <text x="802" y="220" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#333" font-family="DM Sans,sans-serif">B</text>
+          <text x="802" y="220" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="700" fill="#333" font-family="Inter,sans-serif">B</text>
         </svg>
       </div>
 

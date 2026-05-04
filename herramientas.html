@@ -5,17 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>guitarra.cool · Herramientas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --paper:    #faf6f0; --paper2: #f2ece3; --paper3: #e8e0d4;
-  --paper4:   #ddd4c4; --paper5: #cec4b0;
-  --copper:   #a05c20; --copper-lt: #c07830; --copper-dk: #7a4010;
-  --ink:      #1a1410; --ink2: #2e2418; --ink3: #4a3c2c;
-  --ink4:     #6a5a46; --ink5: #8a7a66;
-  --serif: 'Cormorant Garamond', Georgia, serif;
-  --sans:  'DM Sans', system-ui, sans-serif;
-  --mono:  'DM Mono', monospace;
+  --paper:    #f4ece0; --paper2: #f2ece3; --paper3: #e8e0d4;
+  --paper4:   #c8b99f; --paper5: #cec4b0;
+  --copper:   #a85a1e; --copper-lt: #c47a36; --copper-dk: #7a3e10;
+  --ink:      #1c1410; --ink2: #2e2418; --ink3: #4a3c2c;
+  --ink4:     #8a7a64; --ink5: #8a7a66;
+  --serif: 'Marcellus', Georgia, serif;
+  --sans:  'Inter', system-ui, sans-serif;
+  --mono:  'JetBrains Mono', monospace;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
@@ -24,9 +24,9 @@ body { background: var(--paper); color: var(--ink); font-family: var(--sans); fo
 /* NAV */
 nav {
   position: sticky; top: 0; z-index: 100;
-  background: rgba(250,246,240,.94); backdrop-filter: blur(12px);
+  background: rgba(244,236,224,.94); backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--paper4);
-  padding: 0 48px; display: flex; align-items: center; height: 56px; gap: 0;
+  padding: 0 48px; display: flex; align-items: center; height: 60px; gap: 0;
 }
 .nav-logo { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--ink); margin-right: 36px; letter-spacing: -.01em; text-decoration: none; }
 .nav-logo span { color: var(--copper); }
@@ -38,7 +38,7 @@ nav {
 
 /* HERO */
 .hub-hero {
-  background: #100a04;
+  background: #13100c;
   padding: 120px 48px 100px; text-align: center;
   position: relative; overflow: hidden;
 }
@@ -100,7 +100,7 @@ nav {
 
 .tool-card-visual {
   height: 200px;
-  background: #100a04;
+  background: #13100c;
   display: flex; align-items: center; justify-content: center;
   position: relative; overflow: hidden;
 }
@@ -167,7 +167,7 @@ nav {
 
 /* FOOTER */
 .hub-footer-strip {
-  background: #100a04; padding: 64px 48px; text-align: center;
+  background: #13100c; padding: 64px 48px; text-align: center;
 }
 .hub-footer-text {
   font-family: var(--serif); font-size: clamp(22px, 3vw, 34px);
@@ -241,7 +241,7 @@ nav {
             <line x1="258" y1="14" x2="258" y2="128" stroke="rgba(250,246,240,.2)" stroke-width="1.5"/>
             <!-- Do mayor: x32010 (mute 6, fret3 5, fret2 4, open 3, fret1 2, open 1) -->
             <!-- Muted string 6 -->
-            <text x="10" y="26" text-anchor="middle" fill="rgba(192,120,48,.55)" font-size="12" font-weight="700" font-family="DM Sans,sans-serif">✕</text>
+            <text x="10" y="26" text-anchor="middle" fill="rgba(192,120,48,.55)" font-size="12" font-weight="700" font-family="Inter,sans-serif">✕</text>
             <!-- Open string 3 (G) -->
             <circle cx="10" cy="82" r="5" fill="none" stroke="rgba(192,120,48,.6)" stroke-width="1.5"/>
             <!-- Open string 1 (E) -->
@@ -251,9 +251,9 @@ nav {
             <circle cx="90" cy="62" r="9" fill="#a05c20" opacity=".9"/>
             <circle cx="45" cy="102" r="9" fill="#a05c20" opacity=".9"/>
             <!-- Labels -->
-            <text x="133" y="46" text-anchor="middle" fill="#fff" font-size="9" font-weight="700" font-family="DM Mono,monospace">C</text>
-            <text x="90" y="66" text-anchor="middle" fill="#fff" font-size="9" font-weight="700" font-family="DM Mono,monospace">E</text>
-            <text x="45" y="106" text-anchor="middle" fill="#fff" font-size="9" font-weight="700" font-family="DM Mono,monospace">C</text>
+            <text x="133" y="46" text-anchor="middle" fill="#fff" font-size="9" font-weight="700" font-family="JetBrains Mono,monospace">C</text>
+            <text x="90" y="66" text-anchor="middle" fill="#fff" font-size="9" font-weight="700" font-family="JetBrains Mono,monospace">E</text>
+            <text x="45" y="106" text-anchor="middle" fill="#fff" font-size="9" font-weight="700" font-family="JetBrains Mono,monospace">C</text>
           </svg>
         </div>
         <div class="tool-card-body">
@@ -285,9 +285,9 @@ nav {
             <rect x="168" y="15" width="20" height="62" rx="3" fill="rgba(10,6,2,.85)"/>
             <rect x="200" y="15" width="20" height="62" rx="3" fill="rgba(10,6,2,.85)"/>
             <!-- Labels C E G -->
-            <text x="35" y="107" text-anchor="middle" fill="rgba(90,40,5,.75)" font-size="9" font-weight="700" font-family="DM Mono,monospace">C</text>
-            <text x="99" y="107" text-anchor="middle" fill="rgba(90,40,5,.75)" font-size="9" font-weight="700" font-family="DM Mono,monospace">E</text>
-            <text x="163" y="107" text-anchor="middle" fill="rgba(90,40,5,.75)" font-size="9" font-weight="700" font-family="DM Mono,monospace">G</text>
+            <text x="35" y="107" text-anchor="middle" fill="rgba(90,40,5,.75)" font-size="9" font-weight="700" font-family="JetBrains Mono,monospace">C</text>
+            <text x="99" y="107" text-anchor="middle" fill="rgba(90,40,5,.75)" font-size="9" font-weight="700" font-family="JetBrains Mono,monospace">E</text>
+            <text x="163" y="107" text-anchor="middle" fill="rgba(90,40,5,.75)" font-size="9" font-weight="700" font-family="JetBrains Mono,monospace">G</text>
           </svg>
         </div>
         <div class="tool-card-body">

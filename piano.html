@@ -5,22 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>guitarra.cool · Piano</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
 <style>
 :root {
-  --serif:'Cormorant Garamond',Georgia,serif;
-  --sans:'DM Sans','Segoe UI',system-ui,sans-serif;
-  --mono:'DM Mono',monospace;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
 }
 [data-theme="dark"] {
-  --bg:#090807; --surface:#141210; --surface2:#1e1a17;
-  --accent:#c8874a; --accent2:#7c5cbf;
+  --bg:#13100c; --surface:#1c1812; --surface2:#26201a;
+  --accent:#d68838; --accent2:#7c5cbf;
   --text:#f5ede2; --text2:#8a7a6e; --hl:#2e2820;
 }
 [data-theme="light"] {
-  --bg:#f5ede2; --surface:#ede4d8; --surface2:#dfd4c4;
-  --accent:#8c4c14; --accent2:#4a2e90;
+  --bg:#f4ece0; --surface:#ebe1d2; --surface2:#ddd1bd;
+  --accent:#a85a1e; --accent2:#4a2e90;
   --text:#0e0c0a; --text2:#6a5a4a; --hl:#c8baa8;
 }
 
@@ -106,7 +106,7 @@ select.full:hover { border-color:var(--accent2); }
 #piano-svg { display:block; flex-shrink:0; }
 
 .info-bar { background:var(--surface); border-top:1px solid var(--hl); padding:5px 14px; font-size:12px; color:var(--text2); flex-shrink:0; min-height:28px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; width:100%; }
-.midi-badge { font-size:11px; font-family:'DM Mono',monospace; padding:2px 8px; border-radius:10px; border:1px solid var(--hl); background:var(--bg); color:var(--text2); transition:all .3s; white-space:nowrap; }
+.midi-badge { font-size:11px; font-family:'JetBrains Mono',monospace; padding:2px 8px; border-radius:10px; border:1px solid var(--hl); background:var(--bg); color:var(--text2); transition:all .3s; white-space:nowrap; }
 .midi-badge.connected { background:#1a3a1a; border-color:#4caf50; color:#4caf50; }
 .midi-badge.active { background:#2a1a0a; border-color:#ff9800; color:#ff9800; }
 .info-tag { background:var(--surface2); border-radius:4px; padding:2px 7px; color:var(--accent); font-weight:600; }
@@ -551,11 +551,11 @@ function drawPiano(){
       // Octave label on C keys
       if(pc===0){
         const octNum=oct+START_OCT;
-        h+=`<text x="${x+WW/2}" y="${WH-3}" text-anchor="middle" font-size="9" fill="${isActive||isRoot?'rgba(255,255,255,.7)':octLabelFill}" font-family="DM Mono,monospace" style="pointer-events:none">C${octNum}</text>`;
+        h+=`<text x="${x+WW/2}" y="${WH-3}" text-anchor="middle" font-size="9" fill="${isActive||isRoot?'rgba(255,255,255,.7)':octLabelFill}" font-family="JetBrains Mono,monospace" style="pointer-events:none">C${octNum}</text>`;
       }
       // Note name on active white keys
       if((isActive||isRoot)&&pc!==0){
-        h+=`<text x="${x+WW/2}" y="${WH-3}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.8)" font-family="DM Mono,monospace" style="pointer-events:none">${nn(pc,root,_aSet)}</text>`;
+        h+=`<text x="${x+WW/2}" y="${WH-3}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.8)" font-family="JetBrains Mono,monospace" style="pointer-events:none">${nn(pc,root,_aSet)}</text>`;
       }
       wIdx++;
     }
@@ -573,7 +573,7 @@ function drawPiano(){
       h+=`<rect x="${x}" y="6" width="${BW}" height="${BH}" rx="2" fill="${fill}" style="cursor:pointer" onclick="noteClick(${pc},${START_OCT}+${oct})"/>`;
 
       if(isRoot||isActive){
-        h+=`<text x="${x+BW/2}" y="${BH-1}" text-anchor="middle" font-size="8" fill="#fff" font-weight="600" font-family="DM Mono,monospace" style="pointer-events:none">${nn(pc,root,_aSet)}</text>`;
+        h+=`<text x="${x+BW/2}" y="${BH-1}" text-anchor="middle" font-size="8" fill="#fff" font-weight="600" font-family="JetBrains Mono,monospace" style="pointer-events:none">${nn(pc,root,_aSet)}</text>`;
       }
     }
   }
@@ -772,7 +772,7 @@ function renderAnnotations(){
     }else if(ann.type==='text'){
       const tx=document.createElementNS('http://www.w3.org/2000/svg','text');
       tx.setAttribute('x',ann.x);tx.setAttribute('y',ann.y);tx.setAttribute('fill',ann.color);
-      tx.setAttribute('font-size',14);tx.setAttribute('font-family','DM Sans,sans-serif');tx.setAttribute('font-weight','600');
+      tx.setAttribute('font-size',14);tx.setAttribute('font-family','Inter,sans-serif');tx.setAttribute('font-weight','600');
       tx.textContent=ann.text;layer.appendChild(tx);
     }
   }

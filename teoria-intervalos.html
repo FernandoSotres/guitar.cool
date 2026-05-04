@@ -5,18 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>guitarra.cool · Intervalos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
 <style>
 :root {
-  --paper:    #faf6f0; --paper2: #f2ece3; --paper3: #e8e0d4;
-  --paper4:   #ddd4c4; --paper5: #cec4b0;
-  --copper:   #a05c20; --copper-lt: #c07830; --copper-dk: #7a4010;
-  --ink:      #1a1410; --ink2: #2e2418; --ink3: #4a3c2c;
-  --ink4:     #6a5a46; --ink5: #8a7a66;
-  --serif: 'Cormorant Garamond', Georgia, serif;
-  --sans:  'DM Sans', system-ui, sans-serif;
-  --mono:  'DM Mono', monospace;
+  --paper:    #f4ece0; --paper2: #f2ece3; --paper3: #e8e0d4;
+  --paper4:   #c8b99f; --paper5: #cec4b0;
+  --copper:   #a85a1e; --copper-lt: #c47a36; --copper-dk: #7a3e10;
+  --ink:      #1c1410; --ink2: #2e2418; --ink3: #4a3c2c;
+  --ink4:     #8a7a64; --ink5: #8a7a66;
+  --serif: 'Marcellus', Georgia, serif;
+  --sans:  'Inter', system-ui, sans-serif;
+  --mono:  'JetBrains Mono', monospace;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
@@ -25,9 +25,9 @@ body { background: var(--paper); color: var(--ink); font-family: var(--sans); fo
 /* ── NAV ── */
 nav {
   position: sticky; top: 0; z-index: 100;
-  background: rgba(250,246,240,.94); backdrop-filter: blur(12px);
+  background: rgba(244,236,224,.94); backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--paper4);
-  padding: 0 48px; display: flex; align-items: center; height: 56px; gap: 0;
+  padding: 0 48px; display: flex; align-items: center; height: 60px; gap: 0;
 }
 .nav-logo { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--ink); margin-right: 36px; letter-spacing: -.01em; text-decoration: none; }
 .nav-logo span { color: var(--copper); }
@@ -54,7 +54,7 @@ nav {
 
 /* ── HERO ── */
 .th-hero {
-  background: #100a04; padding: 110px 48px 90px; text-align: center; overflow: hidden;
+  background: #13100c; padding: 110px 48px 90px; text-align: center; overflow: hidden;
 }
 .th-chapter {
   font-size: 11px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase;
@@ -78,7 +78,7 @@ nav {
 
 /* ── SECTIONS ── */
 .th-section { padding: 88px 48px; }
-.th-section.dark { background: #100a04; }
+.th-section.dark { background: #13100c; }
 .th-inner { max-width: 1080px; margin: 0 auto; }
 
 .th-label {
@@ -97,7 +97,7 @@ nav {
 .th-body + .th-body { margin-top: 14px; }
 .th-section.dark .th-body { color: rgba(250,246,240,.58); }
 .th-body strong { color: var(--ink2); font-weight: 600; }
-.th-section.dark .th-body strong { color: rgba(250,246,240,.92); }
+.th-section.dark .th-body strong { color: rgba(244,236,224,.92); }
 
 .th-split { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; }
 
@@ -148,7 +148,7 @@ hr.th-div.dark { background: rgba(255,255,255,.06); }
 
 /* ── INTERVAL EXPLORER ── */
 .explorer-wrap {
-  background: #100a04; border-radius: 14px; padding: 36px;
+  background: #13100c; border-radius: 14px; padding: 36px;
   margin: 32px 0;
 }
 .explorer-controls {
@@ -841,8 +841,8 @@ function drawFretStrip() {
 
     const noteName = AC[semi] ? NF[semi] : N[semi];
     h += `<circle cx="${cx}" cy="${Y}" r="16" fill="${fill}" stroke="${stroke}" stroke-width="1.5" style="cursor:pointer" onclick="playFretNote(${m})"/>`;
-    h += `<text x="${cx}" y="${Y+5}" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="${noteName.length>2?9:11}" font-weight="700" fill="${tc}" style="pointer-events:none">${noteName}</text>`;
-    if (f > 0) h += `<text x="${cx}" y="${8+boardH+14}" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="rgba(200,180,150,.35)">${f}</text>`;
+    h += `<text x="${cx}" y="${Y+5}" text-anchor="middle" font-family="Inter,sans-serif" font-size="${noteName.length>2?9:11}" font-weight="700" fill="${tc}" style="pointer-events:none">${noteName}</text>`;
+    if (f > 0) h += `<text x="${cx}" y="${8+boardH+14}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="rgba(200,180,150,.35)">${f}</text>`;
   }
 
   // Draw interval arc between root and target
@@ -853,7 +853,7 @@ function drawFretStrip() {
     const arcY = 8 - 18;
     h += `<path d="M${x0} 8 Q${midX} ${arcY} ${x1} 8" stroke="rgba(90,154,74,.5)" stroke-width="1.5" fill="none" stroke-dasharray="4 3"/>`;
     const ivName = INTERVALS[targetFret]?.es || '';
-    h += `<text x="${midX}" y="${arcY - 4}" text-anchor="middle" font-family="DM Mono,monospace" font-size="9" fill="rgba(90,154,74,.55)">${ivName}</text>`;
+    h += `<text x="${midX}" y="${arcY - 4}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="rgba(90,154,74,.55)">${ivName}</text>`;
   }
 
   svg.innerHTML = h;
