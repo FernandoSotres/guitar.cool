@@ -23,6 +23,9 @@
     { "source": "/practica/progresiones",           "destination": "/practica-progresiones.html" },
     { "source": "/recursos",                         "destination": "/recursos.html" },
     { "source": "/recursos/historia",                "destination": "/recursos-historia.html" },
-    { "source": "/recursos/historia/12-notas",       "destination": "/recursos-historia-12notas.html" }
+    { "source": "/recursos/historia/12-notas",       "destination": "/recursos-historia-12notas.html" },
+    { "source": "/privacidad",                        "destination": "/privacidad.html" },
+    { "source": "/terminos",                          "destination": "/terminos.html" },
+    { "source": "/cookies",                           "destination": "/cookies.html" }
   ]
 }

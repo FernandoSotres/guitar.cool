@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Política de Cookies</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:   #f4ece0; --paper2: #ebe1d2; --paper4: #c8b99f;
+  --ink:     #1c1410; --ink2:   #2e2418; --ink3:   #5a4a38; --ink4: #8a7a64; --ink5: #a09080;
+  --copper:  #a85a1e; --copper-lt: #c47a36; --copper-dk: #7a3e10;
+  --serif: 'Marcellus', Georgia, serif;
+  --sans:  'Inter', system-ui, sans-serif;
+  --mono:  'JetBrains Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.7; }
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(244,236,224,.94); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--paper4);
+  padding: 0 48px; display: flex; align-items: center; height: 60px;
+}
+.nav-logo { font-family: var(--serif); font-size: 22px; font-weight: 400; color: var(--ink); margin-right: 36px; letter-spacing: -.01em; text-decoration: none; display: inline-flex; align-items: baseline; gap: 1px; }
+.nav-logo span { font-family: var(--mono); font-size: .52em; font-weight: 400; color: var(--ink4); margin-left: 2px; }
+.nav-link { padding: 0 16px; height: 60px; display: flex; align-items: center; font-size: 13px; font-weight: 500; color: var(--ink4); text-decoration: none; border-bottom: 2px solid transparent; transition: color .2s; }
+.nav-link:hover { color: var(--ink2); }
+main { max-width: 740px; margin: 0 auto; padding: 72px 24px 120px; }
+.legal-eyebrow { font-family: var(--mono); font-size: 11px; color: var(--copper); letter-spacing: .16em; text-transform: uppercase; margin-bottom: 16px; }
+h1 { font-family: var(--serif); font-size: 48px; font-weight: 400; line-height: 1.05; letter-spacing: -.02em; color: var(--ink); margin-bottom: 12px; }
+.legal-date { font-family: var(--mono); font-size: 11px; color: var(--ink4); margin-bottom: 56px; letter-spacing: .06em; }
+h2 { font-family: var(--serif); font-size: 26px; font-weight: 400; color: var(--ink); margin-top: 48px; margin-bottom: 14px; letter-spacing: -.01em; }
+p { color: var(--ink3); margin-bottom: 16px; font-weight: 300; }
+a { color: var(--copper); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.cookie-table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 13px; }
+.cookie-table th { background: var(--paper2); padding: 10px 14px; text-align: left; font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink4); border-bottom: 2px solid var(--paper4); }
+.cookie-table td { padding: 12px 14px; border-bottom: 1px solid var(--paper4); color: var(--ink3); font-weight: 300; vertical-align: top; }
+.cookie-table td:first-child { font-family: var(--mono); font-size: 12px; color: var(--ink); font-weight: 400; white-space: nowrap; }
+.tag { display: inline-block; font-family: var(--mono); font-size: 10px; padding: 2px 7px; border-radius: 3px; font-weight: 500; }
+.tag-required { background: rgba(168,90,30,.1); color: var(--copper); }
+.tag-optional { background: var(--paper2); color: var(--ink4); }
+footer { background: var(--ink); padding: 40px 48px; text-align: center; }
+.f-copy { font-size: 12px; color: var(--ink4); }
+.f-legal { margin-top: 10px; display: flex; gap: 20px; justify-content: center; }
+.f-legal a { font-size: 11px; color: var(--ink5); text-decoration: none; font-family: var(--mono); letter-spacing: .04em; }
+.f-legal a:hover { color: var(--copper-lt); }
+@media (max-width: 768px) { nav { padding: 0 16px; } main { padding: 40px 16px 80px; } h1 { font-size: 34px; } .cookie-table { font-size: 12px; } }
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="nav-logo">tr<svg width="12" height="12" viewBox="0 0 22 22" style="display:inline-block;vertical-align:middle;margin:0 1px 3px 1px"><path d="M2 11 Q 5.5 4, 9 11 T 16 11 T 20 11" stroke="var(--copper)" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link">Recursos</a>
+</nav>
+
+<main>
+  <div class="legal-eyebrow">Legal · Cookies</div>
+  <h1>Política de Cookies</h1>
+  <div class="legal-date">Última actualización: mayo de 2026</div>
+
+  <p>Esta política explica qué son las cookies, cuáles usamos en tremolo.mx y cómo puedes controlarlas.</p>
+
+  <h2>¿Qué son las cookies?</h2>
+  <p>Las cookies son pequeños archivos de texto que los sitios web guardan en tu navegador. Permiten que el sitio recuerde información entre visitas, como tu sesión iniciada o tus preferencias. No son programas y no pueden acceder a otros archivos de tu dispositivo.</p>
+
+  <h2>Cookies que usamos</h2>
+
+  <table class="cookie-table">
+    <thead>
+      <tr>
+        <th>Cookie</th>
+        <th>Origen</th>
+        <th>Propósito</th>
+        <th>Duración</th>
+        <th>Tipo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>sb-*-auth-token</td>
+        <td>Supabase</td>
+        <td>Mantiene tu sesión iniciada. Sin esta cookie tendrías que hacer login en cada visita.</td>
+        <td>Sesión / 1 semana</td>
+        <td><span class="tag tag-required">Necesaria</span></td>
+      </tr>
+      <tr>
+        <td>sb-*-auth-token-code-verifier</td>
+        <td>Supabase</td>
+        <td>Verifica la seguridad del proceso de autenticación (PKCE).</td>
+        <td>Sesión</td>
+        <td><span class="tag tag-required">Necesaria</span></td>
+      </tr>
+      <tr>
+        <td>tm_cookie_consent</td>
+        <td>tremolo.mx</td>
+        <td>Recuerda que ya viste y aceptaste este aviso de cookies para no mostrarlo de nuevo.</td>
+        <td>1 año</td>
+        <td><span class="tag tag-required">Necesaria</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>Actualmente <strong>no usamos cookies de analytics ni de publicidad</strong>. Si en el futuro incorporamos herramientas de medición (como analytics de privacidad), actualizaremos esta política y te pediremos consentimiento antes de activarlas.</p>
+
+  <h2>Cookies de terceros</h2>
+  <p>Las cookies de Supabase son técnicamente necesarias para el funcionamiento del servicio de autenticación. Supabase puede establecer estas cookies desde el dominio <code>supabase.co</code>. Consulta la <a href="https://supabase.com/privacy" target="_blank" rel="noopener">política de privacidad de Supabase</a> para más detalles.</p>
+
+  <h2>Cómo controlar las cookies</h2>
+  <p>Puedes configurar tu navegador para bloquear o eliminar cookies. Ten en cuenta que bloquear las cookies necesarias impedirá que tu sesión se mantenga activa y tendrás que hacer login cada vez que visites el sitio.</p>
+  <p>Instrucciones para los navegadores más comunes:</p>
+  <p>
+    <a href="https://support.google.com/chrome/answer/95647" target="_blank" rel="noopener">Chrome</a> ·
+    <a href="https://support.mozilla.org/es/kb/cookies-informacion-que-los-sitios-web-guardan-en-" target="_blank" rel="noopener">Firefox</a> ·
+    <a href="https://support.apple.com/es-mx/guide/safari/sfri11471/mac" target="_blank" rel="noopener">Safari</a> ·
+    <a href="https://support.microsoft.com/es-es/windows/eliminar-y-administrar-cookies-168dab11-0753-043d-7c16-ede5947fc64d" target="_blank" rel="noopener">Edge</a>
+  </p>
+
+  <h2>Contacto</h2>
+  <p>Si tienes preguntas sobre el uso de cookies en tremolo.mx, escríbenos a <a href="mailto:privacidad@tremolo.mx">privacidad@tremolo.mx</a>.</p>
+</main>
+
+<footer>
+  <div class="f-copy">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div class="f-legal">
+    <a href="/privacidad">Aviso de Privacidad</a>
+    <a href="/terminos">Términos y Condiciones</a>
+    <a href="/cookies">Política de Cookies</a>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

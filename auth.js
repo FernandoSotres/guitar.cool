@@ -139,6 +139,63 @@
       font-size: 16px; cursor: pointer; padding: 4px 8px; line-height: 1;
     }
     .tm-close:hover { color: #f4ece0; }
+
+    /* ── CONSENT CHECKBOXES ── */
+    .tm-consent { margin: 12px 0 4px; }
+    .tm-consent-row {
+      display: flex; align-items: flex-start; gap: 9px; margin-bottom: 10px;
+    }
+    .tm-consent-row input[type="checkbox"] {
+      margin-top: 2px; flex-shrink: 0; width: 14px; height: 14px;
+      accent-color: #d68838; cursor: pointer;
+    }
+    .tm-consent-row label {
+      font-family: 'JetBrains Mono', monospace; font-size: 10px;
+      color: #8a7a64; line-height: 1.6; cursor: pointer; letter-spacing: .02em;
+    }
+    .tm-consent-row label a { color: #d68838; text-decoration: none; }
+    .tm-consent-row label a:hover { text-decoration: underline; }
+
+    /* ── COOKIE BANNER ── */
+    .tm-cookie-banner {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 9000;
+      background: #1c1812; border-top: 1px solid #3a3026;
+      padding: 14px 24px; display: flex; align-items: center;
+      justify-content: space-between; gap: 16px; flex-wrap: wrap;
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #8a7a64;
+      letter-spacing: .02em; line-height: 1.5;
+      transform: translateY(100%); transition: transform .3s ease;
+    }
+    .tm-cookie-banner.visible { transform: translateY(0); }
+    .tm-cookie-banner a { color: #d68838; text-decoration: none; }
+    .tm-cookie-banner a:hover { text-decoration: underline; }
+    .tm-cookie-accept {
+      background: #d68838; color: #13100c; border: none; border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600;
+      letter-spacing: .06em; text-transform: uppercase;
+      padding: 7px 16px; cursor: pointer; white-space: nowrap; flex-shrink: 0;
+      transition: background .2s;
+    }
+    .tm-cookie-accept:hover { background: #eaa55a; }
+
+    /* ── MINIMAL LEGAL FOOTER ── */
+    .tm-footer-legal {
+      background: #1c1410; padding: 24px 48px; text-align: center;
+      border-top: 1px solid rgba(200,185,159,.08);
+    }
+    .tm-f-copy {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      color: #5a4a38; letter-spacing: .04em; margin-bottom: 8px;
+    }
+    .tm-f-links { display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+    .tm-f-links a {
+      font-family: 'JetBrains Mono', monospace; font-size: 10px;
+      color: #5a4a38; text-decoration: none; letter-spacing: .04em;
+    }
+    .tm-f-links a:hover { color: #d68838; }
+    @media (max-width: 600px) {
+      .tm-footer-legal { padding: 20px 16px; }
+    }
   `;
 
   function injectStyles() {
@@ -172,6 +229,16 @@
             <label class="tm-label" for="tm-pass">Contraseña</label>
             <input class="tm-input" id="tm-pass" type="password" placeholder="••••••••" autocomplete="current-password" minlength="6" required/>
           </div>
+          <div class="tm-consent" id="tm-consent-block" style="display:none">
+            <div class="tm-consent-row">
+              <input type="checkbox" id="tm-chk-terms"/>
+              <label for="tm-chk-terms">He leído y acepto los <a href="/terminos" target="_blank">Términos y Condiciones</a> y el <a href="/privacidad" target="_blank">Aviso de Privacidad</a>. <span style="color:#e86060">*</span></label>
+            </div>
+            <div class="tm-consent-row">
+              <input type="checkbox" id="tm-chk-newsletter"/>
+              <label for="tm-chk-newsletter">Quiero recibir novedades de contenido y actualizaciones del servicio. (Opcional)</label>
+            </div>
+          </div>
           <button class="tm-submit" id="tm-submit" type="submit">Entrar</button>
         </form>
       </div>`;
@@ -189,6 +256,7 @@
         this.classList.add('active');
         document.getElementById('tm-submit').textContent = tab === 'login' ? 'Entrar' : 'Crear cuenta';
         document.getElementById('tm-pass').autocomplete = tab === 'login' ? 'current-password' : 'new-password';
+        document.getElementById('tm-consent-block').style.display = tab === 'signup' ? 'block' : 'none';
         clearMsg();
       });
     });
@@ -205,9 +273,19 @@
           if (error) throw error;
           closeModal();
         } else {
+          const termsChk = document.getElementById('tm-chk-terms');
+          if (!termsChk?.checked) {
+            showMsg('Debes aceptar los Términos y el Aviso de Privacidad para continuar.', 'error');
+            btn.disabled = false; btn.textContent = 'Crear cuenta';
+            return;
+          }
+          const newsletter = document.getElementById('tm-chk-newsletter')?.checked || false;
           const { error } = await sb.auth.signUp({ email, password: pass });
           if (error) throw error;
-          showMsg('Revisa tu email para confirmar la cuenta.', 'success');
+          // Store consent — profile will be created by ensureProfile on SIGNED_IN,
+          // but we save consent intent for when the session arrives.
+          window._tmPendingConsent = { newsletter, terms_accepted_at: new Date().toISOString() };
+          showMsg('¡Listo! Revisa tu email para confirmar la cuenta.', 'success');
         }
       } catch (err) {
         showMsg(err.message || 'Ocurrió un error.', 'error');
@@ -291,6 +369,26 @@
     }
   }
 
+  // ── COOKIE BANNER ────────────────────────────────────────────────────────────
+  function buildCookieBanner() {
+    if (document.cookie.split(';').some(c => c.trim().startsWith('tm_cookie_consent='))) return;
+    const banner = document.createElement('div');
+    banner.className = 'tm-cookie-banner';
+    banner.id = 'tm-cookie-banner';
+    banner.innerHTML = `
+      <span>Usamos cookies necesarias para mantener tu sesión. Consulta nuestra <a href="/cookies">Política de Cookies</a>.</span>
+      <button class="tm-cookie-accept" id="tm-cookie-accept">Aceptar</button>`;
+    document.body.appendChild(banner);
+    // Small delay so CSS transition fires
+    requestAnimationFrame(() => requestAnimationFrame(() => banner.classList.add('visible')));
+    document.getElementById('tm-cookie-accept').addEventListener('click', function () {
+      const exp = new Date(Date.now() + 365 * 24 * 3600 * 1000).toUTCString();
+      document.cookie = `tm_cookie_consent=1; expires=${exp}; path=/; SameSite=Lax`;
+      banner.classList.remove('visible');
+      setTimeout(() => banner.remove(), 350);
+    });
+  }
+
   // ── ACTIVIDAD ────────────────────────────────────────────────────────────────
   async function trackView(session) {
     if (!session) return;
@@ -307,10 +405,14 @@
   async function ensureProfile(session) {
     if (!session) return;
     try {
-      await sb.from('profiles').upsert(
-        { id: session.user.id, email: session.user.email },
-        { onConflict: 'id', ignoreDuplicates: true }
-      );
+      const record = { id: session.user.id, email: session.user.email };
+      // If there's pending signup consent (first login after email confirmation)
+      if (window._tmPendingConsent) {
+        record.newsletter_consent   = window._tmPendingConsent.newsletter;
+        record.terms_accepted_at    = window._tmPendingConsent.terms_accepted_at;
+        delete window._tmPendingConsent;
+      }
+      await sb.from('profiles').upsert(record, { onConflict: 'id', ignoreDuplicates: false });
     } catch (_) {}
   }
 
@@ -319,6 +421,7 @@
     injectStyles();
     buildModal();
     buildNavButton();
+    buildCookieBanner();
 
     const { data: { session } } = await sb.auth.getSession();
     _session = session;
