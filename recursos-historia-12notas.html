@@ -212,7 +212,7 @@ nav {
   border-color: var(--copper);
   box-shadow: 0 4px 16px rgba(160,92,32,.1);
 }
-.ch-nav-next { align-items: flex-end; opacity: .45; pointer-events: none; }
+.ch-nav-next { align-items: flex-end; }
 .ch-nav-dir {
   font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase;
   color: var(--copper);
@@ -239,7 +239,7 @@ nav {
 <body>
 
 <nav>
-  <a href="/" class="nav-logo">tr<span style="color:var(--copper)">é</span>molo<span>.mx</span></a>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
   <a href="/teoria" class="nav-link">Teoría</a>
   <a href="/practica" class="nav-link">Práctica</a>
   <a href="/herramientas" class="nav-link">Herramientas</a>
@@ -684,11 +684,11 @@ nav {
     <span class="ch-nav-name">Historia de la Música</span>
     <span class="ch-nav-desc">Ver todos los capítulos</span>
   </a>
-  <div class="ch-nav-next">
+  <a href="/recursos/historia/barroco-clasico" class="ch-nav-next">
     <span class="ch-nav-dir">Siguiente →</span>
     <span class="ch-nav-name">El Barroco y el Clásico</span>
-    <span class="ch-nav-desc">Próximamente</span>
-  </div>
+    <span class="ch-nav-desc">Cuando la armonía encontró sus reglas</span>
+  </a>
 </div>
 
 <script>

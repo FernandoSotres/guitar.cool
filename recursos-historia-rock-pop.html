@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Rock, Pop y Electrónica — Historia de la Música</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:    #f4ece0; --paper2: #f2ece3; --paper3: #e8e0d4;
+  --paper4:   #c8b99f; --paper5: #cec4b0;
+  --copper:   #a85a1e; --copper-lt: #c47a36; --copper-dk: #7a3e10;
+  --ink:      #1c1410; --ink2: #2e2418; --ink3: #4a3c2c;
+  --ink4:     #8a7a64; --ink5: #8a7a66;
+  --serif: 'Marcellus', Georgia, serif;
+  --sans:  'Inter', system-ui, sans-serif;
+  --mono:  'JetBrains Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+nav { position: sticky; top: 0; z-index: 100; background: rgba(244,236,224,.94); backdrop-filter: blur(12px); border-bottom: 1px solid var(--paper4); padding: 0 48px; display: flex; align-items: center; height: 60px; gap: 0; }
+.nav-logo { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--ink); margin-right: 36px; letter-spacing: -.01em; text-decoration: none; }
+.nav-logo span { font-family: var(--mono); font-size: 0.52em; font-weight: 400; color: var(--ink4); letter-spacing: 0; margin-left: 2px; }
+.nav-link { padding: 0 16px; height: 56px; display: flex; align-items: center; font-size: 13px; font-weight: 500; color: var(--ink4); text-decoration: none; border-bottom: 2px solid transparent; transition: color .2s, border-color .2s; }
+.nav-link:hover { color: var(--ink2); }
+.nav-link.active { color: var(--copper); border-bottom-color: var(--copper); }
+.nav-cta { margin-left: auto; background: var(--copper); color: #fff; font-size: 12px; font-weight: 600; padding: 7px 18px; border-radius: 6px; text-decoration: none; transition: background .2s; }
+.nav-cta:hover { background: var(--copper-dk); }
+.ch-hero { background: #0d0804; padding: 80px 48px 90px; position: relative; overflow: hidden; }
+.ch-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 50% at 50% 120%, rgba(100,60,20,.4) 0%, transparent 70%); pointer-events: none; }
+.ch-breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(250,246,240,.35); margin-bottom: 40px; }
+.ch-breadcrumb a { color: var(--copper-lt); text-decoration: none; }
+.ch-breadcrumb a:hover { opacity: .8; }
+.ch-breadcrumb span { color: rgba(250,246,240,.2); }
+.ch-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.ch-num { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .1em; color: var(--copper-lt); border: 1px solid rgba(192,120,48,.3); padding: 4px 10px; border-radius: 4px; }
+.ch-era { font-size: 12px; color: rgba(250,246,240,.35); font-style: italic; }
+.ch-title { font-family: var(--serif); font-size: clamp(42px, 6vw, 80px); font-weight: 700; line-height: .92; letter-spacing: -.025em; color: var(--paper); max-width: 760px; margin-bottom: 12px; }
+.ch-title em { font-style: italic; color: var(--copper-lt); }
+.ch-subtitle { font-family: var(--serif); font-size: clamp(18px, 2vw, 24px); font-style: italic; color: rgba(250,246,240,.42); margin-bottom: 36px; }
+.ch-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.ch-tag { font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; background: rgba(250,246,240,.07); color: rgba(250,246,240,.45); border: 1px solid rgba(250,246,240,.1); }
+.ch-body { max-width: 720px; margin: 0 auto; padding: 80px 48px 0; }
+.ch-section { margin-bottom: 72px; }
+.ch-section-label { font-size: 10px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--copper); margin-bottom: 14px; display: block; }
+.ch-h2 { font-family: var(--serif); font-size: clamp(28px, 3.5vw, 40px); font-weight: 700; line-height: 1.06; letter-spacing: -.02em; color: var(--ink); margin-bottom: 24px; }
+.ch-h2 em { font-style: italic; color: var(--copper); }
+.ch-body p { font-size: 16px; color: var(--ink3); line-height: 1.85; margin-bottom: 22px; }
+.ch-body p:last-child { margin-bottom: 0; }
+.ch-body strong { font-weight: 600; color: var(--ink2); }
+.ch-pullquote { border-left: 3px solid var(--copper); padding: 16px 24px; background: var(--paper2); border-radius: 0 8px 8px 0; margin: 36px 0; }
+.ch-pullquote p { font-family: var(--serif); font-size: 21px !important; font-style: italic; color: var(--ink2); line-height: 1.55; margin: 0 !important; }
+.ch-section-photo { float: right; width: 42%; margin: 6px 0 22px 30px; border-radius: 10px; overflow: hidden; shape-outside: border-box; }
+.ch-section-photo img { width: 100%; height: 210px; object-fit: cover; object-position: center; display: block; }
+.ch-section::after { content: ''; display: table; clear: both; }
+@media (max-width: 600px) { .ch-section-photo { float: none; width: 100%; margin: 0 0 22px 0; } }
+.ch-visual-wrap { max-width: 860px; margin: 0 auto; padding: 0 48px 72px; }
+.ch-visual { background: var(--paper2); border: 1px solid var(--paper3); border-radius: 14px; overflow: hidden; }
+.ch-visual-header { padding: 13px 20px; border-bottom: 1px solid var(--paper3); display: flex; align-items: center; justify-content: space-between; }
+.ch-visual-title { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--ink5); }
+.ch-audio-hint { font-size: 11px; color: var(--copper); font-weight: 500; font-style: italic; letter-spacing: .02em; }
+.ch-visual-body { padding: 28px 24px; overflow-x: auto; }
+.ch-visual-caption { padding: 12px 24px 16px; border-top: 1px solid var(--paper3); font-size: 12px; color: var(--ink5); font-style: italic; line-height: 1.5; }
+.ch-theory-link { background: #13100c; border-radius: 12px; padding: 28px 32px; margin: 36px 0; display: flex; align-items: flex-start; gap: 20px; }
+.ch-theory-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+.ch-theory-label { font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--copper-lt); margin-bottom: 6px; display: block; }
+.ch-theory-text { font-size: 14px; color: rgba(250,246,240,.55); line-height: 1.7; margin-bottom: 12px; }
+.ch-theory-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--copper-lt); text-decoration: none; border-bottom: 1px solid rgba(192,120,48,.35); padding-bottom: 1px; transition: border-color .2s; }
+.ch-theory-btn:hover { border-color: var(--copper-lt); }
+.ch-nav { max-width: 860px; margin: 0 auto; padding: 0 48px 80px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.ch-nav-back, .ch-nav-next { display: flex; flex-direction: column; gap: 4px; text-decoration: none; padding: 20px 24px; border-radius: 12px; border: 1px solid var(--paper4); transition: border-color .2s, box-shadow .2s; max-width: 48%; }
+.ch-nav-back:hover, .ch-nav-next:hover { border-color: var(--copper); box-shadow: 0 4px 16px rgba(160,92,32,.1); }
+.ch-nav-next { align-items: flex-end; }
+.ch-nav-dir { font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--copper); }
+.ch-nav-name { font-family: var(--serif); font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.2; }
+.ch-nav-desc { font-size: 12px; color: var(--ink5); }
+@media (max-width: 768px) {
+  nav { padding: 0 16px; overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; scrollbar-width: none; }
+  nav::-webkit-scrollbar { display: none; }
+  nav > * { flex-shrink: 0; }
+  .ch-hero { padding: 60px 20px 72px; }
+  .ch-body { padding: 56px 20px 0; }
+  .ch-visual-wrap { padding: 0 20px 56px; }
+  .ch-nav { padding: 0 20px 60px; flex-direction: column; }
+  .ch-nav-back, .ch-nav-next { max-width: 100%; width: 100%; }
+  .ch-nav-next { align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link active">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<section class="ch-hero">
+  <div class="ch-breadcrumb">
+    <a href="/recursos">Recursos</a>
+    <span>·</span>
+    <a href="/recursos/historia">Historia de la Música</a>
+    <span>·</span>
+    <span style="color:rgba(250,246,240,.5)">Capítulo 05</span>
+  </div>
+  <div class="ch-meta">
+    <span class="ch-num">Cap. 05</span>
+    <span class="ch-era">Rock · Pop · Electrónica · 1950 – presente</span>
+  </div>
+  <h1 class="ch-title">Rock, Pop<br>y <em>Electrónica</em></h1>
+  <p class="ch-subtitle">Las raíces de lo que escuchas hoy</p>
+  <div class="ch-tags">
+    <span class="ch-tag">I–IV–V</span>
+    <span class="ch-tag">Power chords</span>
+    <span class="ch-tag">I–V–vi–IV</span>
+    <span class="ch-tag">Síntesis</span>
+    <span class="ch-tag">Samples</span>
+    <span class="ch-tag">Producción</span>
+  </div>
+</section>
+
+<!-- ── SECCIÓN 1 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">El amplificador cambia todo</span>
+  <h2 class="ch-h2">Chuck Berry y el blues<br><em>enchufado</em></h2>
+
+  <p>La historia del rock no empieza con una revolución teórica. Empieza con un cable de guitarra conectado a un amplificador y los volúmenes subidos lo suficiente para que la señal empiece a distorsionarse.</p>
+
+  <p>Chuck Berry, Little Richard, Bo Diddley y Elvis Presley no inventaron nada estructuralmente nuevo. Tomaron el blues de 12 compases, la pentatónica, el I–IV–V y los aceleraron. Los amplificaron. Los pusieron a un tempo que obligaba al cuerpo a moverse de otra manera. <strong>El rock and roll fue, en su inicio, blues a otra velocidad y con otra energía — no otra música.</strong></p>
+
+  <p>Lo que cambió fue el contexto social. Por primera vez en la historia, la música popular tenía su propia industria masiva — discos de vinilo, radio, televisión — y una audiencia joven que la adoptó como propia. La música dejó de ser algo que las generaciones transmitían hacia abajo: los jóvenes empezaron a generar su propio vocabulario musical, y ese vocabulario se expandió hasta cubrir el planeta.</p>
+</div>
+</div>
+
+<!-- ── SECCIÓN 2 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">El acorde de poder</span>
+  <h2 class="ch-h2">Dos notas que<br><em>redefinieron la pesadez</em></h2>
+
+  <p>El power chord es, técnicamente, el intervalo de quinta entre la nota raíz y la quinta de la escala. Sin tercera, lo que significa que no es ni mayor ni menor. En física acústica, la quinta es el segundo parcial de la serie de armónicos — la resonancia más fuerte después de la octava. Cuando un amplificador con distorsión amplifica ese intervalo, los armónicos se multiplican en una forma que el oído percibe como enorme, llena, poderosa.</p>
+
+  <p>El link de rock de Link Wray de 1958, los riffs de Chuck Berry, el hard rock de los años 70, el metal, el punk, el grunge — todos usan el mismo fundamento: raíz y quinta, distorsión, volumen. <strong>El power chord resolvió un problema práctico con elegancia involuntaria: la tercera genera intermodulación desagradable con distorsión, la quinta no.</strong> Lo que suena "correcto" en la guitarra eléctrica con overdrive responde a física, no a preferencia estética.</p>
+</div>
+</div>
+
+<!-- VISUAL 1: Power chord vs full chord -->
+<div class="ch-visual-wrap">
+<div class="ch-visual">
+  <div class="ch-visual-header">
+    <span class="ch-visual-title">Power chord E5 — raíz y quinta, sin tercera</span>
+    <span class="ch-audio-hint">♪ toca cada acorde</span>
+  </div>
+  <div class="ch-visual-body">
+    <svg viewBox="0 0 760 230" width="100%" style="display:block;min-width:460px;max-width:760px">
+      <rect width="760" height="230" fill="#f2ece3" rx="8"/>
+
+      <!-- Left: E5 power chord -->
+      <rect x="60" y="30" width="240" height="160" rx="10" fill="#13100c" opacity=".97"/>
+      <text x="180" y="55" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="rgba(232,168,56,.7)" text-anchor="middle" letter-spacing=".12em">E5 · POWER CHORD</text>
+
+      <!-- Stacked note blocks -->
+      <rect x="90"  y="68"  width="180" height="30" rx="5" fill="#e8a838" opacity=".9"/>
+      <rect x="90"  y="104" width="180" height="30" rx="5" fill="#e8a838" opacity=".7"/>
+      <!-- Empty space where third would be -->
+      <rect x="90"  y="140" width="180" height="30" rx="5" fill="#333" opacity=".5" stroke-dasharray="4,3" stroke="#6a5a46" stroke-width="1"/>
+
+      <text x="180" y="83"  font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#7a3e10" text-anchor="middle" dominant-baseline="middle">B · quinta</text>
+      <text x="180" y="119" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#a07030" text-anchor="middle" dominant-baseline="middle">E · raíz</text>
+      <text x="180" y="155" font-family="JetBrains Mono,monospace" font-size="10" fill="#6a5a46" text-anchor="middle" dominant-baseline="middle">— tercera ausente —</text>
+
+      <text x="180" y="205" font-family="Inter,sans-serif" font-size="11" fill="#8a7a66" text-anchor="middle" font-style="italic">ambiguo mayor/menor · ideal para distorsión</text>
+
+      <!-- Center label -->
+      <text x="380" y="115" font-family="JetBrains Mono,monospace" font-size="18" fill="#cec4b0" text-anchor="middle" dominant-baseline="middle">≈</text>
+
+      <!-- Right: E major full chord -->
+      <rect x="460" y="30" width="240" height="160" rx="10" fill="#1a2030" opacity=".97"/>
+      <text x="580" y="55" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="rgba(74,158,216,.7)" text-anchor="middle" letter-spacing=".12em">E MAYOR · ACORDE COMPLETO</text>
+
+      <rect x="490" y="68"  width="180" height="30" rx="5" fill="#4a9ed8" opacity=".8"/>
+      <rect x="490" y="104" width="180" height="30" rx="5" fill="#4a9ed8" opacity=".65"/>
+      <rect x="490" y="140" width="180" height="30" rx="5" fill="#4a9ed8" opacity=".5"/>
+
+      <text x="580" y="83"  font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">B · quinta</text>
+      <text x="580" y="119" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">G# · tercera mayor</text>
+      <text x="580" y="155" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">E · raíz</text>
+
+      <text x="580" y="205" font-family="Inter,sans-serif" font-size="11" fill="#8a7a66" text-anchor="middle" font-style="italic">definitivamente mayor · intermodulación con distorsión</text>
+
+      <!-- Click zones -->
+      <rect data-chord="E5" x="60"  y="30" width="240" height="160" fill="transparent" style="cursor:pointer"/>
+      <rect data-chord="Em" x="460" y="30" width="240" height="160" fill="transparent" style="cursor:pointer"/>
+    </svg>
+  </div>
+  <div class="ch-visual-caption">
+    El power chord (E5) usa solo raíz y quinta — sin tercera. La ausencia de tercera lo hace armónicamente neutro, ni mayor ni menor. Con distorsión, la tercera genera frecuencias de intermodulación que suenan sucias; la quinta genera armónicos limpios que se suman al sonido. La física resolvió el problema estético.
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 3 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">La progresión eterna</span>
+  <h2 class="ch-h2">I–V–vi–IV:<br><em>cuatro acordes en todas partes</em></h2>
+
+  <p>En 2009, el grupo de comedia musical australiano Axis of Awesome hizo un video que se volvió viral: tocando cuatro acordes — I, V, vi, IV — en bucle y cantando encima fragmentos de cientos de canciones. La demostración era perfecta porque la progresión realmente aparece en un porcentaje extraordinario de la música popular de los últimos cincuenta años.</p>
+
+  <p>La razón no es que los compositores sean perezosos o que la industria imponga fórmulas. La razón es que esa progresión funciona de una forma que el oído humano encuentra natural y satisfactoria. Ya la hemos visto en el capítulo sobre el Barroco: Pachelbel la usó en 1680. Lo que el pop hizo fue redescubrirla y subrayarla.</p>
+
+  <p>El movimiento de I a V tiene la sensación de apertura. El vi (relativo menor) introduce un giro emocional más oscuro o nostálgico. El IV prepara el regreso. <strong>La progresión completa describe un pequeño arco emocional en cuatro pasos que el cerebro reconoce y anticipa.</strong> Esa anticipación — saber que viene el regreso, esperar el momento exacto — es parte del placer.</p>
+
+  <div class="ch-pullquote">
+    <p>La familiaridad de una progresión no hace que suene vacía. La hace sonar como un idioma que ya sabes hablar.</p>
+  </div>
+</div>
+</div>
+
+<!-- VISUAL 2: I-V-vi-IV interactive progression -->
+<div class="ch-visual-wrap">
+<div class="ch-visual">
+  <div class="ch-visual-header">
+    <span class="ch-visual-title">I–V–vi–IV en Do mayor — aparece en miles de canciones</span>
+    <span class="ch-audio-hint">♪ toca cada acorde</span>
+  </div>
+  <div class="ch-visual-body">
+    <svg viewBox="0 0 760 240" width="100%" style="display:block;min-width:460px;max-width:760px">
+      <rect width="760" height="240" fill="#f2ece3" rx="8"/>
+
+      <!-- Four large chord blocks -->
+      <rect x="20"  y="30" width="165" height="130" rx="10" fill="#e8a838" opacity=".2"/>
+      <rect x="20"  y="30" width="165" height="8"   rx="4" fill="#e8a838" opacity=".9"/>
+      <rect x="205" y="30" width="165" height="130" rx="10" fill="#9868d4" opacity=".18"/>
+      <rect x="205" y="30" width="165" height="8"   rx="4" fill="#9868d4" opacity=".9"/>
+      <rect x="390" y="30" width="165" height="130" rx="10" fill="#4a9ed8" opacity=".18"/>
+      <rect x="390" y="30" width="165" height="8"   rx="4" fill="#4a9ed8" opacity=".9"/>
+      <rect x="575" y="30" width="165" height="130" rx="10" fill="#50c490" opacity=".18"/>
+      <rect x="575" y="30" width="165" height="8"   rx="4" fill="#50c490" opacity=".9"/>
+
+      <!-- Degree Roman numerals -->
+      <text x="102" y="80"  font-family="var(--serif, Georgia, serif)" font-size="36" font-weight="700" fill="#7a3e10" text-anchor="middle" dominant-baseline="middle">I</text>
+      <text x="287" y="80"  font-family="var(--serif, Georgia, serif)" font-size="36" font-weight="700" fill="#4a2888" text-anchor="middle" dominant-baseline="middle">V</text>
+      <text x="472" y="80"  font-family="var(--serif, Georgia, serif)" font-size="36" font-weight="700" fill="#1a4a6a" text-anchor="middle" dominant-baseline="middle">vi</text>
+      <text x="657" y="80"  font-family="var(--serif, Georgia, serif)" font-size="36" font-weight="700" fill="#1a5a38" text-anchor="middle" dominant-baseline="middle">IV</text>
+
+      <!-- Chord names -->
+      <text x="102" y="116" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="#a05c20" text-anchor="middle">Do</text>
+      <text x="287" y="116" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="#6040a0" text-anchor="middle">Sol</text>
+      <text x="472" y="116" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="#2a6a8a" text-anchor="middle">La m</text>
+      <text x="657" y="116" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="#2a7a50" text-anchor="middle">Fa</text>
+
+      <!-- Note content -->
+      <text x="102" y="142" font-family="JetBrains Mono,monospace" font-size="10" fill="#8a7a66" text-anchor="middle">C · E · G</text>
+      <text x="287" y="142" font-family="JetBrains Mono,monospace" font-size="10" fill="#8a7a66" text-anchor="middle">G · B · D</text>
+      <text x="472" y="142" font-family="JetBrains Mono,monospace" font-size="10" fill="#8a7a66" text-anchor="middle">A · C · E</text>
+      <text x="657" y="142" font-family="JetBrains Mono,monospace" font-size="10" fill="#8a7a66" text-anchor="middle">F · A · C</text>
+
+      <!-- Arrow cycle below -->
+      <path d="M 185,195 L 205,195" stroke="#cec4b0" stroke-width="1.5" marker-end="url(#arr2)"/>
+      <path d="M 370,195 L 390,195" stroke="#cec4b0" stroke-width="1.5" marker-end="url(#arr2)"/>
+      <path d="M 555,195 L 575,195" stroke="#cec4b0" stroke-width="1.5" marker-end="url(#arr2)"/>
+      <path d="M 740,195 Q 760,195 760,215 Q 760,230 740,230 L 20,230 Q 0,230 0,215 Q 0,195 20,195 L 20,195" stroke="#cec4b0" stroke-width="1.5" fill="none" stroke-dasharray="4,3"/>
+
+      <defs>
+        <marker id="arr2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+          <path d="M0,0 L6,3 L0,6 Z" fill="#cec4b0"/>
+        </marker>
+      </defs>
+
+      <text x="102" y="196" font-family="JetBrains Mono,monospace" font-size="9" fill="#a09080" text-anchor="middle">tónica</text>
+      <text x="287" y="196" font-family="JetBrains Mono,monospace" font-size="9" fill="#a09080" text-anchor="middle">dominante</text>
+      <text x="472" y="196" font-family="JetBrains Mono,monospace" font-size="9" fill="#a09080" text-anchor="middle">rel. menor</text>
+      <text x="657" y="196" font-family="JetBrains Mono,monospace" font-size="9" fill="#a09080" text-anchor="middle">subdominante</text>
+
+      <!-- Click zones -->
+      <rect data-chord="C"  x="20"  y="30" width="165" height="130" fill="transparent" style="cursor:pointer"/>
+      <rect data-chord="G"  x="205" y="30" width="165" height="130" fill="transparent" style="cursor:pointer"/>
+      <rect data-chord="Am" x="390" y="30" width="165" height="130" fill="transparent" style="cursor:pointer"/>
+      <rect data-chord="F"  x="575" y="30" width="165" height="130" fill="transparent" style="cursor:pointer"/>
+    </svg>
+  </div>
+  <div class="ch-visual-caption">
+    I–V–vi–IV en Do mayor: Do, Sol, La menor, Fa. La misma progresión aparece en el Canon de Pachelbel (1680), en Beethoven, en decenas de canciones de los Beatles, en baladas de los 80, en pop contemporáneo. No porque la industria la imponga — sino porque describe un movimiento armónico que el oído humano lleva cuatrocientos años reconociendo.
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 4 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Los años 70 — presente</span>
+  <h2 class="ch-h2">Cuando la máquina<br><em>se convirtió en instrumento</em></h2>
+
+  <p>El sintetizador Moog llegó al mercado en 1970. El Roland TR-808 en 1980. El Fairlight CMI, capaz de samplear y reproducir sonidos reales, en 1979. En el espacio de una década, el paisaje de los instrumentos disponibles cambió de forma radical.</p>
+
+  <p>La electrónica no solo añadió nuevos sonidos: cambió la relación entre el músico y el ritmo. Una caja de ritmos no se cansa, no acelera, no interpreta. El tempo puede ser absolutamente constante, lo que crea una tensión rítmica diferente — una cuadrícula perfecta sobre la que el cantante o el solista puede flotar, o contra la que puede empujar. <strong>El groove del funk, del hip-hop y de la música electrónica depende de esa tensión entre el pulso mecánico y la humanidad de las voces e instrumentos encima.</strong></p>
+
+  <p>El hip-hop añadió otra dimensión: el sampling. Tomar un fragmento de un disco existente y construir algo nuevo sobre él es una forma de composición que no tiene precedente histórico claro. No es cita, no es variación, no es arreglo — es una relación diferente con el material musical, donde el contexto y el reconocimiento se vuelven parte del mensaje.</p>
+</div>
+</div>
+
+<!-- ── SECCIÓN 5 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Lo que permanece</span>
+  <h2 class="ch-h2">Cinco siglos después,<br><em>el mismo problema</em></h2>
+
+  <p>Desde Pitágoras hasta Billie Eilish, desde el gregoriano hasta el trap, la música popular ha cambiado de forma tan radical que a veces parece que no tienen nada en común. Los sonidos son distintos. Los contextos son distintos. Las tecnologías son distintas.</p>
+
+  <p>Pero el problema central sigue siendo el mismo: cómo crear expectativa y satisfacerla, cómo usar la tensión y la resolución, cómo mover a alguien emocionalmente a través del tiempo organizado en sonido. <strong>El vocabulario cambia. La gramática profunda, no.</strong></p>
+
+  <p>El I–IV–V que Chuck Berry tocó en 1955 viene directo del blues de los años 30, que viene del trabajo espiritual de los años 1890, que viene de la armonía tonal que Bach sistematizó en el siglo XVIII, que viene de las proporciones que Pitágoras descubrió en el siglo V antes de Cristo. La cadena no se ha roto. Cada generación la toma, la electrifica, la distorsiona, la samplela, la fragmenta — y luego la pasa adelante.</p>
+
+  <div class="ch-theory-link">
+    <div class="ch-theory-icon">◎</div>
+    <div>
+      <span class="ch-theory-label">Concepto relacionado · Práctica</span>
+      <p class="ch-theory-text">Las progresiones I–IV–V e I–V–vi–IV que definen la música popular se pueden practicar, analizar y construir en el módulo de Progresiones. Ahí puedes experimentar con los mismos acordes en distintas tonalidades y entender por qué funcionan.</p>
+      <a href="/practica/progresiones" class="ch-theory-btn">Ver Progresiones →</a>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="ch-nav">
+  <a href="/recursos/historia/blues-jazz" class="ch-nav-back">
+    <span class="ch-nav-dir">← Anterior</span>
+    <span class="ch-nav-name">Blues y Jazz</span>
+    <span class="ch-nav-desc">El acorde que cambió la música popular</span>
+  </a>
+  <a href="/recursos/historia" class="ch-nav-next">
+    <span class="ch-nav-dir">↑ Volver</span>
+    <span class="ch-nav-name">Historia de la Música</span>
+    <span class="ch-nav-desc">Ver todos los capítulos</span>
+  </a>
+</div>
+
+<script>
+(function () {
+  var _synth = null;
+  var CHORDS = {
+    'E5': [40,47],
+    'Em': [40,44,47],
+    'C':  [48,52,55],
+    'G':  [43,47,50],
+    'Am': [45,48,52],
+    'F':  [41,45,48]
+  };
+  function _midiNote(m) {
+    var names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    return names[m % 12] + (Math.floor(m / 12) - 1);
+  }
+  async function _initAudio() {
+    if (_synth) return;
+    await Tone.start();
+    var comp   = new Tone.Compressor(-18, 4).toDestination();
+    var reverb = new Tone.Freeverb({ roomSize: 0.28, dampening: 3800, wet: 0.14 }).connect(comp);
+    _synth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'triangle' },
+      envelope:   { attack: 0.008, decay: 0.45, sustain: 0.2, release: 1.8 }
+    }).connect(reverb);
+  }
+  async function playChord(name) {
+    var notes = CHORDS[name];
+    if (!notes) return;
+    try { await _initAudio(); _synth.triggerAttackRelease(notes.map(_midiNote), '2n'); } catch(e) {}
+  }
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-chord]');
+    if (el) playChord(el.getAttribute('data-chord'));
+  });
+})();
+</script>
+
+<footer class="tm-footer-legal">
+  <div class="tm-f-copy">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div class="tm-f-links">
+    <a href="/privacidad">Aviso de Privacidad</a>
+    <a href="/terminos">Términos y Condiciones</a>
+    <a href="/cookies">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>
