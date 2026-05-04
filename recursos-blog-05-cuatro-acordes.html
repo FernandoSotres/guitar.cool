@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · I–V–vi–IV: la progresión que conquistó el mundo — Blog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:#f4ece0; --paper2:#f2ece3; --paper3:#e8e0d4; --paper4:#c8b99f;
+  --copper:#a85a1e; --copper-lt:#c47a36; --copper-dk:#7a3e10;
+  --ink:#1c1410; --ink2:#2e2418; --ink3:#4a3c2c; --ink4:#8a7a64; --ink5:#8a7a66;
+  --serif:'Marcellus',Georgia,serif; --sans:'Inter',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:400;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;display:inline-flex;align-items:baseline;gap:1px;}
+.nav-logo span{font-family:var(--mono);font-size:.52em;font-weight:400;color:var(--ink4);margin-left:2px;}
+.nav-link{padding:0 16px;height:60px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.ch-hero{background:#0d0804;padding:80px 48px 88px;position:relative;overflow:hidden;}
+.ch-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 50% 120%,rgba(100,60,20,.4) 0%,transparent 70%);pointer-events:none;}
+.ch-breadcrumb{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:rgba(250,246,240,.3);margin-bottom:40px;}
+.ch-breadcrumb a{color:var(--copper-lt);text-decoration:none;}
+.ch-meta{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+.ch-num{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--copper-lt);border:1px solid rgba(192,120,48,.3);padding:4px 10px;border-radius:4px;}
+.ch-cat{font-size:12px;color:rgba(250,246,240,.35);font-style:italic;}
+.ch-read{font-family:var(--mono);font-size:11px;color:rgba(250,246,240,.25);letter-spacing:.04em;}
+.ch-title{font-family:var(--serif);font-size:clamp(40px,6vw,76px);font-weight:400;line-height:.94;letter-spacing:-.025em;color:var(--paper);max-width:760px;margin-bottom:16px;}
+.ch-title em{font-style:italic;color:var(--copper-lt);}
+.ch-subtitle{font-family:var(--serif);font-size:clamp(17px,2vw,22px);font-style:italic;color:rgba(250,246,240,.4);margin-bottom:36px;}
+.ch-tags{display:flex;flex-wrap:wrap;gap:7px;}
+.ch-tag{font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:4px 10px;border-radius:20px;background:rgba(250,246,240,.06);color:rgba(250,246,240,.4);border:1px solid rgba(250,246,240,.1);}
+.ch-body{max-width:720px;margin:0 auto;padding:80px 48px 0;}
+.ch-section{margin-bottom:72px;}
+.ch-section-label{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;display:block;}
+.ch-h2{font-family:var(--serif);font-size:clamp(26px,3.5vw,38px);font-weight:400;line-height:1.08;letter-spacing:-.02em;color:var(--ink);margin-bottom:24px;}
+.ch-h2 em{font-style:italic;color:var(--copper);}
+.ch-body p{font-size:16px;color:var(--ink3);line-height:1.85;margin-bottom:22px;font-weight:300;}
+.ch-body p:last-child{margin-bottom:0;}
+.ch-body strong{font-weight:600;color:var(--ink2);}
+.ch-pullquote{border-left:3px solid var(--copper);padding:16px 24px;background:var(--paper2);border-radius:0 8px 8px 0;margin:36px 0;}
+.ch-pullquote p{font-family:var(--serif);font-size:21px !important;font-style:italic;color:var(--ink2);line-height:1.55;margin:0 !important;}
+/* Chord diagram inline */
+.ch-chord-row{display:flex;flex-wrap:wrap;gap:12px;margin:28px 0;padding:24px;background:var(--paper2);border-radius:10px;border:1px solid var(--paper3);}
+.ch-chord-cell{text-align:center;flex:1;min-width:80px;}
+.ch-chord-name{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--copper);margin-bottom:2px;}
+.ch-chord-roman{font-family:var(--serif);font-size:28px;color:var(--ink);font-style:italic;}
+.ch-chord-desc{font-size:11px;color:var(--ink5);margin-top:4px;}
+.ch-chord-sep{width:1px;background:var(--paper3);margin:0 4px;}
+.ch-songs{margin:28px 0;}
+.ch-song{display:flex;align-items:baseline;gap:12px;padding:10px 0;border-bottom:1px solid var(--paper3);}
+.ch-song:last-child{border-bottom:none;}
+.ch-song-name{font-size:14px;color:var(--ink);flex:1;}
+.ch-song-artist{font-size:12px;color:var(--ink4);font-style:italic;}
+.ch-song-key{font-family:var(--mono);font-size:10px;color:var(--copper);letter-spacing:.06em;white-space:nowrap;}
+.ch-theory-link{background:#13100c;border-radius:12px;padding:28px 32px;margin:36px 0;display:flex;align-items:flex-start;gap:20px;}
+.ch-theory-icon{font-size:22px;flex-shrink:0;margin-top:2px;}
+.ch-theory-label{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:6px;display:block;}
+.ch-theory-text{font-size:14px;color:rgba(250,246,240,.55);line-height:1.7;margin-bottom:12px;}
+.ch-theory-btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--copper-lt);text-decoration:none;border-bottom:1px solid rgba(192,120,48,.35);padding-bottom:1px;}
+.ch-theory-btn:hover{border-color:var(--copper-lt);}
+.ch-nav{max-width:860px;margin:0 auto;padding:0 48px 80px;display:flex;justify-content:space-between;align-items:center;gap:20px;}
+.ch-nav-back,.ch-nav-next{display:flex;flex-direction:column;gap:4px;text-decoration:none;padding:20px 24px;border-radius:12px;border:1px solid var(--paper4);transition:border-color .2s,box-shadow .2s;max-width:48%;}
+.ch-nav-back:hover,.ch-nav-next:hover{border-color:var(--copper);box-shadow:0 4px 16px rgba(160,92,32,.1);}
+.ch-nav-next{align-items:flex-end;opacity:.45;pointer-events:none;}
+.ch-nav-dir{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);}
+.ch-nav-name{font-family:var(--serif);font-size:16px;color:var(--ink);line-height:1.2;}
+.ch-nav-desc{font-size:12px;color:var(--ink5);}
+@media(max-width:768px){nav{padding:0 16px;}.ch-hero{padding:60px 20px 72px;}.ch-body{padding:56px 20px 0;}.ch-nav{padding:0 20px 60px;flex-direction:column;}.ch-nav-back,.ch-nav-next{max-width:100%;width:100%;}.ch-nav-next{align-items:flex-start;}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="nav-logo">tr<svg width="12" height="12" viewBox="0 0 22 22" style="display:inline-block;vertical-align:middle;margin:0 1px 3px 1px"><path d="M2 11 Q 5.5 4, 9 11 T 16 11 T 20 11" stroke="var(--copper)" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link active">Recursos</a>
+</nav>
+
+<section class="ch-hero">
+  <div class="ch-breadcrumb">
+    <a href="/recursos">Recursos</a>
+    <span>·</span>
+    <a href="/recursos/blog">Blog</a>
+    <span>·</span>
+    <span style="color:rgba(250,246,240,.5)">Análisis</span>
+  </div>
+  <div class="ch-meta">
+    <span class="ch-num">05</span>
+    <span class="ch-cat">Análisis armónico</span>
+    <span class="ch-read">10 min</span>
+  </div>
+  <h1 class="ch-title">I &#8202;–&#8202; V &#8202;–&#8202; vi &#8202;–&#8202; IV:<br>la <em>progresión</em><br>que conquistó el mundo</h1>
+  <p class="ch-subtitle">No es pereza. Es que activa algo muy profundo en el cerebro humano.</p>
+  <div class="ch-tags">
+    <span class="ch-tag">Armonía</span>
+    <span class="ch-tag">Progresión</span>
+    <span class="ch-tag">Cognición musical</span>
+    <span class="ch-tag">Pop</span>
+    <span class="ch-tag">Composición</span>
+  </div>
+</section>
+
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">El fenómeno</span>
+  <h2 class="ch-h2">Cuatro acordes.<br>Miles de canciones.<br><em>¿Qué está pasando?</em></h2>
+
+  <p>En 2009, el grupo de comedia musical Axis of Awesome presentó un medley en el que tocaban más de cuarenta canciones pop utilizando exactamente la misma progresión de cuatro acordes, cambiando solo el tempo y el arreglo. El video se viralizó. La reacción de la gente oscilaba entre la risa y cierta inquietud: ¿todas estas canciones suenan igual?</p>
+
+  <p>La lista incluía canciones de géneros, épocas y culturas completamente distintas. Rock de los setenta, pop de los noventa, punk, baladas de piano, reggae, country. Y todas usaban la misma secuencia: I – V – vi – IV. En Do mayor: Do, Sol, La menor, Fa.</p>
+
+  <p>La pregunta obvia es: ¿por qué? ¿Es holgazanería de los compositores? ¿Una conspiración de la industria musical? ¿O hay algo más profundo en esta convergencia que merece entenderse?</p>
+</div>
+
+<div class="ch-section">
+  <span class="ch-section-label">La armonía</span>
+  <h2 class="ch-h2">Por qué estos cuatro acordes<br>funcionan <em>tan bien juntos</em></h2>
+
+  <p>La respuesta está en la estructura de la escala mayor y en cómo el oído humano ha aprendido a procesar las relaciones entre tonos.</p>
+
+  <div class="ch-chord-row">
+    <div class="ch-chord-cell">
+      <div class="ch-chord-name">En Do mayor</div>
+      <div class="ch-chord-roman">I</div>
+      <div class="ch-chord-desc">Do — tónica<br>Reposo total</div>
+    </div>
+    <div class="ch-chord-sep"></div>
+    <div class="ch-chord-cell">
+      <div class="ch-chord-name">&nbsp;</div>
+      <div class="ch-chord-roman">V</div>
+      <div class="ch-chord-desc">Sol — dominante<br>Máxima tensión</div>
+    </div>
+    <div class="ch-chord-sep"></div>
+    <div class="ch-chord-cell">
+      <div class="ch-chord-name">&nbsp;</div>
+      <div class="ch-chord-roman">vi</div>
+      <div class="ch-chord-desc">La m — relativo<br>Tensión emotiva</div>
+    </div>
+    <div class="ch-chord-sep"></div>
+    <div class="ch-chord-cell">
+      <div class="ch-chord-name">&nbsp;</div>
+      <div class="ch-chord-roman">IV</div>
+      <div class="ch-chord-desc">Fa — subdominante<br>Tensión suave</div>
+    </div>
+  </div>
+
+  <p>El I (tónica) es el hogar, el punto de reposo máximo. El V (dominante) crea la mayor tensión posible dentro de la tonalidad, con el tritono interno que empuja hacia la resolución. El vi (relativo menor) es el I con un sabor oscuro o melancólico, una "salida lateral" del reposo. El IV (subdominante) crea tensión pero sin la urgencia del V, una tensión más contemplativa.</p>
+
+  <p>Juntos, estos cuatro acordes cubren los cuatro estados emocionales fundamentales de la tonalidad mayor: reposo, tensión máxima, melancolía y anticipación. <strong>Es un sistema completo, autosuficiente, que no necesita nada más para contar una historia armónica de principio a fin.</strong></p>
+
+  <p>Y hay otro factor crucial: la progresión es cíclica. I – V – vi – IV regresa al I de forma natural, lo que permite repetir indefinidamente sin que el oído sienta que hay algo incompleto. Es la progresión perfecta para la forma canción de verso-estribillo-verso.</p>
+</div>
+
+<div class="ch-section">
+  <span class="ch-section-label">La historia</span>
+  <h2 class="ch-h2">De Pachelbel a Katy Perry:<br><em>350 años</em> de la misma idea</h2>
+
+  <p>La omnipresencia de esta progresión no es un fenómeno moderno. El Canon en Re de Pachelbel, compuesto alrededor de 1680, utiliza una secuencia de ocho acordes que incluye exactamente I – V – vi – IV en su núcleo. Desde entonces ha aparecido, con variaciones, en cada época de la música occidental.</p>
+
+  <div class="ch-songs">
+    <div class="ch-song">
+      <span class="ch-song-name">Canon en Re</span>
+      <span class="ch-song-artist">Johann Pachelbel</span>
+      <span class="ch-song-key">~1680 · Re mayor</span>
+    </div>
+    <div class="ch-song">
+      <span class="ch-song-name">Let It Be</span>
+      <span class="ch-song-artist">The Beatles</span>
+      <span class="ch-song-key">1970 · Do mayor</span>
+    </div>
+    <div class="ch-song">
+      <span class="ch-song-name">Don't Stop Believin'</span>
+      <span class="ch-song-artist">Journey</span>
+      <span class="ch-song-key">1981 · Mi mayor</span>
+    </div>
+    <div class="ch-song">
+      <span class="ch-song-name">With or Without You</span>
+      <span class="ch-song-artist">U2</span>
+      <span class="ch-song-key">1987 · Re mayor</span>
+    </div>
+    <div class="ch-song">
+      <span class="ch-song-name">No Woman No Cry</span>
+      <span class="ch-song-artist">Bob Marley</span>
+      <span class="ch-song-key">1974 · Do mayor</span>
+    </div>
+    <div class="ch-song">
+      <span class="ch-song-name">Someone Like You</span>
+      <span class="ch-song-artist">Adele</span>
+      <span class="ch-song-key">2011 · La mayor</span>
+    </div>
+  </div>
+
+  <div class="ch-pullquote">
+    <p>"No se trata de cuántos acordes usas. Se trata de qué haces en el espacio entre ellos."</p>
+  </div>
+
+  <p>Lo que diferencia estas canciones entre sí no son los acordes. Es la melodía, el ritmo, el timbre, la letra, el arreglo, la producción. Beethoven y Justin Bieber usan el mismo alfabeto. El nivel de alfabetización es lo que los separa.</p>
+</div>
+
+<div class="ch-section">
+  <span class="ch-section-label">La psicología</span>
+  <h2 class="ch-h2">Por qué el cerebro<br><em>quiere</em> escuchar esto</h2>
+
+  <p>El musicólogo David Huron propone en su teoría de la expectativa musical que el placer de escuchar música proviene en parte de la satisfacción de expectativas y, de forma más intensa, de su violación sorpresiva. El cerebro predice constantemente qué sonido vendrá después. Cuando la predicción es correcta, hay una pequeña recompensa. Cuando la sorpresa es agradable, la recompensa es mayor.</p>
+
+  <p>La progresión I – V – vi – IV ha sido tan omnipresente durante tantas generaciones que está literalmente grabada en las expectativas culturales del oyente occidental. Reconocerla activa circuitos de recompensa asociados con la familiaridad y el reconocimiento de patrones. Es el equivalente musical de un cuento con estructura de inicio, nudo y desenlace: satisfactorio precisamente por su predictibilidad.</p>
+
+  <p>Esto no la hace "mala" ni "fácil". La hace potente. Un compositor que entiende por qué funciona puede usarla intencionalmente, y también puede decidir cuándo violarla y con qué efecto.</p>
+
+  <p><strong>Conocer la progresión no te obliga a usarla. Te da la elección consciente de usarla o no.</strong> Y esa diferencia —entre hacer algo porque es lo que sabes hacer y hacerlo porque elegiste hacerlo— es, de nuevo, la diferencia entre el técnico y el músico.</p>
+
+  <div class="ch-theory-link">
+    <span class="ch-theory-icon">♬</span>
+    <div>
+      <span class="ch-theory-label">Progresiones y grados</span>
+      <p class="ch-theory-text">El módulo de progresiones de tremolo.mx te permite construir y escuchar progresiones en cualquier tonalidad, entender cómo funcionan los grados y explorar variaciones más allá de los cuatro acordes habituales.</p>
+      <a href="/practica/progresiones" class="ch-theory-btn">Explorar progresiones →</a>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="ch-nav">
+  <a href="/recursos/blog/improvisar-es-escuchar" class="ch-nav-back">
+    <span class="ch-nav-dir">← Anterior</span>
+    <span class="ch-nav-name">Improvisar es escuchar</span>
+    <span class="ch-nav-desc">La paradoja de tocar en tiempo real</span>
+  </a>
+  <a href="/recursos/blog" class="ch-nav-next" style="opacity:1;pointer-events:all">
+    <span class="ch-nav-dir">Blog →</span>
+    <span class="ch-nav-name">Volver al índice</span>
+    <span class="ch-nav-desc">Ver todas las entradas</span>
+  </a>
+</div>
+
+<footer class="tm-footer-legal">
+  <div class="tm-f-copy">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div class="tm-f-links">
+    <a href="/privacidad">Aviso de Privacidad</a>
+    <a href="/terminos">Términos y Condiciones</a>
+    <a href="/cookies">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

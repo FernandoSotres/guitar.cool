@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · El temperamento igual — Blog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:#f4ece0; --paper2:#f2ece3; --paper3:#e8e0d4; --paper4:#c8b99f;
+  --copper:#a85a1e; --copper-lt:#c47a36; --copper-dk:#7a3e10;
+  --ink:#1c1410; --ink2:#2e2418; --ink3:#4a3c2c; --ink4:#8a7a64; --ink5:#8a7a66;
+  --serif:'Marcellus',Georgia,serif; --sans:'Inter',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:400;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;display:inline-flex;align-items:baseline;gap:1px;}
+.nav-logo span{font-family:var(--mono);font-size:.52em;font-weight:400;color:var(--ink4);margin-left:2px;}
+.nav-link{padding:0 16px;height:60px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.ch-hero{background:#0d0804;padding:80px 48px 88px;position:relative;overflow:hidden;}
+.ch-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 50% 120%,rgba(100,60,20,.4) 0%,transparent 70%);pointer-events:none;}
+.ch-breadcrumb{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:rgba(250,246,240,.3);margin-bottom:40px;}
+.ch-breadcrumb a{color:var(--copper-lt);text-decoration:none;}
+.ch-meta{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+.ch-num{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--copper-lt);border:1px solid rgba(192,120,48,.3);padding:4px 10px;border-radius:4px;}
+.ch-cat{font-size:12px;color:rgba(250,246,240,.35);font-style:italic;}
+.ch-read{font-family:var(--mono);font-size:11px;color:rgba(250,246,240,.25);letter-spacing:.04em;}
+.ch-title{font-family:var(--serif);font-size:clamp(40px,6vw,76px);font-weight:400;line-height:.94;letter-spacing:-.025em;color:var(--paper);max-width:760px;margin-bottom:16px;}
+.ch-title em{font-style:italic;color:var(--copper-lt);}
+.ch-subtitle{font-family:var(--serif);font-size:clamp(17px,2vw,22px);font-style:italic;color:rgba(250,246,240,.4);margin-bottom:36px;}
+.ch-tags{display:flex;flex-wrap:wrap;gap:7px;}
+.ch-tag{font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:4px 10px;border-radius:20px;background:rgba(250,246,240,.06);color:rgba(250,246,240,.4);border:1px solid rgba(250,246,240,.1);}
+.ch-body{max-width:720px;margin:0 auto;padding:80px 48px 0;}
+.ch-section{margin-bottom:72px;}
+.ch-section-label{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;display:block;}
+.ch-h2{font-family:var(--serif);font-size:clamp(26px,3.5vw,38px);font-weight:400;line-height:1.08;letter-spacing:-.02em;color:var(--ink);margin-bottom:24px;}
+.ch-h2 em{font-style:italic;color:var(--copper);}
+.ch-body p{font-size:16px;color:var(--ink3);line-height:1.85;margin-bottom:22px;font-weight:300;}
+.ch-body p:last-child{margin-bottom:0;}
+.ch-body strong{font-weight:600;color:var(--ink2);}
+.ch-pullquote{border-left:3px solid var(--copper);padding:16px 24px;background:var(--paper2);border-radius:0 8px 8px 0;margin:36px 0;}
+.ch-pullquote p{font-family:var(--serif);font-size:21px !important;font-style:italic;color:var(--ink2);line-height:1.55;margin:0 !important;}
+.ch-data-box{background:var(--paper2);border:1px solid var(--paper3);border-radius:10px;padding:28px 32px;margin:32px 0;}
+.ch-data-box-label{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink4);margin-bottom:16px;display:block;}
+.ch-data-row{display:flex;align-items:baseline;gap:16px;padding:10px 0;border-bottom:1px solid var(--paper3);}
+.ch-data-row:last-child{border-bottom:none;}
+.ch-data-name{font-family:var(--mono);font-size:12px;color:var(--ink);min-width:180px;}
+.ch-data-val{font-size:14px;color:var(--ink4);font-weight:300;line-height:1.5;}
+.ch-theory-link{background:#13100c;border-radius:12px;padding:28px 32px;margin:36px 0;display:flex;align-items:flex-start;gap:20px;}
+.ch-theory-icon{font-size:22px;flex-shrink:0;margin-top:2px;}
+.ch-theory-label{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:6px;display:block;}
+.ch-theory-text{font-size:14px;color:rgba(250,246,240,.55);line-height:1.7;margin-bottom:12px;}
+.ch-theory-btn{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--copper-lt);text-decoration:none;border-bottom:1px solid rgba(192,120,48,.35);padding-bottom:1px;}
+.ch-theory-btn:hover{border-color:var(--copper-lt);}
+.ch-nav{max-width:860px;margin:0 auto;padding:0 48px 80px;display:flex;justify-content:space-between;align-items:center;gap:20px;}
+.ch-nav-back,.ch-nav-next{display:flex;flex-direction:column;gap:4px;text-decoration:none;padding:20px 24px;border-radius:12px;border:1px solid var(--paper4);transition:border-color .2s,box-shadow .2s;max-width:48%;}
+.ch-nav-back:hover,.ch-nav-next:hover{border-color:var(--copper);box-shadow:0 4px 16px rgba(160,92,32,.1);}
+.ch-nav-next{align-items:flex-end;}
+.ch-nav-dir{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);}
+.ch-nav-name{font-family:var(--serif);font-size:16px;color:var(--ink);line-height:1.2;}
+.ch-nav-desc{font-size:12px;color:var(--ink5);}
+@media(max-width:768px){nav{padding:0 16px;}.ch-hero{padding:60px 20px 72px;}.ch-body{padding:56px 20px 0;}.ch-nav{padding:0 20px 60px;flex-direction:column;}.ch-nav-back,.ch-nav-next{max-width:100%;width:100%;}.ch-nav-next{align-items:flex-start;}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="/" class="nav-logo">tr<svg width="12" height="12" viewBox="0 0 22 22" style="display:inline-block;vertical-align:middle;margin:0 1px 3px 1px"><path d="M2 11 Q 5.5 4, 9 11 T 16 11 T 20 11" stroke="var(--copper)" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link active">Recursos</a>
+</nav>
+
+<section class="ch-hero">
+  <div class="ch-breadcrumb">
+    <a href="/recursos">Recursos</a>
+    <span>·</span>
+    <a href="/recursos/blog">Blog</a>
+    <span>·</span>
+    <span style="color:rgba(250,246,240,.5)">Historia</span>
+  </div>
+  <div class="ch-meta">
+    <span class="ch-num">02</span>
+    <span class="ch-cat">Historia de la música</span>
+    <span class="ch-read">9 min</span>
+  </div>
+  <h1 class="ch-title">El temperamento igual:<br><em>la gran mentira</em><br>que hace sonar todo bien</h1>
+  <p class="ch-subtitle">Tu piano está desafinado por diseño. Y eso es genial.</p>
+  <div class="ch-tags">
+    <span class="ch-tag">Afinación</span>
+    <span class="ch-tag">Temperamento</span>
+    <span class="ch-tag">Bach</span>
+    <span class="ch-tag">Historia</span>
+    <span class="ch-tag">Matemática musical</span>
+  </div>
+</section>
+
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">El secreto que nadie te cuenta</span>
+  <h2 class="ch-h2">Ningún Do es<br>un Do <em>perfecto.</em></h2>
+
+  <p>Si tocas un Do en el piano y luego el Sol que está una quinta arriba, y luego el Re, y continúas apilando quintas doce veces hasta volver al Do de partida, deberías llegar exactamente al mismo punto. En teoría.</p>
+
+  <p>En la práctica, no llegas. Llegas a un punto ligeramente más agudo. La diferencia es de apenas 23,46 centésimas de semitono, una discrepancia que los matemáticos llaman <strong>coma pitagórica</strong>. No es un error de cálculo. Es una propiedad fundamental de la física del sonido: las matemáticas de las frecuencias y las matemáticas de la escala cromática son estructuralmente incompatibles.</p>
+
+  <p>Esto significa que cualquier instrumento de afinación fija —el piano, la guitarra con trastes, el xilófono— tiene que mentir. Tiene que distribuir esa discrepancia de alguna manera entre todas sus notas. La pregunta es: ¿cómo?</p>
+
+  <p>Durante cuatrocientos años, esa pregunta fue una de las más importantes y acaloradamente debatidas en la historia de la música.</p>
+</div>
+
+<div class="ch-section">
+  <span class="ch-section-label">El problema histórico</span>
+  <h2 class="ch-h2">Por qué Bach no podía<br>tocar en <em>todos</em> los tonos</h2>
+
+  <p>En el temperamento mesotónico, el sistema más común durante los siglos XV y XVI, los intervalos de tercera sonaban hermosos y "puros" en las tonalidades más usadas. Do mayor, Sol mayor, Re mayor: bellísimas. Pero si intentabas tocar en Mi♭ mayor o La♭ mayor, el resultado era lo que los organistas de la época llamaban literalmente "el lobo": un intervalo tan disonante que sonaba a un aullido.</p>
+
+  <p>Esto no era un problema teórico. Era un problema práctico urgente. Los compositores del Barroco tardío querían explorar tonalidades remotas. Querían modular, sorprender, crear tensión armónica. Y el sistema no se los permitía.</p>
+
+  <div class="ch-data-box">
+    <span class="ch-data-box-label">Sistemas de temperamento históricos</span>
+    <div class="ch-data-row">
+      <span class="ch-data-name">Pitagórico (s. IV a.C.)</span>
+      <span class="ch-data-val">Quintas perfectas. Terceras muy disonantes. Sin tonalidades "vedadas" pero con sonido áspero en acordes.</span>
+    </div>
+    <div class="ch-data-row">
+      <span class="ch-data-name">Mesotónico (s. XV–XVII)</span>
+      <span class="ch-data-val">Terceras puras en tonalidades comunes. El "lobo" en tonalidades remotas. El sistema más usado en el Renacimiento.</span>
+    </div>
+    <div class="ch-data-row">
+      <span class="ch-data-name">Bien temperado (s. XVII–XVIII)</span>
+      <span class="ch-data-val">Todas las tonalidades usables. Cada una con color distinto. El sistema que Bach celebró en el Clave Bien Temperado.</span>
+    </div>
+    <div class="ch-data-row">
+      <span class="ch-data-name">Temperamento igual (s. XIX–hoy)</span>
+      <span class="ch-data-val">Todas las tonalidades idénticas. Ningún intervalo perfecto, pero ninguno horrible. El compromiso definitivo.</span>
+    </div>
+  </div>
+
+  <p>Johann Sebastian Bach compuso el Clave Bien Temperado —dos preludios y fugas en cada una de las 24 tonalidades mayores y menores— precisamente para demostrar que su sistema de afinación preferido hacía todas las tonalidades musicalmente viables. No "iguales". <em>Viables</em>. Cada una con su propio sabor y carácter.</p>
+</div>
+
+<div class="ch-section">
+  <span class="ch-section-label">El gran acuerdo</span>
+  <h2 class="ch-h2">El siglo XIX elige<br><em>la igualdad perfecta</em><br>sobre la belleza impura</h2>
+
+  <p>El temperamento igual no fue una invención repentina. Andreas Werckmeister lo describió matemáticamente en 1691. Pero su adopción universal tardó más de un siglo. Los músicos del Barroco y el Clasicismo resistieron: en el temperamento igual, todas las tonalidades son idénticas, y eso significaba perder el color diferenciado que hacía que Re menor sonara diferente a La menor, que Fa mayor tuviera una luminosidad distinta a Sol mayor.</p>
+
+  <p>¿Qué te llevó a elegirlo? La industrialización. Con la producción masiva de pianos y órganos en el siglo XIX, afinar cada instrumento individualmente en un temperamento histórico específico se volvió económica y logísticamente imposible. El temperamento igual era el único sistema que podía estandarizarse globalmente.</p>
+
+  <div class="ch-pullquote">
+    <p>"El temperamento igual convirtió la música en una lengua franca. Todo el mundo puede hablarla. Nadie la habla perfectamente."</p>
+  </div>
+
+  <p>La ironía es enorme: el sistema que hoy domina absolutamente toda la música occidental —pop, jazz, clásico, metal, electrónica— es un sistema de compromisos. <strong>No existe un solo intervalo perfectamente consonante en el piano. Cada quinto, cada tercera, cada octava está ligeramente desafinada respecto a su ideal físico.</strong> Tan ligeramente que no lo percibimos como problema. Pero ahí está.</p>
+</div>
+
+<div class="ch-section">
+  <span class="ch-section-label">Por qué importa hoy</span>
+  <h2 class="ch-h2">Músicos que escapan<br>de la <em>jaula de doce notas</em></h2>
+
+  <p>La música microtonal existe precisamente como respuesta a esta estandarización. Compositores como Harry Partch, que construyó sus propios instrumentos para usar 43 notas por octava, o el guitarrista Trey Gunn con sus quintas de cuarto de tono, exploran los espacios entre las doce notas del temperamento igual.</p>
+
+  <p>La música árabe, india, turca y muchas tradiciones africanas utilizan intervalos que no existen en el sistema occidental. El maqam árabe, el raga hindú: sistemas tonales completos con sus propias leyes de consonancia y disonancia, ajenos a la tiranía del semitono igual.</p>
+
+  <p>Esto no quiere decir que el temperamento igual sea malo. Es uno de los inventos más útiles de la historia de la música. Pero saber que existe —que es una decisión humana, histórica y culturalmente contingente, no una ley de la naturaleza— cambia cómo escuchas. Cambia lo que es posible imaginar.</p>
+
+  <p>La próxima vez que escuches un cello o un violín tocando en una orquesta, presta atención: son instrumentos sin trastes, con afinación flexible. Los buenos intérpretes ajustan microtonalmente en tiempo real. Están haciendo lo que el piano no puede: acercarse a los intervalos puros que la física del sonido preferiría.</p>
+
+  <div class="ch-theory-link">
+    <span class="ch-theory-icon">◎</span>
+    <div>
+      <span class="ch-theory-label">El origen de las 12 notas</span>
+      <p class="ch-theory-text">La historia completa de cómo llegamos al sistema cromático —desde Pitágoras hasta la adopción del temperamento igual— está desarrollada en detalle en el capítulo 01 de Historia de la Música.</p>
+      <a href="/recursos/historia/12-notas" class="ch-theory-btn">Leer capítulo completo →</a>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="ch-nav">
+  <a href="/recursos/blog/escalas-sin-destino" class="ch-nav-back">
+    <span class="ch-nav-dir">← Anterior</span>
+    <span class="ch-nav-name">Escalas sin destino</span>
+    <span class="ch-nav-desc">Para qué practicas si no sabes a dónde vas</span>
+  </a>
+  <a href="/recursos/blog/plateau-del-musico" class="ch-nav-next">
+    <span class="ch-nav-dir">Siguiente →</span>
+    <span class="ch-nav-name">El plateau del músico</span>
+    <span class="ch-nav-desc">Cuando practicas más pero mejoras menos</span>
+  </a>
+</div>
+
+<footer class="tm-footer-legal">
+  <div class="tm-f-copy">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div class="tm-f-links">
+    <a href="/privacidad">Aviso de Privacidad</a>
+    <a href="/terminos">Términos y Condiciones</a>
+    <a href="/cookies">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

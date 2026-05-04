@@ -24,6 +24,12 @@
     { "source": "/recursos",                         "destination": "/recursos.html" },
     { "source": "/recursos/historia",                "destination": "/recursos-historia.html" },
     { "source": "/recursos/historia/12-notas",       "destination": "/recursos-historia-12notas.html" },
+    { "source": "/recursos/blog",                              "destination": "/recursos-blog.html" },
+    { "source": "/recursos/blog/escalas-sin-destino",          "destination": "/recursos-blog-01-escalas.html" },
+    { "source": "/recursos/blog/temperamento-igual",            "destination": "/recursos-blog-02-temperamento.html" },
+    { "source": "/recursos/blog/plateau-del-musico",            "destination": "/recursos-blog-03-plateau.html" },
+    { "source": "/recursos/blog/improvisar-es-escuchar",        "destination": "/recursos-blog-04-improvisar.html" },
+    { "source": "/recursos/blog/cuatro-acordes",                "destination": "/recursos-blog-05-cuatro-acordes.html" },
     { "source": "/privacidad",                        "destination": "/privacidad.html" },
     { "source": "/terminos",                          "destination": "/terminos.html" },
     { "source": "/cookies",                           "destination": "/cookies.html" }
