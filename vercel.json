@@ -28,6 +28,8 @@
     { "source": "/recursos/historia/romanticismo",         "destination": "/recursos-historia-romanticismo.html" },
     { "source": "/recursos/historia/blues-jazz",           "destination": "/recursos-historia-blues-jazz.html" },
     { "source": "/recursos/historia/rock-pop-electronica", "destination": "/recursos-historia-rock-pop.html" },
+    { "source": "/recursos/generos",                       "destination": "/recursos-generos.html" },
+    { "source": "/recursos/generos/flamenco",              "destination": "/recursos-generos-flamenco.html" },
     { "source": "/recursos/blog",                              "destination": "/recursos-blog.html" },
     { "source": "/recursos/blog/escalas-sin-destino",          "destination": "/recursos-blog-01-escalas.html" },
     { "source": "/recursos/blog/temperamento-igual",            "destination": "/recursos-blog-02-temperamento.html" },

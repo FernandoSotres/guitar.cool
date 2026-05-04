@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Géneros y Estilos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:    #f4ece0; --paper2: #f2ece3; --paper3: #e8e0d4;
+  --paper4:   #c8b99f; --paper5: #cec4b0;
+  --copper:   #a85a1e; --copper-lt: #c47a36; --copper-dk: #7a3e10;
+  --ink:      #1c1410; --ink2: #2e2418; --ink3: #4a3c2c;
+  --ink4:     #8a7a64; --ink5: #8a7a66;
+  --serif: 'Marcellus', Georgia, serif;
+  --sans:  'Inter', system-ui, sans-serif;
+  --mono:  'JetBrains Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(244,236,224,.94); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--paper4);
+  padding: 0 48px; display: flex; align-items: center; height: 60px; gap: 0;
+}
+.nav-logo { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--ink); margin-right: 36px; letter-spacing: -.01em; text-decoration: none; }
+.nav-logo span { font-family: var(--mono); font-size: 0.52em; font-weight: 400; color: var(--ink4); letter-spacing: 0; margin-left: 2px; }
+.nav-link { padding: 0 16px; height: 56px; display: flex; align-items: center; font-size: 13px; font-weight: 500; color: var(--ink4); text-decoration: none; border-bottom: 2px solid transparent; transition: color .2s, border-color .2s; }
+.nav-link:hover { color: var(--ink2); }
+.nav-link.active { color: var(--copper); border-bottom-color: var(--copper); }
+.nav-cta { margin-left: auto; background: var(--copper); color: #fff; font-size: 12px; font-weight: 600; padding: 7px 18px; border-radius: 6px; text-decoration: none; transition: background .2s; }
+.nav-cta:hover { background: var(--copper-dk); }
+
+/* ── HERO ── */
+.hub-hero {
+  background: #0d0804;
+  padding: 120px 48px 108px; text-align: center;
+  position: relative; overflow: hidden;
+}
+.hub-hero::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 110%, rgba(100,60,20,.35) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hub-eyebrow {
+  font-size: 11px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--copper-lt); margin-bottom: 28px;
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+}
+.hub-eyebrow::before, .hub-eyebrow::after {
+  content: ''; display: block; height: 1px; width: 48px; background: var(--copper-lt); opacity: .35;
+}
+.hub-title {
+  font-family: var(--serif); font-size: clamp(52px, 8vw, 96px);
+  font-weight: 700; line-height: .9; letter-spacing: -.03em;
+  color: var(--paper); margin-bottom: 28px;
+}
+.hub-title em { font-style: italic; color: var(--copper-lt); }
+.hub-lead {
+  font-family: var(--serif); font-size: clamp(17px, 2vw, 21px); font-style: italic;
+  color: rgba(250,246,240,.46); max-width: 520px; margin: 0 auto; line-height: 1.75;
+}
+
+/* ── INTRO ── */
+.intro {
+  padding: 96px 48px 0;
+  background: var(--paper);
+}
+.intro-inner {
+  max-width: 900px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 1.8fr; gap: 80px; align-items: start;
+}
+.intro-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--copper); margin-bottom: 16px; display: block;
+  position: sticky; top: 88px;
+}
+.intro-heading {
+  font-family: var(--serif); font-size: clamp(30px, 4vw, 46px);
+  font-weight: 700; line-height: 1.05; letter-spacing: -.02em;
+  color: var(--ink); margin-bottom: 8px; position: sticky; top: 110px;
+}
+.intro-body p {
+  font-size: 16px; color: var(--ink3); line-height: 1.85; margin-bottom: 22px;
+}
+
+/* ── GENRE GRID ── */
+.genres-section {
+  padding: 80px 48px 112px;
+  background: var(--paper);
+}
+.genres-inner { max-width: 900px; margin: 0 auto; }
+
+.genre-grid { display: flex; flex-direction: column; gap: 10px; }
+
+.genre-card {
+  display: flex; align-items: stretch;
+  border: 1px solid var(--paper4); border-radius: 14px;
+  overflow: hidden; text-decoration: none; color: inherit; background: #fff;
+  transition: box-shadow .22s, border-color .22s;
+}
+.genre-card:hover {
+  border-color: var(--copper);
+  box-shadow: 0 6px 28px rgba(160,92,32,.11);
+}
+.genre-card.coming {
+  cursor: default; pointer-events: none; opacity: .48;
+}
+
+.genre-accent {
+  width: 6px; flex-shrink: 0;
+  background: var(--copper);
+}
+.genre-card.coming .genre-accent { background: var(--paper4); }
+
+.genre-body { flex: 1; padding: 24px 28px; }
+.genre-tag {
+  font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
+  color: var(--copper); margin-bottom: 6px; display: block;
+}
+.genre-card.coming .genre-tag { color: var(--ink5); }
+
+.genre-title {
+  font-family: var(--serif); font-size: 24px; font-weight: 700;
+  line-height: 1.1; letter-spacing: -.015em; color: var(--ink); margin-bottom: 6px;
+}
+.genre-subtitle {
+  font-size: 13px; color: var(--copper); font-style: italic; margin-bottom: 8px;
+  font-family: var(--serif);
+}
+.genre-desc { font-size: 13.5px; color: var(--ink4); line-height: 1.6; max-width: 560px; }
+.genre-tags-row { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 5px; }
+.gtag {
+  font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+  padding: 3px 8px; border-radius: 20px;
+  background: var(--paper3); color: var(--ink5);
+}
+
+.genre-arrow {
+  width: 56px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: var(--paper4);
+  transition: color .2s, transform .2s;
+}
+.genre-card:not(.coming):hover .genre-arrow { color: var(--copper); transform: translateX(4px); }
+.genre-card.coming .genre-arrow { font-size: 11px; color: var(--paper5); font-family: var(--mono); letter-spacing: .04em; }
+
+/* ── FOOTER STRIP ── */
+.hub-footer-strip {
+  background: #13100c; padding: 60px 48px; text-align: center;
+}
+.hub-footer-text {
+  font-family: var(--serif); font-size: clamp(18px, 2.5vw, 26px);
+  font-style: italic; color: rgba(250,246,240,.4); margin-bottom: 28px;
+}
+.hub-footer-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--copper); color: #fff; font-size: 13px; font-weight: 600;
+  padding: 12px 28px; border-radius: 8px; text-decoration: none;
+  transition: background .2s;
+}
+.hub-footer-cta:hover { background: var(--copper-dk); }
+
+@media (max-width: 768px) {
+  nav { padding: 0 16px; overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; scrollbar-width: none; }
+  nav::-webkit-scrollbar { display: none; }
+  nav > * { flex-shrink: 0; }
+  .hub-hero { padding: 80px 20px 72px; }
+  .intro { padding: 60px 20px 0; }
+  .intro-inner { grid-template-columns: 1fr; gap: 24px; }
+  .intro-heading { position: static; }
+  .genres-section { padding: 56px 20px 80px; }
+  .genre-body { padding: 18px 16px; }
+  .genre-title { font-size: 20px; }
+  .hub-footer-strip { padding: 48px 20px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link active">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<section class="hub-hero">
+  <div class="hub-eyebrow">tremolo.mx · Recursos</div>
+  <h1 class="hub-title">Géneros<br>y <em>Estilos</em></h1>
+  <p class="hub-lead">Cada tradición musical construyó su propio sistema teórico. Esto es lo que puedes tomar de cada uno.</p>
+</section>
+
+<section class="intro">
+  <div class="intro-inner">
+    <div>
+      <span class="intro-label">La colección</span>
+      <h2 class="intro-heading">Veinte tradiciones.<br>Veinte vocabularios.</h2>
+    </div>
+    <div class="intro-body">
+      <p>La música occidental académica —escalas, acordes, progresiones— es uno de los sistemas teóricos más documentados de la historia, pero está lejos de ser el único. El flamenco tiene sus propios modos y su propio concepto del tiempo. La música clásica india construyó una teoría del ritmo más sofisticada que cualquier equivalente occidental. El maqam árabe divide la octava en intervalos que el temperamento igual no reconoce.</p>
+      <p>Cada entrada de esta colección explora una tradición desde adentro: qué escala usa y por qué, cómo organiza el ritmo, qué relación tiene con la armonía, y qué elementos concretos puedes incorporar a tu propio lenguaje musical sin importar el género en el que toques.</p>
+    </div>
+  </div>
+</section>
+
+<section class="genres-section">
+  <div class="genres-inner">
+    <div class="genre-grid">
+
+      <!-- 01 Flamenco — disponible -->
+      <a href="/recursos/generos/flamenco" class="genre-card">
+        <div class="genre-accent"></div>
+        <div class="genre-body">
+          <span class="genre-tag">Disponible · España · s. XVIII–presente</span>
+          <div class="genre-title">Flamenco</div>
+          <div class="genre-subtitle">El duende y los palos</div>
+          <p class="genre-desc">Cuatro culturas en una sola tradición: el modo flamenco, los palos, el compás de doce tiempos y la guitarra como lenguaje propio. Una de las tradiciones modales más expresivas del mundo.</p>
+          <div class="genre-tags-row">
+            <span class="gtag">Modo frigio</span>
+            <span class="gtag">Escala flamenca</span>
+            <span class="gtag">Compás de 12</span>
+            <span class="gtag">Rasgueado</span>
+          </div>
+        </div>
+        <div class="genre-arrow">→</div>
+      </a>
+
+      <!-- 02 Bossa Nova -->
+      <div class="genre-card coming">
+        <div class="genre-accent"></div>
+        <div class="genre-body">
+          <span class="genre-tag">Próximamente · Brasil · 1958–presente</span>
+          <div class="genre-title">Bossa Nova</div>
+          <div class="genre-subtitle">El silencio dentro del groove</div>
+          <p class="genre-desc">João Gilberto redujo la samba a su esencia armónica. Los acordes extendidos del jazz brasileño, la síncopa suave y la forma en que la voz y la guitarra respiran juntas.</p>
+          <div class="genre-tags-row">
+            <span class="gtag">Acordes extendidos</span>
+            <span class="gtag">Síncopa</span>
+            <span class="gtag">Jazz brasileño</span>
+          </div>
+        </div>
+        <div class="genre-arrow">pronto</div>
+      </div>
+
+      <!-- 03 Metal Progresivo -->
+      <div class="genre-card coming">
+        <div class="genre-accent"></div>
+        <div class="genre-body">
+          <span class="genre-tag">Próximamente · Global · 1990–presente</span>
+          <div class="genre-title">Metal Progresivo</div>
+          <div class="genre-subtitle">La complejidad como lenguaje</div>
+          <p class="genre-desc">Compases asimétricos, poliritmia, modos octatónicos y estructuras de canción que se alejan deliberadamente de la repetición. Dream Theater, Meshuggah, Tool.</p>
+          <div class="genre-tags-row">
+            <span class="gtag">Poliritmia</span>
+            <span class="gtag">Compases asimétricos</span>
+            <span class="gtag">Modos oscuros</span>
+          </div>
+        </div>
+        <div class="genre-arrow">pronto</div>
+      </div>
+
+      <!-- 04 Raga -->
+      <div class="genre-card coming">
+        <div class="genre-accent"></div>
+        <div class="genre-body">
+          <span class="genre-tag">Próximamente · India · s. II a.C.–presente</span>
+          <div class="genre-title">Raga — Música Clásica India</div>
+          <div class="genre-subtitle">El tiempo como forma sagrada</div>
+          <p class="genre-desc">Un raga no es una escala sino un cosmos: tiene notas propias, frases características, un momento del día para tocarse y un estado emocional que invoca. El sistema de talas y el concepto de sama.</p>
+          <div class="genre-tags-row">
+            <span class="gtag">Ragas</span>
+            <span class="gtag">Talas</span>
+            <span class="gtag">Microtonalidad</span>
+          </div>
+        </div>
+        <div class="genre-arrow">pronto</div>
+      </div>
+
+      <!-- 05 Tango -->
+      <div class="genre-card coming">
+        <div class="genre-accent"></div>
+        <div class="genre-body">
+          <span class="genre-tag">Próximamente · Argentina · 1880–presente</span>
+          <div class="genre-title">Tango</div>
+          <div class="genre-subtitle">La armonía del abrazo</div>
+          <p class="genre-desc">El bandoneón, el cromatismo rioplatense y la forma en que Piazzolla llevó el tango al límite de la música de cámara. La tensión armónica como expresión del conflicto entre cuerpos.</p>
+          <div class="genre-tags-row">
+            <span class="gtag">Cromatismo</span>
+            <span class="gtag">Bandoneón</span>
+            <span class="gtag">Piazzolla</span>
+          </div>
+        </div>
+        <div class="genre-arrow">pronto</div>
+      </div>
+
+      <!-- 06 Reggae y Dub -->
+      <div class="genre-card coming">
+        <div class="genre-accent"></div>
+        <div class="genre-body">
+          <span class="genre-tag">Próximamente · Jamaica · 1968–presente</span>
+          <div class="genre-title">Reggae y Dub</div>
+          <div class="genre-subtitle">El bajo como protagonista</div>
+          <p class="genre-desc">El acento en el contragolpe, el riddim como arquitectura, y el dub como primera forma de música electrónica manipulada en tiempo real. Lee "Scratch" Perry y King Tubby.</p>
+          <div class="genre-tags-row">
+            <span class="gtag">Contragolpe</span>
+            <span class="gtag">Riddim</span>
+            <span class="gtag">Dub</span>
+          </div>
+        </div>
+        <div class="genre-arrow">pronto</div>
+      </div>
+
+      <!-- 07 Funk -->
+      <div class="genre-card coming">
+        <div class="genre-accent"></div>
+        <div class="genre-body">
+          <span class="genre-tag">Próximamente · EE.UU. · 1965–presente</span>
+          <div class="genre-title">Funk</div>
+          <div class="genre-subtitle">El groove como argumento</div>
+          <p class="genre-desc">James Brown redujo la armonía a lo mínimo para maximizar el ritmo. El "one" como centro de gravedad, el bajo en diálogo con la batería, y la guitarra como instrumento rítmico antes que melódico.</p>
+          <div class="genre-tags-row">
+            <span class="gtag">Groove</span>
+            <span class="gtag">Pentatónica</span>
+            <span class="gtag">Síncopa</span>
+          </div>
+        </div>
+        <div class="genre-arrow">pronto</div>
+      </div>
+
+      <!-- 08 Blues del Delta -->
+      <div class="genre-card coming">
+        <div class="genre-accent"></div>
+        <div class="genre-body">
+          <span class="genre-tag">Próximamente · EE.UU. · 1900–1940</span>
+          <div class="genre-title">Blues del Delta</div>
+          <div class="genre-subtitle">La guitarra antes de los amplificadores</div>
+          <p class="genre-desc">Robert Johnson, Charlie Patton, Son House. La guitarra slide, el bottleneck, el bajo en ostinato y la voz como extensión del instrumento. La fuente de la que bebe todo el rock.</p>
+          <div class="genre-tags-row">
+            <span class="gtag">Slide</span>
+            <span class="gtag">Open tuning</span>
+            <span class="gtag">Blue notes</span>
+          </div>
+        </div>
+        <div class="genre-arrow">pronto</div>
+      </div>
+
+      <!-- 09 Maqam -->
+      <div class="genre-card coming">
+        <div class="genre-accent"></div>
+        <div class="genre-body">
+          <span class="genre-tag">Próximamente · Oriente Medio · s. IX–presente</span>
+          <div class="genre-title">Maqam — Música Árabe y Turca</div>
+          <div class="genre-subtitle">Los tonos entre los tonos</div>
+          <p class="genre-desc">El sistema maqam divide la octava en cuartos de tono. Cada maqam tiene un carácter emocional específico, patrones melódicos propios y reglas de cadencia que nada tienen que ver con la armonía occidental.</p>
+          <div class="genre-tags-row">
+            <span class="gtag">Cuartos de tono</span>
+            <span class="gtag">Maqamat</span>
+            <span class="gtag">Oud</span>
+          </div>
+        </div>
+        <div class="genre-arrow">pronto</div>
+      </div>
+
+      <!-- 10 Jazz Manouche -->
+      <div class="genre-card coming">
+        <div class="genre-accent"></div>
+        <div class="genre-body">
+          <span class="genre-tag">Próximamente · Europa · 1930–presente</span>
+          <div class="genre-title">Jazz Manouche</div>
+          <div class="genre-subtitle">Django y la guitarra que vuela</div>
+          <p class="genre-desc">Django Reinhardt inventó un estilo de guitarra completamente propio con solo dos dedos funcionales. La pompe, el trémolo, los arpegios en velocidad y la síntesis entre jazz americano y música gitana europea.</p>
+          <div class="genre-tags-row">
+            <span class="gtag">Pompe</span>
+            <span class="gtag">Arpegios</span>
+            <span class="gtag">Swing</span>
+          </div>
+        </div>
+        <div class="genre-arrow">pronto</div>
+      </div>
+
+      <!-- 11 Samba -->
+      <div class="genre-card coming">
+        <div class="genre-accent"></div>
+        <div class="genre-body">
+          <span class="genre-tag">Próximamente · Brasil · 1910–presente</span>
+          <div class="genre-title">Samba</div>
+          <div class="genre-subtitle">El ritmo que organiza el caos</div>
+          <p class="genre-desc">La samba no es un ritmo sino una arquitectura colectiva: cada instrumento tiene su célula rítmica y todas se entrelazan para crear algo que ninguno puede generar solo. La clave africana en Brasil.</p>
+          <div class="genre-tags-row">
+            <span class="gtag">Clave</span>
+            <span class="gtag">Poliritmia</span>
+            <span class="gtag">Cavaquinho</span>
+          </div>
+        </div>
+        <div class="genre-arrow">pronto</div>
+      </div>
+
+      <!-- 12 Gospel y Soul -->
+      <div class="genre-card coming">
+        <div class="genre-accent"></div>
+        <div class="genre-body">
+          <span class="genre-tag">Próximamente · EE.UU. · 1900–presente</span>
+          <div class="genre-title">Gospel y Soul</div>
+          <div class="genre-subtitle">La voz como instrumento sagrado</div>
+          <p class="genre-desc">El melisma, la forma en que una sílaba puede llevar una frase entera, y la relación entre el predicador y la congregación como modelo de call and response. Ray Charles, Aretha Franklin, Sam Cooke.</p>
+          <div class="genre-tags-row">
+            <span class="gtag">Melisma</span>
+            <span class="gtag">Call & response</span>
+            <span class="gtag">Pentatónica</span>
+          </div>
+        </div>
+        <div class="genre-arrow">pronto</div>
+      </div>
+
+      <!-- 13 Country y Americana -->
+      <div class="genre-card coming">
+        <div class="genre-accent"></div>
+        <div class="genre-body">
+          <span class="genre-tag">Próximamente · EE.UU. · 1920–presente</span>
+          <div class="genre-title">Country y Americana</div>
+          <div class="genre-subtitle">La canción que cuenta historias</div>
+          <p class="genre-desc">El fingerpicking de Merle Travis, la narrativa de Hank Williams, el banjo y el mandolín como instrumentos de contrapunto. La relación entre letra y melodía en la canción popular americana.</p>
+          <div class="genre-tags-row">
+            <span class="gtag">Fingerpicking</span>
+            <span class="gtag">Pentatónica mayor</span>
+            <span class="gtag">I–IV–V</span>
+          </div>
+        </div>
+        <div class="genre-arrow">pronto</div>
+      </div>
+
+      <!-- 14 Música Clásica Española -->
+      <div class="genre-card coming">
+        <div class="genre-accent"></div>
+        <div class="genre-body">
+          <span class="genre-tag">Próximamente · España · 1880–1940</span>
+          <div class="genre-title">Música Clásica Española</div>
+          <div class="genre-subtitle">Granados, Albéniz y De Falla</div>
+          <p class="genre-desc">La síntesis entre el piano romántico europeo y los ritmos andaluces, el flamenco y la tradición oral española. La guitarra que nunca aparece pero siempre está presente en el piano de Granados.</p>
+          <div class="genre-tags-row">
+            <span class="gtag">Nacionalismo</span>
+            <span class="gtag">Modo frigio</span>
+            <span class="gtag">Folclore</span>
+          </div>
+        </div>
+        <div class="genre-arrow">pronto</div>
+      </div>
+
+      <!-- 15 Afrobeat -->
+      <div class="genre-card coming">
+        <div class="genre-accent"></div>
+        <div class="genre-body">
+          <span class="genre-tag">Próximamente · Nigeria · 1970–presente</span>
+          <div class="genre-title">Afrobeat</div>
+          <div class="genre-subtitle">El ritmo como acto político</div>
+          <p class="genre-desc">Fela Kuti fusionó el jazz, el funk y la música yoruba para crear algo que era al mismo tiempo música de baile y denuncia política. La clave, los ostinatos de horn y la estructura de vamp infinito.</p>
+          <div class="genre-tags-row">
+            <span class="gtag">Clave</span>
+            <span class="gtag">Ostinato</span>
+            <span class="gtag">Poliritmia</span>
+          </div>
+        </div>
+        <div class="genre-arrow">pronto</div>
+      </div>
+
+      <!-- 16 Música Celta -->
+      <div class="genre-card coming">
+        <div class="genre-accent"></div>
+        <div class="genre-body">
+          <span class="genre-tag">Próximamente · Irlanda · Escocia · Bretaña</span>
+          <div class="genre-title">Música Celta e Irlandesa</div>
+          <div class="genre-subtitle">Las escalas del norte atlántico</div>
+          <p class="genre-desc">Los modos dórico y mixolidio como lengua materna, la ornamentación en el fiddle y la uilleann pipe, y la forma en que las danzas determinan la estructura de las piezas.</p>
+          <div class="genre-tags-row">
+            <span class="gtag">Modo dórico</span>
+            <span class="gtag">Mixolidio</span>
+            <span class="gtag">Ornamentación</span>
+          </div>
+        </div>
+        <div class="genre-arrow">pronto</div>
+      </div>
+
+      <!-- 17 Nueva Trova -->
+      <div class="genre-card coming">
+        <div class="genre-accent"></div>
+        <div class="genre-body">
+          <span class="genre-tag">Próximamente · Latinoamérica · 1960–1990</span>
+          <div class="genre-title">Nueva Trova Latinoamericana</div>
+          <div class="genre-subtitle">La canción comprometida</div>
+          <p class="genre-desc">Silvio Rodríguez, Pablo Milanés, Violeta Parra, Víctor Jara. La síntesis entre la harmonía jazz, los ritmos folclóricos y la lírica poética como acto político y artístico.</p>
+          <div class="genre-tags-row">
+            <span class="gtag">Acordes extendidos</span>
+            <span class="gtag">Folclore</span>
+            <span class="gtag">Canción de autor</span>
+          </div>
+        </div>
+        <div class="genre-arrow">pronto</div>
+      </div>
+
+      <!-- 18 Ambient y Drone -->
+      <div class="genre-card coming">
+        <div class="genre-accent"></div>
+        <div class="genre-body">
+          <span class="genre-tag">Próximamente · Global · 1975–presente</span>
+          <div class="genre-title">Ambient y Drone</div>
+          <div class="genre-subtitle">El sonido como espacio</div>
+          <p class="genre-desc">Brian Eno definió el ambient como música que puede escucharse o ignorarse. El drone como textura armónica fija, las escalas modales como paisaje inmóvil y el tiempo como dimensión plástica.</p>
+          <div class="genre-tags-row">
+            <span class="gtag">Drone</span>
+            <span class="gtag">Textura</span>
+            <span class="gtag">Modalismo</span>
+          </div>
+        </div>
+        <div class="genre-arrow">pronto</div>
+      </div>
+
+      <!-- 19 Post-Rock -->
+      <div class="genre-card coming">
+        <div class="genre-accent"></div>
+        <div class="genre-body">
+          <span class="genre-tag">Próximamente · Global · 1992–presente</span>
+          <div class="genre-title">Post-Rock</div>
+          <div class="genre-subtitle">El rock que decidió no cantar</div>
+          <p class="genre-desc">Godspeed You! Black Emperor, Explosions in the Sky, Mogwai. La estructura de crescendo como forma principal, la guitarra como textura orquestal y la ausencia de voz como declaración estética.</p>
+          <div class="genre-tags-row">
+            <span class="gtag">Crescendo</span>
+            <span class="gtag">Capas de guitarra</span>
+            <span class="gtag">Cinematic</span>
+          </div>
+        </div>
+        <div class="genre-arrow">pronto</div>
+      </div>
+
+      <!-- 20 Cumbia -->
+      <div class="genre-card coming">
+        <div class="genre-accent"></div>
+        <div class="genre-body">
+          <span class="genre-tag">Próximamente · Colombia · Global · s. XVII–presente</span>
+          <div class="genre-title">Cumbia</div>
+          <div class="genre-subtitle">El viaje de un ritmo continental</div>
+          <p class="genre-desc">La cumbia nació en la costa caribe colombiana y se transformó en cada país que la adoptó: cumbia argentina, mexicana, andina, chicha peruana. El estudio de cómo un ritmo muta y sobrevive.</p>
+          <div class="genre-tags-row">
+            <span class="gtag">Clave</span>
+            <span class="gtag">Gaita</span>
+            <span class="gtag">Mestizaje musical</span>
+          </div>
+        </div>
+        <div class="genre-arrow">pronto</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="hub-footer-strip">
+  <p class="hub-footer-text">"Cada tradición es una respuesta diferente a la misma pregunta."</p>
+  <a href="/recursos" class="hub-footer-cta">← Volver a Recursos</a>
+</div>
+
+<footer class="tm-footer-legal">
+  <div class="tm-f-copy">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div class="tm-f-links">
+    <a href="/privacidad">Aviso de Privacidad</a>
+    <a href="/terminos">Términos y Condiciones</a>
+    <a href="/cookies">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>
