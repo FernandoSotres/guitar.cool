@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Arpegios en el mástil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<style>
+:root{
+  --paper:#f4ece0;--paper2:#ebe1d2;--paper3:#ddd1bd;--paper4:#c8b99f;--paper5:#b8a890;
+  --copper:#a85a1e;--copper-lt:#c47a36;--copper-dk:#7a3e10;
+  --ink:#1c1410;--ink2:#2e2418;--ink3:#5a4a38;--ink4:#8a7a64;--ink5:#a09080;
+  --tonic:#a05c20;--subdom:#5a7abf;--dominant:#7a4abf;--relative:#4a7c59;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{font-family:var(--mono);font-size:.52em;font-weight:400;color:var(--ink4);letter-spacing:0;margin-left:2px;}
+.nav-link{padding:0 16px;height:60px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+.th-progress{position:fixed;top:56px;left:0;right:0;height:2px;background:rgba(160,92,32,.12);z-index:99;}
+.th-progress-bar{height:100%;background:var(--copper);width:0%;transition:width .08s linear;}
+
+.th-breadcrumb{background:var(--paper2);border-bottom:1px solid var(--paper4);padding:0 48px;height:40px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink5);}
+.th-breadcrumb a{color:var(--ink5);text-decoration:none;}
+.th-breadcrumb a:hover{color:var(--copper);}
+.th-breadcrumb .sep{opacity:.5;}
+.th-breadcrumb .current{color:var(--ink3);font-weight:500;}
+
+.th-hero{background:#13100c;padding:110px 48px 90px;text-align:center;overflow:hidden;}
+.th-chapter{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:28px;display:flex;align-items:center;justify-content:center;gap:14px;}
+.th-chapter::before,.th-chapter::after{content:'';display:block;height:1px;width:48px;background:var(--copper-lt);opacity:.35;}
+.th-title{font-family:var(--serif);font-size:clamp(54px,7.5vw,92px);font-weight:700;line-height:.92;letter-spacing:-.025em;color:var(--paper);margin-bottom:28px;}
+.th-title em{font-style:italic;color:var(--copper-lt);}
+.th-lead{font-family:var(--serif);font-size:clamp(17px,2vw,22px);font-style:italic;color:rgba(250,246,240,.58);max-width:580px;margin:0 auto 44px;line-height:1.65;}
+.th-scroll-hint{font-size:11px;color:rgba(250,246,240,.22);letter-spacing:.14em;text-transform:uppercase;}
+
+.th-section{padding:88px 48px;}
+.th-section.dark{background:#13100c;}
+.th-inner{max-width:1080px;margin:0 auto;}
+.th-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;display:block;}
+.th-section.dark .th-label{color:var(--copper-lt);}
+.th-h2{font-family:var(--serif);font-size:clamp(34px,4.5vw,56px);font-weight:700;line-height:1.02;letter-spacing:-.025em;color:var(--ink);margin-bottom:22px;}
+.th-section.dark .th-h2{color:var(--paper);}
+.th-body{font-size:15px;color:var(--ink3);line-height:1.85;max-width:640px;}
+.th-body+.th-body{margin-top:14px;}
+.th-section.dark .th-body{color:rgba(250,246,240,.58);}
+.th-body strong{color:var(--ink2);font-weight:600;}
+.th-section.dark .th-body strong{color:rgba(244,236,224,.92);}
+.th-split{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;}
+.th-callout{border-left:3px solid var(--copper);border-radius:0 8px 8px 0;padding:16px 20px;margin:28px 0;background:rgba(160,92,32,.07);}
+.th-section.dark .th-callout{background:rgba(255,255,255,.05);border-left-color:var(--copper-lt);}
+.th-callout-label{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);margin-bottom:7px;}
+.th-section.dark .th-callout-label{color:var(--copper-lt);}
+.th-callout p{font-size:14px;color:var(--ink3);line-height:1.65;}
+.th-section.dark .th-callout p{color:rgba(250,246,240,.58);}
+
+/* ── FRETBOARD ── */
+.fretboard-wrap{overflow-x:auto;margin:32px 0;}
+.arp-legend{display:flex;gap:20px;flex-wrap:wrap;margin-top:14px;align-items:center;}
+.arp-legend-item{display:flex;align-items:center;gap:7px;font-size:13px;color:rgba(250,246,240,.55);}
+.arp-legend-dot{width:13px;height:13px;border-radius:50%;}
+
+/* ── SEVENTH CHORD TABLE ── */
+.seventh-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:28px 0;}
+.seventh-card{background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.09);border-radius:12px;padding:20px 18px;}
+.seventh-name{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--paper);margin-bottom:6px;}
+.seventh-formula{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--copper-lt);margin-bottom:10px;}
+.seventh-desc{font-size:13px;color:rgba(250,246,240,.48);line-height:1.6;}
+
+/* ── NEXT ── */
+.th-next{background:var(--ink);padding:88px 48px;text-align:center;}
+.th-next-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink5);margin-bottom:18px;display:block;}
+.th-next-title{font-family:var(--serif);font-size:clamp(36px,5vw,56px);font-weight:700;color:var(--paper);margin-bottom:10px;letter-spacing:-.02em;}
+.th-next-sub{font-size:14px;color:var(--ink4);margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.th-next-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.th-next-btn{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:13px;font-weight:600;padding:13px 28px;border-radius:8px;text-decoration:none;transition:background .2s;}
+.th-next-btn:hover{background:var(--copper-dk);}
+.th-next-btn.sec{background:transparent;color:rgba(250,246,240,.5);border:1px solid rgba(255,255,255,.12);}
+.th-next-btn.sec:hover{color:var(--paper);border-color:rgba(255,255,255,.3);}
+
+/* ── CHAPTER NAV ── */
+.chapter-nav{display:flex;gap:0;border-top:1px solid rgba(255,255,255,.06);margin-top:64px;}
+.chapter-nav-item{flex:1;padding:28px 24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;transition:background .18s;}
+.chapter-nav-item:hover{background:rgba(255,255,255,.03);}
+.chapter-nav-item.prev{border-right:1px solid rgba(255,255,255,.06);}
+.chapter-nav-dir{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(250,246,240,.25);}
+.chapter-nav-cap{font-size:11px;color:rgba(250,246,240,.25);}
+.chapter-nav-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--paper);}
+
+@media(max-width:768px){
+  nav{padding:0 16px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav>*{flex-shrink:0;}
+  .th-breadcrumb{padding:0 20px;}
+  .th-hero{padding:80px 20px 64px;}
+  .th-section{padding:64px 20px;}
+  .th-split{grid-template-columns:1fr;gap:40px;}
+  .th-next{padding:64px 20px;}
+  .chapter-nav{flex-direction:column;}
+  .chapter-nav-item.prev{border-right:none;border-bottom:1px solid rgba(255,255,255,.06);}
+  .seventh-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link active">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<div class="th-progress"><div class="th-progress-bar" id="prog-bar"></div></div>
+
+<div class="th-breadcrumb">
+  <a href="/teoria">Teoría</a>
+  <span class="sep">›</span>
+  <a href="/teoria/instrumento">Teoría en el Instrumento</a>
+  <span class="sep">›</span>
+  <span class="current">Arpegios en el mástil</span>
+</div>
+
+<!-- HERO -->
+<section class="th-hero">
+  <div class="th-chapter">Teoría en el Instrumento · 07</div>
+  <h1 class="th-title">Arpegios<br><em>en el mástil</em></h1>
+  <p class="th-lead">Las notas de un acorde tocadas en secuencia, y cómo usarlas para que la improvisación siempre suene dentro de la armonía.</p>
+  <div class="th-scroll-hint">↓ leer</div>
+</section>
+
+<!-- SECCIÓN 1: Qué es un arpegio -->
+<section class="th-section">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">Qué es un arpegio</span>
+        <h2 class="th-h2">Un acorde <em>deshecho en el tiempo</em></h2>
+        <p class="th-body">Un <strong>arpegio</strong> es simplemente las notas de un acorde tocadas en secuencia en lugar de simultáneamente. Tocar un acorde de Do mayor (C-E-G) como tres notas individuales distribuidas en el diapasón produce un arpegio de Do mayor. La propiedad clave: cada nota de un arpegio es una nota de acorde, de modo que cualquier frase construida a partir de arpegios suena armónicamente correcta independientemente del orden de las notas o de su disposición rítmica.</p>
+        <p class="th-body">Esto convierte a los arpegios en el material melódico más fiable para improvisar sobre una progresión de acordes. A diferencia de las escalas, no contienen "notas a evitar" en relación con el acorde subyacente. Una escala de Do mayor tocada sobre un acorde de Dm7 produce algunas notas que chocan con el acorde; el arpegio de Dm7 no produce ninguna, porque todas sus notas pertenecen al acorde.</p>
+        <p class="th-body">El resultado práctico es que un guitarrista que conoce los arpegios de una progresión puede construir frases melódicas que siempre suenen "dentro" de la armonía. No porque evite notas, sino porque elige activamente las notas que definen cada acorde. Esta es la diferencia entre improvisar sobre una progresión y improvisar dentro de ella.</p>
+        <div class="th-callout">
+          <div class="th-callout-label">Acorde vs. arpegio</div>
+          <p>C major chord: C + E + G sonando simultáneamente. C major arpeggio: C, luego E, luego G en cualquier orden, cualquier octava, cualquier ritmo. Las notas son las mismas; el tiempo es diferente.</p>
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--paper2);border:1px solid var(--paper3);border-radius:14px;padding:28px 24px;">
+          <p style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:18px;">Notas de acorde en Do mayor</p>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:center;gap:12px;padding:11px 14px;background:rgba(160,92,32,.12);border:1.5px solid rgba(160,92,32,.3);border-radius:8px;">
+              <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--copper);min-width:20px;">1</div>
+              <div style="flex:1;font-family:var(--serif);font-size:17px;font-weight:700;color:var(--ink);">C · Do</div>
+              <div style="font-size:11px;color:var(--ink5);">Raíz</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:11px 14px;background:rgba(196,122,54,.08);border:1.5px solid rgba(196,122,54,.2);border-radius:8px;">
+              <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--copper-lt);min-width:20px;">3</div>
+              <div style="flex:1;font-family:var(--serif);font-size:17px;font-weight:700;color:var(--ink);">E · Mi</div>
+              <div style="font-size:11px;color:var(--ink5);">Tercera mayor</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:11px 14px;background:rgba(74,124,89,.07);border:1.5px solid rgba(74,124,89,.2);border-radius:8px;">
+              <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--relative);min-width:20px;">5</div>
+              <div style="flex:1;font-family:var(--serif);font-size:17px;font-weight:700;color:var(--ink);">G · Sol</div>
+              <div style="font-size:11px;color:var(--ink5);">Quinta justa</div>
+            </div>
+          </div>
+          <p style="font-size:12px;color:var(--ink5);margin-top:18px;font-style:italic;line-height:1.6;">Estas tres notas en cualquier orden, en cualquier octava, forman el arpegio de Do mayor.</p>
+          <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+            <button id="play-arp-seq" style="flex:1;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:9px 14px;border-radius:7px;border:none;cursor:pointer;transition:background .18s;" onmouseover="this.style.background='var(--copper-lt)'" onmouseout="this.style.background='var(--copper)'">&#9654; Arpegio ascendente</button>
+            <button id="play-chord-btn" style="flex:1;background:transparent;color:var(--copper);font-size:12px;font-weight:600;padding:9px 14px;border-radius:7px;border:1.5px solid rgba(160,92,32,.3);cursor:pointer;transition:all .18s;" onmouseover="this.style.borderColor='var(--copper)'" onmouseout="this.style.borderColor='rgba(160,92,32,.3)'">&#9670; Acorde</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 2: Las formas en el mástil -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Las formas en el mástil</span>
+    <h2 class="th-h2">Cinco formas de arpegio <em>como extensión de CAGED</em></h2>
+    <p class="th-body">De la misma manera que el sistema <strong>CAGED</strong> define cinco posiciones para los acordes mayores en el mástil, cada posición tiene una forma de arpegio correspondiente que traza solo las tres notas del acorde en esa región. La forma E, la forma A, la forma G, la forma D y la forma C de arpegio cubren juntas el mástil completo para cualquier tríada mayor.</p>
+    <p class="th-body">Las formas de arpegio menor, disminuido y aumentado siguen la misma lógica con las modificaciones interválicas apropiadas. Aprender las formas de arpegio junto con las formas de acorde del sistema CAGED significa que el guitarrista siempre sabe dónde están las notas del acorde dentro de cualquier posición de escala. La escala y el arpegio se superponen en el mismo espacio del mástil: las notas del arpegio son un subconjunto de las notas de la escala.</p>
+    <p class="th-body">El diagrama interactivo a continuación muestra el arpegio de Do mayor en todo el mástil (trastes 0 a 12). Cada círculo representa una nota del acorde en una posición donde puede tocarse. Haz clic en cualquier nota para escuchar su altura.</p>
+
+    <!-- C major arpeggio full fretboard -->
+    <div class="fretboard-wrap">
+      <svg id="arp-fretboard" width="860" height="148" viewBox="0 0 860 148" xmlns="http://www.w3.org/2000/svg" style="display:block;min-width:700px;"></svg>
+    </div>
+    <div class="arp-legend">
+      <div class="arp-legend-item"><div class="arp-legend-dot" style="background:#a85a1e;"></div>C · Raíz</div>
+      <div class="arp-legend-item"><div class="arp-legend-dot" style="background:#c47a36;"></div>E · Tercera mayor</div>
+      <div class="arp-legend-item"><div class="arp-legend-dot" style="background:#4a7c59;"></div>G · Quinta justa</div>
+      <div style="font-size:12px;color:rgba(250,246,240,.3);font-style:italic;margin-left:auto;">Clic en cualquier nota para escuchar</div>
+    </div>
+
+    <div class="th-callout" style="margin-top:28px;">
+      <div class="th-callout-label">CAGED y los arpegios</div>
+      <p>La forma E del acorde de La mayor en el traste 5 y la forma E del arpegio de La mayor en el traste 5 ocupan exactamente la misma región del mástil. El arpegio es el acorde deshecho: las mismas notas, tocadas de una en una.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 3: Arpegios en la improvisación -->
+<section class="th-section">
+  <div class="th-inner">
+    <span class="th-label">Arpegios en la improvisación</span>
+    <h2 class="th-h2">Seguir los acordes: <em>el secreto del bebop</em></h2>
+    <p class="th-body">Los músicos del bebop (Charlie Parker, Dizzy Gillespie, Wes Montgomery) construyeron su vocabulario improvisatorio fundamentalmente a partir de arpegios de acorde conectados por notas de aproximación cromática. En lugar de correr patrones de escala de acorde en acorde, delineaban las notas de cada acorde de forma melódica, haciendo audible el movimiento armónico en la melodía. Este enfoque se llama "tocar los cambios."</p>
+    <p class="th-body">"Tocar los cambios" es la base de la improvisación en jazz y funciona con igual eficacia en cualquier género. Un break de banjo en bluegrass, un solo de neo-soul y una suite para cello de Bach usan todos la construcción melódica basada en arpegios en su núcleo. La diferencia entre géneros está en el ritmo, el fraseo y el carácter de las notas de paso, no en el principio estructural.</p>
+    <p class="th-body">Para el guitarrista, la aplicación práctica es concreta: en cada cambio de acorde dentro de una progresión, el oído y la mano buscan una nota del nuevo acorde. No la raíz necesariamente (eso suena mecánico) sino cualquier nota del arpegio que esté cerca de la posición actual. Esta práctica de "aterrizaje sobre notas de acorde" es lo que hace que una improvisación suene conectada a la armonía.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">Ejercicio de "tocar los cambios"</div>
+      <p>Sobre una progresión Am-Dm-E7, toca solo las notas del arpegio de cada acorde mientras suena: A-C-E sobre Am, D-F-A sobre Dm, E-G♯-B-D sobre E7. Sin escalas, sin notas de paso. Solo las notas del acorde, en cualquier orden. Eso es improvisar con arpegios.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 4: Arpegios de séptima -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Arpegios de séptima</span>
+    <h2 class="th-h2">Añadir la séptima: <em>cuatro notas, más color</em></h2>
+    <p class="th-body">Los <strong>acordes de séptima</strong> (mayor séptima, dominante séptima, menor séptima, semidisminuido) añaden una cuarta nota a la tríada. Sus formas de arpegio extienden las formas de tríada añadiendo una nota por grupo de cuerdas. Los más usados: el arpegio de <strong>dominante séptima</strong> (1-3-5-b7) para improvisar sobre acordes dominantes, y el arpegio de <strong>menor séptima</strong> (1-b3-5-b7) para contextos de acorde menor.</p>
+    <p class="th-body">En el jazz, conocer el arpegio de cada acorde en una progresión permite al solista navegar movimientos armónicos complejos, como el II-V-I, apuntando a notas de acorde específicas en el momento en que cada acorde cambia. El movimiento IIm7-V7-I en Do mayor usa los arpegios Dm7 (D-F-A-C), G7 (G-B-D-F) y Cmaj7 (C-E-G-B). Las notas de cada arpegio se mueven por movimiento conjunto, lo que crea transiciones melódicas fluidas entre los cambios.</p>
+    <p class="th-body">Para el guitarrista de rock o pop, los arpegios de séptima añaden una capa de color harmónico que las tríadas no tienen. Un riff construido sobre el arpegio de A7 (A-C♯-E-G) tiene un sabor blues-rock inmediato que no surge de la tríada sola. Aprender los arpegios de séptima de los cuatro tipos principales (maj7, dom7, m7, m7b5) amplía el vocabulario disponible para cualquier contexto musical.</p>
+
+    <div class="seventh-grid">
+      <div class="seventh-card">
+        <div class="seventh-name">Mayor séptima</div>
+        <div class="seventh-formula">1 – 3 – 5 – 7</div>
+        <div class="seventh-desc">Sonido: romántico, sofisticado. Contexto: acordes Imaj7 y IVmaj7 en jazz, pop y bossa nova.</div>
+      </div>
+      <div class="seventh-card">
+        <div class="seventh-name">Dominante séptima</div>
+        <div class="seventh-formula">1 – 3 – 5 – b7</div>
+        <div class="seventh-desc">Sonido: tensión, blues. Contexto: acorde V7 en cadencias, acorde principal en blues y rock.</div>
+      </div>
+      <div class="seventh-card">
+        <div class="seventh-name">Menor séptima</div>
+        <div class="seventh-formula">1 – b3 – 5 – b7</div>
+        <div class="seventh-desc">Sonido: suave, funky. Contexto: acordes IIm7, IIIm7 y VIm7 en progresiones mayores.</div>
+      </div>
+      <div class="seventh-card">
+        <div class="seventh-name">Semidisminuido</div>
+        <div class="seventh-formula">1 – b3 – b5 – b7</div>
+        <div class="seventh-desc">Sonido: oscuro, inestable. Contexto: acorde VIIm7b5 en tonalidad mayor, IIm7b5 en menor.</div>
+      </div>
+    </div>
+
+    <div class="th-callout">
+      <div class="th-callout-label">El II-V-I con arpegios</div>
+      <p>En Do mayor: Dm7 (D-F-A-C) → G7 (G-B-D-F) → Cmaj7 (C-E-G-B). Cada arpegio comparte una o dos notas con el siguiente. Esas notas compartidas son los puntos de conexión que hacen fluida la improvisación a través de los cambios.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER / NEXT -->
+<section class="th-next">
+  <span class="th-next-label">Navegar lecciones</span>
+  <h2 class="th-next-title">Sigue explorando</h2>
+  <p class="th-next-sub">Los arpegios te anclan a la armonía. Los voicings e inversiones te muestran cómo reorganizar esas notas para crear texturas nuevas.</p>
+  <div class="th-next-btns">
+    <a href="/teoria/instrumento/voicings" class="th-next-btn">Voicings e inversiones →</a>
+    <a href="/teoria/instrumento/escalas" class="th-next-btn sec">← Escalas diatónicas en el mástil</a>
+  </div>
+  <div class="chapter-nav">
+    <a href="/teoria/instrumento/escalas" class="chapter-nav-item prev">
+      <span class="chapter-nav-dir">← Anterior</span>
+      <span class="chapter-nav-cap">Teoría en el Instrumento · 06</span>
+      <span class="chapter-nav-title">Escalas diatónicas en el mástil</span>
+    </a>
+    <a href="/teoria/instrumento/voicings" class="chapter-nav-item">
+      <span class="chapter-nav-dir">Siguiente →</span>
+      <span class="chapter-nav-cap">Teoría en el Instrumento · 08</span>
+      <span class="chapter-nav-title">Voicings e inversiones</span>
+    </a>
+  </div>
+</section>
+
+<script>
+// Progress bar
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('prog-bar').style.width = (h > 0 ? Math.round(window.scrollY / h * 100) : 0) + '%';
+});
+
+// Audio
+let synth = null;
+async function initAudio() {
+  if (synth) return;
+  await Tone.start();
+  const reverb = new Tone.Freeverb({ roomSize: 0.28, wet: 0.12 }).toDestination();
+  const comp = new Tone.Compressor({ threshold: -22, ratio: 4 }).connect(reverb);
+  synth = new Tone.PolySynth(Tone.Synth, {
+    oscillator: { type: 'triangle' },
+    envelope: { attack: 0.008, decay: 0.5, sustain: 0.15, release: 2.5 },
+    volume: -8,
+  }).connect(comp);
+}
+
+function midiToNote(midi) {
+  const pc = midi % 12, oct = Math.floor(midi / 12) - 1;
+  const names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  return names[pc] + oct;
+}
+
+// C major arpeggio: C=0, E=4, G=7 (semitones from C)
+const CMAJ_ARP = new Set([0, 4, 7]);
+const C_PC = 0;
+const NOTE_COLORS = { 0: '#a85a1e', 4: '#c47a36', 7: '#4a7c59' }; // C=copper, E=amber, G=green
+const OPEN_MIDI = [40, 45, 50, 55, 59, 64];
+
+function buildArpFretboard() {
+  const svg = document.getElementById('arp-fretboard');
+  const FRETS = 13;
+  const STRINGS = 6;
+  const LEFT = 36;
+  const TOP = 20;
+  const FRET_W = 62;
+  const STRING_H = 18;
+  const W = LEFT + FRETS * FRET_W + 20;
+  const H = TOP + (STRINGS - 1) * STRING_H + 20;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('width', W);
+  svg.setAttribute('height', H);
+
+  let html = '';
+
+  // Fret numbers
+  for (let f = 0; f <= FRETS; f++) {
+    const x = LEFT + f * FRET_W;
+    html += `<text x="${x}" y="${TOP - 6}" font-family="JetBrains Mono, monospace" font-size="9" fill="rgba(250,246,240,0.3)" text-anchor="middle">${f}</text>`;
+  }
+
+  // Nut
+  html += `<line x1="${LEFT}" y1="${TOP}" x2="${LEFT}" y2="${TOP + (STRINGS-1)*STRING_H}" stroke="rgba(250,246,240,0.6)" stroke-width="3"/>`;
+
+  // Fret lines
+  for (let f = 1; f <= FRETS; f++) {
+    const x = LEFT + f * FRET_W;
+    html += `<line x1="${x}" y1="${TOP}" x2="${x}" y2="${TOP + (STRINGS-1)*STRING_H}" stroke="rgba(250,246,240,0.12)" stroke-width="1"/>`;
+  }
+
+  // String lines
+  const stringThick = [1.8, 1.6, 1.4, 1.2, 1.0, 0.9];
+  for (let s = 0; s < STRINGS; s++) {
+    const y = TOP + s * STRING_H;
+    html += `<line x1="${LEFT}" y1="${y}" x2="${LEFT + FRETS * FRET_W}" y2="${y}" stroke="rgba(250,246,240,0.2)" stroke-width="${stringThick[s]}"/>`;
+  }
+
+  // Arpeggio notes
+  for (let s = 0; s < STRINGS; s++) {
+    for (let f = 0; f <= FRETS; f++) {
+      const midi = OPEN_MIDI[s] + f;
+      const pc = midi % 12;
+      const interval = (pc - C_PC + 12) % 12;
+      if (!CMAJ_ARP.has(interval)) continue;
+
+      const isRoot = interval === 0;
+      const cx = f === 0 ? LEFT - 10 : LEFT + f * FRET_W - FRET_W / 2;
+      const cy = TOP + s * STRING_H;
+      const color = NOTE_COLORS[interval];
+      const r = isRoot ? 8 : 6;
+
+      html += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}" opacity="0.9" style="cursor:pointer" data-midi="${midi}" class="arp-note"/>`;
+      if (isRoot) {
+        html += `<text x="${cx}" y="${cy + 3.5}" font-family="Inter, sans-serif" font-size="8" font-weight="700" fill="#fff" text-anchor="middle" pointer-events="none">R</text>`;
+      }
+    }
+  }
+
+  svg.innerHTML = html;
+
+  svg.querySelectorAll('.arp-note').forEach(el => {
+    el.addEventListener('click', async () => {
+      await initAudio();
+      const midi = parseInt(el.dataset.midi);
+      synth.triggerAttackRelease(midiToNote(midi), '4n', Tone.now() + 0.05);
+      const orig = el.getAttribute('fill');
+      el.setAttribute('fill', '#fff');
+      setTimeout(() => el.setAttribute('fill', orig), 280);
+    });
+  });
+}
+
+// C major arpeggio buttons (section 1)
+document.getElementById('play-arp-seq').addEventListener('click', async () => {
+  await initAudio();
+  // C3, E3, G3, C4
+  const notes = [48, 52, 55, 60];
+  const now = Tone.now() + 0.05;
+  notes.forEach((midi, i) => {
+    synth.triggerAttackRelease(midiToNote(midi), '4n', now + i * 0.18);
+  });
+});
+
+document.getElementById('play-chord-btn').addEventListener('click', async () => {
+  await initAudio();
+  const notes = [48, 52, 55, 60].map(midiToNote);
+  synth.triggerAttackRelease(notes, '2n', Tone.now() + 0.05);
+});
+
+buildArpFretboard();
+</script>
+
+<footer style="background:var(--ink2);border-top:1px solid rgba(255,255,255,.06);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+  <div style="font-size:12px;color:var(--ink5);">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div style="display:flex;gap:20px;">
+    <a href="/privacidad" style="font-size:12px;color:var(--ink5);text-decoration:none;">Aviso de Privacidad</a>
+    <a href="/terminos" style="font-size:12px;color:var(--ink5);text-decoration:none;">Términos y Condiciones</a>
+    <a href="/cookies" style="font-size:12px;color:var(--ink5);text-decoration:none;">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

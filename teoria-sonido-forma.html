@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Forma musical</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<style>
+:root{
+  --paper:#f4ece0;--paper2:#ebe1d2;--paper3:#ddd1bd;--paper4:#c8b99f;--paper5:#b8a890;
+  --copper:#a85a1e;--copper-lt:#c47a36;--copper-dk:#7a3e10;
+  --ink:#1c1410;--ink2:#2e2418;--ink3:#5a4a38;--ink4:#8a7a64;--ink5:#a09080;
+  --tonic:#a05c20;--subdom:#5a7abf;--dominant:#7a4abf;--relative:#4a7c59;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{font-family:var(--mono);font-size:.52em;font-weight:400;color:var(--ink4);letter-spacing:0;margin-left:2px;}
+.nav-link{padding:0 16px;height:60px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+.th-progress{position:fixed;top:56px;left:0;right:0;height:2px;background:rgba(160,92,32,.12);z-index:99;}
+.th-progress-bar{height:100%;background:var(--copper);width:0%;transition:width .08s linear;}
+
+.th-breadcrumb{background:var(--paper2);border-bottom:1px solid var(--paper4);padding:0 48px;height:40px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink5);}
+.th-breadcrumb a{color:var(--ink5);text-decoration:none;}
+.th-breadcrumb a:hover{color:var(--copper);}
+.th-breadcrumb .sep{opacity:.5;}
+.th-breadcrumb .current{color:var(--ink3);font-weight:500;}
+
+.th-hero{background:#13100c;padding:110px 48px 90px;text-align:center;overflow:hidden;}
+.th-chapter{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:28px;display:flex;align-items:center;justify-content:center;gap:14px;}
+.th-chapter::before,.th-chapter::after{content:'';display:block;height:1px;width:48px;background:var(--copper-lt);opacity:.35;}
+.th-title{font-family:var(--serif);font-size:clamp(54px,7.5vw,92px);font-weight:700;line-height:.92;letter-spacing:-.025em;color:var(--paper);margin-bottom:28px;}
+.th-title em{font-style:italic;color:var(--copper-lt);}
+.th-lead{font-family:var(--serif);font-size:clamp(17px,2vw,22px);font-style:italic;color:rgba(250,246,240,.58);max-width:580px;margin:0 auto 44px;line-height:1.65;}
+.th-scroll-hint{font-size:11px;color:rgba(250,246,240,.22);letter-spacing:.14em;text-transform:uppercase;}
+
+.th-section{padding:88px 48px;}
+.th-section.dark{background:#13100c;}
+.th-inner{max-width:1080px;margin:0 auto;}
+.th-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;display:block;}
+.th-section.dark .th-label{color:var(--copper-lt);}
+.th-h2{font-family:var(--serif);font-size:clamp(34px,4.5vw,56px);font-weight:700;line-height:1.02;letter-spacing:-.025em;color:var(--ink);margin-bottom:22px;}
+.th-section.dark .th-h2{color:var(--paper);}
+.th-body{font-size:15px;color:var(--ink3);line-height:1.85;max-width:640px;}
+.th-body+.th-body{margin-top:14px;}
+.th-section.dark .th-body{color:rgba(250,246,240,.58);}
+.th-body strong{color:var(--ink2);font-weight:600;}
+.th-section.dark .th-body strong{color:rgba(244,236,224,.92);}
+.th-split{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;}
+.th-callout{border-left:3px solid var(--copper);border-radius:0 8px 8px 0;padding:16px 20px;margin:28px 0;background:rgba(160,92,32,.07);}
+.th-section.dark .th-callout{background:rgba(255,255,255,.05);border-left-color:var(--copper-lt);}
+.th-callout-label{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);margin-bottom:7px;}
+.th-section.dark .th-callout-label{color:var(--copper-lt);}
+.th-callout p{font-size:14px;color:var(--ink3);line-height:1.65;}
+.th-section.dark .th-callout p{color:rgba(250,246,240,.58);}
+
+/* ── METRONOME ── */
+.metro-section{padding:88px 48px;background:var(--paper2);}
+.metro-card{background:#1a1410;border-radius:20px;padding:48px;max-width:800px;margin:0 auto;}
+.metro-title{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--paper);margin-bottom:32px;text-align:center;letter-spacing:-.01em;}
+.metro-sig-pills{display:flex;gap:10px;justify-content:center;margin-bottom:32px;}
+.metro-sig-pill{font-family:var(--mono);font-size:14px;font-weight:600;padding:9px 24px;border-radius:24px;border:2px solid rgba(255,255,255,.12);background:transparent;color:rgba(250,246,240,.45);cursor:pointer;transition:all .18s;}
+.metro-sig-pill:hover{border-color:var(--copper-lt);color:rgba(250,246,240,.8);}
+.metro-sig-pill.active{background:var(--copper);border-color:var(--copper-dk);color:#fff;}
+.metro-bpm-row{display:flex;align-items:center;gap:18px;justify-content:center;margin-bottom:36px;}
+.metro-bpm-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(250,246,240,.3);}
+.metro-bpm-val{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--copper-lt);min-width:48px;text-align:right;}
+.metro-slider{-webkit-appearance:none;appearance:none;width:220px;height:4px;border-radius:2px;background:rgba(255,255,255,.12);outline:none;cursor:pointer;}
+.metro-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--copper-lt);cursor:pointer;box-shadow:0 0 0 3px rgba(196,122,54,.2);}
+.metro-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--copper-lt);cursor:pointer;border:none;}
+.metro-beats-row{display:flex;gap:14px;justify-content:center;margin-bottom:28px;flex-wrap:wrap;}
+.metro-beat{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.12);transition:transform .1s,box-shadow .1s,background .1s,border-color .1s;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:600;color:rgba(250,246,240,.3);}
+.metro-beat.accent{width:54px;height:54px;font-size:13px;background:rgba(168,90,30,.15);border-color:rgba(196,122,54,.35);color:var(--copper-lt);}
+.metro-beat.sub-accent{background:rgba(168,90,30,.07);border-color:rgba(196,122,54,.2);color:rgba(196,122,54,.6);}
+.metro-beat.active{transform:scale(1.18);box-shadow:0 0 22px rgba(196,122,54,.45);background:rgba(196,122,54,.28);border-color:var(--copper-lt);color:#fff;}
+.metro-beat.accent.active{transform:scale(1.22);box-shadow:0 0 32px rgba(196,122,54,.6);background:rgba(196,122,54,.45);}
+.metro-play-btn{display:block;margin:0 auto 24px;background:var(--copper);color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;padding:13px 48px;border-radius:10px;border:none;cursor:pointer;transition:background .18s,transform .1s;}
+.metro-play-btn:hover{background:var(--copper-lt);transform:translateY(-1px);}
+.metro-play-btn:active{transform:translateY(0);}
+.metro-desc{text-align:center;font-size:13px;color:rgba(250,246,240,.38);line-height:1.6;font-style:italic;}
+
+/* ── NEXT ── */
+.th-next{background:var(--ink);padding:88px 48px;text-align:center;}
+.th-next-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink5);margin-bottom:18px;display:block;}
+.th-next-title{font-family:var(--serif);font-size:clamp(36px,5vw,56px);font-weight:700;color:var(--paper);margin-bottom:10px;letter-spacing:-.02em;}
+.th-next-sub{font-size:14px;color:var(--ink4);margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.th-next-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.th-next-btn{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:13px;font-weight:600;padding:13px 28px;border-radius:8px;text-decoration:none;transition:background .2s;}
+.th-next-btn:hover{background:var(--copper-dk);}
+.th-next-btn.sec{background:transparent;color:rgba(250,246,240,.5);border:1px solid rgba(255,255,255,.12);}
+.th-next-btn.sec:hover{color:var(--paper);border-color:rgba(255,255,255,.3);}
+.th-next-btn.disabled{background:transparent;color:rgba(250,246,240,.22);border:1px solid rgba(255,255,255,.07);cursor:default;pointer-events:none;}
+
+/* ── CHAPTER NAV ── */
+.chapter-nav{display:flex;gap:0;border-top:1px solid rgba(255,255,255,.06);margin-top:64px;}
+.chapter-nav-item{flex:1;padding:28px 24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;transition:background .18s;}
+.chapter-nav-item:hover{background:rgba(255,255,255,.03);}
+.chapter-nav-item.prev{border-right:1px solid rgba(255,255,255,.06);}
+.chapter-nav-item.disabled{cursor:default;pointer-events:none;opacity:.35;}
+.chapter-nav-dir{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(250,246,240,.25);}
+.chapter-nav-cap{font-size:11px;color:rgba(250,246,240,.25);}
+.chapter-nav-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--paper);}
+
+/* ── AABA FORM VISUAL ── */
+.form-section{padding:88px 48px;background:#13100c;}
+.form-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:48px;max-width:860px;margin:0 auto;}
+.form-title{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--paper);margin-bottom:8px;text-align:center;letter-spacing:-.01em;}
+.form-sub{font-size:13px;color:rgba(250,246,240,.38);text-align:center;margin-bottom:40px;font-style:italic;}
+.form-timeline{display:flex;gap:10px;margin-bottom:24px;}
+.form-block{flex:1;border-radius:10px;padding:20px 14px 16px;cursor:pointer;transition:filter .15s,transform .1s;display:flex;flex-direction:column;gap:6px;position:relative;}
+.form-block:hover{filter:brightness(1.15);transform:translateY(-2px);}
+.form-block.playing{filter:brightness(1.35);box-shadow:0 0 24px rgba(196,122,54,.4);transform:translateY(-3px);}
+.form-block-label{font-family:var(--serif);font-size:22px;font-weight:700;color:rgba(255,255,255,.9);}
+.form-block-fn{font-size:11px;font-weight:600;letter-spacing:.08em;color:rgba(255,255,255,.55);text-transform:uppercase;margin-top:2px;}
+.form-block-bars{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.3);margin-top:8px;}
+.form-bar-labels{display:flex;gap:10px;margin-bottom:28px;}
+.form-bar-label{flex:1;text-align:center;font-family:var(--mono);font-size:9px;color:rgba(250,246,240,.2);letter-spacing:.08em;}
+.form-legend{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:8px;}
+.form-legend-item{display:flex;align-items:center;gap:7px;font-size:11px;color:rgba(250,246,240,.4);}
+.form-legend-dot{width:10px;height:10px;border-radius:3px;}
+.form-hint{text-align:center;font-size:12px;color:rgba(250,246,240,.28);font-style:italic;margin-top:20px;}
+
+@media(max-width:768px){
+  nav{padding:0 16px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav>*{flex-shrink:0;}
+  .th-breadcrumb{padding:0 20px;}
+  .th-hero{padding:80px 20px 64px;}
+  .th-section{padding:64px 20px;}
+  .th-split{grid-template-columns:1fr;gap:40px;}
+  .metro-section{padding:64px 20px;}
+  .metro-card{padding:28px 18px;}
+  .th-next{padding:64px 20px;}
+  .chapter-nav{flex-direction:column;}
+  .chapter-nav-item.prev{border-right:none;border-bottom:1px solid rgba(255,255,255,.06);}
+  .form-section{padding:64px 20px;}
+  .form-card{padding:28px 16px;}
+  .form-timeline{flex-direction:column;gap:8px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link active">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<div class="th-progress"><div class="th-progress-bar" id="prog-bar"></div></div>
+
+<div class="th-breadcrumb">
+  <a href="/teoria">Teoría</a>
+  <span class="sep">›</span>
+  <a href="/teoria/ritmo">Ritmo y Sonido</a>
+  <span class="sep">›</span>
+  <span class="current">Forma musical</span>
+</div>
+
+<!-- HERO -->
+<section class="th-hero">
+  <div class="th-chapter">Ritmo y Sonido · 10</div>
+  <h1 class="th-title">Forma <em>musical</em></h1>
+  <p class="th-lead">Cómo se organiza el tiempo a gran escala: la estructura que hace que una canción tenga principio, tensión y cierre.</p>
+  <div class="th-scroll-hint">↓ leer</div>
+</section>
+
+<!-- SECCIÓN 1: La forma -->
+<section class="th-section">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">La forma</span>
+        <h2 class="th-h2">La arquitectura <em>de la canción</em></h2>
+        <p class="th-body">La <strong>forma musical</strong> es la organización a gran escala de una pieza: cómo se relacionan las secciones entre sí en secuencia. Igual que un edificio tiene habitaciones con funciones específicas, una canción tiene secciones con roles emocionales específicos. La introducción establece el mundo. La estrofa lleva la narrativa o desarrolla el tema. El coro entrega el clímax emocional, repetido con las mismas palabras y melodía.</p>
+        <p class="th-body">El puente proporciona contraste antes del retorno final del coro. La coda o outro cierra la pieza. Conocer la forma significa saber dónde estás en la historia en todo momento.</p>
+        <div class="th-callout">
+          <div class="th-callout-label">Analogía</div>
+          <p>La forma es a la canción lo que la estructura narrativa es a un relato: exposición, desarrollo, clímax, desenlace. El oído espera esa curva y la satisfacción viene de cumplirla o subvertirla.</p>
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--paper2);border:1px solid var(--paper3);border-radius:14px;padding:28px 24px;">
+          <p style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:20px;">Secciones típicas</p>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="padding:10px 14px;background:rgba(160,92,32,.06);border-radius:8px;border:1px solid var(--paper3);">
+              <div style="font-size:12px;font-weight:700;color:var(--copper);margin-bottom:3px;">Intro</div>
+              <div style="font-size:12px;color:var(--ink4);">Establece la textura y el mundo sonoro</div>
+            </div>
+            <div style="padding:10px 14px;background:rgba(160,92,32,.06);border-radius:8px;border:1px solid var(--paper3);">
+              <div style="font-size:12px;font-weight:700;color:var(--copper);margin-bottom:3px;">Estrofa (Verse)</div>
+              <div style="font-size:12px;color:var(--ink4);">Narrativa y desarrollo temático</div>
+            </div>
+            <div style="padding:10px 14px;background:rgba(160,92,32,.07);border-radius:8px;border:1px solid var(--paper4);">
+              <div style="font-size:12px;font-weight:700;color:var(--copper);margin-bottom:3px;">Pre-coro</div>
+              <div style="font-size:12px;color:var(--ink3);">Acumula tensión hacia el clímax</div>
+            </div>
+            <div style="padding:10px 14px;background:rgba(160,92,32,.12);border-radius:8px;border:1px solid var(--paper4);">
+              <div style="font-size:12px;font-weight:700;color:var(--copper-dk);margin-bottom:3px;">Coro (Chorus)</div>
+              <div style="font-size:12px;color:var(--ink2);font-weight:500;">Clímax emocional, repetido</div>
+            </div>
+            <div style="padding:10px 14px;background:rgba(90,122,191,.08);border-radius:8px;border:1px solid rgba(90,122,191,.25);">
+              <div style="font-size:12px;font-weight:700;color:var(--subdom);margin-bottom:3px;">Puente (Bridge)</div>
+              <div style="font-size:12px;color:var(--ink4);">Contraste máximo, diferente textura</div>
+            </div>
+            <div style="padding:10px 14px;background:rgba(160,92,32,.04);border-radius:8px;border:1px solid var(--paper3);">
+              <div style="font-size:12px;font-weight:700;color:var(--copper);margin-bottom:3px;">Coda / Outro</div>
+              <div style="font-size:12px;color:var(--ink5);">Cierre y resolución final</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 2: Las formas básicas (dark) -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Las formas básicas</span>
+    <h2 class="th-h2">Blues, AABA, canción: <em>tres plantillas que contienen todo</em></h2>
+    <p class="th-body">El <strong>blues de 12 compases</strong> es la forma completa más simple: 12 compases de I-IV-V que pueden repetirse indefinidamente mientras un solista improvisa. La <strong>forma AABA</strong> (también llamada forma de 32 compases) es la estructura de la mayoría de los estándares de jazz: una sección A de 8 compases repetida (AA), una sección B contrastante de 8 compases (puente), y un retorno a A.</p>
+    <p class="th-body">La <strong>forma verso-coro</strong> es la estructura de la mayoría de la música pop desde los años cincuenta. Estas tres formas agrupan la mayor parte de la música popular occidental. Entenderlas significa poder predecir la estructura y navegar cualquier estándar sin haberlo aprendido específicamente antes.</p>
+  </div>
+</section>
+
+<!-- VISUAL INTERACTIVO: Forma AABA -->
+<section class="form-section">
+  <div style="max-width:1080px;margin:0 auto;">
+    <span class="th-label" style="display:block;text-align:center;margin-bottom:32px;color:var(--copper-lt);">Interactivo</span>
+    <div class="form-card">
+      <div class="form-title">Forma AABA — 32 compases</div>
+      <div class="form-sub">Haz clic en cada sección para escuchar su progresión característica</div>
+      <div class="form-legend">
+        <div class="form-legend-item">
+          <div class="form-legend-dot" style="background:var(--copper);"></div>
+          Sección A (cobre)
+        </div>
+        <div class="form-legend-item">
+          <div class="form-legend-dot" style="background:#5a7abf;"></div>
+          Sección B — puente
+        </div>
+      </div>
+      <div class="form-timeline" id="form-timeline"></div>
+      <div class="form-bar-labels" id="form-bar-labels"></div>
+      <div class="form-hint">Cada bloque = 8 compases · total = 32 compases · un chorus de jazz</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 3: Contraste y retorno -->
+<section class="th-section">
+  <div class="th-inner">
+    <span class="th-label">Contraste y retorno</span>
+    <h2 class="th-h2">Tensión y resolución <em>a gran escala</em></h2>
+    <p class="th-body">La lógica emocional de la forma musical refleja la lógica de la armonía: tensión y resolución. Una estrofa establece un estado. Un pre-coro eleva la tensión. Un coro la resuelve (y por eso resulta satisfactorio cuando llega). Un puente introduce el contraste máximo: una tonalidad diferente, una textura diferente, un registro emocional diferente, haciendo que el retorno final del coro suene como alivio.</p>
+    <p class="th-body">Este arco a gran escala (estabilidad, tensión, contraste, retorno) opera en la escala de minutos en lugar de segundos, pero usa el mismo mecanismo psicológico que una resolución armónica V-I. El oído busca cierre en cualquier escala de tiempo.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">Analogía armónica</div>
+      <p>Verso = tónica. Pre-coro = subdominante. Coro = resolución. Puente = dominante extendido. El arco de la forma repite el arco de la cadencia, pero en minutos.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 4: Forma e improvisación (dark) -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Forma e improvisación</span>
+    <h2 class="th-h2">Improvisar sobre forma: <em>saber dónde estás</em></h2>
+    <p class="th-body">Los músicos de jazz navegan la forma memorizando los cambios de acordes y su posición en el arco total. En un estándar AABA de 32 compases, "estamos en el puente" significa que estás en los compases 17-24, la sección con máxima separación armónica de la tonalidad principal. Esta conciencia espacial, saber exactamente dónde estás en la forma mientras improvisas, es la habilidad fundamental de la actuación en jazz.</p>
+    <p class="th-body">Es también lo que separa a los músicos que "siguen los acordes" de los que construyen solos con forma y narrativa, usando la estructura como un andamiaje dramático en lugar de una serie de cajones de acordes que rellenar. La habilidad de sostener una línea a través de la frontera entre secciones, o de marcar deliberadamente esa frontera, requiere tener la forma completamente internalizada.</p>
+  </div>
+</section>
+
+<!-- FOOTER / NEXT -->
+<section class="th-next">
+  <span class="th-next-label">Fin de la sección · Ritmo y Sonido</span>
+  <h2 class="th-next-title">Has completado la sección</h2>
+  <p class="th-next-sub">Frecuencia, timbre, dinámica y forma: los cuatro pilares del sonido organizado. Vuelve al índice para continuar.</p>
+  <div class="th-next-btns">
+    <a href="/teoria" class="th-next-btn">← Volver al índice de Teoría</a>
+    <a href="/teoria/sonido/dinamica" class="th-next-btn sec">← Dinámica y articulación</a>
+  </div>
+  <div class="chapter-nav">
+    <a href="/teoria/sonido/dinamica" class="chapter-nav-item prev">
+      <span class="chapter-nav-dir">← Anterior</span>
+      <span class="chapter-nav-cap">Ritmo y Sonido · 09</span>
+      <span class="chapter-nav-title">Dinámica y articulación</span>
+    </a>
+    <a href="/teoria" class="chapter-nav-item">
+      <span class="chapter-nav-dir">↑ Volver al índice</span>
+      <span class="chapter-nav-cap">Sección completa</span>
+      <span class="chapter-nav-title">Índice de Teoría</span>
+    </a>
+  </div>
+</section>
+
+<script>
+// ── Progress bar ──────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('prog-bar').style.width = (h > 0 ? Math.round(window.scrollY / h * 100) : 0) + '%';
+});
+
+// ── AABA Form interactive ─────────────────────────────────────────────────────
+const FORM_SECTIONS = [
+  {
+    id: 'A1',
+    label: 'A1',
+    fn: 'Establecer',
+    bars: 'cc. 1–8',
+    color: '#a85a1e',
+    // Cmaj → Am → Fmaj → G7
+    chords: [
+      { note: 'C4', dur: 0.9 },
+      { note: 'A3', dur: 0.9 },
+      { note: 'F3', dur: 0.9 },
+      { note: 'G3', dur: 0.9 },
+    ],
+  },
+  {
+    id: 'A2',
+    label: 'A2',
+    fn: 'Repetir',
+    bars: 'cc. 9–16',
+    color: '#a85a1e',
+    chords: [
+      { note: 'C4', dur: 0.9 },
+      { note: 'A3', dur: 0.9 },
+      { note: 'F3', dur: 0.9 },
+      { note: 'G3', dur: 0.9 },
+    ],
+  },
+  {
+    id: 'B',
+    label: 'B',
+    fn: 'Contrastar',
+    bars: 'cc. 17–24',
+    color: '#5a7abf',
+    // Dm → G7 → Em → Am
+    chords: [
+      { note: 'D4', dur: 0.9 },
+      { note: 'G3', dur: 0.9 },
+      { note: 'E4', dur: 0.9 },
+      { note: 'A3', dur: 0.9 },
+    ],
+  },
+  {
+    id: 'A3',
+    label: 'A3',
+    fn: 'Resolver',
+    bars: 'cc. 25–32',
+    color: '#a85a1e',
+    chords: [
+      { note: 'C4', dur: 0.9 },
+      { note: 'A3', dur: 0.9 },
+      { note: 'F3', dur: 0.9 },
+      { note: 'G3', dur: 0.9 },
+    ],
+  },
+];
+
+function buildFormTimeline() {
+  const tl = document.getElementById('form-timeline');
+  const bl = document.getElementById('form-bar-labels');
+  tl.innerHTML = '';
+  bl.innerHTML = '';
+
+  FORM_SECTIONS.forEach((sec, i) => {
+    const block = document.createElement('div');
+    block.className = 'form-block';
+    block.id = 'fblock-' + i;
+    block.style.background = sec.color === '#5a7abf'
+      ? 'rgba(90,122,191,.18)'
+      : 'rgba(168,90,30,.2)';
+    block.style.border = `2px solid ${sec.color}44`;
+
+    const labelEl = document.createElement('div');
+    labelEl.className = 'form-block-label';
+    labelEl.style.color = sec.color === '#5a7abf' ? '#7a9ad4' : 'var(--copper-lt)';
+    labelEl.textContent = sec.label;
+
+    const fnEl = document.createElement('div');
+    fnEl.className = 'form-block-fn';
+    fnEl.textContent = sec.fn;
+
+    const barsEl = document.createElement('div');
+    barsEl.className = 'form-block-bars';
+    barsEl.textContent = sec.bars;
+
+    block.appendChild(labelEl);
+    block.appendChild(fnEl);
+    block.appendChild(barsEl);
+    block.addEventListener('click', () => playSection(i));
+    tl.appendChild(block);
+
+    // bar label
+    const barLbl = document.createElement('div');
+    barLbl.className = 'form-bar-label';
+    barLbl.textContent = sec.bars;
+    bl.appendChild(barLbl);
+  });
+}
+
+function midiToFreq(midi) {
+  return 440 * Math.pow(2, (midi - 69) / 12);
+}
+
+function noteNameToMidi(name) {
+  const map = { 'C':60,'D':62,'E':64,'F':65,'G':67,'A':69,'B':71 };
+  const letter = name[0];
+  const octave = parseInt(name[name.length - 1]);
+  return map[letter] + (octave - 4) * 12;
+}
+
+async function playSection(idx) {
+  await Tone.start();
+  const sec = FORM_SECTIONS[idx];
+  const block = document.getElementById('fblock-' + idx);
+
+  // Remove all playing states
+  document.querySelectorAll('.form-block').forEach(b => b.classList.remove('playing'));
+  if (block) block.classList.add('playing');
+
+  const gap = 0.95 * 1000;
+  sec.chords.forEach((chord, ci) => {
+    setTimeout(() => {
+      const freq = midiToFreq(noteNameToMidi(chord.note));
+      const synth = new Tone.Synth({
+        oscillator: { type: 'triangle' },
+        envelope: { attack: 0.01, decay: 0.3, sustain: 0.5, release: 0.5 }
+      }).toDestination();
+      synth.volume.value = -10;
+      synth.triggerAttackRelease(freq, chord.dur);
+      setTimeout(() => { try { synth.dispose(); } catch(e) {} }, Math.round(chord.dur * 1000) + 500);
+    }, ci * gap);
+  });
+
+  setTimeout(() => {
+    if (block) block.classList.remove('playing');
+  }, sec.chords.length * gap + 500);
+}
+
+buildFormTimeline();
+</script>
+
+<footer class="tm-footer-legal" style="background:var(--ink2);border-top:1px solid rgba(255,255,255,.06);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+  <div class="tm-f-copy" style="font-size:12px;color:var(--ink5);">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div class="tm-f-links" style="display:flex;gap:20px;">
+    <a href="/privacidad" style="font-size:12px;color:var(--ink5);text-decoration:none;">Aviso de Privacidad</a>
+    <a href="/terminos" style="font-size:12px;color:var(--ink5);text-decoration:none;">Términos y Condiciones</a>
+    <a href="/cookies" style="font-size:12px;color:var(--ink5);text-decoration:none;">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

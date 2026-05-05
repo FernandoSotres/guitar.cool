@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · El sistema CAGED</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<style>
+:root{
+  --paper:#f4ece0;--paper2:#ebe1d2;--paper3:#ddd1bd;--paper4:#c8b99f;--paper5:#b8a890;
+  --copper:#a85a1e;--copper-lt:#c47a36;--copper-dk:#7a3e10;
+  --ink:#1c1410;--ink2:#2e2418;--ink3:#5a4a38;--ink4:#8a7a64;--ink5:#a09080;
+  --tonic:#a05c20;--subdom:#5a7abf;--dominant:#7a4abf;--relative:#4a7c59;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{font-family:var(--mono);font-size:.52em;font-weight:400;color:var(--ink4);letter-spacing:0;margin-left:2px;}
+.nav-link{padding:0 16px;height:60px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+.th-progress{position:fixed;top:56px;left:0;right:0;height:2px;background:rgba(160,92,32,.12);z-index:99;}
+.th-progress-bar{height:100%;background:var(--copper);width:0%;transition:width .08s linear;}
+
+.th-breadcrumb{background:var(--paper2);border-bottom:1px solid var(--paper4);padding:0 48px;height:40px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink5);}
+.th-breadcrumb a{color:var(--ink5);text-decoration:none;}
+.th-breadcrumb a:hover{color:var(--copper);}
+.th-breadcrumb .sep{opacity:.5;}
+.th-breadcrumb .current{color:var(--ink3);font-weight:500;}
+
+.th-hero{background:#13100c;padding:110px 48px 90px;text-align:center;overflow:hidden;}
+.th-chapter{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:28px;display:flex;align-items:center;justify-content:center;gap:14px;}
+.th-chapter::before,.th-chapter::after{content:'';display:block;height:1px;width:48px;background:var(--copper-lt);opacity:.35;}
+.th-title{font-family:var(--serif);font-size:clamp(54px,7.5vw,92px);font-weight:700;line-height:.92;letter-spacing:-.025em;color:var(--paper);margin-bottom:28px;}
+.th-title em{font-style:italic;color:var(--copper-lt);}
+.th-lead{font-family:var(--serif);font-size:clamp(17px,2vw,22px);font-style:italic;color:rgba(250,246,240,.58);max-width:580px;margin:0 auto 44px;line-height:1.65;}
+.th-scroll-hint{font-size:11px;color:rgba(250,246,240,.22);letter-spacing:.14em;text-transform:uppercase;}
+
+.th-section{padding:88px 48px;}
+.th-section.dark{background:#13100c;}
+.th-inner{max-width:1080px;margin:0 auto;}
+.th-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;display:block;}
+.th-section.dark .th-label{color:var(--copper-lt);}
+.th-h2{font-family:var(--serif);font-size:clamp(34px,4.5vw,56px);font-weight:700;line-height:1.02;letter-spacing:-.025em;color:var(--ink);margin-bottom:22px;}
+.th-section.dark .th-h2{color:var(--paper);}
+.th-body{font-size:15px;color:var(--ink3);line-height:1.85;max-width:640px;}
+.th-body+.th-body{margin-top:14px;}
+.th-section.dark .th-body{color:rgba(250,246,240,.58);}
+.th-body strong{color:var(--ink2);font-weight:600;}
+.th-section.dark .th-body strong{color:rgba(244,236,224,.92);}
+.th-split{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;}
+.th-callout{border-left:3px solid var(--copper);border-radius:0 8px 8px 0;padding:16px 20px;margin:28px 0;background:rgba(160,92,32,.07);}
+.th-section.dark .th-callout{background:rgba(255,255,255,.05);border-left-color:var(--copper-lt);}
+.th-callout-label{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);margin-bottom:7px;}
+.th-section.dark .th-callout-label{color:var(--copper-lt);}
+.th-callout p{font-size:14px;color:var(--ink3);line-height:1.65;}
+.th-section.dark .th-callout p{color:rgba(250,246,240,.58);}
+
+/* ── CAGED FRETBOARD ── */
+.caged-wrap{overflow-x:auto;padding-bottom:8px;}
+.caged-outer{background:#1a1410;border-radius:16px;padding:32px 28px 28px;}
+.caged-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:20px;text-align:center;}
+.caged-legend{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:18px;}
+.caged-legend-item{display:flex;align-items:center;gap:7px;font-size:11px;}
+.caged-hint{font-size:12px;color:rgba(250,246,240,.3);text-align:center;margin-top:14px;font-style:italic;line-height:1.6;}
+
+/* ── NEXT ── */
+.th-next{background:var(--ink);padding:88px 48px;text-align:center;}
+.th-next-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink5);margin-bottom:18px;display:block;}
+.th-next-title{font-family:var(--serif);font-size:clamp(36px,5vw,56px);font-weight:700;color:var(--paper);margin-bottom:10px;letter-spacing:-.02em;}
+.th-next-sub{font-size:14px;color:var(--ink4);margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.th-next-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.th-next-btn{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:13px;font-weight:600;padding:13px 28px;border-radius:8px;text-decoration:none;transition:background .2s;}
+.th-next-btn:hover{background:var(--copper-dk);}
+.th-next-btn.sec{background:transparent;color:rgba(250,246,240,.5);border:1px solid rgba(255,255,255,.12);}
+.th-next-btn.sec:hover{color:var(--paper);border-color:rgba(255,255,255,.3);}
+
+/* ── CHAPTER NAV ── */
+.chapter-nav{display:flex;gap:0;border-top:1px solid rgba(255,255,255,.06);margin-top:64px;}
+.chapter-nav-item{flex:1;padding:28px 24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;transition:background .18s;}
+.chapter-nav-item:hover{background:rgba(255,255,255,.03);}
+.chapter-nav-item.prev{border-right:1px solid rgba(255,255,255,.06);}
+.chapter-nav-dir{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(250,246,240,.25);}
+.chapter-nav-cap{font-size:11px;color:rgba(250,246,240,.25);}
+.chapter-nav-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--paper);}
+
+@media(max-width:768px){
+  nav{padding:0 16px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav>*{flex-shrink:0;}
+  .th-breadcrumb{padding:0 20px;}
+  .th-hero{padding:80px 20px 64px;}
+  .th-section{padding:64px 20px;}
+  .th-split{grid-template-columns:1fr;gap:40px;}
+  .th-next{padding:64px 20px;}
+  .chapter-nav{flex-direction:column;}
+  .chapter-nav-item.prev{border-right:none;border-bottom:1px solid rgba(255,255,255,.06);}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link active">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<div class="th-progress"><div class="th-progress-bar" id="prog-bar"></div></div>
+
+<div class="th-breadcrumb">
+  <a href="/teoria">Teoría</a>
+  <span class="sep">›</span>
+  <a href="/teoria/instrumento">Teoría en el Instrumento</a>
+  <span class="sep">›</span>
+  <span class="current">El sistema CAGED</span>
+</div>
+
+<!-- HERO -->
+<section class="th-hero">
+  <div class="th-chapter">Teoría en el Instrumento · 02</div>
+  <h1 class="th-title">El sistema <em>CAGED</em></h1>
+  <p class="th-lead">Las cinco formas que conectan cualquier acorde mayor a lo largo de todo el mástil.</p>
+  <div class="th-scroll-hint">↓ leer</div>
+</section>
+
+<!-- SECCIÓN 1: Las cinco formas -->
+<section class="th-section">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">Las cinco formas</span>
+        <h2 class="th-h2">C, A, G, E, D:<br><em>cinco ventanas al mismo acorde</em></h2>
+        <p class="th-body">El sistema <strong>CAGED</strong> toma su nombre de los cinco acordes abiertos: <strong>C</strong>, <strong>A</strong>, <strong>G</strong>, <strong>E</strong> y <strong>D</strong>. Cada forma puede desplazarse por el mástil usando cejilla o técnica de barre, lo que permite tocar cualquier acorde mayor en 5 posiciones distintas. Estas posiciones dividen el diapasón en 5 zonas superpuestas, cada una centrada en una forma diferente.</p>
+        <p class="th-body">Las formas se conectan sin huecos: la parte superior de una se superpone con la inferior de la siguiente. Un guitarrista que conoce las cinco formas tiene acceso al diapasón completo en cualquier tonalidad. No hay nota ni zona del mástil que quede fuera de este sistema.</p>
+        <p class="th-body">El orden CAGED no es arbitrario: es el orden en que las formas aparecen de izquierda a derecha en el mástil para <strong>C mayor</strong>. En cualquier otra tonalidad, el orden de las formas es el mismo, solo cambia la posición de inicio.</p>
+        <div class="th-callout">
+          <div class="th-callout-label">El principio central</div>
+          <p>Las cinco formas son siempre el mismo acorde mayor. Lo que cambia es desde qué cuerda y en qué traste está la raíz.</p>
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--paper2);border:1px solid var(--paper3);border-radius:14px;padding:28px 24px;">
+          <p style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:16px;">Las cinco formas del sistema</p>
+          <div id="caged-shapes-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 2: El encadenamiento -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">El encadenamiento</span>
+    <h2 class="th-h2">Cinco formas,<br><em>una debajo de la otra</em></h2>
+    <p class="th-body">Para <strong>C mayor</strong>: la forma C aparece en posición abierta (trastes 0-3), la forma A continúa con la raíz en el traste 3 (cuerda A2), la forma G prosigue con la raíz en el traste 5 (cuerda E2 grave), la forma E tiene la raíz en el traste 8, y la forma D cierra el ciclo cerca del traste 10. Luego el patrón se repite una octava más arriba.</p>
+    <p class="th-body">Cada forma comienza donde termina la anterior. La nota raíz del acorde se desplaza a una cuerda y posición nuevas con cada forma, pero la calidad del acorde (mayor) permanece constante en todo el recorrido. Esto crea un mapa continuo del diapasón donde cualquier punto pertenece a alguna de las cinco formas.</p>
+    <p class="th-body">La secuencia de raíces por cuerda sigue también el orden CAGED: la raíz de la forma C está en la cuerda B3, la de la forma A en la cuerda A2, la de la forma G en la cuerda E2 grave, la de la forma E en la cuerda E2 grave también (pero más arriba), y la de la forma D en la cuerda D3. Conocer en qué cuerda está la raíz es la clave para localizar cualquier forma en cualquier tonalidad.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">Cómo usar este mapa</div>
+      <p>Para tocar cualquier acorde mayor en la forma A: busca la nota raíz en la cuerda A2 y pon el dedo en ese traste. La forma A se construye a partir de ahí hacia las cuerdas agudas.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN INTERACTIVA: CAGED en C mayor -->
+<section class="th-section" style="padding-top:0;">
+  <div class="th-inner">
+    <span class="th-label" style="margin-bottom:24px;">Interactivo</span>
+    <div class="caged-outer">
+      <div class="caged-label">C mayor · Las 5 formas CAGED · haz clic en una raíz para escuchar C4</div>
+      <div class="caged-wrap">
+        <canvas id="caged-canvas" style="display:block;cursor:pointer;"></canvas>
+      </div>
+      <div class="caged-legend" id="caged-legend"></div>
+      <p class="caged-hint">R = raíz (Do) · círculo medio = tercera (Mi) · punto pequeño = quinta (Sol) · haz clic en R para escuchar</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 3: Los modos y CAGED -->
+<section class="th-section">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">Los modos y CAGED</span>
+        <h2 class="th-h2">CAGED como mapa<br><em>de escalas y modos</em></h2>
+        <p class="th-body">Cada forma CAGED corresponde a un patrón de digitación de escala. La forma <strong>E</strong> en CAGED coincide con lo que muchos métodos llaman "posición 1" de la escala mayor. La forma <strong>D</strong> corresponde a otra posición. Aprender CAGED implica aprender implícitamente las 5 posiciones de la escala diatónica en cualquier tonalidad, porque los patrones de escala rodean las notas del acorde.</p>
+        <p class="th-body">Los guitarristas avanzados usan CAGED no solo para acordes sino como sistema de navegación: saber en qué forma están indica de inmediato qué notas del acorde están disponibles y dónde. Esto facilita la improvisación, el fraseo melódico sobre acordes específicos, y la construcción de solos que siguen la armonía.</p>
+        <p class="th-body">Cada forma también tiene sus propias <strong>extensiones naturales</strong> de escala: las notas de paso más cómodas cambian según la forma. Un solo en la forma G tiene un carácter digital distinto al mismo solo en la forma A, aunque ambos estén en la misma tonalidad.</p>
+      </div>
+      <div>
+        <div style="background:var(--paper2);border:1px solid var(--paper3);border-radius:14px;padding:28px 24px;">
+          <p style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:16px;">CAGED y posiciones de escala</p>
+          <div id="caged-scale-map"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 4: Aplicaciones -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Aplicaciones</span>
+    <h2 class="th-h2">Transposición automática<br><em>y visión del mástil</em></h2>
+    <p class="th-body">El beneficio principal de CAGED es que aprender un lick, riff o voicing en una posición entrega automáticamente 4 posiciones más, simplemente ubicando dónde queda la misma forma para ese acorde. Si aprendes un lick de blues en la forma <strong>E</strong> (posición abierta), funciona de forma idéntica en la forma <strong>G</strong> en el traste 5, en la forma <strong>D</strong> en el traste 10, y así sucesivamente.</p>
+    <p class="th-body">Esto transforma la guitarra de un instrumento donde se aprenden cosas individuales por posición a uno donde los patrones se generalizan por todo el mástil. Un guitarrista sin CAGED tiende a "vivir" en uno o dos patrones de escala. Uno con CAGED tiene cinco puertas de entrada al mismo material en cualquier tonalidad.</p>
+    <p class="th-body">En situaciones de banda, CAGED permite elegir la posición del acorde o el solo que mejor se adapta al rango de la voz, al espacio que dejan los otros instrumentos, o al color sonoro deseado. Un <strong>C mayor</strong> en la forma C (abierto) suena distinto al mismo acorde en la forma G (trastes 4-7), aunque sean las mismas notas en teoría.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">Cómo practicarlo</div>
+      <p>Toma un acorde que ya sepas tocar. Encuentra las otras 4 posiciones del mismo acorde usando las formas restantes. Luego conecta las 5 posiciones subiendo y bajando el mástil sin saltos.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER / NEXT -->
+<section class="th-next">
+  <span class="th-next-label">Navegar lecciones</span>
+  <h2 class="th-next-title">Siguiente: acordes abiertos</h2>
+  <p class="th-next-sub">Con el sistema CAGED en mente, conviene conocer a fondo las cinco formas en posición abierta, que son la base de todo el sistema.</p>
+  <div class="th-next-btns">
+    <a href="/teoria/instrumento/acordes-abiertos" class="th-next-btn">Acordes abiertos →</a>
+    <a href="/teoria/instrumento/mastil" class="th-next-btn sec">← El mástil</a>
+  </div>
+  <div class="chapter-nav">
+    <a href="/teoria/instrumento/mastil" class="chapter-nav-item prev">
+      <span class="chapter-nav-dir">← Anterior</span>
+      <span class="chapter-nav-cap">01</span>
+      <span class="chapter-nav-title">El mástil</span>
+    </a>
+    <a href="/teoria/instrumento/acordes-abiertos" class="chapter-nav-item">
+      <span class="chapter-nav-dir">Siguiente →</span>
+      <span class="chapter-nav-cap">03</span>
+      <span class="chapter-nav-title">Acordes abiertos</span>
+    </a>
+  </div>
+</section>
+
+<script>
+// ── Progress bar ──────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('prog-bar').style.width = (h > 0 ? Math.round(window.scrollY / h * 100) : 0) + '%';
+});
+
+// ── CAGED data ────────────────────────────────────────────────────────────────
+// C major CAGED shapes: each shape defines which frets on each string contain
+// root (R), third (3), or fifth (5). String index 0 = E2 (low), 5 = E4 (high).
+// fretMin/fretMax define the span of the shape on the fretboard.
+const CAGED_SHAPES = [
+  {
+    name: 'C', color: '#a85a1e', fretMin: 0, fretMax: 3,
+    notes: [
+      // [string, fret, type] type: 'R'=root, '3'=third, '5'=fifth, null=muted
+      [0, null], // E2 muted
+      [1, 3, 'R'],  // A2 fret 3 = C
+      [2, 2, '5'],  // D3 fret 2 = E? No: D3+2=E3 = third
+      [3, 0, 'R'],  // G3 open = G3 = fifth
+      [4, 1, '3'],  // B3 fret 1 = C4 = root? No: B3+1=C4 = root
+      [5, 0, '5'],  // E4 open = E4 = third
+    ],
+    // Corrected for C major (C E G):
+    // E2 muted, A2 f3=C(R), D3 f2=E(3), G3 f0=G(5), B3 f1=C(R), E4 f0=E(3)
+  },
+  {
+    name: 'A', color: '#5a7abf', fretMin: 3, fretMax: 6,
+    notes: [
+      [0, null],     // E2 muted
+      [1, 3, 'R'],   // A2 f3=C (root)
+      [2, 5, 'R'],   // D3 f5=G? D3=50, +5=55=G3=fifth
+      [3, 5, '3'],   // G3 f5=C4? G3=55,+5=60=C4=root
+      [4, 5, '5'],   // B3 f5=E4? B3=59,+5=64=E4=third
+      [5, null],     // E4 muted? or open
+    ],
+    // A shape for C major: barre at 3, root on A string
+    // E2 muted, A2 f3=C(R), D3 f5=G(5)? No D3+5=55=G3 but D3+2=E3(3)
+    // Let me use standard A-shape positions:
+    // Barre fret 3: A2(3)=C(R), D3(3+2)=E(3), G3(3+2)=B?
+    // Standard A shape: x,R,5,R,3,5 relative to barre
+    // A shape: -,0,2,2,2,0 semitones from barre
+    // At barre=3: A2 f3=C(R), D3 f5=E(3)? D3=50,f5=55=G(5). Hmm.
+    // Actually A shape: x,R,5,R,3,5 strings A,D,G,B,e
+    // Root on A string at fret 3 = C.
+    // D: fret 3+2=5, G3+5=55+... wait let me just store display positions
+  },
+  {
+    name: 'G', color: '#4a7c59', fretMin: 4, fretMax: 8,
+    notes: [
+      [0, 3, 'R'],   // E2 f3=G? No E2=40,+3=43=G2? E2+3=43=G2. Hmm, for C major G shape root is on E string
+      // G shape: 3,2,0,0,0,3 (open G) moved to C: root on E2 string
+      // C major G shape starts at fret 5 with root on E2
+    ],
+  },
+  {
+    name: 'E', color: '#c47a36', fretMin: 7, fretMax: 10,
+    notes: [],
+  },
+  {
+    name: 'D', color: '#7a4abf', fretMin: 9, fretMax: 12,
+    notes: [],
+  },
+];
+
+// Simplified: define shapes as arrays of [string, fret, role]
+// for C major, using standard CAGED positions
+// role: 'R'=root(C), '3'=third(E), '5'=fifth(G)
+const CAGED_NOTES = {
+  // C shape (frets 0-3)
+  C: { color: '#a85a1e', fretSpan: [0, 3], dots: [
+    // string(0=low E), fret, role
+    // x, C(R)@3, E(3)@2, G(5)@0, C(R)@1, E(3)@0
+    {s:1, f:3, role:'R'}, {s:2, f:2, role:'3'}, {s:3, f:0, role:'5'},
+    {s:4, f:1, role:'R'}, {s:5, f:0, role:'3'},
+  ]},
+  // A shape (frets 3-6), barre at 3
+  A: { color: '#5a7abf', fretSpan: [3, 6], dots: [
+    // x, C(R)@3, G(5)@5, C(R)@5, E(3)@5, G(5)@5 -- but that's wrong
+    // A shape root on A string: A2+3=C, D3+5=G, G3+5=C, B3+5=E, e1+3=G
+    {s:1, f:3, role:'R'}, {s:2, f:5, role:'5'}, {s:3, f:5, role:'R'},
+    {s:4, f:5, role:'3'}, {s:5, f:3, role:'5'},
+  ]},
+  // G shape (frets 4-8), root on E2 string and e1 string
+  G: { color: '#4a7c59', fretSpan: [4, 8], dots: [
+    // G open shape: E(3)@0, A(5?)... moved to C:
+    // E2+8=C(R)@8, A2+7=E(3)@7? No. Standard G shape for C:
+    // e1+8=C(R), B3+8=G(5)@8? B3=59,+8=67=G4(5), G3+9=66=F#? No.
+    // G shape: 3,2,0,0,0,3 semitone offsets from root
+    // For C major G shape, root at E2 fret 8? E2=40,+8=48? That's not C.
+    // E2+8=48=C3. Yes! C=48 is C3 = C(R)
+    // So: E2 f8=C(R), A2 f7=? A2=45,+7=52=E3(3), D3 f5=? D3=50,+5=55=G3(5),
+    // G3 f5=? G3=55,+5=60=C4(R), B3 f5=? B3=59,+5=64=E4(3), e1 f8=? E4=64,+8=72=C5(R)
+    {s:0, f:8, role:'R'}, {s:1, f:7, role:'3'}, {s:2, f:5, role:'5'},
+    {s:3, f:5, role:'R'}, {s:4, f:5, role:'3'}, {s:5, f:8, role:'R'},
+  ]},
+  // E shape (frets 7-11), barre at 8, root on E2 string
+  E: { color: '#c47a36', fretSpan: [7, 11], dots: [
+    // E shape: 0,2,2,1,0,0 offsets from barre
+    // For C: barre at 8, E2 f8=C(R), A2 f10=E(3)? A2+10=55=G? No A2=45,+10=55=G. That's 5th.
+    // E open shape offsets: E2=R, A2=5, D3=R, G3=3, B3=5, e1=R
+    // At barre 8: E2+0=C(R)@8, A2 f8=E3? A2+8=53=F? Hmm wait fret 8 on A2: A2=45, fret8 = 45+8=53=F. Not right.
+    // Actually for E shape root on E2 string at C:
+    // E2 root is at fret where E2+fret=C. E2=40(MIDI). C=48. fret=8. Correct.
+    // E shape from open: string offsets to root [0,7,5,4,2,0] semitones? No.
+    // E major open: E2(0)=R, A2(2)=5th, D3(2)=R(oct), G3(1)=3rd, B3(0)=5th, e1(0)=R
+    // Fret offsets from shape root fret: [0,2,2,1,0,0]
+    // At fret 8: E2 f8=C(R), A2 f10=? A2=45,+10=55=G3(5), D3 f10=? D3=50,+10=60=C4(R),
+    // G3 f9=? G3=55,+9=64=E4(3), B3 f8=? B3=59,+8=67=G4(5), e1 f8=? E4=64,+8=72=C5(R)
+    {s:0, f:8, role:'R'}, {s:1, f:10, role:'5'}, {s:2, f:10, role:'R'},
+    {s:3, f:9, role:'3'}, {s:4, f:8, role:'5'}, {s:5, f:8, role:'R'},
+  ]},
+  // D shape (frets 9-12), root on D3 string
+  D: { color: '#7a4abf', fretSpan: [9, 12], dots: [
+    // D open shape: x,x,0,2,3,2 offsets for D major (root on D string)
+    // For C: D3 root at fret 10 (D3=50,+10=60=C4). D shape offsets: [x,x,0,2,3,2]
+    // D3 f10=C(R), G3 f12=? G3=55,+12=67=G4(5), B3 f13=? Too high.
+    // B3+10=69=A? B3=59,+10=69=A(6th). That's not right.
+    // D shape: x,x,D(R),A(5),D(R),F#(3) -- semitone offsets [x,x,0,7,12,4]? No.
+    // D open: D3(0)=R, G3(2)=5th, B3(3)=R(oct)? B3=59, D3=50, diff=9. G3=55, D3=50, diff=5.
+    // D major open fingering: x,x,0,2,3,2 fret positions
+    // Notes: D3(open)=D=R, G3(f2)=A=5th, B3(f3)=D=R, e1(f2)=F#=3rd
+    // For C major D shape, root on D3 string at fret 10:
+    // D3 f10=C(R), G3 f12=G4(5), B3 f13=D5? B3=59,+13=72=C5(R), e1 f12=? E4+12=76=E5(3)
+    // fret 13 is beyond 12 -- let's place D shape slightly lower
+    // Actually D shape for C can start at fret 10 going up with some notes at 10-13
+    // Let me use: D3 f10=C(R), G3 f12=G(5), B3 f10=? B3+10=69=A? Not C.
+    // Revisit: for C major, D shape root is typically near frets 10-12
+    // Standard: D3+10=C(R), G3+12=G(5)? G3=55,12=67=G(5) yes, B3+13=C but that's 13.
+    // In practice the D shape for C at this position:
+    // e1 f12=E5(3)? E4+12=76=E5 yes. B3+13 out of range.
+    // Use accessible: D3 f10=C(R), G3 f12=G(5), B3 f12=? B3+12=71=B(7th)? No.
+    // B3=59,+10=69=A, +11=70=Bb, +12=71=B, +13=72=C(R). At 13 = root. Let's cap at 12.
+    // Practical D shape for C major near top: show at frets 9-12
+    // E2 x, A2 x, D3 f10=C(R), G3 f12=G(5), B3 f10=D? No.
+    // I'll use a slightly different voicing that stays within 12 frets:
+    // The C shape repeats at fret 12 (octave). Use: D3 f10=C(R), G3 f9=C? G3+9=64=E(3).
+    // G3+9=55+9=64=E4 (3rd). G3+12=55+12=67=G4 (5th).
+    // Let me just do D shape: D3 f10=C(R), G3 f12=G(5), e1 f12=E(3)
+    // and note B3 at fret 13 is omitted (beyond 12)
+    {s:2, f:10, role:'R'}, {s:3, f:12, role:'5'}, {s:5, f:12, role:'3'},
+    // add e1 f10=C? E4=64,+10=74=D(2nd). No.
+    // B3 f12: B3+12=71=B? MIDI 71=B4. Not in C major triad (C E G). Skip.
+    // Add A2 at fret 10 for a more complete shape: A2+10=55=G3=G(5)? A2=45,+10=55=G3. Yes 5th.
+    // Actually MIDI 55 = G3 which is the 5th of C major.
+  ]},
+};
+
+// Recalculate D shape properly
+CAGED_NOTES.D.dots = [
+  {s:1, f:10, role:'5'},  // A2+10=55=G3 (5th)
+  {s:2, f:10, role:'R'},  // D3+10=60=C4 (root)
+  {s:3, f:12, role:'5'},  // G3+12=67=G4 (5th) -- hmm that's 5th too
+  {s:5, f:12, role:'3'},  // E4+12=76=E5 (3rd)
+];
+// Actually G3+9=64=E4 (3rd). Let me fix:
+CAGED_NOTES.D.dots = [
+  {s:1, f:10, role:'5'},  // A2=45+10=55=G3 (5th of C)
+  {s:2, f:10, role:'R'},  // D3=50+10=60=C4 (root)
+  {s:3, f:9,  role:'3'},  // G3=55+9=64=E4 (3rd of C)
+  {s:4, f:10, role:'R'},  // B3=59+10=69=A4? No. 59+10=69. 69%12=9=A. That's A, not in triad.
+  // Fix: B3+13=72=C5(R) but out of range. Use B3+1=60=C4 at fret 1 -- wrong position.
+  // Drop B string for D shape above fret 10.
+  {s:5, f:12, role:'3'},  // E4=64+12=76=E5 (3rd)
+];
+// Remove the bad B string note
+CAGED_NOTES.D.dots = [
+  {s:1, f:10, role:'5'},
+  {s:2, f:10, role:'R'},
+  {s:3, f:9,  role:'3'},
+  {s:5, f:12, role:'3'},
+];
+
+// ── Canvas setup ──────────────────────────────────────────────────────────────
+const FRET_COUNT = 13;
+const STRING_COUNT = 6;
+const CELL_W = 52;
+const CELL_H = 34;
+const LEFT_PAD = 38;
+const TOP_PAD = 28;
+const NUT_W = 6;
+const BOT_PAD = 14;
+
+const canvas = document.getElementById('caged-canvas');
+const CW = LEFT_PAD + NUT_W + FRET_COUNT * CELL_W + 20;
+const CH = TOP_PAD + (STRING_COUNT - 1) * CELL_H + BOT_PAD;
+canvas.width = CW;
+canvas.height = CH;
+canvas.style.width = CW + 'px';
+canvas.style.height = CH + 'px';
+
+function sY(s) { return TOP_PAD + s * CELL_H; }
+function fX(f) { return f === 0 ? LEFT_PAD + NUT_W / 2 : LEFT_PAD + NUT_W + f * CELL_W - CELL_W / 2; }
+// fX gives center x of the zone between fret f-1 and fret f
+// For open: left of nut
+
+function drawCaged() {
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, CW, CH);
+  ctx.fillStyle = '#1a1410';
+  ctx.fillRect(0, 0, CW, CH);
+
+  // Shape zones (background bands)
+  const shapeOrder = ['C','A','G','E','D'];
+  shapeOrder.forEach(name => {
+    const sh = CAGED_NOTES[name];
+    const x1 = LEFT_PAD + NUT_W + sh.fretSpan[0] * CELL_W;
+    const x2 = LEFT_PAD + NUT_W + sh.fretSpan[1] * CELL_W;
+    const col = sh.color;
+    // Parse color to rgba
+    ctx.fillStyle = col + '18'; // very transparent
+    // Use hex alpha trick
+    ctx.globalAlpha = 0.12;
+    ctx.fillStyle = col;
+    ctx.fillRect(x1, TOP_PAD - 4, x2 - x1, (STRING_COUNT - 1) * CELL_H + 8);
+    ctx.globalAlpha = 1;
+    // Shape label at top
+    ctx.font = '700 11px "JetBrains Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = col;
+    ctx.globalAlpha = 0.7;
+    ctx.fillText(name, (x1 + x2) / 2, 12);
+    ctx.globalAlpha = 1;
+  });
+
+  // Nut
+  ctx.fillStyle = '#c8b99f';
+  ctx.fillRect(LEFT_PAD, TOP_PAD - 2, NUT_W, (STRING_COUNT - 1) * CELL_H + 4);
+
+  // Fret lines
+  for (let f = 1; f <= FRET_COUNT; f++) {
+    ctx.beginPath();
+    ctx.moveTo(LEFT_PAD + NUT_W + f * CELL_W, TOP_PAD);
+    ctx.lineTo(LEFT_PAD + NUT_W + f * CELL_W, TOP_PAD + (STRING_COUNT - 1) * CELL_H);
+    ctx.strokeStyle = 'rgba(255,255,255,.12)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  // Fret numbers
+  ctx.font = '400 10px "JetBrains Mono", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(250,246,240,.18)';
+  for (let f = 0; f <= FRET_COUNT; f++) {
+    const x = f === 0 ? LEFT_PAD + NUT_W / 2 : LEFT_PAD + NUT_W + f * CELL_W - CELL_W / 2;
+    ctx.fillText(f, x, 14);
+  }
+
+  // String lines
+  const STRING_LABELS_FR = ['E2','A2','D3','G3','B3','e1'];
+  for (let s = 0; s < STRING_COUNT; s++) {
+    ctx.beginPath();
+    ctx.moveTo(LEFT_PAD + NUT_W, sY(s));
+    ctx.lineTo(LEFT_PAD + NUT_W + FRET_COUNT * CELL_W, sY(s));
+    ctx.strokeStyle = 'rgba(200,180,140,.5)';
+    ctx.lineWidth = 1 + (STRING_COUNT - 1 - s) * 0.3;
+    ctx.stroke();
+    ctx.font = '500 10px "JetBrains Mono", monospace';
+    ctx.textAlign = 'right';
+    ctx.fillStyle = 'rgba(250,246,240,.3)';
+    ctx.fillText(STRING_LABELS_FR[s], LEFT_PAD - 4, sY(s) + 4);
+  }
+
+  // Draw dots for each shape
+  shapeOrder.forEach(name => {
+    const sh = CAGED_NOTES[name];
+    sh.dots.forEach(dot => {
+      const x = dot.f === 0
+        ? LEFT_PAD + NUT_W / 2
+        : LEFT_PAD + NUT_W + dot.f * CELL_W - CELL_W / 2;
+      const y = sY(dot.s);
+      const isRoot = dot.role === 'R';
+      const r = isRoot ? 13 : 9;
+
+      // Outer glow for roots
+      if (isRoot) {
+        ctx.beginPath();
+        ctx.arc(x, y, r + 3, 0, Math.PI * 2);
+        ctx.fillStyle = sh.color;
+        ctx.globalAlpha = 0.22;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = isRoot ? sh.color : sh.color;
+      ctx.globalAlpha = isRoot ? 1 : 0.55;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      if (isRoot) {
+        ctx.font = '700 9px "JetBrains Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#f4ece0';
+        ctx.fillText('R', x, y + 3);
+      } else if (dot.role === '3') {
+        ctx.font = '600 8px "JetBrains Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = 'rgba(250,246,240,.85)';
+        ctx.fillText('3', x, y + 3);
+      } else {
+        ctx.font = '600 8px "JetBrains Mono", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = 'rgba(250,246,240,.85)';
+        ctx.fillText('5', x, y + 3);
+      }
+    });
+  });
+}
+
+// ── Legend ────────────────────────────────────────────────────────────────────
+function buildLegend() {
+  const el = document.getElementById('caged-legend');
+  const shapeOrder = ['C','A','G','E','D'];
+  shapeOrder.forEach(name => {
+    const sh = CAGED_NOTES[name];
+    const item = document.createElement('div');
+    item.className = 'caged-legend-item';
+    item.style.cursor = 'pointer';
+    item.innerHTML = `
+      <div style="width:12px;height:12px;border-radius:50%;background:${sh.color};"></div>
+      <span style="color:rgba(250,246,240,.5);">Forma <strong style="color:${sh.color};">${name}</strong></span>
+    `;
+    item.title = `Escuchar raíz · Forma ${name}`;
+    item.addEventListener('click', async () => {
+      await initAudio();
+      synth.triggerAttackRelease('C4', '4n', Tone.now() + 0.05);
+    });
+    el.appendChild(item);
+  });
+}
+
+// ── Scale map ─────────────────────────────────────────────────────────────────
+function buildScaleMap() {
+  const el = document.getElementById('caged-scale-map');
+  const data = [
+    { shape: 'E', pos: 'Posición 1', frets: '0-4', note: 'La más estudiada en libros de guitarra.' },
+    { shape: 'D', pos: 'Posición 2', frets: '2-6', note: 'Comienza con el dedo 2 en la cuerda baja.' },
+    { shape: 'C', pos: 'Posición 3', frets: '4-8', note: 'Patrón simétrico en cuerdas medias.' },
+    { shape: 'A', pos: 'Posición 4', frets: '7-11', note: 'Favorita para solos de blues.' },
+    { shape: 'G', pos: 'Posición 5', frets: '9-13', note: 'Conecta de vuelta con la posición 1 una octava arriba.' },
+  ];
+  data.forEach(d => {
+    const sh = CAGED_NOTES[d.shape];
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:8px;margin-bottom:6px;background:rgba(160,92,32,.05);border:1px solid rgba(160,92,32,.12);';
+    row.innerHTML = `
+      <div style="width:24px;height:24px;border-radius:50%;background:${sh.color};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:var(--mono);font-size:11px;font-weight:700;color:#f4ece0;">${d.shape}</div>
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--ink2);">${d.pos} <span style="font-family:var(--mono);font-size:10px;color:var(--ink5);">(trastes ${d.frets})</span></div>
+        <div style="font-size:12px;color:var(--ink5);margin-top:2px;">${d.note}</div>
+      </div>
+    `;
+    el.appendChild(row);
+  });
+}
+
+// ── CAGED shapes list ─────────────────────────────────────────────────────────
+function buildCagedShapesList() {
+  const el = document.getElementById('caged-shapes-list');
+  const shapeOrder = ['C','A','G','E','D'];
+  const descs = {
+    C: 'Forma C · Raíz en cuerda B3 · Posición abierta',
+    A: 'Forma A · Raíz en cuerda A2 · Barre en traste 3',
+    G: 'Forma G · Raíces en E2 y e1 · Traste 5 aprox.',
+    E: 'Forma E · Raíz en cuerda E2 · Barre en traste 8',
+    D: 'Forma D · Raíz en cuerda D3 · Traste 10',
+  };
+  shapeOrder.forEach(name => {
+    const sh = CAGED_NOTES[name];
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;margin-bottom:6px;cursor:pointer;transition:background .15s;';
+    row.style.background = 'rgba(160,92,32,.06)';
+    row.innerHTML = `
+      <div style="width:28px;height:28px;border-radius:50%;background:${sh.color};display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;font-weight:700;color:#f4ece0;flex-shrink:0;">${name}</div>
+      <span style="font-size:13px;color:var(--ink3);">${descs[name]}</span>
+    `;
+    row.addEventListener('mouseenter', () => row.style.background = 'rgba(160,92,32,.12)');
+    row.addEventListener('mouseleave', () => row.style.background = 'rgba(160,92,32,.06)');
+    row.addEventListener('click', async () => {
+      await initAudio();
+      synth.triggerAttackRelease('C4', '4n', Tone.now() + 0.05);
+    });
+    el.appendChild(row);
+  });
+}
+
+// ── Audio ─────────────────────────────────────────────────────────────────────
+let synth = null;
+async function initAudio() {
+  if (synth) return;
+  await Tone.start();
+  const reverb = new Tone.Freeverb({ roomSize: 0.28, wet: 0.12 }).toDestination();
+  const comp = new Tone.Compressor({ threshold: -22, ratio: 4 }).connect(reverb);
+  synth = new Tone.PolySynth(Tone.Synth, {
+    oscillator: { type: 'triangle' },
+    envelope: { attack: 0.008, decay: 0.6, sustain: 0.1, release: 2.8 },
+    volume: -8,
+  }).connect(comp);
+}
+
+// Root click handler on canvas
+canvas.addEventListener('click', async e => {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const cx = (e.clientX - rect.left) * scaleX;
+  const cy = (e.clientY - rect.top) * scaleY;
+
+  // Find if click is near any root dot
+  const shapeOrder = ['C','A','G','E','D'];
+  for (const name of shapeOrder) {
+    const sh = CAGED_NOTES[name];
+    for (const dot of sh.dots) {
+      if (dot.role !== 'R') continue;
+      const x = dot.f === 0
+        ? LEFT_PAD + NUT_W / 2
+        : LEFT_PAD + NUT_W + dot.f * CELL_W - CELL_W / 2;
+      const y = sY(dot.s);
+      const dist = Math.sqrt((cx - x) ** 2 + (cy - y) ** 2);
+      if (dist < 16) {
+        await initAudio();
+        synth.triggerAttackRelease('C4', '4n', Tone.now() + 0.05);
+        // Flash
+        const ctx = canvas.getContext('2d');
+        ctx.beginPath();
+        ctx.arc(x, y, 18, 0, Math.PI * 2);
+        ctx.fillStyle = sh.color;
+        ctx.globalAlpha = 0.5;
+        ctx.fill();
+        ctx.globalAlpha = 1;
+        setTimeout(drawCaged, 300);
+        return;
+      }
+    }
+  }
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+buildCagedShapesList();
+buildLegend();
+buildScaleMap();
+drawCaged();
+</script>
+
+<footer style="background:var(--ink2);border-top:1px solid rgba(255,255,255,.06);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+  <div style="font-size:12px;color:var(--ink5);">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div style="display:flex;gap:20px;">
+    <a href="/privacidad" style="font-size:12px;color:var(--ink5);text-decoration:none;">Aviso de Privacidad</a>
+    <a href="/terminos" style="font-size:12px;color:var(--ink5);text-decoration:none;">Términos y Condiciones</a>
+    <a href="/cookies" style="font-size:12px;color:var(--ink5);text-decoration:none;">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

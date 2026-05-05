@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Figuras rítmicas y silencios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<style>
+:root{
+  --paper:#f4ece0;--paper2:#ebe1d2;--paper3:#ddd1bd;--paper4:#c8b99f;--paper5:#b8a890;
+  --copper:#a85a1e;--copper-lt:#c47a36;--copper-dk:#7a3e10;
+  --ink:#1c1410;--ink2:#2e2418;--ink3:#5a4a38;--ink4:#8a7a64;--ink5:#a09080;
+  --tonic:#a05c20;--subdom:#5a7abf;--dominant:#7a4abf;--relative:#4a7c59;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{font-family:var(--mono);font-size:.52em;font-weight:400;color:var(--ink4);letter-spacing:0;margin-left:2px;}
+.nav-link{padding:0 16px;height:60px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+.th-progress{position:fixed;top:56px;left:0;right:0;height:2px;background:rgba(160,92,32,.12);z-index:99;}
+.th-progress-bar{height:100%;background:var(--copper);width:0%;transition:width .08s linear;}
+
+.th-breadcrumb{background:var(--paper2);border-bottom:1px solid var(--paper4);padding:0 48px;height:40px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink5);}
+.th-breadcrumb a{color:var(--ink5);text-decoration:none;}
+.th-breadcrumb a:hover{color:var(--copper);}
+.th-breadcrumb .sep{opacity:.5;}
+.th-breadcrumb .current{color:var(--ink3);font-weight:500;}
+
+.th-hero{background:#13100c;padding:110px 48px 90px;text-align:center;overflow:hidden;}
+.th-chapter{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:28px;display:flex;align-items:center;justify-content:center;gap:14px;}
+.th-chapter::before,.th-chapter::after{content:'';display:block;height:1px;width:48px;background:var(--copper-lt);opacity:.35;}
+.th-title{font-family:var(--serif);font-size:clamp(54px,7.5vw,92px);font-weight:700;line-height:.92;letter-spacing:-.025em;color:var(--paper);margin-bottom:28px;}
+.th-title em{font-style:italic;color:var(--copper-lt);}
+.th-lead{font-family:var(--serif);font-size:clamp(17px,2vw,22px);font-style:italic;color:rgba(250,246,240,.58);max-width:580px;margin:0 auto 44px;line-height:1.65;}
+.th-scroll-hint{font-size:11px;color:rgba(250,246,240,.22);letter-spacing:.14em;text-transform:uppercase;}
+
+.th-section{padding:88px 48px;}
+.th-section.dark{background:#13100c;}
+.th-inner{max-width:1080px;margin:0 auto;}
+.th-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;display:block;}
+.th-section.dark .th-label{color:var(--copper-lt);}
+.th-h2{font-family:var(--serif);font-size:clamp(34px,4.5vw,56px);font-weight:700;line-height:1.02;letter-spacing:-.025em;color:var(--ink);margin-bottom:22px;}
+.th-section.dark .th-h2{color:var(--paper);}
+.th-body{font-size:15px;color:var(--ink3);line-height:1.85;max-width:640px;}
+.th-body+.th-body{margin-top:14px;}
+.th-section.dark .th-body{color:rgba(250,246,240,.58);}
+.th-body strong{color:var(--ink2);font-weight:600;}
+.th-section.dark .th-body strong{color:rgba(244,236,224,.92);}
+.th-split{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;}
+.th-callout{border-left:3px solid var(--copper);border-radius:0 8px 8px 0;padding:16px 20px;margin:28px 0;background:rgba(160,92,32,.07);}
+.th-section.dark .th-callout{background:rgba(255,255,255,.05);border-left-color:var(--copper-lt);}
+.th-callout-label{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);margin-bottom:7px;}
+.th-section.dark .th-callout-label{color:var(--copper-lt);}
+.th-callout p{font-size:14px;color:var(--ink3);line-height:1.65;}
+.th-section.dark .th-callout p{color:rgba(250,246,240,.58);}
+
+/* ── METRONOME ── */
+.metro-section{padding:88px 48px;background:var(--paper2);}
+.metro-card{background:#1a1410;border-radius:20px;padding:48px;max-width:800px;margin:0 auto;}
+.metro-title{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--paper);margin-bottom:32px;text-align:center;letter-spacing:-.01em;}
+.metro-sig-pills{display:flex;gap:10px;justify-content:center;margin-bottom:32px;}
+.metro-sig-pill{font-family:var(--mono);font-size:14px;font-weight:600;padding:9px 24px;border-radius:24px;border:2px solid rgba(255,255,255,.12);background:transparent;color:rgba(250,246,240,.45);cursor:pointer;transition:all .18s;}
+.metro-sig-pill:hover{border-color:var(--copper-lt);color:rgba(250,246,240,.8);}
+.metro-sig-pill.active{background:var(--copper);border-color:var(--copper-dk);color:#fff;}
+.metro-bpm-row{display:flex;align-items:center;gap:18px;justify-content:center;margin-bottom:36px;}
+.metro-bpm-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(250,246,240,.3);}
+.metro-bpm-val{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--copper-lt);min-width:48px;text-align:right;}
+.metro-slider{-webkit-appearance:none;appearance:none;width:220px;height:4px;border-radius:2px;background:rgba(255,255,255,.12);outline:none;cursor:pointer;}
+.metro-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--copper-lt);cursor:pointer;box-shadow:0 0 0 3px rgba(196,122,54,.2);}
+.metro-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--copper-lt);cursor:pointer;border:none;}
+.metro-beats-row{display:flex;gap:14px;justify-content:center;margin-bottom:28px;flex-wrap:wrap;}
+.metro-beat{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.12);transition:transform .1s,box-shadow .1s,background .1s,border-color .1s;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:600;color:rgba(250,246,240,.3);}
+.metro-beat.accent{width:54px;height:54px;font-size:13px;background:rgba(168,90,30,.15);border-color:rgba(196,122,54,.35);color:var(--copper-lt);}
+.metro-beat.sub-accent{background:rgba(168,90,30,.07);border-color:rgba(196,122,54,.2);color:rgba(196,122,54,.6);}
+.metro-beat.active{transform:scale(1.18);box-shadow:0 0 22px rgba(196,122,54,.45);background:rgba(196,122,54,.28);border-color:var(--copper-lt);color:#fff;}
+.metro-beat.accent.active{transform:scale(1.22);box-shadow:0 0 32px rgba(196,122,54,.6);background:rgba(196,122,54,.45);}
+.metro-play-btn{display:block;margin:0 auto 24px;background:var(--copper);color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;padding:13px 48px;border-radius:10px;border:none;cursor:pointer;transition:background .18s,transform .1s;}
+.metro-play-btn:hover{background:var(--copper-lt);transform:translateY(-1px);}
+.metro-play-btn:active{transform:translateY(0);}
+.metro-desc{text-align:center;font-size:13px;color:rgba(250,246,240,.38);line-height:1.6;font-style:italic;}
+
+/* ── NEXT ── */
+.th-next{background:var(--ink);padding:88px 48px;text-align:center;}
+.th-next-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink5);margin-bottom:18px;display:block;}
+.th-next-title{font-family:var(--serif);font-size:clamp(36px,5vw,56px);font-weight:700;color:var(--paper);margin-bottom:10px;letter-spacing:-.02em;}
+.th-next-sub{font-size:14px;color:var(--ink4);margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.th-next-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.th-next-btn{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:13px;font-weight:600;padding:13px 28px;border-radius:8px;text-decoration:none;transition:background .2s;}
+.th-next-btn:hover{background:var(--copper-dk);}
+.th-next-btn.sec{background:transparent;color:rgba(250,246,240,.5);border:1px solid rgba(255,255,255,.12);}
+.th-next-btn.sec:hover{color:var(--paper);border-color:rgba(255,255,255,.3);}
+.th-next-btn.disabled{background:transparent;color:rgba(250,246,240,.22);border:1px solid rgba(255,255,255,.07);cursor:default;pointer-events:none;}
+
+/* ── CHAPTER NAV ── */
+.chapter-nav{display:flex;gap:0;border-top:1px solid rgba(255,255,255,.06);margin-top:64px;}
+.chapter-nav-item{flex:1;padding:28px 24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;transition:background .18s;}
+.chapter-nav-item:hover{background:rgba(255,255,255,.03);}
+.chapter-nav-item.prev{border-right:1px solid rgba(255,255,255,.06);}
+.chapter-nav-item.disabled{cursor:default;pointer-events:none;opacity:.35;}
+.chapter-nav-dir{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(250,246,240,.25);}
+.chapter-nav-cap{font-size:11px;color:rgba(250,246,240,.25);}
+.chapter-nav-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--paper);}
+
+/* ── FIGURAS VISUAL ── */
+.figuras-card{background:#1a1410;border-radius:20px;padding:48px;max-width:860px;margin:0 auto;}
+.figuras-title{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--paper);margin-bottom:8px;text-align:center;letter-spacing:-.01em;}
+.figuras-subtitle{text-align:center;font-size:13px;color:rgba(250,246,240,.38);margin-bottom:36px;font-style:italic;}
+.figura-row{display:flex;align-items:center;gap:14px;margin-bottom:12px;cursor:pointer;}
+.figura-row:hover .figura-bar{filter:brightness(1.2);}
+.figura-symbol{font-family:var(--serif);font-size:22px;color:var(--paper);min-width:28px;text-align:center;}
+.figura-name{min-width:100px;font-size:12px;font-weight:600;color:rgba(250,246,240,.6);letter-spacing:.04em;}
+.figura-bar-wrap{flex:1;display:flex;gap:2px;height:36px;align-items:stretch;}
+.figura-bar{height:100%;border-radius:5px;transition:filter .15s,box-shadow .15s;}
+.figura-bar.playing{box-shadow:0 0 18px rgba(196,122,54,.6);}
+.figura-beats{min-width:56px;font-family:var(--mono);font-size:12px;color:rgba(250,246,240,.35);text-align:right;}
+
+@media(max-width:768px){
+  nav{padding:0 16px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav>*{flex-shrink:0;}
+  .th-breadcrumb{padding:0 20px;}
+  .th-hero{padding:80px 20px 64px;}
+  .th-section{padding:64px 20px;}
+  .th-split{grid-template-columns:1fr;gap:40px;}
+  .metro-section{padding:64px 20px;}
+  .metro-card{padding:28px 18px;}
+  .th-next{padding:64px 20px;}
+  .chapter-nav{flex-direction:column;}
+  .chapter-nav-item.prev{border-right:none;border-bottom:1px solid rgba(255,255,255,.06);}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link active">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<div class="th-progress"><div class="th-progress-bar" id="prog-bar"></div></div>
+
+<div class="th-breadcrumb">
+  <a href="/teoria">Teoría</a>
+  <span class="sep">›</span>
+  <a href="/teoria">Ritmo y Sonido</a>
+  <span class="sep">›</span>
+  <span class="current">Figuras rítmicas y silencios</span>
+</div>
+
+<!-- HERO -->
+<section class="th-hero">
+  <div class="th-chapter">Ritmo y Sonido · 02</div>
+  <h1 class="th-title">Figuras rítmicas<br><em>y silencios</em></h1>
+  <p class="th-lead">La unidad de tiempo en la música escrita: cómo se representa cada duración y su silencio equivalente.</p>
+  <div class="th-scroll-hint">↓ leer</div>
+</section>
+
+<!-- SECCIÓN 1: La notación -->
+<section class="th-section">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">La notación</span>
+        <h2 class="th-h2">Las figuras: <em>cuánto dura cada nota</em></h2>
+        <p class="th-body">La notación occidental usa cinco valores fundamentales: la <strong>redonda</strong> (4 tiempos), la <strong>blanca</strong> (2 tiempos), la <strong>negra</strong> (1 tiempo), la <strong>corchea</strong> (½ tiempo) y la <strong>semicorchea</strong> (¼ de tiempo). Cada valor dura exactamente la mitad del anterior, lo que crea la estructura jerárquica del ritmo en casi toda la música occidental.</p>
+        <p class="th-body">Esta división binaria no es arbitraria: permite combinar figuras de distinto valor para rellenar exactamente un compás, sin importar la firma de tiempo. Un compás de 4/4 puede llenarse con una redonda, con dos blancas, con cuatro negras, o con cualquier combinación que sume cuatro tiempos.</p>
+        <p class="th-body">Cada figura tiene un <strong>silencio equivalente</strong> con idéntica duración. El silencio de redonda, el silencio de blanca, el silencio de negra, el silencio de corchea y el silencio de semicorchea forman una familia paralela que convive con las notas en toda partitura.</p>
+        <div class="th-callout">
+          <div class="th-callout-label">Definición clave</div>
+          <p>Una figura no indica altura, solo duración. Una negra puede ser un Do, un Sol o cualquier nota — lo que cambia es cuánto dura, no cuál es.</p>
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--paper2);border:1px solid var(--paper3);border-radius:14px;padding:28px 24px;">
+          <p style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:20px;">Jerarquía de duraciones</p>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span style="font-family:var(--mono);font-size:11px;min-width:90px;color:var(--ink4);">Redonda</span>
+              <div style="flex:1;height:28px;background:rgba(168,90,30,.22);border:2px solid rgba(168,90,30,.4);border-radius:5px;"></div>
+              <span style="font-family:var(--mono);font-size:11px;color:var(--ink5);">4♩</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span style="font-family:var(--mono);font-size:11px;min-width:90px;color:var(--ink4);">Blanca</span>
+              <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:3px;">
+                <div style="height:24px;background:rgba(168,90,30,.13);border:2px solid rgba(168,90,30,.28);border-radius:5px;"></div>
+                <div style="height:24px;background:rgba(168,90,30,.13);border:2px solid rgba(168,90,30,.28);border-radius:5px;"></div>
+              </div>
+              <span style="font-family:var(--mono);font-size:11px;color:var(--ink5);">2♩</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span style="font-family:var(--mono);font-size:11px;min-width:90px;color:var(--ink4);">Negra</span>
+              <div style="flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:3px;">
+                <div style="height:20px;background:rgba(168,90,30,.1);border:1.5px solid rgba(168,90,30,.22);border-radius:4px;"></div>
+                <div style="height:20px;background:rgba(168,90,30,.1);border:1.5px solid rgba(168,90,30,.22);border-radius:4px;"></div>
+                <div style="height:20px;background:rgba(168,90,30,.1);border:1.5px solid rgba(168,90,30,.22);border-radius:4px;"></div>
+                <div style="height:20px;background:rgba(168,90,30,.1);border:1.5px solid rgba(168,90,30,.22);border-radius:4px;"></div>
+              </div>
+              <span style="font-family:var(--mono);font-size:11px;color:var(--ink5);">1♩</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span style="font-family:var(--mono);font-size:11px;min-width:90px;color:var(--ink4);">Corchea</span>
+              <div style="flex:1;display:grid;grid-template-columns:repeat(8,1fr);gap:2px;">
+                <div style="height:16px;background:rgba(90,122,191,.1);border:1.5px solid rgba(90,122,191,.22);border-radius:3px;"></div>
+                <div style="height:16px;background:rgba(90,122,191,.1);border:1.5px solid rgba(90,122,191,.22);border-radius:3px;"></div>
+                <div style="height:16px;background:rgba(90,122,191,.1);border:1.5px solid rgba(90,122,191,.22);border-radius:3px;"></div>
+                <div style="height:16px;background:rgba(90,122,191,.1);border:1.5px solid rgba(90,122,191,.22);border-radius:3px;"></div>
+                <div style="height:16px;background:rgba(90,122,191,.1);border:1.5px solid rgba(90,122,191,.22);border-radius:3px;"></div>
+                <div style="height:16px;background:rgba(90,122,191,.1);border:1.5px solid rgba(90,122,191,.22);border-radius:3px;"></div>
+                <div style="height:16px;background:rgba(90,122,191,.1);border:1.5px solid rgba(90,122,191,.22);border-radius:3px;"></div>
+                <div style="height:16px;background:rgba(90,122,191,.1);border:1.5px solid rgba(90,122,191,.22);border-radius:3px;"></div>
+              </div>
+              <span style="font-family:var(--mono);font-size:11px;color:var(--ink5);">½♩</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span style="font-family:var(--mono);font-size:11px;min-width:90px;color:var(--ink4);">Semicorchea</span>
+              <div style="flex:1;display:grid;grid-template-columns:repeat(16,1fr);gap:1px;">
+                <div style="height:12px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:2px;"></div><div style="height:12px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:2px;"></div><div style="height:12px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:2px;"></div><div style="height:12px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:2px;"></div>
+                <div style="height:12px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:2px;"></div><div style="height:12px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:2px;"></div><div style="height:12px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:2px;"></div><div style="height:12px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:2px;"></div>
+                <div style="height:12px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:2px;"></div><div style="height:12px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:2px;"></div><div style="height:12px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:2px;"></div><div style="height:12px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:2px;"></div>
+                <div style="height:12px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:2px;"></div><div style="height:12px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:2px;"></div><div style="height:12px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:2px;"></div><div style="height:12px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:2px;"></div>
+              </div>
+              <span style="font-family:var(--mono);font-size:11px;color:var(--ink5);">¼♩</span>
+            </div>
+          </div>
+          <p style="font-size:12px;color:var(--ink5);margin-top:16px;font-style:italic;line-height:1.6;">Cada figura es el doble de larga que la siguiente. La redonda equivale a 16 semicorcheas.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 2: Los valores -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Los valores</span>
+    <h2 class="th-h2">De cuatro tiempos <em>a un cuarto de tiempo</em></h2>
+    <p class="th-body">La <strong>negra</strong> es el pulso predeterminado en la mayoría de los contextos porque la mayoría de la música usa el pulso de negra: el clic del metrónomo equivale a una negra. Una <strong>redonda</strong> llena todo un compás de 4/4. Dos <strong>blancas</strong> lo llenan. Cuatro <strong>negras</strong> lo llenan. Ocho <strong>corcheas</strong> lo llenan. Dieciséis <strong>semicorcheas</strong> lo llenan.</p>
+    <p class="th-body">Este apilamiento es aditivo: se pueden combinar cualquier número de figuras que sumen 4 tiempos para completar un compás. Una redonda más dos corcheas es imposible porque excede 5 tiempos; pero una blanca con puntillo más una negra suma exactamente 4. La contabilidad de tiempos es la operación básica de la lectura rítmica.</p>
+    <p class="th-body">Una <strong>nota con puntillo</strong> añade la mitad de su valor a sí misma: una negra con puntillo dura 1.5 tiempos, una blanca con puntillo dura 3 tiempos. Los puntillos aparecen constantemente en la música porque permiten cruces de subdivisión que las figuras básicas no pueden expresar solas.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">Regla práctica</div>
+      <p>Cada compás es como una ecuación: los valores de todas las figuras deben sumar exactamente el número de tiempos indicado. Si no cuadra, hay un error de escritura.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN INTERACTIVA: Figuras -->
+<section class="metro-section">
+  <div style="max-width:1080px;margin:0 auto;">
+    <span class="th-label" style="display:block;text-align:center;margin-bottom:32px;">Interactivo</span>
+    <div class="figuras-card">
+      <div class="figuras-title">Figuras rítmicas — toca cada barra para escucharla</div>
+      <div class="figuras-subtitle">A 80 BPM · haz clic en cualquier fila para reproducir su duración</div>
+      <div id="figuras-visual"></div>
+      <p class="metro-desc" id="figuras-desc" style="margin-top:20px;">Haz clic en una figura para escuchar su duración.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 3: Los silencios -->
+<section class="th-section">
+  <div class="th-inner">
+    <span class="th-label">Los silencios</span>
+    <h2 class="th-h2">El silencio no es <em>la ausencia de música</em></h2>
+    <p class="th-body">Cada figura tiene un silencio equivalente que dura lo mismo. El silencio no es una ausencia sino una instrucción precisa: mantener el silencio por exactamente esa duración. En el ritmo, silencio y sonido tienen el mismo peso; ambos ocupan tiempo, ambos articulan la frase.</p>
+    <p class="th-body">Los músicos de jazz hablan del "espacio" como decisión compositiva. Charlie Parker era tan conocido por lo que no tocaba como por sus ideas melódicas. Un fraseo sin silencios puede ser técnicamente brillante pero resulta agotador al oído, igual que un texto sin puntuación.</p>
+    <p class="th-body">El músico que controla los silencios controla la forma de la frase. Los puntos de respiro, la tensión y la resolución dependen de dónde caen los descansos. Practicar con figuras de silencio es tan importante como practicar con notas.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">Perspectiva</div>
+      <p>"Una frase sin silencios es como un texto sin puntuación: técnicamente legible, pero incómodo de leer."</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 4: La subdivisión -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">La subdivisión</span>
+    <h2 class="th-h2">Contar hacia adentro: <em>el "y" entre los tiempos</em></h2>
+    <p class="th-body">La subdivisión consiste en dividir mentalmente cada tiempo en unidades más pequeñas mientras se toca. Contar "1-y-2-y-3-y-4-y" subdivide cada negra en dos corcheas. Contar "1-e-y-a-2-e-y-a" la divide en cuatro semicorcheas. Esta cuadrícula interna es lo que permite a un músico colocar notas con precisión entre los tiempos.</p>
+    <p class="th-body">Sin subdivisión, las notas de corchea y semicorchea quedan "a ojo": pueden sonar aproximadamente en el lugar correcto, pero la precisión rítmica se pierde especialmente a tempos rápidos. El baterista subdivide de forma explícita con el hi-hat; el guitarrista debe hacerlo de forma interna mientras toca la melodía.</p>
+    <p class="th-body">La técnica se transfiere a cualquier compás. En 6/8 se cuenta "1-y-a-2-y-a" para subdividir cada tiempo en tres corcheas. La subdivisión es la base de la precisión rítmica a cualquier tempo, y se desarrolla con práctica metódica más que con talento innato.</p>
+  </div>
+</section>
+
+<!-- NEXT / NAV -->
+<section class="th-next">
+  <span class="th-next-label">Navegar capítulos</span>
+  <h2 class="th-next-title">Continúa la serie</h2>
+  <p class="th-next-sub">Las figuras son el vocabulario del ritmo escrito. El siguiente paso es aprender cómo desplazar el acento.</p>
+  <div class="th-next-btns">
+    <a href="/teoria/ritmo/sincopa" class="th-next-btn">Síncopa y contratiempo →</a>
+    <a href="/teoria/ritmo" class="th-next-btn sec">← Pulso, Tempo y Compás</a>
+  </div>
+  <div class="chapter-nav">
+    <a href="/teoria/ritmo" class="chapter-nav-item prev">
+      <span class="chapter-nav-dir">← Anterior</span>
+      <span class="chapter-nav-cap">Ritmo y Sonido · 01</span>
+      <span class="chapter-nav-title">Pulso, Tempo y Compás</span>
+    </a>
+    <a href="/teoria/ritmo/sincopa" class="chapter-nav-item">
+      <span class="chapter-nav-dir">Siguiente →</span>
+      <span class="chapter-nav-cap">Ritmo y Sonido · 03</span>
+      <span class="chapter-nav-title">Síncopa y contratiempo</span>
+    </a>
+  </div>
+</section>
+
+<script>
+// ── Progress bar ──────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('prog-bar').style.width = (h > 0 ? Math.round(window.scrollY / h * 100) : 0) + '%';
+});
+
+// ── Figuras interactive visual ────────────────────────────────────────────────
+const BPM = 80;
+const BEAT_SECS = 60 / BPM;
+
+const FIGURAS = [
+  {
+    name: 'Redonda',
+    symbol: '𝅝',
+    beats: 4,
+    cells: 16,
+    colorFill: 'rgba(168,90,30,.55)',
+    colorBorder: 'rgba(196,122,54,.8)',
+    toneNote: '1n',
+    label: '4 tiempos',
+    pitch: 'C4'
+  },
+  {
+    name: 'Blanca',
+    symbol: '𝅗𝅥',
+    beats: 2,
+    cells: 8,
+    colorFill: 'rgba(168,90,30,.35)',
+    colorBorder: 'rgba(196,122,54,.55)',
+    toneNote: '2n',
+    label: '2 tiempos',
+    pitch: 'C4'
+  },
+  {
+    name: 'Negra',
+    symbol: '♩',
+    beats: 1,
+    cells: 4,
+    colorFill: 'rgba(200,185,159,.45)',
+    colorBorder: 'rgba(200,185,159,.7)',
+    toneNote: '4n',
+    label: '1 tiempo',
+    pitch: 'C4'
+  },
+  {
+    name: 'Corchea',
+    symbol: '♪',
+    beats: 0.5,
+    cells: 2,
+    colorFill: 'rgba(221,209,189,.35)',
+    colorBorder: 'rgba(221,209,189,.6)',
+    toneNote: '8n',
+    label: '½ tiempo',
+    pitch: 'C4'
+  },
+  {
+    name: 'Semicorchea',
+    symbol: '𝅘𝅥𝅯',
+    beats: 0.25,
+    cells: 1,
+    colorFill: 'rgba(235,225,210,.28)',
+    colorBorder: 'rgba(235,225,210,.5)',
+    toneNote: '16n',
+    label: '¼ tiempo',
+    pitch: 'C4'
+  }
+];
+
+const TOTAL_CELLS = 16;
+const container = document.getElementById('figuras-visual');
+let activeSynth = null;
+
+FIGURAS.forEach((fig, idx) => {
+  const row = document.createElement('div');
+  row.className = 'figura-row';
+  row.id = 'figura-row-' + idx;
+
+  const sym = document.createElement('span');
+  sym.className = 'figura-symbol';
+  sym.textContent = fig.symbol;
+
+  const nameEl = document.createElement('span');
+  nameEl.className = 'figura-name';
+  nameEl.textContent = fig.name;
+
+  const barWrap = document.createElement('div');
+  barWrap.className = 'figura-bar-wrap';
+
+  // Build cells: one big bar spanning fig.cells proportional slots,
+  // then remaining cells dimmed
+  const fullBar = document.createElement('div');
+  fullBar.className = 'figura-bar';
+  fullBar.style.flex = fig.cells;
+  fullBar.style.background = fig.colorFill;
+  fullBar.style.border = '2px solid ' + fig.colorBorder;
+  fullBar.id = 'figura-fill-' + idx;
+  barWrap.appendChild(fullBar);
+
+  // Remaining dimmed cells
+  const remaining = TOTAL_CELLS - fig.cells;
+  if (remaining > 0) {
+    const dimBar = document.createElement('div');
+    dimBar.style.flex = remaining;
+    dimBar.style.height = '100%';
+    dimBar.style.background = 'rgba(255,255,255,.04)';
+    dimBar.style.border = '1px solid rgba(255,255,255,.07)';
+    dimBar.style.borderRadius = '4px';
+    barWrap.appendChild(dimBar);
+  }
+
+  const beats = document.createElement('span');
+  beats.className = 'figura-beats';
+  beats.textContent = fig.label;
+
+  row.appendChild(sym);
+  row.appendChild(nameEl);
+  row.appendChild(barWrap);
+  row.appendChild(beats);
+  container.appendChild(row);
+
+  row.addEventListener('click', async () => {
+    await Tone.start();
+    document.getElementById('figuras-desc').textContent = 'Reproduciendo: ' + fig.name + ' (' + fig.label + ')';
+
+    // Reset all
+    FIGURAS.forEach((_, i) => {
+      const bar = document.getElementById('figura-fill-' + i);
+      if (bar) bar.classList.remove('playing');
+    });
+
+    if (activeSynth) {
+      try { activeSynth.dispose(); } catch(e) {}
+      activeSynth = null;
+    }
+
+    Tone.getTransport().stop();
+    Tone.getTransport().cancel();
+    Tone.getTransport().bpm.value = BPM;
+
+    const synth = new Tone.Synth({
+      oscillator: { type: 'triangle' },
+      envelope: { attack: 0.01, decay: 0.1, sustain: 0.7, release: 0.3 }
+    }).toDestination();
+    synth.volume.value = -8;
+    activeSynth = synth;
+
+    fullBar.classList.add('playing');
+    synth.triggerAttackRelease(fig.pitch, fig.toneNote);
+
+    const durMs = fig.beats * BEAT_SECS * 1000;
+    setTimeout(() => {
+      fullBar.classList.remove('playing');
+      document.getElementById('figuras-desc').textContent = 'Haz clic en una figura para escuchar su duración.';
+      try { synth.dispose(); } catch(e) {}
+      if (activeSynth === synth) activeSynth = null;
+    }, durMs + 400);
+  });
+});
+</script>
+
+<footer class="tm-footer-legal" style="background:var(--ink2);border-top:1px solid rgba(255,255,255,.06);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+  <div class="tm-f-copy" style="font-size:12px;color:var(--ink5);">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div class="tm-f-links" style="display:flex;gap:20px;">
+    <a href="/privacidad" style="font-size:12px;color:var(--ink5);text-decoration:none;">Aviso de Privacidad</a>
+    <a href="/terminos" style="font-size:12px;color:var(--ink5);text-decoration:none;">Términos y Condiciones</a>
+    <a href="/cookies" style="font-size:12px;color:var(--ink5);text-decoration:none;">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

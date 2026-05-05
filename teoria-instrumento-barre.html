@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Acordes barre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<style>
+:root{
+  --paper:#f4ece0;--paper2:#ebe1d2;--paper3:#ddd1bd;--paper4:#c8b99f;--paper5:#b8a890;
+  --copper:#a85a1e;--copper-lt:#c47a36;--copper-dk:#7a3e10;
+  --ink:#1c1410;--ink2:#2e2418;--ink3:#5a4a38;--ink4:#8a7a64;--ink5:#a09080;
+  --tonic:#a05c20;--subdom:#5a7abf;--dominant:#7a4abf;--relative:#4a7c59;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{font-family:var(--mono);font-size:.52em;font-weight:400;color:var(--ink4);letter-spacing:0;margin-left:2px;}
+.nav-link{padding:0 16px;height:60px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+.th-progress{position:fixed;top:56px;left:0;right:0;height:2px;background:rgba(160,92,32,.12);z-index:99;}
+.th-progress-bar{height:100%;background:var(--copper);width:0%;transition:width .08s linear;}
+
+.th-breadcrumb{background:var(--paper2);border-bottom:1px solid var(--paper4);padding:0 48px;height:40px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink5);}
+.th-breadcrumb a{color:var(--ink5);text-decoration:none;}
+.th-breadcrumb a:hover{color:var(--copper);}
+.th-breadcrumb .sep{opacity:.5;}
+.th-breadcrumb .current{color:var(--ink3);font-weight:500;}
+
+.th-hero{background:#13100c;padding:110px 48px 90px;text-align:center;overflow:hidden;}
+.th-chapter{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:28px;display:flex;align-items:center;justify-content:center;gap:14px;}
+.th-chapter::before,.th-chapter::after{content:'';display:block;height:1px;width:48px;background:var(--copper-lt);opacity:.35;}
+.th-title{font-family:var(--serif);font-size:clamp(54px,7.5vw,92px);font-weight:700;line-height:.92;letter-spacing:-.025em;color:var(--paper);margin-bottom:28px;}
+.th-title em{font-style:italic;color:var(--copper-lt);}
+.th-lead{font-family:var(--serif);font-size:clamp(17px,2vw,22px);font-style:italic;color:rgba(250,246,240,.58);max-width:580px;margin:0 auto 44px;line-height:1.65;}
+.th-scroll-hint{font-size:11px;color:rgba(250,246,240,.22);letter-spacing:.14em;text-transform:uppercase;}
+
+.th-section{padding:88px 48px;}
+.th-section.dark{background:#13100c;}
+.th-inner{max-width:1080px;margin:0 auto;}
+.th-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;display:block;}
+.th-section.dark .th-label{color:var(--copper-lt);}
+.th-h2{font-family:var(--serif);font-size:clamp(34px,4.5vw,56px);font-weight:700;line-height:1.02;letter-spacing:-.025em;color:var(--ink);margin-bottom:22px;}
+.th-section.dark .th-h2{color:var(--paper);}
+.th-body{font-size:15px;color:var(--ink3);line-height:1.85;max-width:640px;}
+.th-body+.th-body{margin-top:14px;}
+.th-section.dark .th-body{color:rgba(250,246,240,.58);}
+.th-body strong{color:var(--ink2);font-weight:600;}
+.th-section.dark .th-body strong{color:rgba(244,236,224,.92);}
+.th-split{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;}
+.th-callout{border-left:3px solid var(--copper);border-radius:0 8px 8px 0;padding:16px 20px;margin:28px 0;background:rgba(160,92,32,.07);}
+.th-section.dark .th-callout{background:rgba(255,255,255,.05);border-left-color:var(--copper-lt);}
+.th-callout-label{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);margin-bottom:7px;}
+.th-section.dark .th-callout-label{color:var(--copper-lt);}
+.th-callout p{font-size:14px;color:var(--ink3);line-height:1.65;}
+.th-section.dark .th-callout p{color:rgba(250,246,240,.58);}
+
+/* ── CHORD DIAGRAM ── */
+.chord-diagrams{display:flex;gap:48px;flex-wrap:wrap;justify-content:center;margin:36px 0;}
+.chord-diagram{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:16px;padding:28px 24px;text-align:center;}
+.chord-diagram-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--paper);margin-bottom:4px;}
+.chord-diagram-sub{font-size:11px;color:rgba(250,246,240,.35);letter-spacing:.08em;margin-bottom:20px;}
+.chord-play-btn{display:inline-flex;align-items:center;gap:6px;margin-top:16px;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:8px 18px;border-radius:6px;border:none;cursor:pointer;transition:background .18s;}
+.chord-play-btn:hover{background:var(--copper-lt);}
+
+/* ── NEXT ── */
+.th-next{background:var(--ink);padding:88px 48px;text-align:center;}
+.th-next-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink5);margin-bottom:18px;display:block;}
+.th-next-title{font-family:var(--serif);font-size:clamp(36px,5vw,56px);font-weight:700;color:var(--paper);margin-bottom:10px;letter-spacing:-.02em;}
+.th-next-sub{font-size:14px;color:var(--ink4);margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.th-next-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.th-next-btn{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:13px;font-weight:600;padding:13px 28px;border-radius:8px;text-decoration:none;transition:background .2s;}
+.th-next-btn:hover{background:var(--copper-dk);}
+.th-next-btn.sec{background:transparent;color:rgba(250,246,240,.5);border:1px solid rgba(255,255,255,.12);}
+.th-next-btn.sec:hover{color:var(--paper);border-color:rgba(255,255,255,.3);}
+
+/* ── CHAPTER NAV ── */
+.chapter-nav{display:flex;gap:0;border-top:1px solid rgba(255,255,255,.06);margin-top:64px;}
+.chapter-nav-item{flex:1;padding:28px 24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;transition:background .18s;}
+.chapter-nav-item:hover{background:rgba(255,255,255,.03);}
+.chapter-nav-item.prev{border-right:1px solid rgba(255,255,255,.06);}
+.chapter-nav-item.disabled{cursor:default;pointer-events:none;opacity:.35;}
+.chapter-nav-dir{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(250,246,240,.25);}
+.chapter-nav-cap{font-size:11px;color:rgba(250,246,240,.25);}
+.chapter-nav-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--paper);}
+
+@media(max-width:768px){
+  nav{padding:0 16px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav>*{flex-shrink:0;}
+  .th-breadcrumb{padding:0 20px;}
+  .th-hero{padding:80px 20px 64px;}
+  .th-section{padding:64px 20px;}
+  .th-split{grid-template-columns:1fr;gap:40px;}
+  .th-next{padding:64px 20px;}
+  .chapter-nav{flex-direction:column;}
+  .chapter-nav-item.prev{border-right:none;border-bottom:1px solid rgba(255,255,255,.06);}
+  .chord-diagrams{gap:24px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link active">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<div class="th-progress"><div class="th-progress-bar" id="prog-bar"></div></div>
+
+<div class="th-breadcrumb">
+  <a href="/teoria">Teoría</a>
+  <span class="sep">›</span>
+  <a href="/teoria/instrumento">Teoría en el Instrumento</a>
+  <span class="sep">›</span>
+  <span class="current">Acordes barre</span>
+</div>
+
+<!-- HERO -->
+<section class="th-hero">
+  <div class="th-chapter">Teoría en el Instrumento · 04</div>
+  <h1 class="th-title">Acordes<br><em>barre</em></h1>
+  <p class="th-lead">Cómo la cejilla convierte cualquier forma abierta en un acorde movible por todo el mástil.</p>
+  <div class="th-scroll-hint">↓ leer</div>
+</section>
+
+<!-- SECCIÓN 1: El principio del barre -->
+<section class="th-section">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">El principio del barre</span>
+        <h2 class="th-h2">El índice como <em>traste artificial</em></h2>
+        <p class="th-body">Un <strong>acorde barre</strong> utiliza el dedo índice para presionar todas o la mayoría de las cuerdas en un mismo traste, funcionando como una cejilla móvil. Esto permite que los demás dedos formen las mismas formas de acordes abiertos conocidas por encima del índice. El resultado es un acorde que puede desplazarse a cualquier traste, transponiendo la armonía un semitono por cada posición.</p>
+        <p class="th-body">Dos formas de acordes abiertos son las fuentes más comunes para los barres: la forma E (utilizando las cuerdas 1 a 6) y la forma A (utilizando las cuerdas 1 a 5, con frecuencia usando el anular o el meñique para pisar las cuerdas 1 a 4 en el segundo traste de la forma). Estas dos formas cubren los 12 acordes mayores y sus 12 equivalentes menores.</p>
+        <p class="th-body">La economía del sistema es notable: en lugar de aprender docenas de formas distintas para cada tonalidad, el guitarrista aprende dos formas y las desplaza por el mástil. Todo acorde mayor o menor alcanzable con cuerdas al aire tiene un equivalente barre en cualquier región del diapasón.</p>
+        <div class="th-callout">
+          <div class="th-callout-label">Por qué funciona</div>
+          <p>El índice reemplaza la cejilla de la guitarra. Las notas al aire del acorde abierto suenan ahora desde el traste barre, exactamente como si el instrumento estuviera afinado más alto.</p>
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--paper2);border:1px solid var(--paper3);border-radius:14px;padding:28px 24px;">
+          <p style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:18px;">Forma E movida por el mástil</p>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="font-family:var(--mono);font-size:11px;color:var(--copper);min-width:32px;font-weight:700;">Traste 1</div>
+              <div style="flex:1;padding:9px 12px;background:rgba(160,92,32,.07);border:1.5px solid rgba(160,92,32,.2);border-radius:7px;font-family:var(--serif);font-size:15px;color:var(--ink);">F mayor</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="font-family:var(--mono);font-size:11px;color:var(--copper);min-width:32px;font-weight:700;">Traste 2</div>
+              <div style="flex:1;padding:9px 12px;background:rgba(160,92,32,.07);border:1.5px solid rgba(160,92,32,.2);border-radius:7px;font-family:var(--serif);font-size:15px;color:var(--ink);">F♯ mayor</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="font-family:var(--mono);font-size:11px;color:var(--copper);min-width:32px;font-weight:700;">Traste 3</div>
+              <div style="flex:1;padding:9px 12px;background:rgba(160,92,32,.07);border:1.5px solid rgba(160,92,32,.2);border-radius:7px;font-family:var(--serif);font-size:15px;color:var(--ink);">G mayor</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="font-family:var(--mono);font-size:11px;color:var(--copper);min-width:32px;font-weight:700;">Traste 5</div>
+              <div style="flex:1;padding:9px 12px;background:rgba(160,92,32,.14);border:1.5px solid rgba(160,92,32,.35);border-radius:7px;font-family:var(--serif);font-size:15px;font-weight:700;color:var(--copper-dk);">A mayor</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="font-family:var(--mono);font-size:11px;color:var(--copper);min-width:32px;font-weight:700;">Traste 7</div>
+              <div style="flex:1;padding:9px 12px;background:rgba(160,92,32,.07);border:1.5px solid rgba(160,92,32,.2);border-radius:7px;font-family:var(--serif);font-size:15px;color:var(--ink);">B mayor</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="font-family:var(--mono);font-size:11px;color:var(--copper);min-width:32px;font-weight:700;">Traste 10</div>
+              <div style="flex:1;padding:9px 12px;background:rgba(160,92,32,.07);border:1.5px solid rgba(160,92,32,.2);border-radius:7px;font-family:var(--serif);font-size:15px;color:var(--ink);">D mayor</div>
+            </div>
+          </div>
+          <p style="font-size:12px;color:var(--ink5);margin-top:16px;font-style:italic;line-height:1.6;">La raíz siempre está en la 6.ª cuerda, en el traste donde ceja el índice.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 2: Forma E y forma A -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Forma E y forma A</span>
+    <h2 class="th-h2">Dos formas, <em>24 acordes mayores y menores</em></h2>
+    <p class="th-body">El <strong>barre forma E</strong> coloca el índice en el traste n y forma un acorde de Mi mayor abierto a partir del traste n+1. La raíz queda en la 6.ª cuerda (Mi grave) en el traste donde ceja el índice. Traste 1 produce Fa mayor, traste 2 produce Fa sostenido mayor, traste 3 produce Sol mayor, y así sucesivamente por todo el mástil.</p>
+    <p class="th-body">El <strong>barre forma A</strong> coloca la raíz en la 5.ª cuerda (La) en el traste donde ceja el índice. Traste 2 produce Si mayor, traste 3 produce Do mayor, traste 5 produce Re mayor. Cada forma cuenta además con una variante menor (forma Em, forma Am) que genera acordes menores en cada posición.</p>
+    <p class="th-body">Con solo estas cuatro variantes (E mayor, E menor, A mayor, A menor) el guitarrista tiene acceso a los 24 acordes mayores y menores en cualquier tonalidad, sin necesidad de aprender formas adicionales para cada una. Esto convierte el sistema barre en la base práctica de toda la armonía movible en la guitarra.</p>
+
+    <!-- Chord diagrams -->
+    <div class="chord-diagrams">
+      <!-- A major barre E-shape at fret 5 -->
+      <div class="chord-diagram">
+        <div class="chord-diagram-title">La mayor (forma E)</div>
+        <div class="chord-diagram-sub">Barre en traste 5</div>
+        <svg width="180" height="210" viewBox="0 0 180 210" xmlns="http://www.w3.org/2000/svg">
+          <!-- Fret label -->
+          <text x="14" y="52" font-family="JetBrains Mono, monospace" font-size="10" fill="rgba(250,246,240,0.4)" text-anchor="end">5fr</text>
+          <!-- Strings (vertical lines) -->
+          <line x1="30" y1="36" x2="30" y2="196" stroke="rgba(250,246,240,0.25)" stroke-width="1.5"/>
+          <line x1="58" y1="36" x2="58" y2="196" stroke="rgba(250,246,240,0.25)" stroke-width="1.5"/>
+          <line x1="86" y1="36" x2="86" y2="196" stroke="rgba(250,246,240,0.25)" stroke-width="1.5"/>
+          <line x1="114" y1="36" x2="114" y2="196" stroke="rgba(250,246,240,0.25)" stroke-width="1.5"/>
+          <line x1="142" y1="36" x2="142" y2="196" stroke="rgba(250,246,240,0.25)" stroke-width="1.5"/>
+          <line x1="170" y1="36" x2="170" y2="196" stroke="rgba(250,246,240,0.25)" stroke-width="1.5"/>
+          <!-- Frets (horizontal lines) -->
+          <line x1="30" y1="36" x2="170" y2="36" stroke="rgba(250,246,240,0.5)" stroke-width="2.5"/>
+          <line x1="30" y1="76" x2="170" y2="76" stroke="rgba(250,246,240,0.15)" stroke-width="1"/>
+          <line x1="30" y1="116" x2="170" y2="116" stroke="rgba(250,246,240,0.15)" stroke-width="1"/>
+          <line x1="30" y1="156" x2="170" y2="156" stroke="rgba(250,246,240,0.15)" stroke-width="1"/>
+          <line x1="30" y1="196" x2="170" y2="196" stroke="rgba(250,246,240,0.15)" stroke-width="1"/>
+          <!-- Barre bar across all 6 strings at fret 1 (y=56) -->
+          <rect x="22" y="44" width="156" height="22" rx="11" fill="rgba(196,122,54,0.75)"/>
+          <!-- Finger 2: string 3 (86), fret 2 (y=96) -->
+          <circle cx="86" cy="96" r="11" fill="rgba(196,122,54,0.9)"/>
+          <!-- Finger 3: string 5 (142), fret 3 (y=136) -->
+          <circle cx="142" cy="136" r="11" fill="rgba(196,122,54,0.9)"/>
+          <!-- Finger 4: string 4 (114), fret 3 (y=136) -->
+          <circle cx="114" cy="136" r="11" fill="rgba(196,122,54,0.9)"/>
+          <!-- Root label on string 6 (30), barre -->
+          <text x="30" y="60" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#13100c" text-anchor="middle">R</text>
+        </svg>
+        <button class="chord-play-btn" id="play-amaj">&#9654; Escuchar</button>
+      </div>
+
+      <!-- C major barre A-shape at fret 3 -->
+      <div class="chord-diagram">
+        <div class="chord-diagram-title">Do mayor (forma A)</div>
+        <div class="chord-diagram-sub">Barre en traste 3</div>
+        <svg width="180" height="210" viewBox="0 0 180 210" xmlns="http://www.w3.org/2000/svg">
+          <!-- Fret label -->
+          <text x="14" y="52" font-family="JetBrains Mono, monospace" font-size="10" fill="rgba(250,246,240,0.4)" text-anchor="end">3fr</text>
+          <!-- Strings (vertical lines) -->
+          <line x1="30" y1="36" x2="30" y2="196" stroke="rgba(250,246,240,0.12)" stroke-width="1.5" stroke-dasharray="4,3"/>
+          <line x1="58" y1="36" x2="58" y2="196" stroke="rgba(250,246,240,0.25)" stroke-width="1.5"/>
+          <line x1="86" y1="36" x2="86" y2="196" stroke="rgba(250,246,240,0.25)" stroke-width="1.5"/>
+          <line x1="114" y1="36" x2="114" y2="196" stroke="rgba(250,246,240,0.25)" stroke-width="1.5"/>
+          <line x1="142" y1="36" x2="142" y2="196" stroke="rgba(250,246,240,0.25)" stroke-width="1.5"/>
+          <line x1="170" y1="36" x2="170" y2="196" stroke="rgba(250,246,240,0.25)" stroke-width="1.5"/>
+          <!-- X mark on string 6 (muted) -->
+          <text x="30" y="22" font-size="13" fill="rgba(250,246,240,0.3)" text-anchor="middle" font-family="Inter,sans-serif">✕</text>
+          <!-- Frets -->
+          <line x1="30" y1="36" x2="170" y2="36" stroke="rgba(250,246,240,0.5)" stroke-width="2.5"/>
+          <line x1="30" y1="76" x2="170" y2="76" stroke="rgba(250,246,240,0.15)" stroke-width="1"/>
+          <line x1="30" y1="116" x2="170" y2="116" stroke="rgba(250,246,240,0.15)" stroke-width="1"/>
+          <line x1="30" y1="156" x2="170" y2="156" stroke="rgba(250,246,240,0.15)" stroke-width="1"/>
+          <line x1="30" y1="196" x2="170" y2="196" stroke="rgba(250,246,240,0.15)" stroke-width="1"/>
+          <!-- Barre bar across strings 2-6 (58 to 170) at fret 1 -->
+          <rect x="50" y="44" width="128" height="22" rx="11" fill="rgba(196,122,54,0.75)"/>
+          <!-- Finger 2: string 4 (114), fret 2 (y=96) -->
+          <circle cx="114" cy="96" r="11" fill="rgba(196,122,54,0.9)"/>
+          <!-- Finger 3: string 3 (86), fret 2 (y=96) -->
+          <circle cx="86" cy="96" r="11" fill="rgba(196,122,54,0.9)"/>
+          <!-- Finger 4: string 2 (58) fret 2 (y=96) — mini-barre -->
+          <circle cx="58" cy="96" r="11" fill="rgba(196,122,54,0.9)"/>
+          <!-- Root label on string 5 (58 is string 2 in A-shape, root on string 5 = 142) -->
+          <text x="142" y="60" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#13100c" text-anchor="middle">R</text>
+        </svg>
+        <button class="chord-play-btn" id="play-cmaj">&#9654; Escuchar</button>
+      </div>
+    </div>
+
+    <div class="th-callout">
+      <div class="th-callout-label">La nota raíz</div>
+      <p>Identificar en qué traste está la nota raíz es todo lo que se necesita para nombrar el acorde. Para la forma E la raíz está en la 6.ª cuerda; para la forma A está en la 5.ª cuerda. El resto se calcula automáticamente con el sistema de trastes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 3: La técnica -->
+<section class="th-section">
+  <div class="th-inner">
+    <span class="th-label">La técnica</span>
+    <h2 class="th-h2">El mayor obstáculo <em>de la guitarra para principiantes</em></h2>
+    <p class="th-body">Los acordes barre requieren una fuerza y precisión en la mano izquierda considerablemente mayores que los acordes abiertos. El dedo índice debe aplicar presión uniforme en todas las cuerdas simultáneamente evitando el traste metálico. Los problemas más comunes: el índice se dobla en la articulación media, la muñeca no rota lo suficiente, el pulgar queda demasiado arriba del mástil.</p>
+    <p class="th-body">La solución pasa por dos ajustes técnicos concretos. El primero es la <strong>posición dentro del traste</strong>: el dedo debe colocarse justo detrás del traste metálico (no en el centro del espacio entre trastes), lo que minimiza la fuerza necesaria para producir el sonido limpio. El segundo es la <strong>rotación del índice</strong>: en lugar de usar el lado blando del dedo, se rota ligeramente para usar el borde óseo, que transmite la presión con mayor eficiencia.</p>
+    <p class="th-body">El progreso requiere repetición diaria constante durante dos a cuatro semanas. No es una cuestión de técnica solamente, sino de desarrollo muscular gradual. Practicar el barre en trastes más altos (7 a 9) donde la tensión de las cuerdas es menor ayuda a construir la forma correcta antes de trasladarla a posiciones bajas del mástil.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">El truco del traste alto</div>
+      <p>Practica el barre en el traste 7 o más arriba al principio. Las cuerdas ofrecen menos resistencia y el tamaño del traste es más pequeño, lo que hace más fácil conseguir el sonido limpio mientras se desarrolla la técnica.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 4: Chord quality -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Calidad del acorde</span>
+    <h2 class="th-h2">Mayor, menor, séptima: <em>cuatro acordes por posición</em></h2>
+    <p class="th-body">Una vez establecida la posición del barre, cambiar la <strong>calidad del acorde</strong> requiere solo pequeñas modificaciones en los demás dedos. Forma E en traste 5 produce La mayor. Levantar el anular de la 3.ª cuerda produce La menor. Levantar también el anular de la 1.ª cuerda produce La dominante séptima. Levantar el meñique produce La mayor séptima.</p>
+    <p class="th-body">Esto significa que cada posición de barre contiene múltiples calidades de acorde con un mínimo de movimiento. No es necesario cambiar la posición de la mano en el mástil para pasar de mayor a menor o a séptima: basta con modificar uno o dos dedos dentro de la misma forma. Esta eficiencia de movimiento es fundamental para la fluidez al tocar progresiones con cambios rápidos.</p>
+    <p class="th-body">Aprender las variantes de forma E y forma A en sus versiones mayor, menor y dominante séptima da acceso a 72 acordes distintos usando solo dos posiciones de mano. El mástil completo queda cubierto para las tres calidades de acorde más usadas en la música popular, el jazz y el rock.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">Los cuatro acordes de la posición A en traste 5</div>
+      <p>Re mayor · Re menor · Re7 (dominante) · Remaj7: todos en el mismo traste, con un dedo de diferencia entre cada uno.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER / NEXT -->
+<section class="th-next">
+  <span class="th-next-label">Navegar lecciones</span>
+  <h2 class="th-next-title">Sigue explorando</h2>
+  <p class="th-next-sub">El barre desbloquea el mástil completo. La pentatónica te da el vocabulario melódico para llenarlo.</p>
+  <div class="th-next-btns">
+    <a href="/teoria/instrumento/pentatonica" class="th-next-btn">Las 5 posiciones de la pentatónica →</a>
+    <a href="/teoria/instrumento/acordes-abiertos" class="th-next-btn sec">← Acordes abiertos</a>
+  </div>
+  <div class="chapter-nav">
+    <a href="/teoria/instrumento/acordes-abiertos" class="chapter-nav-item prev">
+      <span class="chapter-nav-dir">← Anterior</span>
+      <span class="chapter-nav-cap">Teoría en el Instrumento · 03</span>
+      <span class="chapter-nav-title">Acordes abiertos</span>
+    </a>
+    <a href="/teoria/instrumento/pentatonica" class="chapter-nav-item">
+      <span class="chapter-nav-dir">Siguiente →</span>
+      <span class="chapter-nav-cap">Teoría en el Instrumento · 05</span>
+      <span class="chapter-nav-title">Las 5 posiciones de la pentatónica</span>
+    </a>
+  </div>
+</section>
+
+<script>
+// Progress bar
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('prog-bar').style.width = (h > 0 ? Math.round(window.scrollY / h * 100) : 0) + '%';
+});
+
+// Audio
+let synth = null;
+async function initAudio() {
+  if (synth) return;
+  await Tone.start();
+  const reverb = new Tone.Freeverb({ roomSize: 0.28, wet: 0.12 }).toDestination();
+  const comp = new Tone.Compressor({ threshold: -22, ratio: 4 }).connect(reverb);
+  synth = new Tone.PolySynth(Tone.Synth, {
+    oscillator: { type: 'triangle' },
+    envelope: { attack: 0.008, decay: 0.5, sustain: 0.15, release: 2.5 },
+    volume: -8,
+  }).connect(comp);
+}
+
+function midiToNote(midi) {
+  const pc = midi % 12, oct = Math.floor(midi / 12) - 1;
+  const names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  return names[pc] + oct;
+}
+
+async function playArpeggio(midis) {
+  await initAudio();
+  const filtered = midis.filter(m => m !== null);
+  const now = Tone.now() + 0.05;
+  filtered.forEach((midi, i) => {
+    synth.triggerAttackRelease(midiToNote(midi), '4n', now + i * 0.10);
+  });
+}
+
+// A major barre fret 5: MIDI 45,52,57,61,64,69
+document.getElementById('play-amaj').addEventListener('click', () => {
+  playArpeggio([45, 52, 57, 61, 64, 69]);
+});
+
+// C major barre A-shape fret 3: skip 6th string, MIDI 48,55,60,64,67
+document.getElementById('play-cmaj').addEventListener('click', () => {
+  playArpeggio([48, 55, 60, 64, 67]);
+});
+</script>
+
+<footer style="background:var(--ink2);border-top:1px solid rgba(255,255,255,.06);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+  <div style="font-size:12px;color:var(--ink5);">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div style="display:flex;gap:20px;">
+    <a href="/privacidad" style="font-size:12px;color:var(--ink5);text-decoration:none;">Aviso de Privacidad</a>
+    <a href="/terminos" style="font-size:12px;color:var(--ink5);text-decoration:none;">Términos y Condiciones</a>
+    <a href="/cookies" style="font-size:12px;color:var(--ink5);text-decoration:none;">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

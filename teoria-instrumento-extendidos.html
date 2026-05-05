@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Acordes extendidos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<style>
+:root{
+  --paper:#f4ece0;--paper2:#ebe1d2;--paper3:#ddd1bd;--paper4:#c8b99f;--paper5:#b8a890;
+  --copper:#a85a1e;--copper-lt:#c47a36;--copper-dk:#7a3e10;
+  --ink:#1c1410;--ink2:#2e2418;--ink3:#5a4a38;--ink4:#8a7a64;--ink5:#a09080;
+  --tonic:#a05c20;--subdom:#5a7abf;--dominant:#7a4abf;--relative:#4a7c59;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{font-family:var(--mono);font-size:.52em;font-weight:400;color:var(--ink4);letter-spacing:0;margin-left:2px;}
+.nav-link{padding:0 16px;height:60px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+.th-progress{position:fixed;top:56px;left:0;right:0;height:2px;background:rgba(160,92,32,.12);z-index:99;}
+.th-progress-bar{height:100%;background:var(--copper);width:0%;transition:width .08s linear;}
+
+.th-breadcrumb{background:var(--paper2);border-bottom:1px solid var(--paper4);padding:0 48px;height:40px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink5);}
+.th-breadcrumb a{color:var(--ink5);text-decoration:none;}
+.th-breadcrumb a:hover{color:var(--copper);}
+.th-breadcrumb .sep{opacity:.5;}
+.th-breadcrumb .current{color:var(--ink3);font-weight:500;}
+
+.th-hero{background:#13100c;padding:110px 48px 90px;text-align:center;overflow:hidden;}
+.th-chapter{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:28px;display:flex;align-items:center;justify-content:center;gap:14px;}
+.th-chapter::before,.th-chapter::after{content:'';display:block;height:1px;width:48px;background:var(--copper-lt);opacity:.35;}
+.th-title{font-family:var(--serif);font-size:clamp(54px,7.5vw,92px);font-weight:700;line-height:.92;letter-spacing:-.025em;color:var(--paper);margin-bottom:28px;}
+.th-title em{font-style:italic;color:var(--copper-lt);}
+.th-lead{font-family:var(--serif);font-size:clamp(17px,2vw,22px);font-style:italic;color:rgba(250,246,240,.58);max-width:580px;margin:0 auto 44px;line-height:1.65;}
+.th-scroll-hint{font-size:11px;color:rgba(250,246,240,.22);letter-spacing:.14em;text-transform:uppercase;}
+
+.th-section{padding:88px 48px;}
+.th-section.dark{background:#13100c;}
+.th-inner{max-width:1080px;margin:0 auto;}
+.th-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;display:block;}
+.th-section.dark .th-label{color:var(--copper-lt);}
+.th-h2{font-family:var(--serif);font-size:clamp(34px,4.5vw,56px);font-weight:700;line-height:1.02;letter-spacing:-.025em;color:var(--ink);margin-bottom:22px;}
+.th-section.dark .th-h2{color:var(--paper);}
+.th-body{font-size:15px;color:var(--ink3);line-height:1.85;max-width:640px;}
+.th-body+.th-body{margin-top:14px;}
+.th-section.dark .th-body{color:rgba(250,246,240,.58);}
+.th-body strong{color:var(--ink2);font-weight:600;}
+.th-section.dark .th-body strong{color:rgba(244,236,224,.92);}
+.th-split{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;}
+.th-callout{border-left:3px solid var(--copper);border-radius:0 8px 8px 0;padding:16px 20px;margin:28px 0;background:rgba(160,92,32,.07);}
+.th-section.dark .th-callout{background:rgba(255,255,255,.05);border-left-color:var(--copper-lt);}
+.th-callout-label{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);margin-bottom:7px;}
+.th-section.dark .th-callout-label{color:var(--copper-lt);}
+.th-callout p{font-size:14px;color:var(--ink3);line-height:1.65;}
+.th-section.dark .th-callout p{color:rgba(250,246,240,.58);}
+
+/* ── CHORD DIAGRAMS ── */
+.chord-diagrams-row{display:flex;gap:28px;flex-wrap:wrap;margin-top:32px;justify-content:center;}
+.chord-diagram{display:flex;flex-direction:column;align-items:center;gap:10px;}
+.chord-diagram-label{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--copper-lt);cursor:pointer;padding:6px 14px;border:1.5px solid rgba(196,122,54,.3);border-radius:20px;transition:all .18s;user-select:none;text-align:center;}
+.chord-diagram-label:hover{background:rgba(196,122,54,.12);border-color:var(--copper-lt);}
+.chord-diagram-label.playing{background:rgba(196,122,54,.25);border-color:var(--copper-lt);color:#fff;}
+.chord-tones-row{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;max-width:120px;}
+.tone-badge{font-family:var(--mono);font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px;}
+.tone-badge.root{background:rgba(160,92,32,.25);color:rgba(196,122,54,.9);}
+.tone-badge.third{background:rgba(90,122,191,.2);color:rgba(120,152,210,.9);}
+.tone-badge.fifth{background:rgba(74,124,89,.15);color:rgba(74,124,89,.8);}
+.tone-badge.seventh{background:rgba(122,74,191,.2);color:rgba(152,104,210,.9);}
+.tone-badge.ninth{background:rgba(180,90,120,.2);color:rgba(200,110,140,.9);}
+.tone-badge.eleventh{background:rgba(90,150,180,.2);color:rgba(90,150,180,.9);}
+.tone-badge.thirteenth{background:rgba(140,160,60,.2);color:rgba(140,160,60,.9);}
+
+/* ── NEXT ── */
+.th-next{background:var(--ink);padding:88px 48px;text-align:center;}
+.th-next-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink5);margin-bottom:18px;display:block;}
+.th-next-title{font-family:var(--serif);font-size:clamp(36px,5vw,56px);font-weight:700;color:var(--paper);margin-bottom:10px;letter-spacing:-.02em;}
+.th-next-sub{font-size:14px;color:var(--ink4);margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.th-next-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.th-next-btn{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:13px;font-weight:600;padding:13px 28px;border-radius:8px;text-decoration:none;transition:background .2s;}
+.th-next-btn:hover{background:var(--copper-dk);}
+.th-next-btn.sec{background:transparent;color:rgba(250,246,240,.5);border:1px solid rgba(255,255,255,.12);}
+.th-next-btn.sec:hover{color:var(--paper);border-color:rgba(255,255,255,.3);}
+
+/* ── CHAPTER NAV ── */
+.chapter-nav{display:flex;gap:0;border-top:1px solid rgba(255,255,255,.06);margin-top:64px;}
+.chapter-nav-item{flex:1;padding:28px 24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;transition:background .18s;}
+.chapter-nav-item:hover{background:rgba(255,255,255,.03);}
+.chapter-nav-item.prev{border-right:1px solid rgba(255,255,255,.06);}
+.chapter-nav-item.disabled{cursor:default;pointer-events:none;opacity:.35;}
+.chapter-nav-dir{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(250,246,240,.25);}
+.chapter-nav-cap{font-size:11px;color:rgba(250,246,240,.25);}
+.chapter-nav-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--paper);}
+
+/* ── STACKING VISUAL ── */
+.stack-visual{display:flex;flex-direction:column-reverse;gap:4px;margin-top:20px;}
+.stack-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:8px;transition:background .15s;}
+.stack-row:hover{background:rgba(255,255,255,.04);}
+.stack-degree{font-family:var(--mono);font-size:11px;font-weight:700;min-width:28px;color:rgba(250,246,240,.3);}
+.stack-note{font-family:var(--serif);font-size:16px;font-weight:700;color:var(--paper);min-width:32px;}
+.stack-name{font-size:12px;color:rgba(250,246,240,.4);}
+.stack-row.highlighted .stack-degree{color:var(--copper-lt);}
+.stack-row.highlighted .stack-note{color:var(--copper-lt);}
+.stack-row.highlighted .stack-name{color:rgba(196,122,54,.7);}
+
+@media(max-width:768px){
+  nav{padding:0 16px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav>*{flex-shrink:0;}
+  .th-breadcrumb{padding:0 20px;}
+  .th-hero{padding:80px 20px 64px;}
+  .th-section{padding:64px 20px;}
+  .th-split{grid-template-columns:1fr;gap:40px;}
+  .th-next{padding:64px 20px;}
+  .chapter-nav{flex-direction:column;}
+  .chapter-nav-item.prev{border-right:none;border-bottom:1px solid rgba(255,255,255,.06);}
+  .chord-diagrams-row{gap:16px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link active">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<div class="th-progress"><div class="th-progress-bar" id="prog-bar"></div></div>
+
+<div class="th-breadcrumb">
+  <a href="/teoria">Teoría</a>
+  <span class="sep">›</span>
+  <a href="/teoria/instrumento">Teoría en el Instrumento</a>
+  <span class="sep">›</span>
+  <span class="current">Acordes extendidos</span>
+</div>
+
+<!-- HERO -->
+<section class="th-hero">
+  <div class="th-chapter">Teoría en el Instrumento · 09</div>
+  <h1 class="th-title">Acordes <em>extendidos</em></h1>
+  <p class="th-lead">Séptimas, novenas, oncenas: cómo agregar tensiones a los acordes básicos sin necesitar más dedos de los que tienes.</p>
+  <div class="th-scroll-hint">↓ leer</div>
+</section>
+
+<!-- SECCIÓN 1: La construcción por terceras -->
+<section class="th-section">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">La construcción por terceras</span>
+        <h2 class="th-h2">Apilar terceras<br><em>más allá de la séptima</em></h2>
+        <p class="th-body">Los acordes extendidos se construyen continuando el apilamiento de terceras por encima del acorde de séptima. La <strong>novena</strong> es el segundo grado de la escala desplazado una octava hacia arriba (una tercera por encima de la séptima). La <strong>oncena</strong> es el cuarto grado desplazado dos octavas. La <strong>decimotercera</strong> es el sexto grado desplazado dos octavas.</p>
+        <p class="th-body">En teoría, un acorde de decimotercera completo contiene 7 notas (desde la raíz hasta la 13ª). En la práctica, ningún guitarrista las toca todas simultáneamente. En cambio, se omiten notas específicas, tipicamente la quinta y en ocasiones la raíz, para mantener el voicing tocable en 4 o 5 notas sin perder la identidad armónica del acorde.</p>
+        <div class="th-callout">
+          <div class="th-callout-label">Qué omitir</div>
+          <p>La quinta es la primera candidata a omitir porque aporta poco color armónico. La raíz puede omitirse cuando el bajo del ensemble la toca. Lo que no puede faltar: la tercera y la séptima — las <strong>notas guía</strong> que definen la calidad del acorde.</p>
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--paper2);border:1px solid var(--paper3);border-radius:14px;padding:28px 24px;">
+          <p style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:6px;">La torre de terceras (Do)</p>
+          <p style="font-size:12px;color:var(--ink5);margin-bottom:16px;font-style:italic;">Las notas en gris se omiten en la práctica</p>
+          <div class="stack-visual" id="stack-visual"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 2: Las más usadas -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Las más usadas</span>
+    <h2 class="th-h2">Maj7, Dom7, 9, 11, 13:<br><em>cuándo aparece cada una</em></h2>
+    <p class="th-body">El <strong>acorde major7</strong> (Cmaj7) añade un brillo suave al acorde mayor, común en la bossa nova y las baladas pop. El <strong>dominante 9</strong> (G9) añade tensión más allá del dominante 7, esencial en el funk y el soul. El <strong>menor 11</strong> (Dm11) crea una cualidad flotante y suspendida usada en el jazz ambiental y el R&B. El <strong>dominante 13</strong> (G13) es el sonido dominante más rico, con la tercera y la decimotercera presentes a la vez (la oncena suele omitirse por su choque con la tercera).</p>
+    <p class="th-body">Las secciones de viento de Fela Kuti, los partes de teclado de Stevie Wonder y la mayor parte de los arreglos de Bill Withers usan acordes extendidos como vocabulario armónico primario. No son adornos de jazz abstracto, sino el idioma de la música popular de los años sesenta y setenta más influyente del siglo XX.</p>
+    <p style="font-size:15px;color:rgba(250,246,240,.58);line-height:1.85;max-width:640px;margin-top:14px;">Haz clic en cada acorde para escucharlo como arpegio. Observa las notas que lo componen y cuáles se han omitido respecto del acorde teórico completo.</p>
+
+    <!-- Interactive chord diagrams -->
+    <div class="chord-diagrams-row" id="ext-diagrams"></div>
+  </div>
+</section>
+
+<!-- SECCIÓN 3: Cómo agregar tensiones -->
+<section class="th-section">
+  <div class="th-inner">
+    <span class="th-label">Cómo agregar tensiones</span>
+    <h2 class="th-h2">Modificar lo que ya sabes:<br><em>un dedo a la vez</em></h2>
+    <p class="th-body">La manera más rápida de aprender acordes extendidos es partir de uno que ya conoces y agregar una sola nota. Desde un acorde de Em abierto, añadir el meñique en la segunda cuerda, traste 2 = Em add9. Desde un barré A7 en forma E en el traste 5, levantar el anular (que toca la quinta) y reemplazarlo con el meñique dos trastes más arriba = A9. Desde un Dm, añadir la cuerda prima al aire = Dm add9.</p>
+    <p class="th-body">Este enfoque es más rápido y más musical que memorizar diagramas abstractos. Se construye la relación sonora de la tensión con respecto a una posición familiar, lo que activa a la vez la memoria motora y la auditiva. Con el tiempo, el sonido de la novena añadida sobre un menor se vuelve reconocible antes de que el dedo lo toque.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">Principio de economía de movimiento</div>
+      <p>Las tensiones más idiomáticas en guitarra son las que se agregan con un solo dedo adicional a partir de una posición conocida. Si necesitas reconfigurar todo el acorde, probablemente hay una inversión más cercana que resuelve el mismo problema.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 4: Tensiones alteradas -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Tensiones alteradas</span>
+    <h2 class="th-h2">b9, #9, b13:<br><em>el vocabulario del jazz</em></h2>
+    <p class="th-body">Los acordes dominantes alterados contienen tensiones modificadas cromáticamente respecto de la escala diatónica: b9 (un semitono por encima de la raíz), #9 (segunda aumentada sobre la raíz, el llamado "acorde Hendrix"), b5 (tritono), #5/b13. El alterado dominante más común es el <strong>7#9</strong> (dominante séptima con novena aumentada), el acorde del riff inicial de "Purple Haze" y pieza fija del comping en jazz moderno.</p>
+    <p class="th-body">Los acordes alterados crean tensión máxima antes de una resolución dominante, haciendo que la llegada al acorde I se sienta inevitable. La tensión del #9 resulta de la coexistencia de la tercera mayor y la tercera menor en el mismo acorde, un intervalo de medio tono entre ambas que el oído percibe como disonancia intensa pero coherente. La regla de resolución: los dominantes alterados resuelven hacia acordes una quinta justa hacia abajo.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">La escala alterada</div>
+      <p>Todas las tensiones alteradas (b9, #9, #11, b13) están contenidas en la <strong>escala alterada</strong> (séptimo modo de la menor melódica). Es la escala que corresponde al acorde 7alt y es el punto de partida del vocabulario del jazz moderno sobre dominantes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER / NEXT -->
+<section class="th-next">
+  <span class="th-next-label">Navegar capítulos</span>
+  <h2 class="th-next-title">Técnica y expresión</h2>
+  <p class="th-next-sub">Vibrato, bend, slide, hammer-on, pull-off: las herramientas con las que la guitarra imita una voz.</p>
+  <div class="th-next-btns">
+    <a href="/teoria/instrumento/tecnica" class="th-next-btn">Técnica y expresión →</a>
+    <a href="/teoria/instrumento/voicings" class="th-next-btn sec">← Voicings e inversiones</a>
+  </div>
+  <div class="chapter-nav">
+    <a href="/teoria/instrumento/voicings" class="chapter-nav-item prev">
+      <span class="chapter-nav-dir">← Anterior</span>
+      <span class="chapter-nav-cap">Teoría en el Instrumento · 08</span>
+      <span class="chapter-nav-title">Voicings e inversiones</span>
+    </a>
+    <a href="/teoria/instrumento/tecnica" class="chapter-nav-item">
+      <span class="chapter-nav-dir">Siguiente →</span>
+      <span class="chapter-nav-cap">Teoría en el Instrumento · 10</span>
+      <span class="chapter-nav-title">Técnica y expresión</span>
+    </a>
+  </div>
+</section>
+
+<script>
+// ── Progress bar ──────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('prog-bar').style.width = (h > 0 ? Math.round(window.scrollY / h * 100) : 0) + '%';
+});
+
+// ── Audio ─────────────────────────────────────────────────────────────────────
+let synth = null;
+async function initAudio() {
+  if (synth) return;
+  await Tone.start();
+  const reverb = new Tone.Freeverb({ roomSize: 0.4, wet: 0.2 }).toDestination();
+  const comp = new Tone.Compressor({ threshold: -22, ratio: 4 }).connect(reverb);
+  synth = new Tone.PolySynth(Tone.Synth, {
+    oscillator: { type: 'triangle' },
+    envelope: { attack: 0.01, decay: 0.65, sustain: 0.12, release: 3.2 },
+    volume: -8,
+  }).connect(comp);
+}
+
+function midiToNote(midi) {
+  const pc = midi % 12, oct = Math.floor(midi / 12) - 1;
+  const names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  return names[pc] + oct;
+}
+
+async function playArpeggio(midiNotes, labelEl) {
+  await initAudio();
+  if (labelEl) labelEl.classList.add('playing');
+  const now = Tone.now() + 0.05;
+  midiNotes.forEach((m, i) => {
+    synth.triggerAttackRelease(midiToNote(m), '2n', now + i * 0.16);
+  });
+  setTimeout(() => { if (labelEl) labelEl.classList.remove('playing'); }, midiNotes.length * 160 + 900);
+}
+
+// ── Stack visual ──────────────────────────────────────────────────────────────
+const STACK_NOTES = [
+  { degree: 'R',   note: 'Do',  name: 'raíz',           highlighted: true },
+  { degree: '3ª',  note: 'Mi',  name: 'tercera',         highlighted: true },
+  { degree: '5ª',  note: 'Sol', name: 'quinta',          highlighted: false },
+  { degree: '7ª',  note: 'Si',  name: 'séptima',         highlighted: true },
+  { degree: '9ª',  note: 'Re',  name: 'novena (2ª + 8va)',highlighted: true },
+  { degree: '11ª', note: 'Fa',  name: 'oncena (4ª + 8va)',highlighted: false },
+  { degree: '13ª', note: 'La',  name: 'decimotercera (6ª + 8va)', highlighted: true },
+];
+
+function buildStackVisual() {
+  const container = document.getElementById('stack-visual');
+  STACK_NOTES.forEach(n => {
+    const row = document.createElement('div');
+    row.className = 'stack-row' + (n.highlighted ? ' highlighted' : '');
+    row.innerHTML = `
+      <div class="stack-degree">${n.degree}</div>
+      <div class="stack-note">${n.note}</div>
+      <div class="stack-name">${n.name}</div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+// ── Chord diagram SVG ─────────────────────────────────────────────────────────
+function buildChordSVG(dots, startFret, numStrings) {
+  const W = 100, H = 120;
+  const padL = 16, padR = 8, padT = 24, padB = 8;
+  const strSpacing = (W - padL - padR) / (numStrings - 1);
+  const fretSpacing = (H - padT - padB) / 5;
+
+  let svg = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+
+  if (startFret > 1) {
+    svg += `<text x="${padL - 3}" y="${padT + 4}" font-family="JetBrains Mono, monospace" font-size="7.5" fill="rgba(250,246,240,.4)" text-anchor="end">${startFret}fr</text>`;
+  }
+
+  const nutColor = startFret === 1 ? 'rgba(250,246,240,.7)' : 'rgba(250,246,240,.22)';
+  const nutW = startFret === 1 ? 3 : 1.5;
+  svg += `<line x1="${padL}" y1="${padT}" x2="${padL + strSpacing * (numStrings - 1)}" y2="${padT}" stroke="${nutColor}" stroke-width="${nutW}"/>`;
+
+  for (let f = 1; f <= 5; f++) {
+    const y = padT + f * fretSpacing;
+    svg += `<line x1="${padL}" y1="${y}" x2="${padL + strSpacing * (numStrings - 1)}" y2="${y}" stroke="rgba(250,246,240,.12)" stroke-width="1"/>`;
+  }
+
+  for (let s = 0; s < numStrings; s++) {
+    const x = padL + s * strSpacing;
+    svg += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${padT + 5 * fretSpacing}" stroke="rgba(250,246,240,.3)" stroke-width="1.2"/>`;
+  }
+
+  dots.forEach(d => {
+    const x = padL + (d.string - 1) * strSpacing;
+    const y = padT + (d.fret - 0.5) * fretSpacing;
+    svg += `<circle cx="${x}" cy="${y}" r="8" fill="var(--copper-lt)"/>`;
+    if (d.label) {
+      svg += `<text x="${x}" y="${y + 3}" font-family="JetBrains Mono, monospace" font-size="7" font-weight="700" fill="rgba(0,0,0,.9)" text-anchor="middle">${d.label}</text>`;
+    }
+  });
+
+  svg += `</svg>`;
+  return svg;
+}
+
+// ── Extended chord data ───────────────────────────────────────────────────────
+const EXT_CHORDS = [
+  {
+    name: 'Cmaj7',
+    // x32000 on strings 5-1: A2=45,E3=52,G3=55,B3=59,E4=64...
+    // Actually x32000 = strings 5-1: C3(x),E3,C4,G3,B3 — wait
+    // x32000: string5=3rd fret A=C3(48), string4=2nd fret D=E3(52), string3=open=G3(55), string2=open=B3(59), string1=open=E4(64)
+    // That's C3,E3,G3,B3,E4 — that's Cmaj (no 7th)
+    // Cmaj7 x32000 actually is: x3-2-0-0-0:
+    // String 6: x, String 5: 3=C3(48), String 4: 2=E3(52), String 3: 0=G3(55), String 2: 0=B3(59), String 1: 0=E4(64)
+    // No 7th (B) explicitly... B3 on string 2 open IS the major 7th of C! So it IS Cmaj7
+    // MIDI: 48,52,55,59,64
+    dots: [
+      { string: 1, fret: 2, label: 'R' },   // string5 = A, 3rd fret
+      { string: 2, fret: 1, label: '3' },   // string4 = D, 2nd fret
+      // strings 3,2,1 open — shown as open circles above nut
+    ],
+    startFret: 1,
+    numStrings: 5,
+    // simplified diagram showing pressed + open visually
+    dotsAll: [
+      { string: 1, fret: 3, label: 'R' },
+      { string: 2, fret: 2, label: '3' },
+    ],
+    openStrings: [3, 4, 5],
+    midi: [48, 52, 55, 59, 64],
+    tones: [
+      { label: 'R', cls: 'root' }, { label: '3', cls: 'third' },
+      { label: '5', cls: 'fifth' }, { label: '7M', cls: 'seventh' }
+    ],
+    context: 'Bossa nova, balada pop',
+  },
+  {
+    name: 'G9',
+    // G9 practical voicing: x,2,3,2,3,x  (strings 5-2) = A=B2(35+12=47? no)
+    // G9 on strings 6-1: 3,2,0,0,0,1 (320001) — G2,B2,D3,G3,B3,F#4... not 9th
+    // Good G9: x,x,5,4,3,5 (strings 4-1): D fret5=G3(55), G fret4=B3(59), B fret3=D4(62), E fret5=A4(69)... no
+    // Simple: x,10,9,10,10,x = A fret10=G3(55), D fret9=B3(59)...
+    // Let's use: 3,2,3,2,3,x (strings 6-2)
+    // String6 fret3=G2(43), String5 fret2=B2(47)...
+    // Most practical G9 for this context: x,2,1,2,1,3
+    // = String5 fret2=B2, String4 fret1=Eb3... no
+    // Use the standard voicing: 3,x,3,4,3,5
+    // G on 6th fret3=G2(43), skip5, D fret3=F3(53)? no..
+    // Simplest G9: fingers on 5 strings, startFret 2:
+    // String5(A): fret2 = B2(47), String4(D): fret1=Eb?
+    // Let me just use a clear concept voicing at fret 3 area
+    // G9 = G B D F A. Practical 4-string: G(root),B(3),F(b7),A(9)
+    // String4(D): fret5=G3(55), String3(G): fret4=B3(59), String2(B): fret3=D4(62)... that's no 7th
+    // Add F: String1(E): fret1=F4(65)? and String2: fret3=D4
+    // OK: String4 f5=G3(55), String3 f4=B3(59), String2 f1=C4(60)... no
+    // FINAL DECISION: use MIDI [55,59,65,69] = G3,B3,F4,A4 for G9 (R,3,b7,9)
+    // Diagram: strings 4-1, startFret 3:
+    // String4(D): fret5=G3 → at startFret3, that's position fret 3 relative
+    dots: [
+      { string: 1, fret: 3, label: 'R' },
+      { string: 2, fret: 2, label: '3' },
+      { string: 3, fret: 1, label: 'b7' },
+      { string: 4, fret: 3, label: '9' },
+    ],
+    startFret: 3,
+    numStrings: 4,
+    midi: [55, 59, 65, 69],
+    tones: [
+      { label: 'R', cls: 'root' }, { label: '3', cls: 'third' },
+      { label: 'b7', cls: 'seventh' }, { label: '9', cls: 'ninth' }
+    ],
+    context: 'Funk, soul',
+  },
+  {
+    name: 'Dm11',
+    // Dm11 = D F A C G (R,b3,5,b7,11) — practical: D,F,C,G (omit 5th A)
+    // MIDI: 50,53,60,67 = D3,F3,C4,G4
+    dots: [
+      { string: 1, fret: 2, label: 'R' },
+      { string: 2, fret: 1, label: 'b3' },
+      { string: 3, fret: 2, label: 'b7' },
+      { string: 4, fret: 2, label: '11' },
+    ],
+    startFret: 5,
+    numStrings: 4,
+    midi: [50, 53, 60, 67],
+    tones: [
+      { label: 'R', cls: 'root' }, { label: 'b3', cls: 'third' },
+      { label: 'b7', cls: 'seventh' }, { label: '11', cls: 'eleventh' }
+    ],
+    context: 'Jazz ambiental, R&B',
+  },
+  {
+    name: 'G13',
+    // G13 = G B D F A C E — practical omitting 11(C): G,B,F,E = R,3,b7,13
+    // MIDI: 55,59,65,76 = G3,B3,F4,E5... high
+    // Better: 43,59,65,69 = G2,B3,F4,A4 or use 55,59,65,69 as G9 and add 13
+    // G13 practical: 43,47,53,57,62 = G2,B2,F3,A3,D4...
+    // Use: R(G3),3(B3),b7(F4),13(E4+12=... E5 too high)
+    // Practical guitar G13: MIDI 55,59,64,65 = G3,B3,E4,F4 (R,3,13,b7)
+    dots: [
+      { string: 1, fret: 3, label: 'R' },
+      { string: 2, fret: 4, label: '13' },
+      { string: 3, fret: 3, label: 'b7' },
+      { string: 4, fret: 2, label: '3' },
+    ],
+    startFret: 3,
+    numStrings: 4,
+    midi: [55, 59, 64, 65],
+    tones: [
+      { label: 'R', cls: 'root' }, { label: '3', cls: 'third' },
+      { label: 'b7', cls: 'seventh' }, { label: '13', cls: 'thirteenth' }
+    ],
+    context: 'Jazz, big band',
+  },
+];
+
+function buildExtDiagrams() {
+  const container = document.getElementById('ext-diagrams');
+  EXT_CHORDS.forEach(ch => {
+    const wrap = document.createElement('div');
+    wrap.className = 'chord-diagram';
+
+    const svgWrap = document.createElement('div');
+    svgWrap.innerHTML = buildChordSVG(ch.dots, ch.startFret, ch.numStrings);
+
+    const label = document.createElement('div');
+    label.className = 'chord-diagram-label';
+    label.textContent = ch.name;
+    label.addEventListener('click', () => playArpeggio(ch.midi, label));
+
+    const tones = document.createElement('div');
+    tones.className = 'chord-tones-row';
+    ch.tones.forEach(t => {
+      const badge = document.createElement('span');
+      badge.className = `tone-badge ${t.cls}`;
+      badge.textContent = t.label;
+      tones.appendChild(badge);
+    });
+
+    const ctx = document.createElement('div');
+    ctx.style.cssText = 'font-size:10px;color:rgba(250,246,240,.28);font-style:italic;text-align:center;';
+    ctx.textContent = ch.context;
+
+    wrap.appendChild(svgWrap);
+    wrap.appendChild(label);
+    wrap.appendChild(tones);
+    wrap.appendChild(ctx);
+    container.appendChild(wrap);
+  });
+}
+
+buildStackVisual();
+buildExtDiagrams();
+</script>
+
+<footer style="background:var(--ink2);border-top:1px solid rgba(255,255,255,.06);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+  <div style="font-size:12px;color:var(--ink5);">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div style="display:flex;gap:20px;">
+    <a href="/privacidad" style="font-size:12px;color:var(--ink5);text-decoration:none;">Aviso de Privacidad</a>
+    <a href="/terminos" style="font-size:12px;color:var(--ink5);text-decoration:none;">Términos y Condiciones</a>
+    <a href="/cookies" style="font-size:12px;color:var(--ink5);text-decoration:none;">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

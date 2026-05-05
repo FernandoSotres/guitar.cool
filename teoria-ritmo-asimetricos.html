@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Compases asimétricos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<style>
+:root{
+  --paper:#f4ece0;--paper2:#ebe1d2;--paper3:#ddd1bd;--paper4:#c8b99f;--paper5:#b8a890;
+  --copper:#a85a1e;--copper-lt:#c47a36;--copper-dk:#7a3e10;
+  --ink:#1c1410;--ink2:#2e2418;--ink3:#5a4a38;--ink4:#8a7a64;--ink5:#a09080;
+  --tonic:#a05c20;--subdom:#5a7abf;--dominant:#7a4abf;--relative:#4a7c59;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{font-family:var(--mono);font-size:.52em;font-weight:400;color:var(--ink4);letter-spacing:0;margin-left:2px;}
+.nav-link{padding:0 16px;height:60px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+.th-progress{position:fixed;top:56px;left:0;right:0;height:2px;background:rgba(160,92,32,.12);z-index:99;}
+.th-progress-bar{height:100%;background:var(--copper);width:0%;transition:width .08s linear;}
+
+.th-breadcrumb{background:var(--paper2);border-bottom:1px solid var(--paper4);padding:0 48px;height:40px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink5);}
+.th-breadcrumb a{color:var(--ink5);text-decoration:none;}
+.th-breadcrumb a:hover{color:var(--copper);}
+.th-breadcrumb .sep{opacity:.5;}
+.th-breadcrumb .current{color:var(--ink3);font-weight:500;}
+
+.th-hero{background:#13100c;padding:110px 48px 90px;text-align:center;overflow:hidden;}
+.th-chapter{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:28px;display:flex;align-items:center;justify-content:center;gap:14px;}
+.th-chapter::before,.th-chapter::after{content:'';display:block;height:1px;width:48px;background:var(--copper-lt);opacity:.35;}
+.th-title{font-family:var(--serif);font-size:clamp(54px,7.5vw,92px);font-weight:700;line-height:.92;letter-spacing:-.025em;color:var(--paper);margin-bottom:28px;}
+.th-title em{font-style:italic;color:var(--copper-lt);}
+.th-lead{font-family:var(--serif);font-size:clamp(17px,2vw,22px);font-style:italic;color:rgba(250,246,240,.58);max-width:580px;margin:0 auto 44px;line-height:1.65;}
+.th-scroll-hint{font-size:11px;color:rgba(250,246,240,.22);letter-spacing:.14em;text-transform:uppercase;}
+
+.th-section{padding:88px 48px;}
+.th-section.dark{background:#13100c;}
+.th-inner{max-width:1080px;margin:0 auto;}
+.th-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;display:block;}
+.th-section.dark .th-label{color:var(--copper-lt);}
+.th-h2{font-family:var(--serif);font-size:clamp(34px,4.5vw,56px);font-weight:700;line-height:1.02;letter-spacing:-.025em;color:var(--ink);margin-bottom:22px;}
+.th-section.dark .th-h2{color:var(--paper);}
+.th-body{font-size:15px;color:var(--ink3);line-height:1.85;max-width:640px;}
+.th-body+.th-body{margin-top:14px;}
+.th-section.dark .th-body{color:rgba(250,246,240,.58);}
+.th-body strong{color:var(--ink2);font-weight:600;}
+.th-section.dark .th-body strong{color:rgba(244,236,224,.92);}
+.th-split{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;}
+.th-callout{border-left:3px solid var(--copper);border-radius:0 8px 8px 0;padding:16px 20px;margin:28px 0;background:rgba(160,92,32,.07);}
+.th-section.dark .th-callout{background:rgba(255,255,255,.05);border-left-color:var(--copper-lt);}
+.th-callout-label{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);margin-bottom:7px;}
+.th-section.dark .th-callout-label{color:var(--copper-lt);}
+.th-callout p{font-size:14px;color:var(--ink3);line-height:1.65;}
+.th-section.dark .th-callout p{color:rgba(250,246,240,.58);}
+
+/* ── METRONOME ── */
+.metro-section{padding:88px 48px;background:var(--paper2);}
+.metro-card{background:#1a1410;border-radius:20px;padding:48px;max-width:800px;margin:0 auto;}
+.metro-title{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--paper);margin-bottom:32px;text-align:center;letter-spacing:-.01em;}
+.metro-sig-pills{display:flex;gap:10px;justify-content:center;margin-bottom:32px;}
+.metro-sig-pill{font-family:var(--mono);font-size:14px;font-weight:600;padding:9px 24px;border-radius:24px;border:2px solid rgba(255,255,255,.12);background:transparent;color:rgba(250,246,240,.45);cursor:pointer;transition:all .18s;}
+.metro-sig-pill:hover{border-color:var(--copper-lt);color:rgba(250,246,240,.8);}
+.metro-sig-pill.active{background:var(--copper);border-color:var(--copper-dk);color:#fff;}
+.metro-bpm-row{display:flex;align-items:center;gap:18px;justify-content:center;margin-bottom:36px;}
+.metro-bpm-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(250,246,240,.3);}
+.metro-bpm-val{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--copper-lt);min-width:48px;text-align:right;}
+.metro-slider{-webkit-appearance:none;appearance:none;width:220px;height:4px;border-radius:2px;background:rgba(255,255,255,.12);outline:none;cursor:pointer;}
+.metro-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--copper-lt);cursor:pointer;box-shadow:0 0 0 3px rgba(196,122,54,.2);}
+.metro-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--copper-lt);cursor:pointer;border:none;}
+.metro-beats-row{display:flex;gap:14px;justify-content:center;margin-bottom:28px;flex-wrap:wrap;}
+.metro-beat{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.12);transition:transform .1s,box-shadow .1s,background .1s,border-color .1s;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:600;color:rgba(250,246,240,.3);}
+.metro-beat.accent{width:54px;height:54px;font-size:13px;background:rgba(168,90,30,.15);border-color:rgba(196,122,54,.35);color:var(--copper-lt);}
+.metro-beat.sub-accent{background:rgba(168,90,30,.07);border-color:rgba(196,122,54,.2);color:rgba(196,122,54,.6);}
+.metro-beat.active{transform:scale(1.18);box-shadow:0 0 22px rgba(196,122,54,.45);background:rgba(196,122,54,.28);border-color:var(--copper-lt);color:#fff;}
+.metro-beat.accent.active{transform:scale(1.22);box-shadow:0 0 32px rgba(196,122,54,.6);background:rgba(196,122,54,.45);}
+.metro-play-btn{display:block;margin:0 auto 24px;background:var(--copper);color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;padding:13px 48px;border-radius:10px;border:none;cursor:pointer;transition:background .18s,transform .1s;}
+.metro-play-btn:hover{background:var(--copper-lt);transform:translateY(-1px);}
+.metro-play-btn:active{transform:translateY(0);}
+.metro-desc{text-align:center;font-size:13px;color:rgba(250,246,240,.38);line-height:1.6;font-style:italic;}
+
+/* ── NEXT ── */
+.th-next{background:var(--ink);padding:88px 48px;text-align:center;}
+.th-next-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink5);margin-bottom:18px;display:block;}
+.th-next-title{font-family:var(--serif);font-size:clamp(36px,5vw,56px);font-weight:700;color:var(--paper);margin-bottom:10px;letter-spacing:-.02em;}
+.th-next-sub{font-size:14px;color:var(--ink4);margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.th-next-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.th-next-btn{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:13px;font-weight:600;padding:13px 28px;border-radius:8px;text-decoration:none;transition:background .2s;}
+.th-next-btn:hover{background:var(--copper-dk);}
+.th-next-btn.sec{background:transparent;color:rgba(250,246,240,.5);border:1px solid rgba(255,255,255,.12);}
+.th-next-btn.sec:hover{color:var(--paper);border-color:rgba(255,255,255,.3);}
+.th-next-btn.disabled{background:transparent;color:rgba(250,246,240,.22);border:1px solid rgba(255,255,255,.07);cursor:default;pointer-events:none;}
+
+/* ── CHAPTER NAV ── */
+.chapter-nav{display:flex;gap:0;border-top:1px solid rgba(255,255,255,.06);margin-top:64px;}
+.chapter-nav-item{flex:1;padding:28px 24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;transition:background .18s;}
+.chapter-nav-item:hover{background:rgba(255,255,255,.03);}
+.chapter-nav-item.prev{border-right:1px solid rgba(255,255,255,.06);}
+.chapter-nav-item.disabled{cursor:default;pointer-events:none;opacity:.35;}
+.chapter-nav-dir{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(250,246,240,.25);}
+.chapter-nav-cap{font-size:11px;color:rgba(250,246,240,.25);}
+.chapter-nav-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--paper);}
+
+/* ── INTERACTIVE VISUAL ── */
+.asim-visual{background:#1a1410;border-radius:20px;padding:40px;max-width:760px;margin:0 auto;}
+.asim-row-label{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(250,246,240,.3);margin-bottom:10px;}
+.asim-cells{display:flex;gap:6px;margin-bottom:28px;}
+.asim-cell{height:52px;border-radius:7px;border:2px solid transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:700;transition:transform .1s,box-shadow .12s,opacity .12s;flex:1;}
+.asim-cell:hover{opacity:.85;}
+.asim-cell.active-flash{transform:scale(1.12);box-shadow:0 0 18px rgba(196,122,54,.5);}
+.asim-group-a{background:rgba(168,90,30,.25);border-color:rgba(196,122,54,.5);color:var(--copper-lt);}
+.asim-group-b{background:rgba(196,122,54,.14);border-color:rgba(196,122,54,.3);color:rgba(196,122,54,.7);}
+.asim-group-c{background:rgba(200,185,159,.12);border-color:rgba(200,185,159,.3);color:rgba(200,185,159,.7);}
+.asim-accent-dot{width:6px;height:6px;border-radius:50%;background:var(--copper-lt);display:inline-block;margin-right:4px;}
+.asim-visual-title{font-family:var(--serif);font-size:17px;color:var(--paper);margin-bottom:24px;text-align:center;}
+.asim-legend{display:flex;gap:18px;justify-content:center;margin-top:4px;flex-wrap:wrap;}
+.asim-legend-item{display:flex;align-items:center;gap:7px;font-size:11px;color:rgba(250,246,240,.4);}
+.asim-legend-dot{width:10px;height:10px;border-radius:3px;}
+
+@media(max-width:768px){
+  nav{padding:0 16px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav>*{flex-shrink:0;}
+  .th-breadcrumb{padding:0 20px;}
+  .th-hero{padding:80px 20px 64px;}
+  .th-section{padding:64px 20px;}
+  .th-split{grid-template-columns:1fr;gap:40px;}
+  .metro-section{padding:64px 20px;}
+  .metro-card{padding:28px 18px;}
+  .th-next{padding:64px 20px;}
+  .chapter-nav{flex-direction:column;}
+  .chapter-nav-item.prev{border-right:none;border-bottom:1px solid rgba(255,255,255,.06);}
+  .asim-visual{padding:24px 16px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link active">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<div class="th-progress"><div class="th-progress-bar" id="prog-bar"></div></div>
+
+<div class="th-breadcrumb">
+  <a href="/teoria">Teoría</a>
+  <span class="sep">›</span>
+  <a href="/teoria">Ritmo y Sonido</a>
+  <span class="sep">›</span>
+  <span class="current">Compases asimétricos</span>
+</div>
+
+<!-- HERO -->
+<section class="th-hero">
+  <div class="th-chapter">Ritmo y Sonido · 05</div>
+  <h1 class="th-title">Compases <em>asimétricos</em></h1>
+  <p class="th-lead">5/4, 7/8, 11/8: por qué los tiempos impares suenan extraños al principio y naturales después.</p>
+  <div class="th-scroll-hint">↓ leer</div>
+</section>
+
+<!-- SECCIÓN 1: Tiempos impares -->
+<section class="th-section">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">Tiempos impares</span>
+        <h2 class="th-h2">Cinco, siete, once: <em>el oído busca el grupo</em></h2>
+        <p class="th-body">Los compases <strong>asimétricos</strong> tienen un número de tiempos que no puede dividirse en grupos iguales. Un compás de 5/4 solo puede dividirse como 3+2 o 2+3. Un compás de 7/8 se divide como 2+2+3, 2+3+2, o 3+2+2. El oído humano agrupa los pulsos rítmicos de forma natural en patrones de 2 o 3 tiempos, por lo que en una métrica asimétrica el agrupamiento es desigual.</p>
+        <p class="th-body">Esta desigualdad crea una característica "cojera" o "tropiezo" en el punto donde cae el grupo más largo. Después de unas cuantas repeticiones, el patrón se vuelve reconocible y predecible. El efecto de extrañeza no viene del número en sí mismo, sino de la ruptura de la expectativa de simetría que el oído occidental lleva incorporada.</p>
+        <p class="th-body">El número de abajo de la indicación de compás sigue indicando la figura que recibe un tiempo: en 7/8, cada tiempo es una corchea; en 5/4, cada tiempo es una negra. Lo que cambia es que ninguna agrupación simétrica de esos tiempos llena el compás completo. Eso obliga a elegir una agrupación concreta, y esa elección define el carácter del compás.</p>
+        <div class="th-callout">
+          <div class="th-callout-label">Concepto clave</div>
+          <p>La asimetría no está en el número total de tiempos, sino en la imposibilidad de agruparlos en partes iguales.</p>
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--paper2);border:1px solid var(--paper3);border-radius:14px;padding:28px 24px;">
+          <p style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:20px;">Agrupaciones posibles</p>
+          <div style="display:flex;flex-direction:column;gap:18px;">
+            <div>
+              <p style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink5);margin-bottom:8px;">5/4 = 3+2</p>
+              <div style="display:flex;gap:4px;">
+                <div style="flex:1;height:28px;background:rgba(160,92,32,.22);border:2px solid rgba(160,92,32,.4);border-radius:5px;"></div>
+                <div style="flex:1;height:28px;background:rgba(160,92,32,.22);border:2px solid rgba(160,92,32,.4);border-radius:5px;"></div>
+                <div style="flex:1;height:28px;background:rgba(160,92,32,.22);border:2px solid rgba(160,92,32,.4);border-radius:5px;"></div>
+                <div style="flex:1;height:28px;background:rgba(196,122,54,.14);border:2px solid rgba(196,122,54,.3);border-radius:5px;"></div>
+                <div style="flex:1;height:28px;background:rgba(196,122,54,.14);border:2px solid rgba(196,122,54,.3);border-radius:5px;"></div>
+              </div>
+            </div>
+            <div>
+              <p style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink5);margin-bottom:8px;">5/4 = 2+3</p>
+              <div style="display:flex;gap:4px;">
+                <div style="flex:1;height:28px;background:rgba(196,122,54,.14);border:2px solid rgba(196,122,54,.3);border-radius:5px;"></div>
+                <div style="flex:1;height:28px;background:rgba(196,122,54,.14);border:2px solid rgba(196,122,54,.3);border-radius:5px;"></div>
+                <div style="flex:1;height:28px;background:rgba(160,92,32,.22);border:2px solid rgba(160,92,32,.4);border-radius:5px;"></div>
+                <div style="flex:1;height:28px;background:rgba(160,92,32,.22);border:2px solid rgba(160,92,32,.4);border-radius:5px;"></div>
+                <div style="flex:1;height:28px;background:rgba(160,92,32,.22);border:2px solid rgba(160,92,32,.4);border-radius:5px;"></div>
+              </div>
+            </div>
+            <div>
+              <p style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink5);margin-bottom:8px;">7/8 = 2+2+3</p>
+              <div style="display:flex;gap:4px;">
+                <div style="flex:1;height:28px;background:rgba(160,92,32,.22);border:2px solid rgba(160,92,32,.4);border-radius:5px;"></div>
+                <div style="flex:1;height:28px;background:rgba(160,92,32,.22);border:2px solid rgba(160,92,32,.4);border-radius:5px;"></div>
+                <div style="flex:1;height:28px;background:rgba(196,122,54,.14);border:2px solid rgba(196,122,54,.3);border-radius:5px;"></div>
+                <div style="flex:1;height:28px;background:rgba(196,122,54,.14);border:2px solid rgba(196,122,54,.3);border-radius:5px;"></div>
+                <div style="flex:1;height:28px;background:rgba(200,185,159,.18);border:2px solid rgba(200,185,159,.35);border-radius:5px;"></div>
+                <div style="flex:1;height:28px;background:rgba(200,185,159,.18);border:2px solid rgba(200,185,159,.35);border-radius:5px;"></div>
+                <div style="flex:1;height:28px;background:rgba(200,185,159,.18);border:2px solid rgba(200,185,159,.35);border-radius:5px;"></div>
+              </div>
+            </div>
+          </div>
+          <p style="font-size:12px;color:var(--ink5);margin-top:16px;font-style:italic;line-height:1.6;">El color indica el grupo. No hay forma de hacer todos los grupos iguales.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 2: 5/4 y 7/8 -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">5/4 y 7/8</span>
+    <h2 class="th-h2">Dave Brubeck, Tool, <em>la música balcánica</em></h2>
+    <p class="th-body">"Take Five" (Dave Brubeck, 1959) introdujo el 5/4 al público del jazz popular como un groove bailable, no como un ejercicio intelectual. Su agrupación 3+2 crea un swing asimétrico pero inevitablemente danzable. La pieza demostró que el compás impar no exige sacrificar la sensación física de la música.</p>
+    <p class="th-body">Tool utiliza 5/4, 7/8 y 13/8 como <strong>compases primarios</strong> a lo largo de su catálogo, en particular en álbumes como Lateralus y 10,000 Days. En ese contexto el metal pesado y los compases impares se fusionan sin fricciones, porque el riff de guitarra define el patrón físico antes que el cerebro tenga tiempo de contar.</p>
+    <p class="th-body">La música folclórica balcánica (Bulgaria, Serbia, Macedonia) tiene una tradición de siglos en métricas asimétricas. El pravo horo búlgaro está en 7/8 (3+2+2), y los músicos locales no lo experimentan como "raro" porque crecieron con él. Este es el argumento más fuerte contra la idea de que los compases impares son inherentemente difíciles: son difíciles para quienes crecieron fuera de ellos.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">Contexto histórico</div>
+      <p>El folclore búlgaro tiene compases de 5, 7, 9, 11 y 13 tiempos que coexisten con danzas populares de celebración, no con música de concierto experimental.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN INTERACTIVA: 7/8 agrupaciones -->
+<section class="metro-section">
+  <div style="max-width:1080px;margin:0 auto;">
+    <span class="th-label" style="display:block;text-align:center;margin-bottom:32px;">Interactivo</span>
+    <div class="asim-visual">
+      <div class="asim-visual-title">7/8 en dos agrupaciones — toca cada celda</div>
+
+      <div class="asim-row-label">Fila A &nbsp;·&nbsp; 2 + 2 + 3</div>
+      <div class="asim-cells" id="row-a"></div>
+
+      <div class="asim-row-label">Fila B &nbsp;·&nbsp; 3 + 2 + 2</div>
+      <div class="asim-cells" id="row-b"></div>
+
+      <div class="asim-legend">
+        <div class="asim-legend-item">
+          <div class="asim-legend-dot" style="background:rgba(168,90,30,.5);border:1.5px solid rgba(196,122,54,.7);"></div>
+          Grupo 1 (acento fuerte)
+        </div>
+        <div class="asim-legend-item">
+          <div class="asim-legend-dot" style="background:rgba(196,122,54,.25);border:1.5px solid rgba(196,122,54,.45);"></div>
+          Grupo 2
+        </div>
+        <div class="asim-legend-item">
+          <div class="asim-legend-dot" style="background:rgba(200,185,159,.18);border:1.5px solid rgba(200,185,159,.4);"></div>
+          Grupo 3
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 3: Cómo aprenderlos -->
+<section class="th-section">
+  <div class="th-inner">
+    <span class="th-label">Cómo aprenderlos</span>
+    <h2 class="th-h2">Internalizar: <em>del conteo al cuerpo</em></h2>
+    <p class="th-body">La peor forma de aprender compases asimétricos es contar permanentemente. El objetivo es sentir la agrupación como un patrón físico, igual que una palabra tiene un acento silábico específico. Di "DAA-da-da-DAA-da" para el 5/4 en 3+2, o "DAA-da-DAA-da-DAA-da-da" para el 7/8 en 2+2+3. La sílaba en mayúscula es el primer tiempo de cada grupo.</p>
+    <p class="th-body">Una vez que el patrón vive en el cuerpo (en el paso del pie, en el golpe de rodilla, en la respiración), el conteo puede desaparecer. La mayoría de los músicos que crecieron tocando música asimétrica nunca cuentan: lo sienten de la misma forma en que un intérprete de vals siente el 3/4. El conteo es el andamio, no el edificio.</p>
+    <p class="th-body">Practica con un metrónomo marcando cada <strong>corchea</strong> (o <strong>negra</strong>, dependiendo del compás), no el tiempo grande. Después, mueve el metrónomo al primer tiempo de cada grupo. Finalmente, retira el metrónomo y toca solo con el patrón de sílabas o de golpes corporales. Cada etapa entrena una capa diferente de la internalización.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">Ejercicio</div>
+      <p>Para 7/8 en 3+2+2: camina marcando el paso como DAA-da-da / DAA-da / DAA-da hasta que dejes de pensar en los números.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 4: Ejemplos -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Ejemplos</span>
+    <h2 class="th-h2">Reconocer los compases <em>asimétricos en contexto</em></h2>
+    <p class="th-body">Escucha "Paranoid Android" (Radiohead) para compases cambiantes que incluyen 7/8. "Money" (Pink Floyd) abre en 7/4, un compás que el bajo y la batería convierten en un groove tan sólido que muchos oyentes no lo identifican como impar. "Solsbury Hill" (Peter Gabriel) está en 7/4 con una agrupación 4+3 que le da su característica urgencia ascendente.</p>
+    <p class="th-body">"Marte" de la Suite Los Planetas de Holst está en 5/4, donde el tiempo adicional crea una sensación de marcha inevitablemente irregular, amenazante. En todos estos casos el compás asimétrico fue elegido porque coincidía con el ritmo natural de una melodía o de un texto: el compás sirve a la música, no al revés.</p>
+    <p class="th-body">Una vez que empiezas a reconocer estos compases, aparecen en todas partes: en música tradicional armenia, en samba de enredo con acentuaciones desplazadas, en varios temas de Björk y de Frank Zappa. La asimetría deja de parecer una excepción y revela ser un recurso tan ordinario como el 4/4.</p>
+  </div>
+</section>
+
+<!-- FOOTER / NEXT -->
+<section class="th-next">
+  <span class="th-next-label">Navegar capítulos</span>
+  <h2 class="th-next-title">Sigue explorando</h2>
+  <p class="th-next-sub">Los compases impares son el primer paso. Ahora dos patrones al mismo tiempo.</p>
+  <div class="th-next-btns">
+    <a href="/teoria/ritmo/poliritmia" class="th-next-btn">Poliritmia y hemiola →</a>
+    <a href="/teoria/ritmo/compases-compuestos" class="th-next-btn sec">← Compases compuestos</a>
+  </div>
+  <div class="chapter-nav">
+    <a href="/teoria/ritmo/compases-compuestos" class="chapter-nav-item prev">
+      <span class="chapter-nav-dir">← Anterior</span>
+      <span class="chapter-nav-cap">Ritmo y Sonido · 04</span>
+      <span class="chapter-nav-title">Compases compuestos</span>
+    </a>
+    <a href="/teoria/ritmo/poliritmia" class="chapter-nav-item">
+      <span class="chapter-nav-dir">Siguiente →</span>
+      <span class="chapter-nav-cap">Ritmo y Sonido · 06</span>
+      <span class="chapter-nav-title">Poliritmia y hemiola</span>
+    </a>
+  </div>
+</section>
+
+<script>
+// ── Progress bar ──────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('prog-bar').style.width = (h > 0 ? Math.round(window.scrollY / h * 100) : 0) + '%';
+});
+
+// ── 7/8 Interactive Visual ────────────────────────────────────────────────────
+// Row A: 2+2+3  => groups: [0,1] [2,3] [4,5,6]
+// Row B: 3+2+2  => groups: [0,1,2] [3,4] [5,6]
+
+const rowAGroups = [0,0,1,1,2,2,2];
+const rowBGroups = [0,0,0,1,1,2,2];
+const groupClasses = ['asim-group-a','asim-group-b','asim-group-c'];
+// accent = first of each group
+const rowAAccents = [0,2,4];
+const rowBAccents = [0,3,5];
+
+// Pitches: high (first of group), medium (second), low (third in group of 3)
+// Group A cells: position within group
+function groupPositionA(i) {
+  const starts = [0,2,4];
+  for (let g = starts.length-1; g >= 0; g--) if (i >= starts[g]) return i - starts[g];
+  return 0;
+}
+function groupPositionB(i) {
+  const starts = [0,3,5];
+  for (let g = starts.length-1; g >= 0; g--) if (i >= starts[g]) return i - starts[g];
+  return 0;
+}
+
+const PITCHES = ['C5','G4','E4']; // high, medium, low
+
+let synth = null;
+function getSynth() {
+  if (!synth) {
+    synth = new Tone.Synth({
+      oscillator: { type: 'triangle' },
+      envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.05 }
+    }).toDestination();
+    synth.volume.value = -8;
+  }
+  return synth;
+}
+
+async function playCell(pitch) {
+  await Tone.start();
+  getSynth().triggerAttackRelease(pitch, '16n');
+}
+
+function flashCell(el) {
+  el.classList.add('active-flash');
+  setTimeout(() => el.classList.remove('active-flash'), 180);
+}
+
+function buildRow(containerId, groupMap, accentList, positionFn) {
+  const container = document.getElementById(containerId);
+  for (let i = 0; i < 7; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'asim-cell ' + groupClasses[groupMap[i]];
+    const pos = positionFn(i);
+    const pitch = PITCHES[Math.min(pos, 2)];
+    // accent marker
+    if (accentList.includes(i)) {
+      cell.innerHTML = '<span class="asim-accent-dot"></span>' + (i+1);
+    } else {
+      cell.textContent = i+1;
+    }
+    cell.addEventListener('click', () => {
+      playCell(pitch);
+      flashCell(cell);
+    });
+    container.appendChild(cell);
+  }
+}
+
+buildRow('row-a', rowAGroups, rowAAccents, groupPositionA);
+buildRow('row-b', rowBGroups, rowBAccents, groupPositionB);
+</script>
+
+<footer style="background:var(--ink2);border-top:1px solid rgba(255,255,255,.06);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+  <div style="font-size:12px;color:var(--ink5);">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div style="display:flex;gap:20px;">
+    <a href="/privacidad" style="font-size:12px;color:var(--ink5);text-decoration:none;">Aviso de Privacidad</a>
+    <a href="/terminos" style="font-size:12px;color:var(--ink5);text-decoration:none;">Términos y Condiciones</a>
+    <a href="/cookies" style="font-size:12px;color:var(--ink5);text-decoration:none;">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Técnica y expresión</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<style>
+:root{
+  --paper:#f4ece0;--paper2:#ebe1d2;--paper3:#ddd1bd;--paper4:#c8b99f;--paper5:#b8a890;
+  --copper:#a85a1e;--copper-lt:#c47a36;--copper-dk:#7a3e10;
+  --ink:#1c1410;--ink2:#2e2418;--ink3:#5a4a38;--ink4:#8a7a64;--ink5:#a09080;
+  --tonic:#a05c20;--subdom:#5a7abf;--dominant:#7a4abf;--relative:#4a7c59;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{font-family:var(--mono);font-size:.52em;font-weight:400;color:var(--ink4);letter-spacing:0;margin-left:2px;}
+.nav-link{padding:0 16px;height:60px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+.th-progress{position:fixed;top:56px;left:0;right:0;height:2px;background:rgba(160,92,32,.12);z-index:99;}
+.th-progress-bar{height:100%;background:var(--copper);width:0%;transition:width .08s linear;}
+
+.th-breadcrumb{background:var(--paper2);border-bottom:1px solid var(--paper4);padding:0 48px;height:40px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink5);}
+.th-breadcrumb a{color:var(--ink5);text-decoration:none;}
+.th-breadcrumb a:hover{color:var(--copper);}
+.th-breadcrumb .sep{opacity:.5;}
+.th-breadcrumb .current{color:var(--ink3);font-weight:500;}
+
+.th-hero{background:#13100c;padding:110px 48px 90px;text-align:center;overflow:hidden;}
+.th-chapter{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:28px;display:flex;align-items:center;justify-content:center;gap:14px;}
+.th-chapter::before,.th-chapter::after{content:'';display:block;height:1px;width:48px;background:var(--copper-lt);opacity:.35;}
+.th-title{font-family:var(--serif);font-size:clamp(54px,7.5vw,92px);font-weight:700;line-height:.92;letter-spacing:-.025em;color:var(--paper);margin-bottom:28px;}
+.th-title em{font-style:italic;color:var(--copper-lt);}
+.th-lead{font-family:var(--serif);font-size:clamp(17px,2vw,22px);font-style:italic;color:rgba(250,246,240,.58);max-width:580px;margin:0 auto 44px;line-height:1.65;}
+.th-scroll-hint{font-size:11px;color:rgba(250,246,240,.22);letter-spacing:.14em;text-transform:uppercase;}
+
+.th-section{padding:88px 48px;}
+.th-section.dark{background:#13100c;}
+.th-inner{max-width:1080px;margin:0 auto;}
+.th-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;display:block;}
+.th-section.dark .th-label{color:var(--copper-lt);}
+.th-h2{font-family:var(--serif);font-size:clamp(34px,4.5vw,56px);font-weight:700;line-height:1.02;letter-spacing:-.025em;color:var(--ink);margin-bottom:22px;}
+.th-section.dark .th-h2{color:var(--paper);}
+.th-body{font-size:15px;color:var(--ink3);line-height:1.85;max-width:640px;}
+.th-body+.th-body{margin-top:14px;}
+.th-section.dark .th-body{color:rgba(250,246,240,.58);}
+.th-body strong{color:var(--ink2);font-weight:600;}
+.th-section.dark .th-body strong{color:rgba(244,236,224,.92);}
+.th-split{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;}
+.th-callout{border-left:3px solid var(--copper);border-radius:0 8px 8px 0;padding:16px 20px;margin:28px 0;background:rgba(160,92,32,.07);}
+.th-section.dark .th-callout{background:rgba(255,255,255,.05);border-left-color:var(--copper-lt);}
+.th-callout-label{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);margin-bottom:7px;}
+.th-section.dark .th-callout-label{color:var(--copper-lt);}
+.th-callout p{font-size:14px;color:var(--ink3);line-height:1.65;}
+.th-section.dark .th-callout p{color:rgba(250,246,240,.58);}
+
+/* ── TECHNIQUE VISUAL ── */
+.technique-visual{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:28px 24px;margin-top:32px;}
+.technique-visual-title{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:20px;}
+.technique-cards{display:flex;flex-direction:column;gap:12px;}
+.technique-card{display:flex;align-items:center;gap:16px;padding:14px 16px;background:rgba(255,255,255,.04);border:1.5px solid rgba(255,255,255,.08);border-radius:10px;cursor:pointer;transition:all .18s;user-select:none;}
+.technique-card:hover{border-color:rgba(196,122,54,.35);background:rgba(196,122,54,.06);}
+.technique-card.playing{border-color:var(--copper-lt);background:rgba(196,122,54,.12);}
+.technique-icon{width:48px;height:48px;flex-shrink:0;}
+.technique-info{flex:1;}
+.technique-name{font-family:var(--serif);font-size:16px;font-weight:700;color:var(--paper);margin-bottom:3px;}
+.technique-desc{font-size:12px;color:rgba(250,246,240,.38);line-height:1.5;}
+.technique-play-hint{font-size:10px;color:rgba(196,122,54,.5);font-family:var(--mono);font-weight:600;flex-shrink:0;}
+
+/* ── NEXT ── */
+.th-next{background:var(--ink);padding:88px 48px;text-align:center;}
+.th-next-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink5);margin-bottom:18px;display:block;}
+.th-next-title{font-family:var(--serif);font-size:clamp(36px,5vw,56px);font-weight:700;color:var(--paper);margin-bottom:10px;letter-spacing:-.02em;}
+.th-next-sub{font-size:14px;color:var(--ink4);margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.th-next-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.th-next-btn{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:13px;font-weight:600;padding:13px 28px;border-radius:8px;text-decoration:none;transition:background .2s;}
+.th-next-btn:hover{background:var(--copper-dk);}
+.th-next-btn.sec{background:transparent;color:rgba(250,246,240,.5);border:1px solid rgba(255,255,255,.12);}
+.th-next-btn.sec:hover{color:var(--paper);border-color:rgba(255,255,255,.3);}
+
+/* ── CHAPTER NAV ── */
+.chapter-nav{display:flex;gap:0;border-top:1px solid rgba(255,255,255,.06);margin-top:64px;}
+.chapter-nav-item{flex:1;padding:28px 24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;transition:background .18s;}
+.chapter-nav-item:hover{background:rgba(255,255,255,.03);}
+.chapter-nav-item.prev{border-right:1px solid rgba(255,255,255,.06);}
+.chapter-nav-item.disabled{cursor:default;pointer-events:none;opacity:.35;}
+.chapter-nav-dir{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(250,246,240,.25);}
+.chapter-nav-cap{font-size:11px;color:rgba(250,246,240,.25);}
+.chapter-nav-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--paper);}
+
+/* ── TECHNIQUE TABLE ── */
+.tech-table{width:100%;border-collapse:collapse;margin:24px 0;}
+.tech-table th{font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:10px 14px;text-align:left;border-bottom:1px solid var(--paper3);color:var(--ink5);}
+.tech-table td{padding:12px 14px;border-bottom:1px solid var(--paper3);vertical-align:top;}
+.tech-table tr:last-child td{border-bottom:none;}
+.tech-table tr:hover td{background:rgba(160,92,32,.04);}
+.tt-name{font-family:var(--serif);font-size:15px;font-weight:700;color:var(--ink);white-space:nowrap;}
+.tt-desc{font-size:13px;color:var(--ink4);line-height:1.55;}
+.tt-analogy{font-size:12px;color:var(--ink5);font-style:italic;margin-top:4px;}
+
+@media(max-width:768px){
+  nav{padding:0 16px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav>*{flex-shrink:0;}
+  .th-breadcrumb{padding:0 20px;}
+  .th-hero{padding:80px 20px 64px;}
+  .th-section{padding:64px 20px;}
+  .th-split{grid-template-columns:1fr;gap:40px;}
+  .th-next{padding:64px 20px;}
+  .chapter-nav{flex-direction:column;}
+  .chapter-nav-item.prev{border-right:none;border-bottom:1px solid rgba(255,255,255,.06);}
+  .tech-table{font-size:13px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link active">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<div class="th-progress"><div class="th-progress-bar" id="prog-bar"></div></div>
+
+<div class="th-breadcrumb">
+  <a href="/teoria">Teoría</a>
+  <span class="sep">›</span>
+  <a href="/teoria/instrumento">Teoría en el Instrumento</a>
+  <span class="sep">›</span>
+  <span class="current">Técnica y expresión</span>
+</div>
+
+<!-- HERO -->
+<section class="th-hero">
+  <div class="th-chapter">Teoría en el Instrumento · 10</div>
+  <h1 class="th-title">Técnica <em>y expresión</em></h1>
+  <p class="th-lead">Vibrato, bend, slide, hammer-on, pull-off: las herramientas con las que la guitarra imita una voz.</p>
+  <div class="th-scroll-hint">↓ leer</div>
+</section>
+
+<!-- SECCIÓN 1: La técnica al servicio -->
+<section class="th-section">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">La técnica al servicio</span>
+        <h2 class="th-h2">Las técnicas no son<br><em>fines en sí mismos</em></h2>
+        <p class="th-body">La técnica en guitarra no es un objetivo, es un medio para un fin expresivo concreto. El <strong>vibrato</strong> añade calidez y sustain a una nota. Un <strong>bend</strong> sube el tono de forma continua, imitando la capacidad de la voz humana para la inflexión microtonal. Los <strong>slides</strong> conectan dos notas con un deslizamiento continuo. Los <strong>hammer-ons</strong> y <strong>pull-offs</strong> permiten articular notas sin puntear, creando una fraseo ligado y fluido.</p>
+        <p class="th-body">Todas estas técnicas existen en otros instrumentos: el violín tiene vibrato y slide, el trombón tiene slide, la voz los tiene todos. La ventaja de la guitarra es que todos están disponibles simultáneamente en un mismo instrumento, lo que permite imitar registros y cualidades de voz con una flexibilidad que pocos instrumentos de cuerda igualan.</p>
+        <div class="th-callout">
+          <div class="th-callout-label">La pregunta correcta</div>
+          <p>Antes de practicar una técnica, pregunta: ¿qué efecto expresivo busco con esto? El vibrato que imita una voz que sostiene una nota larga es diferente al vibrato decorativo que se pone en toda nota porque sí.</p>
+        </div>
+      </div>
+      <div>
+        <table class="tech-table">
+          <thead>
+            <tr>
+              <th>Técnica</th>
+              <th>Efecto</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="tt-name">Vibrato</div></td>
+              <td><div class="tt-desc">Calidez, sustain prolongado, emoción.</div><div class="tt-analogy">Análogo al vibrato del violinista.</div></td>
+            </tr>
+            <tr>
+              <td><div class="tt-name">Bend</div></td>
+              <td><div class="tt-desc">Inflexión de tono, expresividad vocal, tensión.</div><div class="tt-analogy">Como un portamento de cantante.</div></td>
+            </tr>
+            <tr>
+              <td><div class="tt-name">Slide</div></td>
+              <td><div class="tt-desc">Conexión fluida entre notas, glissando.</div><div class="tt-analogy">Como el glissando de trombón.</div></td>
+            </tr>
+            <tr>
+              <td><div class="tt-name">Hammer-on</div></td>
+              <td><div class="tt-desc">Legato, velocidad, suavidad de ataque.</div><div class="tt-analogy">Como la articulación ligada en cuerdas.</div></td>
+            </tr>
+            <tr>
+              <td><div class="tt-name">Pull-off</div></td>
+              <td><div class="tt-desc">Legato descendente, líneas rápidas sin plectro.</div><div class="tt-analogy">Comparable al détaché suave en violín.</div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 2: Vibrato y bend -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Vibrato y bend</span>
+    <h2 class="th-h2">Hacer que una nota<br><em>respire</em></h2>
+    <p class="th-body">El vibrato se produce doblando y soltando repetidamente la cuerda una pequeña cantidad (típicamente un cuarto o medio tono) mientras se sostiene la nota. La <strong>velocidad</strong> (tasa) y la <strong>amplitud</strong> (rango de tono) del vibrato son decisiones estilísticas: el vibrato rápido y estrecho de B.B. King es inmediatamente reconocible, el vibrato más lento y amplio de Carlos Santana, igual de identificable. Cada guitarrista desarrolla un vibrato propio con el tiempo.</p>
+    <p class="th-body">Un <strong>bend</strong> (doblar la cuerda) sube el tono empujando o jalando la cuerda en sentido perpendicular al mástil. Un bend completo sube el tono un tono entero. Un semi-bend sube un semitono. Los <strong>pre-bends</strong> suben la cuerda antes de puntearla y luego la sueltan: el oyente escucha la nota descender desde una posición superior. Todas estas variantes requieren que los dedos de la mano izquierda tengan suficiente fuerza para mover la cuerda sin perder contacto con el traste.</p>
+
+    <!-- Interactive technique visual -->
+    <div class="technique-visual">
+      <div class="technique-visual-title">Técnicas interactivas — haz clic para escuchar</div>
+      <div class="technique-cards" id="technique-cards"></div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 3: Legato -->
+<section class="th-section">
+  <div class="th-inner">
+    <span class="th-label">Legato: hammer-on y pull-off</span>
+    <h2 class="th-h2">Sin plectro:<br><em>la línea que no corta</em></h2>
+    <p class="th-body">Un <strong>hammer-on</strong> produce una nota llevando un dedo con fuerza sobre la cuerda sin puntear: el impacto mismo crea el sonido. Un <strong>pull-off</strong> produce una nota jalando el dedo de una cuerda pisada mientras otro dedo sostiene un traste más bajo, sonando la nota inferior sin puntear. Combinados en secuencias, crean runs de <strong>legato</strong> donde solo la primera nota se puntea y todas las siguientes las articula la mano izquierda sola.</p>
+    <p class="th-body">Guitarristas como Allan Holdsworth y John McLaughlin usan técnica legato de forma predominante para lograr líneas muy rápidas y fluidas que la técnica de plectro sola no puede igualar. La ausencia del ataque de la pua permite una continuidad de sonido casi parecida a la de un instrumento de viento, con frases que respiran en lugar de atacar cada nota.</p>
+    <p class="th-body">La exigencia técnica del legato no está en la velocidad sino en la uniformidad de volumen: un pull-off bien ejecutado produce el mismo volumen que la nota punteada anterior. Cuando los pull-offs suenan apagados o débiles, el problema es la fuerza de la mano izquierda y el ángulo del dedo al jalar, no la velocidad.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">Ejercicio fundamental</div>
+      <p>Practica la secuencia 5–7 en una cuerda con hammer-on y luego pull-off hasta que ambas notas tengan el mismo volumen que la primera nota punteada. Solo cuando son iguales, añade velocidad.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 4: La frase vocal -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">La frase vocal</span>
+    <h2 class="th-h2">Imitar la voz:<br><em>el objetivo final</em></h2>
+    <p class="th-body">El estándar más alto para el fraseo en guitarra es la voz humana, porque es el instrumento que cada oyente conoce con mayor intimidad. Una frase que respira (tiene espacio entre ideas), que infle (usa micro-tonal bend), que sostiene (usa vibrato para calidez) y que tiene dirección (construye y libera tensión) comunica más que una frase técnicamente perfecta pero entregada mecánicamente.</p>
+    <p class="th-body">B.B. King decía que intentaba "llorar" a través de la guitarra. Django Reinhardt describía la melodía como "hablarle directamente al corazón." Estos no son metáforas de sentimentalismo, son descripciones de objetivos técnicos específicos: timing, afinación y forma dinámica que comunican contenido emocional. El cry de B.B. King es un bend de medio tono con vibrato en la cima, ejecutado en el momento preciso de la frase. Identificable, replicable, con nombre técnico.</p>
+    <p class="th-body">Imitar frases de cantantes en la guitarra es un ejercicio práctico de primer orden. Toma una frase vocal de una canción que conozcas, identifica sus alturas aproximadas, transcríbela e intenta reproducir no solo las notas sino el vibrato, los bends y el espacio entre ellas. Cuando suene a la voz original, habrás capturado algo que ningún libro de teoría puede enseñarte directamente.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">Técnica + intención</div>
+      <p>Cada técnica tiene un nombre y una descripción mecánica. Pero la decisión de cuándo usarla, con qué amplitud, en qué nota de la frase y durante cuánto tiempo, eso es fraseo. La técnica sin fraseo produce precisión sin expresión. Son dos habilidades distintas y ambas se practican.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER / NEXT -->
+<section class="th-next">
+  <span class="th-next-label">Fin de la sección</span>
+  <h2 class="th-next-title">Volver al índice</h2>
+  <p class="th-next-sub">Has completado Teoría en el Instrumento. Regresa al índice para explorar otras secciones de Teoría.</p>
+  <div class="th-next-btns">
+    <a href="/teoria" class="th-next-btn">Índice de Teoría →</a>
+    <a href="/teoria/instrumento/extendidos" class="th-next-btn sec">← Acordes extendidos</a>
+  </div>
+  <div class="chapter-nav">
+    <a href="/teoria/instrumento/extendidos" class="chapter-nav-item prev">
+      <span class="chapter-nav-dir">← Anterior</span>
+      <span class="chapter-nav-cap">Teoría en el Instrumento · 09</span>
+      <span class="chapter-nav-title">Acordes extendidos</span>
+    </a>
+    <a href="/teoria" class="chapter-nav-item">
+      <span class="chapter-nav-dir">Índice →</span>
+      <span class="chapter-nav-cap">Sección completa</span>
+      <span class="chapter-nav-title">Volver al índice de Teoría</span>
+    </a>
+  </div>
+</section>
+
+<script>
+// ── Progress bar ──────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('prog-bar').style.width = (h > 0 ? Math.round(window.scrollY / h * 100) : 0) + '%';
+});
+
+// ── Audio ─────────────────────────────────────────────────────────────────────
+let audioReady = false;
+let monoSynth = null;
+let pitchShift = null;
+let vibratoLFO = null;
+let vibratoGain = null;
+let dest = null;
+
+async function initAudio() {
+  if (audioReady) return;
+  await Tone.start();
+  const reverb = new Tone.Freeverb({ roomSize: 0.35, wet: 0.16 }).toDestination();
+  const comp = new Tone.Compressor({ threshold: -20, ratio: 3.5 }).connect(reverb);
+  monoSynth = new Tone.Synth({
+    oscillator: { type: 'triangle' },
+    envelope: { attack: 0.02, decay: 0.2, sustain: 0.7, release: 1.8 },
+    volume: -6,
+  }).connect(comp);
+  audioReady = true;
+}
+
+function midiToFreq(midi) {
+  return 440 * Math.pow(2, (midi - 69) / 12);
+}
+
+// ── Bend: ramp frequency up ───────────────────────────────────────────────────
+async function playBend(card) {
+  await initAudio();
+  card.classList.add('playing');
+  const startNote = 'A4'; // 69
+  const endFreq = midiToFreq(71); // B4 — whole tone bend
+  monoSynth.triggerAttack(startNote, Tone.now());
+  monoSynth.frequency.rampTo(endFreq, 0.35, Tone.now() + 0.05);
+  setTimeout(() => {
+    monoSynth.triggerRelease();
+    card.classList.remove('playing');
+  }, 1400);
+}
+
+// ── Vibrato: frequency wobble ─────────────────────────────────────────────────
+async function playVibrato(card) {
+  await initAudio();
+  card.classList.add('playing');
+  const baseFreq = midiToFreq(69); // A4
+  monoSynth.triggerAttack('A4', Tone.now());
+
+  // Manual vibrato via frequency oscillation
+  let t = 0;
+  const vibratoRate = 6; // Hz
+  const vibratoDepth = 12; // cents
+  const interval = setInterval(() => {
+    t += 1 / 60;
+    const offset = Math.sin(2 * Math.PI * vibratoRate * t) * vibratoDepth;
+    monoSynth.frequency.value = baseFreq * Math.pow(2, offset / 1200);
+  }, 1000 / 60);
+
+  setTimeout(() => {
+    clearInterval(interval);
+    monoSynth.triggerRelease();
+    card.classList.remove('playing');
+  }, 2000);
+}
+
+// ── Slide: two notes with portamento ─────────────────────────────────────────
+async function playSlide(card) {
+  await initAudio();
+  card.classList.add('playing');
+  monoSynth.portamento = 0.18;
+  monoSynth.triggerAttack('G4', Tone.now());
+  monoSynth.frequency.rampTo(midiToFreq(71), 0.18, Tone.now() + 0.08); // slide to B4
+  setTimeout(() => {
+    monoSynth.triggerRelease();
+    monoSynth.portamento = 0;
+    card.classList.remove('playing');
+  }, 1200);
+}
+
+// ── Technique cards data ──────────────────────────────────────────────────────
+const TECHNIQUES = [
+  {
+    id: 'bend',
+    name: 'Bend',
+    desc: 'La nota sube un tono entero empujando la cuerda — de La a Si.',
+    icon: `<svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="36" r="5" fill="var(--copper-lt)" opacity=".9"/>
+      <path d="M24 31 C24 20 34 18 34 10" stroke="var(--copper-lt)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M30 7 L34 10 L31 14" stroke="var(--copper-lt)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`,
+    play: playBend,
+  },
+  {
+    id: 'vibrato',
+    name: 'Vibrato',
+    desc: 'La nota oscila repetidamente un cuarto de tono arriba y abajo.',
+    icon: `<svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="24" cy="30" r="5" fill="var(--copper-lt)" opacity=".9"/>
+      <path d="M8 24 Q12 18 16 24 Q20 30 24 24 Q28 18 32 24 Q36 30 40 24" stroke="var(--copper-lt)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    </svg>`,
+    play: playVibrato,
+  },
+  {
+    id: 'slide',
+    name: 'Slide',
+    desc: 'Deslizamiento continuo de Sol a Si (dos tonos hacia arriba).',
+    icon: `<svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="36" r="5" fill="rgba(196,122,54,.5)"/>
+      <circle cx="36" cy="14" r="5" fill="var(--copper-lt)" opacity=".9"/>
+      <line x1="16" y1="33" x2="32" y2="17" stroke="var(--copper-lt)" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M29 13 L36 14 L34 21" stroke="var(--copper-lt)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`,
+    play: playSlide,
+  },
+];
+
+function buildTechniqueCards() {
+  const container = document.getElementById('technique-cards');
+  TECHNIQUES.forEach(t => {
+    const card = document.createElement('div');
+    card.className = 'technique-card';
+    card.id = 'tech-' + t.id;
+    card.innerHTML = `
+      <div class="technique-icon">${t.icon}</div>
+      <div class="technique-info">
+        <div class="technique-name">${t.name}</div>
+        <div class="technique-desc">${t.desc}</div>
+      </div>
+      <div class="technique-play-hint">▶ escuchar</div>
+    `;
+    card.addEventListener('click', () => t.play(card));
+    container.appendChild(card);
+  });
+}
+
+buildTechniqueCards();
+</script>
+
+<footer style="background:var(--ink2);border-top:1px solid rgba(255,255,255,.06);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+  <div style="font-size:12px;color:var(--ink5);">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div style="display:flex;gap:20px;">
+    <a href="/privacidad" style="font-size:12px;color:var(--ink5);text-decoration:none;">Aviso de Privacidad</a>
+    <a href="/terminos" style="font-size:12px;color:var(--ink5);text-decoration:none;">Términos y Condiciones</a>
+    <a href="/cookies" style="font-size:12px;color:var(--ink5);text-decoration:none;">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

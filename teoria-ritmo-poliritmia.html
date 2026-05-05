@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Poliritmia y hemiola</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<style>
+:root{
+  --paper:#f4ece0;--paper2:#ebe1d2;--paper3:#ddd1bd;--paper4:#c8b99f;--paper5:#b8a890;
+  --copper:#a85a1e;--copper-lt:#c47a36;--copper-dk:#7a3e10;
+  --ink:#1c1410;--ink2:#2e2418;--ink3:#5a4a38;--ink4:#8a7a64;--ink5:#a09080;
+  --tonic:#a05c20;--subdom:#5a7abf;--dominant:#7a4abf;--relative:#4a7c59;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{font-family:var(--mono);font-size:.52em;font-weight:400;color:var(--ink4);letter-spacing:0;margin-left:2px;}
+.nav-link{padding:0 16px;height:60px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+.th-progress{position:fixed;top:56px;left:0;right:0;height:2px;background:rgba(160,92,32,.12);z-index:99;}
+.th-progress-bar{height:100%;background:var(--copper);width:0%;transition:width .08s linear;}
+
+.th-breadcrumb{background:var(--paper2);border-bottom:1px solid var(--paper4);padding:0 48px;height:40px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink5);}
+.th-breadcrumb a{color:var(--ink5);text-decoration:none;}
+.th-breadcrumb a:hover{color:var(--copper);}
+.th-breadcrumb .sep{opacity:.5;}
+.th-breadcrumb .current{color:var(--ink3);font-weight:500;}
+
+.th-hero{background:#13100c;padding:110px 48px 90px;text-align:center;overflow:hidden;}
+.th-chapter{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:28px;display:flex;align-items:center;justify-content:center;gap:14px;}
+.th-chapter::before,.th-chapter::after{content:'';display:block;height:1px;width:48px;background:var(--copper-lt);opacity:.35;}
+.th-title{font-family:var(--serif);font-size:clamp(54px,7.5vw,92px);font-weight:700;line-height:.92;letter-spacing:-.025em;color:var(--paper);margin-bottom:28px;}
+.th-title em{font-style:italic;color:var(--copper-lt);}
+.th-lead{font-family:var(--serif);font-size:clamp(17px,2vw,22px);font-style:italic;color:rgba(250,246,240,.58);max-width:580px;margin:0 auto 44px;line-height:1.65;}
+.th-scroll-hint{font-size:11px;color:rgba(250,246,240,.22);letter-spacing:.14em;text-transform:uppercase;}
+
+.th-section{padding:88px 48px;}
+.th-section.dark{background:#13100c;}
+.th-inner{max-width:1080px;margin:0 auto;}
+.th-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;display:block;}
+.th-section.dark .th-label{color:var(--copper-lt);}
+.th-h2{font-family:var(--serif);font-size:clamp(34px,4.5vw,56px);font-weight:700;line-height:1.02;letter-spacing:-.025em;color:var(--ink);margin-bottom:22px;}
+.th-section.dark .th-h2{color:var(--paper);}
+.th-body{font-size:15px;color:var(--ink3);line-height:1.85;max-width:640px;}
+.th-body+.th-body{margin-top:14px;}
+.th-section.dark .th-body{color:rgba(250,246,240,.58);}
+.th-body strong{color:var(--ink2);font-weight:600;}
+.th-section.dark .th-body strong{color:rgba(244,236,224,.92);}
+.th-split{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;}
+.th-callout{border-left:3px solid var(--copper);border-radius:0 8px 8px 0;padding:16px 20px;margin:28px 0;background:rgba(160,92,32,.07);}
+.th-section.dark .th-callout{background:rgba(255,255,255,.05);border-left-color:var(--copper-lt);}
+.th-callout-label{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);margin-bottom:7px;}
+.th-section.dark .th-callout-label{color:var(--copper-lt);}
+.th-callout p{font-size:14px;color:var(--ink3);line-height:1.65;}
+.th-section.dark .th-callout p{color:rgba(250,246,240,.58);}
+
+/* ── METRONOME (shared) ── */
+.metro-section{padding:88px 48px;background:var(--paper2);}
+.metro-card{background:#1a1410;border-radius:20px;padding:48px;max-width:800px;margin:0 auto;}
+.metro-title{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--paper);margin-bottom:32px;text-align:center;letter-spacing:-.01em;}
+.metro-sig-pills{display:flex;gap:10px;justify-content:center;margin-bottom:32px;}
+.metro-sig-pill{font-family:var(--mono);font-size:14px;font-weight:600;padding:9px 24px;border-radius:24px;border:2px solid rgba(255,255,255,.12);background:transparent;color:rgba(250,246,240,.45);cursor:pointer;transition:all .18s;}
+.metro-sig-pill:hover{border-color:var(--copper-lt);color:rgba(250,246,240,.8);}
+.metro-sig-pill.active{background:var(--copper);border-color:var(--copper-dk);color:#fff;}
+.metro-bpm-row{display:flex;align-items:center;gap:18px;justify-content:center;margin-bottom:36px;}
+.metro-bpm-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(250,246,240,.3);}
+.metro-bpm-val{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--copper-lt);min-width:48px;text-align:right;}
+.metro-slider{-webkit-appearance:none;appearance:none;width:220px;height:4px;border-radius:2px;background:rgba(255,255,255,.12);outline:none;cursor:pointer;}
+.metro-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--copper-lt);cursor:pointer;box-shadow:0 0 0 3px rgba(196,122,54,.2);}
+.metro-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--copper-lt);cursor:pointer;border:none;}
+.metro-beats-row{display:flex;gap:14px;justify-content:center;margin-bottom:28px;flex-wrap:wrap;}
+.metro-beat{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.12);transition:transform .1s,box-shadow .1s,background .1s,border-color .1s;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:600;color:rgba(250,246,240,.3);}
+.metro-beat.accent{width:54px;height:54px;font-size:13px;background:rgba(168,90,30,.15);border-color:rgba(196,122,54,.35);color:var(--copper-lt);}
+.metro-beat.sub-accent{background:rgba(168,90,30,.07);border-color:rgba(196,122,54,.2);color:rgba(196,122,54,.6);}
+.metro-beat.active{transform:scale(1.18);box-shadow:0 0 22px rgba(196,122,54,.45);background:rgba(196,122,54,.28);border-color:var(--copper-lt);color:#fff;}
+.metro-beat.accent.active{transform:scale(1.22);box-shadow:0 0 32px rgba(196,122,54,.6);background:rgba(196,122,54,.45);}
+.metro-play-btn{display:block;margin:0 auto 24px;background:var(--copper);color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;padding:13px 48px;border-radius:10px;border:none;cursor:pointer;transition:background .18s,transform .1s;}
+.metro-play-btn:hover{background:var(--copper-lt);transform:translateY(-1px);}
+.metro-play-btn:active{transform:translateY(0);}
+.metro-desc{text-align:center;font-size:13px;color:rgba(250,246,240,.38);line-height:1.6;font-style:italic;}
+
+/* ── NEXT ── */
+.th-next{background:var(--ink);padding:88px 48px;text-align:center;}
+.th-next-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink5);margin-bottom:18px;display:block;}
+.th-next-title{font-family:var(--serif);font-size:clamp(36px,5vw,56px);font-weight:700;color:var(--paper);margin-bottom:10px;letter-spacing:-.02em;}
+.th-next-sub{font-size:14px;color:var(--ink4);margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.th-next-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.th-next-btn{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:13px;font-weight:600;padding:13px 28px;border-radius:8px;text-decoration:none;transition:background .2s;}
+.th-next-btn:hover{background:var(--copper-dk);}
+.th-next-btn.sec{background:transparent;color:rgba(250,246,240,.5);border:1px solid rgba(255,255,255,.12);}
+.th-next-btn.sec:hover{color:var(--paper);border-color:rgba(255,255,255,.3);}
+.th-next-btn.disabled{background:transparent;color:rgba(250,246,240,.22);border:1px solid rgba(255,255,255,.07);cursor:default;pointer-events:none;}
+
+/* ── CHAPTER NAV ── */
+.chapter-nav{display:flex;gap:0;border-top:1px solid rgba(255,255,255,.06);margin-top:64px;}
+.chapter-nav-item{flex:1;padding:28px 24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;transition:background .18s;}
+.chapter-nav-item:hover{background:rgba(255,255,255,.03);}
+.chapter-nav-item.prev{border-right:1px solid rgba(255,255,255,.06);}
+.chapter-nav-item.disabled{cursor:default;pointer-events:none;opacity:.35;}
+.chapter-nav-dir{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(250,246,240,.25);}
+.chapter-nav-cap{font-size:11px;color:rgba(250,246,240,.25);}
+.chapter-nav-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--paper);}
+
+/* ── POLY VISUAL ── */
+.poly-visual{background:#1a1410;border-radius:20px;padding:40px;max-width:760px;margin:0 auto;}
+.poly-visual-title{font-family:var(--serif);font-size:17px;color:var(--paper);margin-bottom:28px;text-align:center;}
+.poly-row-wrap{margin-bottom:24px;}
+.poly-row-label{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(250,246,240,.3);margin-bottom:10px;}
+.poly-cells{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;}
+.poly-cell{height:48px;border-radius:7px;border:2px solid transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:700;transition:transform .1s,box-shadow .12s,opacity .12s;}
+.poly-cell:hover{opacity:.85;}
+.poly-cell.active-flash{transform:scale(1.12);box-shadow:0 0 18px rgba(196,122,54,.5);}
+.poly-cell.on-copper{background:rgba(168,90,30,.28);border-color:rgba(196,122,54,.55);color:var(--copper-lt);}
+.poly-cell.on-blue{background:rgba(90,122,191,.22);border-color:rgba(90,122,191,.5);color:#7a9fdf;}
+.poly-cell.on-both{background:rgba(130,90,110,.32);border-color:rgba(180,120,150,.6);color:#e0b0c8;}
+.poly-cell.off{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.08);color:rgba(250,246,240,.18);}
+.poly-play-btn{display:block;margin:20px auto 0;background:var(--copper);color:#fff;font-family:var(--sans);font-size:13px;font-weight:600;padding:11px 36px;border-radius:8px;border:none;cursor:pointer;transition:background .18s,transform .1s;}
+.poly-play-btn:hover{background:var(--copper-lt);transform:translateY(-1px);}
+.poly-play-btn:active{transform:translateY(0);}
+.poly-legend{display:flex;gap:18px;justify-content:center;margin-top:20px;flex-wrap:wrap;}
+.poly-legend-item{display:flex;align-items:center;gap:7px;font-size:11px;color:rgba(250,246,240,.4);}
+.poly-legend-dot{width:10px;height:10px;border-radius:3px;}
+
+@media(max-width:768px){
+  nav{padding:0 16px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav>*{flex-shrink:0;}
+  .th-breadcrumb{padding:0 20px;}
+  .th-hero{padding:80px 20px 64px;}
+  .th-section{padding:64px 20px;}
+  .th-split{grid-template-columns:1fr;gap:40px;}
+  .metro-section{padding:64px 20px;}
+  .metro-card{padding:28px 18px;}
+  .th-next{padding:64px 20px;}
+  .chapter-nav{flex-direction:column;}
+  .chapter-nav-item.prev{border-right:none;border-bottom:1px solid rgba(255,255,255,.06);}
+  .poly-visual{padding:24px 16px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link active">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<div class="th-progress"><div class="th-progress-bar" id="prog-bar"></div></div>
+
+<div class="th-breadcrumb">
+  <a href="/teoria">Teoría</a>
+  <span class="sep">›</span>
+  <a href="/teoria">Ritmo y Sonido</a>
+  <span class="sep">›</span>
+  <span class="current">Poliritmia y hemiola</span>
+</div>
+
+<!-- HERO -->
+<section class="th-hero">
+  <div class="th-chapter">Ritmo y Sonido · 06</div>
+  <h1 class="th-title">Poliritmia <em>y hemiola</em></h1>
+  <p class="th-lead">Dos patrones rítmicos distintos sonando al mismo tiempo sobre el mismo pulso.</p>
+  <div class="th-scroll-hint">↓ leer</div>
+</section>
+
+<!-- SECCIÓN 1: Dos contra tres -->
+<section class="th-section">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">Dos contra tres</span>
+        <h2 class="th-h2">El origen africano <em>del ritmo occidental</em></h2>
+        <p class="th-body">La <strong>poliritmia</strong> es la combinación simultánea de dos o más patrones rítmicos contrastantes. El ejemplo más simple es 3 contra 2: un músico toca 3 notas iguales en el mismo tiempo que otro toca 2. El resultado es que las notas solo coinciden al inicio y al final del ciclo.</p>
+        <p class="th-body">Las tradiciones de percusión del África Occidental han usado la poliritmia durante siglos como principio organizador fundamental. Las dos o tres capas rítmicas no pelean entre sí: se entrelazan. Cada capa es incompleta sola; juntas forman el tejido completo. Esta tradición es directamente ancestral del jazz, el blues, el funk y toda la música de la diáspora africana.</p>
+        <p class="th-body">El oído occidental, habituado a una sola línea rítmica dominante, tiende a "elegir" una de las capas y seguirla, o a fusionarlas en una sola figura compuesta. El entrenamiento para escuchar poliritmia consiste en aprender a mantener las dos capas separadas y conscientes al mismo tiempo, sin que ninguna domine.</p>
+        <div class="th-callout">
+          <div class="th-callout-label">Principio</div>
+          <p>En la poliritmia, cada capa es un patrón completo por sí mismo. El punto no es la disonancia sino el entrelazamiento.</p>
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--paper2);border:1px solid var(--paper3);border-radius:14px;padding:28px 24px;">
+          <p style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:20px;">3 contra 2 sobre 6 pulsos</p>
+          <div style="margin-bottom:18px;">
+            <p style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink5);margin-bottom:8px;">Patrón de 3 (notas en 1, 3, 5)</p>
+            <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;">
+              <div style="height:28px;background:rgba(160,92,32,.3);border:2px solid rgba(160,92,32,.5);border-radius:5px;"></div>
+              <div style="height:28px;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:5px;"></div>
+              <div style="height:28px;background:rgba(160,92,32,.3);border:2px solid rgba(160,92,32,.5);border-radius:5px;"></div>
+              <div style="height:28px;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:5px;"></div>
+              <div style="height:28px;background:rgba(160,92,32,.3);border:2px solid rgba(160,92,32,.5);border-radius:5px;"></div>
+              <div style="height:28px;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:5px;"></div>
+            </div>
+          </div>
+          <div style="margin-bottom:18px;">
+            <p style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink5);margin-bottom:8px;">Patrón de 2 (notas en 1, 4)</p>
+            <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;">
+              <div style="height:28px;background:rgba(90,122,191,.28);border:2px solid rgba(90,122,191,.5);border-radius:5px;"></div>
+              <div style="height:28px;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:5px;"></div>
+              <div style="height:28px;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:5px;"></div>
+              <div style="height:28px;background:rgba(90,122,191,.28);border:2px solid rgba(90,122,191,.5);border-radius:5px;"></div>
+              <div style="height:28px;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:5px;"></div>
+              <div style="height:28px;background:rgba(255,255,255,.04);border:2px solid rgba(255,255,255,.08);border-radius:5px;"></div>
+            </div>
+          </div>
+          <p style="font-size:12px;color:var(--ink5);font-style:italic;line-height:1.6;">Solo el pulso 1 coincide. Los demás caen en posiciones distintas.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 2: 3 contra 2 -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">3 contra 2</span>
+    <h2 class="th-h2">Cómo suena y <em>cómo se practica</em></h2>
+    <p class="th-body">Para practicar 3 contra 2: toca con la mano derecha 3 tiempos iguales mientras la izquierda toca 2. La única coincidencia es en el tiempo 1 (el inicio). Entre ellos, las notas de cada mano caen en posiciones distintas. Un dicho útil: "no es difícil, es peculiar." El cuerpo aprende la coordinación antes que el cerebro termine de explicársela.</p>
+    <p class="th-body">La proporción 3:2 aparece en la música clásica occidental como la <strong>hemiola</strong> (tres blancas abarcando dos compases de 3/4), en la <strong>clave son</strong> (3-2) de la música cubana, y en el <strong>cross-rhythm</strong> característico de la percusión del África Occidental. El mismo principio matemático genera sonidos de culturas completamente distintas.</p>
+    <p class="th-body">La forma más eficiente de practicar la coordinación polirrítmica es empezar lento con un metrónomo marcando cada subdivisión del MCM (el mínimo común múltiplo de las dos cifras). Para 3 contra 2, el MCM es 6: practica con el metrónomo en cada uno de los 6 pulsos. Poco a poco reduce la guía hasta tocar solo con los dos patrones propios.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">Mnemotecnia</div>
+      <p>"Not difficult, quite peculiar" — di estas cuatro sílabas mientras tocas: NO-T-DIF-FI-CULT-QUI (3 grupos de 2) o NO-TDI-FFI-CUL-TQU-ITE (2 grupos de 3).</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN INTERACTIVA: 3 contra 2 -->
+<section class="metro-section">
+  <div style="max-width:1080px;margin:0 auto;">
+    <span class="th-label" style="display:block;text-align:center;margin-bottom:32px;">Interactivo</span>
+    <div class="poly-visual">
+      <div class="poly-visual-title">3 contra 2 — 6 pulsos (MCM)</div>
+
+      <div class="poly-row-wrap">
+        <div class="poly-row-label">Patrón de 3 &nbsp;·&nbsp; notas en pulsos 1, 3, 5</div>
+        <div class="poly-cells" id="row-3"></div>
+      </div>
+
+      <div class="poly-row-wrap">
+        <div class="poly-row-label">Patrón de 2 &nbsp;·&nbsp; notas en pulsos 1, 4</div>
+        <div class="poly-cells" id="row-2"></div>
+      </div>
+
+      <div class="poly-row-wrap">
+        <div class="poly-row-label">Combinación &nbsp;·&nbsp; los dos juntos</div>
+        <div class="poly-cells" id="row-both"></div>
+      </div>
+
+      <button class="poly-play-btn" id="poly-play-btn">Reproducir juntos</button>
+
+      <div class="poly-legend">
+        <div class="poly-legend-item">
+          <div class="poly-legend-dot" style="background:rgba(168,90,30,.4);border:1.5px solid rgba(196,122,54,.7);"></div>
+          Patrón de 3
+        </div>
+        <div class="poly-legend-item">
+          <div class="poly-legend-dot" style="background:rgba(90,122,191,.3);border:1.5px solid rgba(90,122,191,.6);"></div>
+          Patrón de 2
+        </div>
+        <div class="poly-legend-item">
+          <div class="poly-legend-dot" style="background:rgba(130,90,110,.4);border:1.5px solid rgba(180,120,150,.7);"></div>
+          Coincidencia
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 3: La hemiola -->
+<section class="th-section">
+  <div class="th-inner">
+    <span class="th-label">La hemiola</span>
+    <h2 class="th-h2">Tres en el espacio de dos: <em>la ilusión de compás</em></h2>
+    <p class="th-body">La <strong>hemiola</strong> es una figura rítmica específica donde tres notas de duración igual ocupan el espacio que normalmente tomarían dos notas de duración diferente. En un vals de 3/4, tocar tres blancas (que abarcan dos compases) crea la sensación de que el compás ha cambiado temporalmente a 3/2.</p>
+    <p class="th-body">Handel, Brahms y Schumann usaron la hemiola ampliamente en las cadencias para crear énfasis rítmico antes de una resolución. La tensión entre el compás escrito y el compás percibido produce una sensación de ensanchamiento o de "respiración" justo antes del final de la frase. Es uno de los recursos retóricos más efectivos del período barroco y romántico.</p>
+    <p class="th-body">En la música contemporánea, el cross-rhythm del Afrobeat y el "3 contra 4" del piano de jazz (el ritmo de mazurca de Chopin contra el stride de jazz) son versiones modernas del mismo principio. La hemiola no pertenece a ningún período histórico: es una consecuencia directa de cómo el oído agrupa notas iguales en grupos de 2 o de 3.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">Para escuchar</div>
+      <p>El final del segundo movimiento del Trío Op. 8 de Brahms tiene hemiolas superpuestas en tres voces simultáneas. Escúchalo después de leer esta sección.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 4: Aplicaciones -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Aplicaciones</span>
+    <h2 class="th-h2">Clave, polyrhythm <em>y música de baile</em></h2>
+    <p class="th-body">La <strong>clave son 3-2</strong> es la base de toda la música cubana. Es un patrón de 5 notas distribuidas en 2 compases de 4/4: tres notas en el primer compás, dos en el segundo. Todas las demás partes rítmicas en un conjunto de salsa están en diálogo implícito con la clave. Cambiar entre la versión 3-2 y la 2-3 transforma el carácter de la música de forma inmediata y reconocible.</p>
+    <p class="th-body">Los conjuntos de percusión africana usan hasta 6 capas polirrítmicas simultáneas. Cada músico mantiene su patrón independientemente mientras escucha el tejido completo. Esta práctica contrasta con la tradición occidental de subordinar todas las partes a un pulso común único; en la tradición africana, el pulso común emerge de la interacción, no lo impone un director.</p>
+    <p class="th-body">La lección práctica: desarrollar la capacidad de mantener un patrón rítmico con las manos mientras se siente otro internamente hace cualquier ritmo más seguro. Un guitarrista que puede tocar el patrón de rasgueo de 3 mientras siente el compás de 4 tiene una reserva de estabilidad rítmica que los músicos sin este entrenamiento no poseen. La poliritmia no es un adorno, es infraestructura.</p>
+  </div>
+</section>
+
+<!-- FOOTER / NEXT -->
+<section class="th-next">
+  <span class="th-next-label">Navegar capítulos</span>
+  <h2 class="th-next-title">Sigue explorando</h2>
+  <p class="th-next-sub">Los patrones simultáneos están claros. Ahora la diferencia entre tocar las notas y hacer que la música se mueva.</p>
+  <div class="th-next-btns">
+    <a href="/teoria/ritmo/swing" class="th-next-btn">Swing y groove →</a>
+    <a href="/teoria/ritmo/asimetricos" class="th-next-btn sec">← Compases asimétricos</a>
+  </div>
+  <div class="chapter-nav">
+    <a href="/teoria/ritmo/asimetricos" class="chapter-nav-item prev">
+      <span class="chapter-nav-dir">← Anterior</span>
+      <span class="chapter-nav-cap">Ritmo y Sonido · 05</span>
+      <span class="chapter-nav-title">Compases asimétricos</span>
+    </a>
+    <a href="/teoria/ritmo/swing" class="chapter-nav-item">
+      <span class="chapter-nav-dir">Siguiente →</span>
+      <span class="chapter-nav-cap">Ritmo y Sonido · 07</span>
+      <span class="chapter-nav-title">Swing y groove</span>
+    </a>
+  </div>
+</section>
+
+<script>
+// ── Progress bar ──────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('prog-bar').style.width = (h > 0 ? Math.round(window.scrollY / h * 100) : 0) + '%';
+});
+
+// ── 3 vs 2 Interactive Visual ─────────────────────────────────────────────────
+// 6 cells = LCM(2,3)
+// Pattern of 3: cells 0, 2, 4 (1-indexed: 1, 3, 5)
+// Pattern of 2: cells 0, 3 (1-indexed: 1, 4)
+
+const pat3 = [0, 2, 4];
+const pat2 = [0, 3];
+
+let synth3 = null, synth2 = null;
+let polySeq = null;
+let polyPlaying = false;
+
+function getSynth3() {
+  if (!synth3) {
+    synth3 = new Tone.Synth({
+      oscillator: { type: 'triangle' },
+      envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.05 }
+    }).toDestination();
+    synth3.volume.value = -8;
+  }
+  return synth3;
+}
+function getSynth2() {
+  if (!synth2) {
+    synth2 = new Tone.Synth({
+      oscillator: { type: 'sine' },
+      envelope: { attack: 0.001, decay: 0.12, sustain: 0, release: 0.06 }
+    }).toDestination();
+    synth2.volume.value = -8;
+  }
+  return synth2;
+}
+
+async function playNote(pitch, isBluePat) {
+  await Tone.start();
+  if (isBluePat) {
+    getSynth2().triggerAttackRelease(pitch, '16n');
+  } else {
+    getSynth3().triggerAttackRelease(pitch, '16n');
+  }
+}
+
+function flashCell(el) {
+  el.classList.add('active-flash');
+  setTimeout(() => el.classList.remove('active-flash'), 180);
+}
+
+function buildPolyRow(containerId, activeIndices, isBlue) {
+  const container = document.getElementById(containerId);
+  for (let i = 0; i < 6; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'poly-cell';
+    const isOn = activeIndices.includes(i);
+    cell.classList.add(isOn ? (isBlue ? 'on-blue' : 'on-copper') : 'off');
+    cell.textContent = i + 1;
+    if (isOn) {
+      const pitch = isBlue ? 'G4' : 'C5';
+      cell.addEventListener('click', () => {
+        playNote(pitch, isBlue);
+        flashCell(cell);
+      });
+    }
+    container.appendChild(cell);
+  }
+}
+
+function buildBothRow(containerId) {
+  const container = document.getElementById(containerId);
+  for (let i = 0; i < 6; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'poly-cell';
+    const in3 = pat3.includes(i);
+    const in2 = pat2.includes(i);
+    if (in3 && in2) {
+      cell.classList.add('on-both');
+    } else if (in3) {
+      cell.classList.add('on-copper');
+    } else if (in2) {
+      cell.classList.add('on-blue');
+    } else {
+      cell.classList.add('off');
+    }
+    cell.textContent = i + 1;
+    if (in3 || in2) {
+      cell.addEventListener('click', async () => {
+        await Tone.start();
+        if (in3) getSynth3().triggerAttackRelease('C5', '16n');
+        if (in2) getSynth2().triggerAttackRelease('G4', '16n');
+        flashCell(cell);
+      });
+    }
+    container.appendChild(cell);
+  }
+}
+
+buildPolyRow('row-3', pat3, false);
+buildPolyRow('row-2', pat2, true);
+buildBothRow('row-both');
+
+// Play-together button
+document.getElementById('poly-play-btn').addEventListener('click', async () => {
+  await Tone.start();
+  polyPlaying = !polyPlaying;
+  const btn = document.getElementById('poly-play-btn');
+  if (polyPlaying) {
+    btn.textContent = 'Detener';
+    btn.style.background = 'var(--copper-dk)';
+
+    Tone.getTransport().bpm.value = 72;
+
+    // Each step = 1/6 of a bar. One bar = 4 beats. Step = 4/6 beats = "4n" * 2/3
+    // Use a 16th-note grid at 72*4 = 288 steps/min with spacing of triplet 8th
+    // Simplest: schedule 6 steps per cycle, each step = "8t" (triplet 8th)
+    let step = 0;
+    const cellsRow3 = document.querySelectorAll('#row-3 .poly-cell');
+    const cellsRow2 = document.querySelectorAll('#row-2 .poly-cell');
+    const cellsBoth = document.querySelectorAll('#row-both .poly-cell');
+
+    if (polySeq) { polySeq.dispose(); Tone.getTransport().cancel(); }
+
+    polySeq = new Tone.Sequence((time, idx) => {
+      if (pat3.includes(idx)) {
+        getSynth3().triggerAttackRelease('C5', '32n', time);
+      }
+      if (pat2.includes(idx)) {
+        getSynth2().triggerAttackRelease('G4', '32n', time);
+      }
+      Tone.getDraw().schedule(() => {
+        // flash row-3
+        cellsRow3.forEach((c, i) => { if (i === idx && pat3.includes(i)) flashCell(c); });
+        // flash row-2
+        cellsRow2.forEach((c, i) => { if (i === idx && pat2.includes(i)) flashCell(c); });
+        // flash both
+        cellsBoth.forEach((c, i) => { if (i === idx && (pat3.includes(i) || pat2.includes(i))) flashCell(c); });
+      }, time);
+    }, [0,1,2,3,4,5], '8t');
+
+    polySeq.start(0);
+    Tone.getTransport().start();
+  } else {
+    btn.textContent = 'Reproducir juntos';
+    btn.style.background = '';
+    if (polySeq) { polySeq.dispose(); polySeq = null; }
+    Tone.getTransport().stop();
+    Tone.getTransport().cancel();
+  }
+});
+</script>
+
+<footer style="background:var(--ink2);border-top:1px solid rgba(255,255,255,.06);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+  <div style="font-size:12px;color:var(--ink5);">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div style="display:flex;gap:20px;">
+    <a href="/privacidad" style="font-size:12px;color:var(--ink5);text-decoration:none;">Aviso de Privacidad</a>
+    <a href="/terminos" style="font-size:12px;color:var(--ink5);text-decoration:none;">Términos y Condiciones</a>
+    <a href="/cookies" style="font-size:12px;color:var(--ink5);text-decoration:none;">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Dinámica y articulación</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<style>
+:root{
+  --paper:#f4ece0;--paper2:#ebe1d2;--paper3:#ddd1bd;--paper4:#c8b99f;--paper5:#b8a890;
+  --copper:#a85a1e;--copper-lt:#c47a36;--copper-dk:#7a3e10;
+  --ink:#1c1410;--ink2:#2e2418;--ink3:#5a4a38;--ink4:#8a7a64;--ink5:#a09080;
+  --tonic:#a05c20;--subdom:#5a7abf;--dominant:#7a4abf;--relative:#4a7c59;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{font-family:var(--mono);font-size:.52em;font-weight:400;color:var(--ink4);letter-spacing:0;margin-left:2px;}
+.nav-link{padding:0 16px;height:60px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+.th-progress{position:fixed;top:56px;left:0;right:0;height:2px;background:rgba(160,92,32,.12);z-index:99;}
+.th-progress-bar{height:100%;background:var(--copper);width:0%;transition:width .08s linear;}
+
+.th-breadcrumb{background:var(--paper2);border-bottom:1px solid var(--paper4);padding:0 48px;height:40px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink5);}
+.th-breadcrumb a{color:var(--ink5);text-decoration:none;}
+.th-breadcrumb a:hover{color:var(--copper);}
+.th-breadcrumb .sep{opacity:.5;}
+.th-breadcrumb .current{color:var(--ink3);font-weight:500;}
+
+.th-hero{background:#13100c;padding:110px 48px 90px;text-align:center;overflow:hidden;}
+.th-chapter{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:28px;display:flex;align-items:center;justify-content:center;gap:14px;}
+.th-chapter::before,.th-chapter::after{content:'';display:block;height:1px;width:48px;background:var(--copper-lt);opacity:.35;}
+.th-title{font-family:var(--serif);font-size:clamp(54px,7.5vw,92px);font-weight:700;line-height:.92;letter-spacing:-.025em;color:var(--paper);margin-bottom:28px;}
+.th-title em{font-style:italic;color:var(--copper-lt);}
+.th-lead{font-family:var(--serif);font-size:clamp(17px,2vw,22px);font-style:italic;color:rgba(250,246,240,.58);max-width:580px;margin:0 auto 44px;line-height:1.65;}
+.th-scroll-hint{font-size:11px;color:rgba(250,246,240,.22);letter-spacing:.14em;text-transform:uppercase;}
+
+.th-section{padding:88px 48px;}
+.th-section.dark{background:#13100c;}
+.th-inner{max-width:1080px;margin:0 auto;}
+.th-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;display:block;}
+.th-section.dark .th-label{color:var(--copper-lt);}
+.th-h2{font-family:var(--serif);font-size:clamp(34px,4.5vw,56px);font-weight:700;line-height:1.02;letter-spacing:-.025em;color:var(--ink);margin-bottom:22px;}
+.th-section.dark .th-h2{color:var(--paper);}
+.th-body{font-size:15px;color:var(--ink3);line-height:1.85;max-width:640px;}
+.th-body+.th-body{margin-top:14px;}
+.th-section.dark .th-body{color:rgba(250,246,240,.58);}
+.th-body strong{color:var(--ink2);font-weight:600;}
+.th-section.dark .th-body strong{color:rgba(244,236,224,.92);}
+.th-split{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;}
+.th-callout{border-left:3px solid var(--copper);border-radius:0 8px 8px 0;padding:16px 20px;margin:28px 0;background:rgba(160,92,32,.07);}
+.th-section.dark .th-callout{background:rgba(255,255,255,.05);border-left-color:var(--copper-lt);}
+.th-callout-label{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);margin-bottom:7px;}
+.th-section.dark .th-callout-label{color:var(--copper-lt);}
+.th-callout p{font-size:14px;color:var(--ink3);line-height:1.65;}
+.th-section.dark .th-callout p{color:rgba(250,246,240,.58);}
+
+/* ── METRONOME ── */
+.metro-section{padding:88px 48px;background:var(--paper2);}
+.metro-card{background:#1a1410;border-radius:20px;padding:48px;max-width:800px;margin:0 auto;}
+.metro-title{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--paper);margin-bottom:32px;text-align:center;letter-spacing:-.01em;}
+.metro-sig-pills{display:flex;gap:10px;justify-content:center;margin-bottom:32px;}
+.metro-sig-pill{font-family:var(--mono);font-size:14px;font-weight:600;padding:9px 24px;border-radius:24px;border:2px solid rgba(255,255,255,.12);background:transparent;color:rgba(250,246,240,.45);cursor:pointer;transition:all .18s;}
+.metro-sig-pill:hover{border-color:var(--copper-lt);color:rgba(250,246,240,.8);}
+.metro-sig-pill.active{background:var(--copper);border-color:var(--copper-dk);color:#fff;}
+.metro-bpm-row{display:flex;align-items:center;gap:18px;justify-content:center;margin-bottom:36px;}
+.metro-bpm-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(250,246,240,.3);}
+.metro-bpm-val{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--copper-lt);min-width:48px;text-align:right;}
+.metro-slider{-webkit-appearance:none;appearance:none;width:220px;height:4px;border-radius:2px;background:rgba(255,255,255,.12);outline:none;cursor:pointer;}
+.metro-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--copper-lt);cursor:pointer;box-shadow:0 0 0 3px rgba(196,122,54,.2);}
+.metro-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--copper-lt);cursor:pointer;border:none;}
+.metro-beats-row{display:flex;gap:14px;justify-content:center;margin-bottom:28px;flex-wrap:wrap;}
+.metro-beat{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.12);transition:transform .1s,box-shadow .1s,background .1s,border-color .1s;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:600;color:rgba(250,246,240,.3);}
+.metro-beat.accent{width:54px;height:54px;font-size:13px;background:rgba(168,90,30,.15);border-color:rgba(196,122,54,.35);color:var(--copper-lt);}
+.metro-beat.sub-accent{background:rgba(168,90,30,.07);border-color:rgba(196,122,54,.2);color:rgba(196,122,54,.6);}
+.metro-beat.active{transform:scale(1.18);box-shadow:0 0 22px rgba(196,122,54,.45);background:rgba(196,122,54,.28);border-color:var(--copper-lt);color:#fff;}
+.metro-beat.accent.active{transform:scale(1.22);box-shadow:0 0 32px rgba(196,122,54,.6);background:rgba(196,122,54,.45);}
+.metro-play-btn{display:block;margin:0 auto 24px;background:var(--copper);color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;padding:13px 48px;border-radius:10px;border:none;cursor:pointer;transition:background .18s,transform .1s;}
+.metro-play-btn:hover{background:var(--copper-lt);transform:translateY(-1px);}
+.metro-play-btn:active{transform:translateY(0);}
+.metro-desc{text-align:center;font-size:13px;color:rgba(250,246,240,.38);line-height:1.6;font-style:italic;}
+
+/* ── NEXT ── */
+.th-next{background:var(--ink);padding:88px 48px;text-align:center;}
+.th-next-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink5);margin-bottom:18px;display:block;}
+.th-next-title{font-family:var(--serif);font-size:clamp(36px,5vw,56px);font-weight:700;color:var(--paper);margin-bottom:10px;letter-spacing:-.02em;}
+.th-next-sub{font-size:14px;color:var(--ink4);margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.th-next-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.th-next-btn{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:13px;font-weight:600;padding:13px 28px;border-radius:8px;text-decoration:none;transition:background .2s;}
+.th-next-btn:hover{background:var(--copper-dk);}
+.th-next-btn.sec{background:transparent;color:rgba(250,246,240,.5);border:1px solid rgba(255,255,255,.12);}
+.th-next-btn.sec:hover{color:var(--paper);border-color:rgba(255,255,255,.3);}
+.th-next-btn.disabled{background:transparent;color:rgba(250,246,240,.22);border:1px solid rgba(255,255,255,.07);cursor:default;pointer-events:none;}
+
+/* ── CHAPTER NAV ── */
+.chapter-nav{display:flex;gap:0;border-top:1px solid rgba(255,255,255,.06);margin-top:64px;}
+.chapter-nav-item{flex:1;padding:28px 24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;transition:background .18s;}
+.chapter-nav-item:hover{background:rgba(255,255,255,.03);}
+.chapter-nav-item.prev{border-right:1px solid rgba(255,255,255,.06);}
+.chapter-nav-item.disabled{cursor:default;pointer-events:none;opacity:.35;}
+.chapter-nav-dir{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(250,246,240,.25);}
+.chapter-nav-cap{font-size:11px;color:rgba(250,246,240,.25);}
+.chapter-nav-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--paper);}
+
+/* ── ARTICULATION VISUAL ── */
+.artic-section{padding:88px 48px;background:var(--paper2);}
+.artic-card{background:#1a1410;border-radius:20px;padding:48px;max-width:860px;margin:0 auto;}
+.artic-title{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--paper);margin-bottom:8px;text-align:center;letter-spacing:-.01em;}
+.artic-sub{font-size:13px;color:rgba(250,246,240,.38);text-align:center;margin-bottom:36px;font-style:italic;}
+.artic-tabs{display:flex;gap:8px;justify-content:center;margin-bottom:32px;}
+.artic-tab{font-size:12px;font-weight:600;padding:8px 22px;border-radius:20px;border:2px solid rgba(255,255,255,.12);background:transparent;color:rgba(250,246,240,.45);cursor:pointer;transition:all .18s;font-family:var(--sans);}
+.artic-tab:hover{border-color:var(--copper-lt);color:rgba(250,246,240,.8);}
+.artic-tab.active{background:var(--copper);border-color:var(--copper-dk);color:#fff;}
+.artic-row{display:flex;align-items:flex-end;gap:12px;height:100px;margin-bottom:28px;}
+.artic-note-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;cursor:pointer;}
+.artic-note-bar{border-radius:4px;transition:filter .15s,opacity .15s;}
+.artic-note-wrap:hover .artic-note-bar{filter:brightness(1.3);}
+.artic-note-wrap.playing .artic-note-bar{filter:brightness(1.5);box-shadow:0 0 14px rgba(196,122,54,.5);}
+.artic-note-name{font-family:var(--serif);font-size:13px;color:rgba(250,246,240,.6);}
+.artic-play-btn{display:block;margin:0 auto 16px;background:var(--copper);color:#fff;font-family:var(--sans);font-size:13px;font-weight:600;padding:11px 36px;border-radius:8px;border:none;cursor:pointer;transition:background .18s;}
+.artic-play-btn:hover{background:var(--copper-lt);}
+.artic-desc{text-align:center;font-size:12px;color:rgba(250,246,240,.35);font-style:italic;line-height:1.6;}
+.artic-mark{font-size:14px;color:rgba(250,246,240,.5);margin-bottom:4px;height:18px;display:flex;align-items:center;justify-content:center;}
+
+@media(max-width:768px){
+  nav{padding:0 16px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav>*{flex-shrink:0;}
+  .th-breadcrumb{padding:0 20px;}
+  .th-hero{padding:80px 20px 64px;}
+  .th-section{padding:64px 20px;}
+  .th-split{grid-template-columns:1fr;gap:40px;}
+  .metro-section{padding:64px 20px;}
+  .metro-card{padding:28px 18px;}
+  .th-next{padding:64px 20px;}
+  .chapter-nav{flex-direction:column;}
+  .chapter-nav-item.prev{border-right:none;border-bottom:1px solid rgba(255,255,255,.06);}
+  .artic-section{padding:64px 20px;}
+  .artic-card{padding:28px 16px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link active">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<div class="th-progress"><div class="th-progress-bar" id="prog-bar"></div></div>
+
+<div class="th-breadcrumb">
+  <a href="/teoria">Teoría</a>
+  <span class="sep">›</span>
+  <a href="/teoria/ritmo">Ritmo y Sonido</a>
+  <span class="sep">›</span>
+  <span class="current">Dinámica y articulación</span>
+</div>
+
+<!-- HERO -->
+<section class="th-hero">
+  <div class="th-chapter">Ritmo y Sonido · 09</div>
+  <h1 class="th-title">Dinámica <em>y articulación</em></h1>
+  <p class="th-lead">Cómo el volumen y el ataque definen el carácter de una frase, más allá de qué notas se tocan.</p>
+  <div class="th-scroll-hint">↓ leer</div>
+</section>
+
+<!-- SECCIÓN 1: La dinámica -->
+<section class="th-section">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">La dinámica</span>
+        <h2 class="th-h2">Forte y piano: <em>volumen como herramienta</em></h2>
+        <p class="th-body">Las marcas de dinámica en la notación musical indican volumen relativo. La escala estándar italiana: <strong>pianissimo</strong> (pp, muy suave), <strong>piano</strong> (p, suave), <strong>mezzo-piano</strong> (mp, medio suave), <strong>mezzo-forte</strong> (mf, medio fuerte), <strong>forte</strong> (f, fuerte), <strong>fortissimo</strong> (ff, muy fuerte). Más allá de estos niveles estáticos, el <strong>crescendo</strong> (gradualmente más fuerte) y el <strong>decrescendo</strong> o diminuendo (gradualmente más suave) indican dirección de cambio.</p>
+        <p class="th-body">La palabra importante es "relativo": forte en un cuarteto de cuerdas es diferente de forte en una banda de rock. Las dinámicas existen siempre en contexto. Un pianissimo en una sala de conciertos puede ser perfectamente audible; en un club con batería en vivo desaparece.</p>
+        <div class="th-callout">
+          <div class="th-callout-label">Nota práctica</div>
+          <p>En guitarra eléctrica, la dinámica puede controlarse con la técnica de la mano derecha y el volumen de la guitarra, sin tocar el amplificador.</p>
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--paper2);border:1px solid var(--paper3);border-radius:14px;padding:28px 24px;">
+          <p style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:20px;">Escala de dinámicas</p>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:14px;padding:9px 14px;background:rgba(160,92,32,.04);border-radius:8px;border:1px solid var(--paper3);">
+              <div style="font-family:var(--serif);font-size:15px;color:var(--ink);min-width:32px;font-style:italic;">pp</div>
+              <div style="flex:1;height:4px;background:var(--paper3);border-radius:2px;"><div style="height:100%;width:8%;background:var(--copper);border-radius:2px;"></div></div>
+              <div style="font-size:11px;color:var(--ink5);min-width:80px;text-align:right;">pianissimo</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:9px 14px;background:rgba(160,92,32,.04);border-radius:8px;border:1px solid var(--paper3);">
+              <div style="font-family:var(--serif);font-size:15px;color:var(--ink);min-width:32px;font-style:italic;">p</div>
+              <div style="flex:1;height:4px;background:var(--paper3);border-radius:2px;"><div style="height:100%;width:22%;background:var(--copper);border-radius:2px;"></div></div>
+              <div style="font-size:11px;color:var(--ink5);min-width:80px;text-align:right;">piano</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:9px 14px;background:rgba(160,92,32,.04);border-radius:8px;border:1px solid var(--paper3);">
+              <div style="font-family:var(--serif);font-size:15px;color:var(--ink);min-width:32px;font-style:italic;">mp</div>
+              <div style="flex:1;height:4px;background:var(--paper3);border-radius:2px;"><div style="height:100%;width:42%;background:var(--copper);border-radius:2px;"></div></div>
+              <div style="font-size:11px;color:var(--ink5);min-width:80px;text-align:right;">mezzo-piano</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:9px 14px;background:rgba(160,92,32,.07);border-radius:8px;border:1px solid var(--paper4);">
+              <div style="font-family:var(--serif);font-size:15px;color:var(--ink);font-weight:600;min-width:32px;font-style:italic;">mf</div>
+              <div style="flex:1;height:4px;background:var(--paper3);border-radius:2px;"><div style="height:100%;width:58%;background:var(--copper);border-radius:2px;"></div></div>
+              <div style="font-size:11px;color:var(--ink4);min-width:80px;text-align:right;">mezzo-forte</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:9px 14px;background:rgba(160,92,32,.07);border-radius:8px;border:1px solid var(--paper4);">
+              <div style="font-family:var(--serif);font-size:15px;color:var(--ink);font-weight:600;min-width:32px;font-style:italic;">f</div>
+              <div style="flex:1;height:4px;background:var(--paper3);border-radius:2px;"><div style="height:100%;width:76%;background:var(--copper);border-radius:2px;"></div></div>
+              <div style="font-size:11px;color:var(--ink4);min-width:80px;text-align:right;">forte</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:9px 14px;background:rgba(160,92,32,.1);border-radius:8px;border:1px solid var(--paper4);">
+              <div style="font-family:var(--serif);font-size:15px;color:var(--ink);font-weight:600;min-width:32px;font-style:italic;">ff</div>
+              <div style="flex:1;height:4px;background:var(--paper3);border-radius:2px;"><div style="height:100%;width:100%;background:var(--copper);border-radius:2px;"></div></div>
+              <div style="font-size:11px;color:var(--ink3);min-width:80px;text-align:right;">fortissimo</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 2: La articulación (dark) -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">La articulación</span>
+    <h2 class="th-h2">Cómo empieza y termina <em>cada nota</em></h2>
+    <p class="th-body"><strong>Legato</strong> significa suave y conectado: las notas fluyen una hacia la otra sin huecos. <strong>Staccato</strong> significa corto y separado: las notas se cortan bien antes de su duración escrita completa. Las marcas de acento indican una nota que debe recibir un ataque extra (<strong>sforzando</strong> = acento fuerte y repentino). <strong>Tenuto</strong> significa sostenido por su valor completo, a veces con un ligero peso adicional.</p>
+    <p class="th-body">En guitarra, estas instrucciones se traducen en técnicas concretas: el legato usa ligados ascendentes y descendentes (hammer-ons y pull-offs), el staccato usa apagado de cuerdas con la palma o los dedos, y el acento depende del ángulo y la velocidad del plectro o de los dedos. Las mismas notas suenan radicalmente distintas según la articulación aplicada.</p>
+  </div>
+</section>
+
+<!-- VISUAL INTERACTIVO: Articulación -->
+<section class="artic-section">
+  <div style="max-width:1080px;margin:0 auto;">
+    <span class="th-label" style="display:block;text-align:center;margin-bottom:32px;">Interactivo</span>
+    <div class="artic-card">
+      <div class="artic-title">La misma frase — tres articulaciones</div>
+      <div class="artic-sub">Do · Re · Mi · Fa · Haz clic en una nota o toca toda la frase</div>
+      <div class="artic-tabs">
+        <button class="artic-tab active" data-mode="legato">Legato</button>
+        <button class="artic-tab" data-mode="staccato">Staccato</button>
+        <button class="artic-tab" data-mode="accent">Acentuado</button>
+      </div>
+      <div class="artic-row" id="artic-row"></div>
+      <button class="artic-play-btn" id="artic-play-btn">Tocar frase completa</button>
+      <div class="artic-desc" id="artic-desc">Legato: notas conectadas sin silencio entre ellas</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 3: El ataque -->
+<section class="th-section">
+  <div class="th-inner">
+    <span class="th-label">El ataque</span>
+    <h2 class="th-h2">El primer instante: <em>cómo empieza el sonido</em></h2>
+    <p class="th-body">El <strong>ataque</strong> es el transitorio inicial, los primeros milisegundos de un sonido que caracterizan cómo comenzó. En el piano, presionar la tecla con más fuerza produce un ataque más fuerte y brillante. En la guitarra, pulsar cerca del puente crea un ataque agudo y brillante; cerca del mástil crea uno más redondo y suave.</p>
+    <p class="th-body">El ataque lleva tanta información tímbrica y expresiva como la parte sostenida de la nota. Si se graba una guitarra y se elimina el ataque, quedando solo el sustain, es extremadamente difícil identificar el instrumento: el ataque es donde vive la identidad sonora. Esto explica por qué la posición del plectro sobre las cuerdas es una de las decisiones expresivas más importantes en la guitarra.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">Técnica</div>
+      <p>Puente versus mástil: los guitarristas de jazz prefieren pulsar cerca del mástil para un ataque suave. El metal clásico prefiere el puente para un ataque más percusivo y brillante.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 4: Frase y carácter (dark) -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Frase y carácter</span>
+    <h2 class="th-h2">La misma melodía <em>con cuatro caracteres distintos</em></h2>
+    <p class="th-body">Una frase de cuatro notas (Do-Re-Mi-Fa) tocada forte-staccato suena asertiva y percusiva. Tocada piano-legato, suena lírica y delicada. Tocada con un crescendo de p a f, suena como una llegada. Tocada ff con acento en la primera nota y diminuendo, suena como una declaración seguida de reflexión.</p>
+    <p class="th-body">Las notas son idénticas en los cuatro casos. Por eso las dinámicas y la articulación no son decoración añadida a la música: son parte de la música misma. Una partitura sin indicaciones dinámicas es una instrucción incompleta. Los grandes intérpretes tratan las marcas de dinámica y articulación con la misma seriedad que las alturas y las duraciones.</p>
+  </div>
+</section>
+
+<!-- FOOTER / NEXT -->
+<section class="th-next">
+  <span class="th-next-label">Navegar capítulos</span>
+  <h2 class="th-next-title">Sigue explorando</h2>
+  <p class="th-next-sub">Dinámica y articulación definen el carácter. A continuación, la forma musical: cómo se organiza el tiempo a gran escala.</p>
+  <div class="th-next-btns">
+    <a href="/teoria/sonido/forma" class="th-next-btn">Forma musical →</a>
+    <a href="/teoria/sonido" class="th-next-btn sec">← El sonido — frecuencia, timbre y armónicos</a>
+  </div>
+  <div class="chapter-nav">
+    <a href="/teoria/sonido" class="chapter-nav-item prev">
+      <span class="chapter-nav-dir">← Anterior</span>
+      <span class="chapter-nav-cap">Ritmo y Sonido · 08</span>
+      <span class="chapter-nav-title">El sonido — frecuencia, timbre y armónicos</span>
+    </a>
+    <a href="/teoria/sonido/forma" class="chapter-nav-item">
+      <span class="chapter-nav-dir">Siguiente →</span>
+      <span class="chapter-nav-cap">Ritmo y Sonido · 10</span>
+      <span class="chapter-nav-title">Forma musical</span>
+    </a>
+  </div>
+</section>
+
+<script>
+// ── Progress bar ──────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('prog-bar').style.width = (h > 0 ? Math.round(window.scrollY / h * 100) : 0) + '%';
+});
+
+// ── Articulation interactive ──────────────────────────────────────────────────
+const NOTES = [
+  { name: 'Do', midi: 60 },
+  { name: 'Re', midi: 62 },
+  { name: 'Mi', midi: 64 },
+  { name: 'Fa', midi: 65 },
+];
+
+const MODES = {
+  legato: {
+    desc: 'Legato: notas conectadas sin silencio entre ellas',
+    barHeight: 72,
+    gapRatio: 0.0,
+    accentFirst: false,
+    color: 'rgba(196,122,54,.8)',
+    mark: '',
+  },
+  staccato: {
+    desc: 'Staccato: cada nota cortada a la mitad de su duración',
+    barHeight: 36,
+    gapRatio: 0.5,
+    accentFirst: false,
+    color: 'rgba(196,122,54,.65)',
+    mark: '·',
+  },
+  accent: {
+    desc: 'Acentuado: primera nota con ataque más fuerte y brillante',
+    barHeight: 72,
+    gapRatio: 0.0,
+    accentFirst: true,
+    color: 'rgba(196,122,54,.7)',
+    markFirst: '>',
+    mark: '',
+  },
+};
+
+let currentMode = 'legato';
+
+function midiToFreq(midi) {
+  return 440 * Math.pow(2, (midi - 69) / 12);
+}
+
+function buildArticRow(mode) {
+  const row = document.getElementById('artic-row');
+  row.innerHTML = '';
+  const cfg = MODES[mode];
+
+  NOTES.forEach((n, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'artic-note-wrap';
+    wrap.id = 'anote-' + i;
+
+    const mark = document.createElement('div');
+    mark.className = 'artic-mark';
+    if (mode === 'staccato') {
+      mark.textContent = cfg.mark;
+    } else if (mode === 'accent' && i === 0) {
+      mark.textContent = cfg.markFirst;
+    } else {
+      mark.textContent = '';
+    }
+
+    const bar = document.createElement('div');
+    bar.className = 'artic-note-bar';
+    bar.style.cssText = `width:100%;height:${cfg.barHeight}px;background:${i === 0 && cfg.accentFirst ? 'rgba(196,122,54,1)' : cfg.color};border-radius:4px;`;
+
+    const name = document.createElement('div');
+    name.className = 'artic-note-name';
+    name.textContent = n.name;
+
+    wrap.appendChild(mark);
+    wrap.appendChild(bar);
+    wrap.appendChild(name);
+
+    wrap.addEventListener('click', () => playSingleNote(i, mode));
+    row.appendChild(wrap);
+  });
+
+  document.getElementById('artic-desc').textContent = cfg.desc;
+}
+
+async function playSingleNote(idx, mode) {
+  await Tone.start();
+  const cfg = MODES[mode];
+  const note = NOTES[idx];
+  const freq = midiToFreq(note.midi);
+  const isAccent = mode === 'accent' && idx === 0;
+  const dur = mode === 'staccato' ? 0.15 : 0.4;
+
+  const synth = new Tone.Synth({
+    oscillator: { type: 'triangle' },
+    envelope: { attack: 0.005, decay: 0.2, sustain: 0.5, release: 0.3 }
+  }).toDestination();
+  synth.volume.value = isAccent ? -6 : -12;
+
+  const wrap = document.getElementById('anote-' + idx);
+  if (wrap) wrap.classList.add('playing');
+  synth.triggerAttackRelease(freq, dur);
+  setTimeout(() => {
+    if (wrap) wrap.classList.remove('playing');
+    try { synth.dispose(); } catch(e) {}
+  }, Math.round(dur * 1000) + 300);
+}
+
+let phraseTimeout = null;
+
+async function playPhrase(mode) {
+  await Tone.start();
+  const cfg = MODES[mode];
+  const noteDur = mode === 'staccato' ? 0.15 : 0.35;
+  const gap = mode === 'staccato' ? 0.22 : 0.36;
+
+  NOTES.forEach((note, i) => {
+    const t = i * gap * 1000;
+    setTimeout(async () => {
+      const isAccent = mode === 'accent' && i === 0;
+      const freq = midiToFreq(note.midi);
+      const synth = new Tone.Synth({
+        oscillator: { type: 'triangle' },
+        envelope: { attack: 0.005, decay: 0.2, sustain: 0.5, release: 0.3 }
+      }).toDestination();
+      synth.volume.value = isAccent ? -6 : -12;
+
+      const wrap = document.getElementById('anote-' + i);
+      if (wrap) wrap.classList.add('playing');
+      synth.triggerAttackRelease(freq, noteDur);
+      setTimeout(() => {
+        if (wrap) wrap.classList.remove('playing');
+        try { synth.dispose(); } catch(e) {}
+      }, Math.round(noteDur * 1000) + 200);
+    }, t);
+  });
+}
+
+// Tabs
+document.querySelectorAll('.artic-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.artic-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentMode = btn.dataset.mode;
+    buildArticRow(currentMode);
+  });
+});
+
+// Play phrase button
+document.getElementById('artic-play-btn').addEventListener('click', () => {
+  playPhrase(currentMode);
+});
+
+// Init
+buildArticRow(currentMode);
+</script>
+
+<footer class="tm-footer-legal" style="background:var(--ink2);border-top:1px solid rgba(255,255,255,.06);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+  <div class="tm-f-copy" style="font-size:12px;color:var(--ink5);">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div class="tm-f-links" style="display:flex;gap:20px;">
+    <a href="/privacidad" style="font-size:12px;color:var(--ink5);text-decoration:none;">Aviso de Privacidad</a>
+    <a href="/terminos" style="font-size:12px;color:var(--ink5);text-decoration:none;">Términos y Condiciones</a>
+    <a href="/cookies" style="font-size:12px;color:var(--ink5);text-decoration:none;">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

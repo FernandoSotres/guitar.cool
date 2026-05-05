@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · El sonido — frecuencia, timbre y armónicos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<style>
+:root{
+  --paper:#f4ece0;--paper2:#ebe1d2;--paper3:#ddd1bd;--paper4:#c8b99f;--paper5:#b8a890;
+  --copper:#a85a1e;--copper-lt:#c47a36;--copper-dk:#7a3e10;
+  --ink:#1c1410;--ink2:#2e2418;--ink3:#5a4a38;--ink4:#8a7a64;--ink5:#a09080;
+  --tonic:#a05c20;--subdom:#5a7abf;--dominant:#7a4abf;--relative:#4a7c59;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{font-family:var(--mono);font-size:.52em;font-weight:400;color:var(--ink4);letter-spacing:0;margin-left:2px;}
+.nav-link{padding:0 16px;height:60px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+.th-progress{position:fixed;top:56px;left:0;right:0;height:2px;background:rgba(160,92,32,.12);z-index:99;}
+.th-progress-bar{height:100%;background:var(--copper);width:0%;transition:width .08s linear;}
+
+.th-breadcrumb{background:var(--paper2);border-bottom:1px solid var(--paper4);padding:0 48px;height:40px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink5);}
+.th-breadcrumb a{color:var(--ink5);text-decoration:none;}
+.th-breadcrumb a:hover{color:var(--copper);}
+.th-breadcrumb .sep{opacity:.5;}
+.th-breadcrumb .current{color:var(--ink3);font-weight:500;}
+
+.th-hero{background:#13100c;padding:110px 48px 90px;text-align:center;overflow:hidden;}
+.th-chapter{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:28px;display:flex;align-items:center;justify-content:center;gap:14px;}
+.th-chapter::before,.th-chapter::after{content:'';display:block;height:1px;width:48px;background:var(--copper-lt);opacity:.35;}
+.th-title{font-family:var(--serif);font-size:clamp(54px,7.5vw,92px);font-weight:700;line-height:.92;letter-spacing:-.025em;color:var(--paper);margin-bottom:28px;}
+.th-title em{font-style:italic;color:var(--copper-lt);}
+.th-lead{font-family:var(--serif);font-size:clamp(17px,2vw,22px);font-style:italic;color:rgba(250,246,240,.58);max-width:580px;margin:0 auto 44px;line-height:1.65;}
+.th-scroll-hint{font-size:11px;color:rgba(250,246,240,.22);letter-spacing:.14em;text-transform:uppercase;}
+
+.th-section{padding:88px 48px;}
+.th-section.dark{background:#13100c;}
+.th-inner{max-width:1080px;margin:0 auto;}
+.th-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;display:block;}
+.th-section.dark .th-label{color:var(--copper-lt);}
+.th-h2{font-family:var(--serif);font-size:clamp(34px,4.5vw,56px);font-weight:700;line-height:1.02;letter-spacing:-.025em;color:var(--ink);margin-bottom:22px;}
+.th-section.dark .th-h2{color:var(--paper);}
+.th-body{font-size:15px;color:var(--ink3);line-height:1.85;max-width:640px;}
+.th-body+.th-body{margin-top:14px;}
+.th-section.dark .th-body{color:rgba(250,246,240,.58);}
+.th-body strong{color:var(--ink2);font-weight:600;}
+.th-section.dark .th-body strong{color:rgba(244,236,224,.92);}
+.th-split{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;}
+.th-callout{border-left:3px solid var(--copper);border-radius:0 8px 8px 0;padding:16px 20px;margin:28px 0;background:rgba(160,92,32,.07);}
+.th-section.dark .th-callout{background:rgba(255,255,255,.05);border-left-color:var(--copper-lt);}
+.th-callout-label{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);margin-bottom:7px;}
+.th-section.dark .th-callout-label{color:var(--copper-lt);}
+.th-callout p{font-size:14px;color:var(--ink3);line-height:1.65;}
+.th-section.dark .th-callout p{color:rgba(250,246,240,.58);}
+
+/* ── METRONOME ── */
+.metro-section{padding:88px 48px;background:var(--paper2);}
+.metro-card{background:#1a1410;border-radius:20px;padding:48px;max-width:800px;margin:0 auto;}
+.metro-title{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--paper);margin-bottom:32px;text-align:center;letter-spacing:-.01em;}
+.metro-sig-pills{display:flex;gap:10px;justify-content:center;margin-bottom:32px;}
+.metro-sig-pill{font-family:var(--mono);font-size:14px;font-weight:600;padding:9px 24px;border-radius:24px;border:2px solid rgba(255,255,255,.12);background:transparent;color:rgba(250,246,240,.45);cursor:pointer;transition:all .18s;}
+.metro-sig-pill:hover{border-color:var(--copper-lt);color:rgba(250,246,240,.8);}
+.metro-sig-pill.active{background:var(--copper);border-color:var(--copper-dk);color:#fff;}
+.metro-bpm-row{display:flex;align-items:center;gap:18px;justify-content:center;margin-bottom:36px;}
+.metro-bpm-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(250,246,240,.3);}
+.metro-bpm-val{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--copper-lt);min-width:48px;text-align:right;}
+.metro-slider{-webkit-appearance:none;appearance:none;width:220px;height:4px;border-radius:2px;background:rgba(255,255,255,.12);outline:none;cursor:pointer;}
+.metro-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--copper-lt);cursor:pointer;box-shadow:0 0 0 3px rgba(196,122,54,.2);}
+.metro-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--copper-lt);cursor:pointer;border:none;}
+.metro-beats-row{display:flex;gap:14px;justify-content:center;margin-bottom:28px;flex-wrap:wrap;}
+.metro-beat{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.12);transition:transform .1s,box-shadow .1s,background .1s,border-color .1s;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:600;color:rgba(250,246,240,.3);}
+.metro-beat.accent{width:54px;height:54px;font-size:13px;background:rgba(168,90,30,.15);border-color:rgba(196,122,54,.35);color:var(--copper-lt);}
+.metro-beat.sub-accent{background:rgba(168,90,30,.07);border-color:rgba(196,122,54,.2);color:rgba(196,122,54,.6);}
+.metro-beat.active{transform:scale(1.18);box-shadow:0 0 22px rgba(196,122,54,.45);background:rgba(196,122,54,.28);border-color:var(--copper-lt);color:#fff;}
+.metro-beat.accent.active{transform:scale(1.22);box-shadow:0 0 32px rgba(196,122,54,.6);background:rgba(196,122,54,.45);}
+.metro-play-btn{display:block;margin:0 auto 24px;background:var(--copper);color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;padding:13px 48px;border-radius:10px;border:none;cursor:pointer;transition:background .18s,transform .1s;}
+.metro-play-btn:hover{background:var(--copper-lt);transform:translateY(-1px);}
+.metro-play-btn:active{transform:translateY(0);}
+.metro-desc{text-align:center;font-size:13px;color:rgba(250,246,240,.38);line-height:1.6;font-style:italic;}
+
+/* ── NEXT ── */
+.th-next{background:var(--ink);padding:88px 48px;text-align:center;}
+.th-next-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink5);margin-bottom:18px;display:block;}
+.th-next-title{font-family:var(--serif);font-size:clamp(36px,5vw,56px);font-weight:700;color:var(--paper);margin-bottom:10px;letter-spacing:-.02em;}
+.th-next-sub{font-size:14px;color:var(--ink4);margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.th-next-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.th-next-btn{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:13px;font-weight:600;padding:13px 28px;border-radius:8px;text-decoration:none;transition:background .2s;}
+.th-next-btn:hover{background:var(--copper-dk);}
+.th-next-btn.sec{background:transparent;color:rgba(250,246,240,.5);border:1px solid rgba(255,255,255,.12);}
+.th-next-btn.sec:hover{color:var(--paper);border-color:rgba(255,255,255,.3);}
+.th-next-btn.disabled{background:transparent;color:rgba(250,246,240,.22);border:1px solid rgba(255,255,255,.07);cursor:default;pointer-events:none;}
+
+/* ── CHAPTER NAV ── */
+.chapter-nav{display:flex;gap:0;border-top:1px solid rgba(255,255,255,.06);margin-top:64px;}
+.chapter-nav-item{flex:1;padding:28px 24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;transition:background .18s;}
+.chapter-nav-item:hover{background:rgba(255,255,255,.03);}
+.chapter-nav-item.prev{border-right:1px solid rgba(255,255,255,.06);}
+.chapter-nav-item.disabled{cursor:default;pointer-events:none;opacity:.35;}
+.chapter-nav-dir{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(250,246,240,.25);}
+.chapter-nav-cap{font-size:11px;color:rgba(250,246,240,.25);}
+.chapter-nav-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--paper);}
+
+/* ── HARMONIC SERIES ── */
+.harmonic-section{padding:88px 48px;background:#13100c;}
+.harmonic-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:48px;max-width:860px;margin:0 auto;}
+.harmonic-title{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--paper);margin-bottom:8px;text-align:center;letter-spacing:-.01em;}
+.harmonic-sub{font-size:13px;color:rgba(250,246,240,.38);text-align:center;margin-bottom:40px;font-style:italic;}
+.harmonic-bars{display:flex;align-items:flex-end;gap:10px;height:220px;justify-content:center;}
+.harmonic-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:0;cursor:pointer;}
+.harmonic-bar{border-radius:6px 6px 0 0;transition:filter .15s,transform .1s;}
+.harmonic-bar-wrap:hover .harmonic-bar{filter:brightness(1.2);transform:scaleY(1.04);transform-origin:bottom;}
+.harmonic-bar-wrap.playing .harmonic-bar{filter:brightness(1.45);box-shadow:0 0 18px rgba(196,122,54,.5);}
+.harmonic-label{font-family:var(--mono);font-size:10px;font-weight:600;color:rgba(250,246,240,.45);margin-top:8px;letter-spacing:.04em;}
+.harmonic-note{font-family:var(--serif);font-size:12px;color:var(--copper-lt);margin-top:4px;}
+.harmonic-num{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(250,246,240,.22);margin-top:2px;}
+.harmonic-hint{text-align:center;font-size:12px;color:rgba(250,246,240,.28);margin-top:28px;font-style:italic;}
+
+@media(max-width:768px){
+  nav{padding:0 16px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav>*{flex-shrink:0;}
+  .th-breadcrumb{padding:0 20px;}
+  .th-hero{padding:80px 20px 64px;}
+  .th-section{padding:64px 20px;}
+  .th-split{grid-template-columns:1fr;gap:40px;}
+  .metro-section{padding:64px 20px;}
+  .metro-card{padding:28px 18px;}
+  .th-next{padding:64px 20px;}
+  .chapter-nav{flex-direction:column;}
+  .chapter-nav-item.prev{border-right:none;border-bottom:1px solid rgba(255,255,255,.06);}
+  .harmonic-section{padding:64px 20px;}
+  .harmonic-card{padding:28px 16px;}
+  .harmonic-bars{gap:5px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link active">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<div class="th-progress"><div class="th-progress-bar" id="prog-bar"></div></div>
+
+<div class="th-breadcrumb">
+  <a href="/teoria">Teoría</a>
+  <span class="sep">›</span>
+  <a href="/teoria/ritmo">Ritmo y Sonido</a>
+  <span class="sep">›</span>
+  <span class="current">El sonido — frecuencia, timbre y armónicos</span>
+</div>
+
+<!-- HERO -->
+<section class="th-hero">
+  <div class="th-chapter">Ritmo y Sonido · 08</div>
+  <h1 class="th-title">El sonido — frecuencia,<br><em>timbre y armónicos</em></h1>
+  <p class="th-lead">Por qué una guitarra y un piano suenan diferente tocando la misma nota, y qué tiene que ver eso con los acordes.</p>
+  <div class="th-scroll-hint">↓ leer</div>
+</section>
+
+<!-- SECCIÓN 1: La onda sonora -->
+<section class="th-section">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">La onda sonora</span>
+        <h2 class="th-h2">El sonido es <em>vibración con información</em></h2>
+        <p class="th-body">El sonido es una onda mecánica: una compresión y rarefacción periódica de las moléculas del aire. Un tono musical es un sonido con una frecuencia regular y periódica. La <strong>frecuencia</strong> se mide en Hertz (Hz), es decir, ciclos por segundo. El La440 (el La encima del Do central) vibra a 440 Hz.</p>
+        <p class="th-body">Cuanto mayor es la frecuencia, más aguda es la altura percibida. Una octava hacia arriba duplica la frecuencia: La5 = 880 Hz. Esta relación de duplicación es la razón por la que las octavas suenan como "la misma nota": el segundo armónico de 440 Hz es 880 Hz, lo que hace que la relación sea matemáticamente simple.</p>
+        <div class="th-callout">
+          <div class="th-callout-label">Referencia</div>
+          <p>La440 es el estándar internacional de afinación. La mayoría de las orquestas afina a esta frecuencia exacta desde el siglo XX.</p>
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--paper2);border:1px solid var(--paper3);border-radius:14px;padding:28px 24px;">
+          <p style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:20px;">Frecuencias de referencia</p>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:center;gap:14px;padding:10px 14px;background:rgba(160,92,32,.06);border-radius:8px;border:1px solid var(--paper3);">
+              <div style="font-family:var(--serif);font-size:15px;color:var(--ink);min-width:60px;">La3</div>
+              <div style="flex:1;height:4px;background:var(--paper3);border-radius:2px;"><div style="height:100%;width:30%;background:var(--copper);border-radius:2px;"></div></div>
+              <div style="font-family:var(--mono);font-size:11px;color:var(--ink5);min-width:64px;text-align:right;">220 Hz</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:10px 14px;background:rgba(160,92,32,.06);border-radius:8px;border:1px solid var(--paper3);">
+              <div style="font-family:var(--serif);font-size:15px;color:var(--ink);min-width:60px;">La4</div>
+              <div style="flex:1;height:4px;background:var(--paper3);border-radius:2px;"><div style="height:100%;width:55%;background:var(--copper);border-radius:2px;"></div></div>
+              <div style="font-family:var(--mono);font-size:11px;color:var(--ink5);min-width:64px;text-align:right;">440 Hz</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:10px 14px;background:rgba(160,92,32,.1);border-radius:8px;border:1px solid var(--paper4);">
+              <div style="font-family:var(--serif);font-size:15px;color:var(--ink);font-weight:600;min-width:60px;">La5</div>
+              <div style="flex:1;height:4px;background:var(--paper3);border-radius:2px;"><div style="height:100%;width:80%;background:var(--copper);border-radius:2px;"></div></div>
+              <div style="font-family:var(--mono);font-size:11px;color:var(--ink4);min-width:64px;text-align:right;">880 Hz</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:10px 14px;background:rgba(160,92,32,.06);border-radius:8px;border:1px solid var(--paper3);">
+              <div style="font-family:var(--serif);font-size:15px;color:var(--ink);min-width:60px;">La6</div>
+              <div style="flex:1;height:4px;background:var(--paper3);border-radius:2px;"><div style="height:100%;width:100%;background:var(--copper);border-radius:2px;"></div></div>
+              <div style="font-family:var(--mono);font-size:11px;color:var(--ink5);min-width:64px;text-align:right;">1760 Hz</div>
+            </div>
+          </div>
+          <p style="font-size:12px;color:var(--ink5);margin-top:16px;font-style:italic;line-height:1.6;">Cada octava duplica la frecuencia. La relación es logarítmica, no lineal.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 2: Los armónicos (dark) + Visual interactivo -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Los armónicos</span>
+    <h2 class="th-h2">Una nota, <em>muchas frecuencias a la vez</em></h2>
+    <p class="th-body">Cuando una cuerda vibra, no produce una sola frecuencia. Vibra simultáneamente como un todo (<strong>fundamental</strong>), en mitades (2.º armónico = octava), en tercios (3.er armónico = quinta justa sobre la octava), en cuartos (4.º armónico = dos octavas) y así sucesivamente. Esta serie, la <strong>serie armónica</strong>, es el fundamento acústico de toda la armonía occidental.</p>
+    <p class="th-body">La tríada mayor (tónica, tercera mayor, quinta) corresponde a los armónicos 4.º, 5.º y 6.º de la fundamental. El hecho de que estos intervalos suenen consonantes juntos no es cultural: es físico. La preferencia del oído humano por ciertas combinaciones de notas refleja directamente las proporciones numéricas de la serie armónica.</p>
+  </div>
+</section>
+
+<!-- VISUAL INTERACTIVO: Serie armónica -->
+<section class="harmonic-section">
+  <div style="max-width:1080px;margin:0 auto;">
+    <span class="th-label" style="display:block;text-align:center;margin-bottom:32px;color:var(--copper-lt);">Interactivo</span>
+    <div class="harmonic-card">
+      <div class="harmonic-title">Serie armónica — haz clic para escuchar cada parcial</div>
+      <div class="harmonic-sub">Do3 como fundamental · Los primeros 8 armónicos</div>
+      <div class="harmonic-bars" id="harmonic-bars"></div>
+      <div class="harmonic-hint">Haz clic en cualquier barra para escuchar ese armónico</div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 3: El timbre -->
+<section class="th-section">
+  <div class="th-inner">
+    <span class="th-label">El timbre</span>
+    <h2 class="th-h2">Por qué los instrumentos <em>suenan distintos</em></h2>
+    <p class="th-body">El <strong>timbre</strong> (también llamado color tonal) está determinado por la mezcla de armónicos presentes y sus amplitudes relativas. Un clarinete tiene una fundamental fuerte y los armónicos pares suprimidos, lo que le da un sonido hueco. Un violín tiene armónicos pares e impares fuertes, lo que le da riqueza. Una guitarra tiene un ataque rápido y una caída lenta, con armónicos 2.º y 3.º prominentes.</p>
+    <p class="th-body">Dos instrumentos tocando La440 tienen la misma frecuencia fundamental pero perfiles armónicos distintos, y el oído usa esos perfiles para identificar el instrumento. Entender el timbre explica por qué las elecciones de voicing (qué posiciones armónicas se usan en un acorde) afectan el sonido aunque el acorde sea técnicamente el mismo.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">Experimento</div>
+      <p>Graba una nota de guitarra y elimina el primer transitorio de ataque. Lo que queda es casi irreconocible como guitarra: el timbre vive principalmente en el ataque.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 4: Aplicaciones armónicas (dark) -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Aplicaciones armónicas</span>
+    <h2 class="th-h2">Los armónicos y <em>por qué los acordes funcionan</em></h2>
+    <p class="th-body">La consonancia o disonancia de un intervalo está determinada en parte por cuánto se superponen las series armónicas de las dos notas. Las notas separadas una quinta justa comparten varios armónicos: el tercer armónico de la nota inferior coincide con el segundo de la superior. Las notas separadas una segunda menor casi no tienen armónicos en común, lo que crea batidos (interferencias) entre sus frecuencias, percibidos como tensión.</p>
+    <p class="th-body">Por eso las quintas justas suenan estables y las segundas menores suenan tensas. La preferencia de la armonía occidental por las consonancias perfectas tiene una base física, no arbitraria. Esta misma lógica explica la jerarquía tonal: la dominante quiere resolver a la tónica porque sus series armónicas se alinean con la de la tónica de forma especialmente ordenada.</p>
+  </div>
+</section>
+
+<!-- FOOTER / NEXT -->
+<section class="th-next">
+  <span class="th-next-label">Navegar capítulos</span>
+  <h2 class="th-next-title">Sigue explorando</h2>
+  <p class="th-next-sub">El sonido tiene estructura. Ahora aprende cómo el volumen y el ataque definen el carácter de una frase.</p>
+  <div class="th-next-btns">
+    <a href="/teoria/sonido/dinamica" class="th-next-btn">Dinámica y articulación →</a>
+    <a href="/teoria/ritmo/swing" class="th-next-btn sec">← Swing y groove</a>
+  </div>
+  <div class="chapter-nav">
+    <a href="/teoria/ritmo/swing" class="chapter-nav-item prev">
+      <span class="chapter-nav-dir">← Anterior</span>
+      <span class="chapter-nav-cap">Ritmo y Sonido · 07</span>
+      <span class="chapter-nav-title">Swing y groove</span>
+    </a>
+    <a href="/teoria/sonido/dinamica" class="chapter-nav-item">
+      <span class="chapter-nav-dir">Siguiente →</span>
+      <span class="chapter-nav-cap">Ritmo y Sonido · 09</span>
+      <span class="chapter-nav-title">Dinámica y articulación</span>
+    </a>
+  </div>
+</section>
+
+<script>
+// ── Progress bar ──────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('prog-bar').style.width = (h > 0 ? Math.round(window.scrollY / h * 100) : 0) + '%';
+});
+
+// ── Harmonic series ───────────────────────────────────────────────────────────
+const HARMONICS = [
+  { num: 1, label: 'H1', note: 'Do3',  midi: 48, amp: 1.00 },
+  { num: 2, label: 'H2', note: 'Do4',  midi: 60, amp: 0.60 },
+  { num: 3, label: 'H3', note: 'Sol4', midi: 67, amp: 0.40 },
+  { num: 4, label: 'H4', note: 'Do5',  midi: 72, amp: 0.30 },
+  { num: 5, label: 'H5', note: 'Mi5',  midi: 76, amp: 0.22 },
+  { num: 6, label: 'H6', note: 'Sol5', midi: 79, amp: 0.18 },
+  { num: 7, label: 'H7', note: 'Sib5', midi: 82, amp: 0.14 },
+  { num: 8, label: 'H8', note: 'Do6',  midi: 84, amp: 0.12 },
+];
+
+const MAX_HEIGHT = 180;
+const MIN_WIDTH = 36;
+
+// Copper gradient stops
+function barColor(idx) {
+  const stops = [
+    '#c47a36','#b86e2e','#a86228','#9a5820','#8e501c','#824818','#784016','#6e3a14'
+  ];
+  return stops[idx] || stops[stops.length - 1];
+}
+
+function midiToFreq(midi) {
+  return 440 * Math.pow(2, (midi - 69) / 12);
+}
+
+function buildHarmonicBars() {
+  const container = document.getElementById('harmonic-bars');
+  container.innerHTML = '';
+  HARMONICS.forEach((h, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'harmonic-bar-wrap';
+    wrap.id = 'hbar-' + i;
+
+    const bar = document.createElement('div');
+    bar.className = 'harmonic-bar';
+    const barH = Math.round(h.amp * MAX_HEIGHT);
+    bar.style.cssText = `width:${MIN_WIDTH + (8 - i) * 2}px;height:${barH}px;background:${barColor(i)};`;
+
+    const label = document.createElement('div');
+    label.className = 'harmonic-label';
+    label.textContent = h.label;
+
+    const note = document.createElement('div');
+    note.className = 'harmonic-note';
+    note.textContent = h.note;
+
+    const num = document.createElement('div');
+    num.className = 'harmonic-num';
+    num.textContent = Math.round(midiToFreq(h.midi)) + ' Hz';
+
+    wrap.appendChild(bar);
+    wrap.appendChild(label);
+    wrap.appendChild(note);
+    wrap.appendChild(num);
+
+    wrap.addEventListener('click', () => playHarmonic(i, h));
+    container.appendChild(wrap);
+  });
+}
+
+let activeOsc = null;
+
+async function playHarmonic(idx, h) {
+  await Tone.start();
+  // Stop previous
+  if (activeOsc) {
+    try { activeOsc.stop(); activeOsc.dispose(); } catch(e) {}
+    activeOsc = null;
+    document.querySelectorAll('.harmonic-bar-wrap').forEach(el => el.classList.remove('playing'));
+  }
+
+  const freq = midiToFreq(h.midi);
+  const synth = new Tone.Synth({
+    oscillator: { type: 'sine' },
+    envelope: { attack: 0.01, decay: 0.3, sustain: 0.4, release: 0.8 }
+  }).toDestination();
+  synth.volume.value = -10 + (h.amp * 6);
+
+  const wrap = document.getElementById('hbar-' + idx);
+  if (wrap) wrap.classList.add('playing');
+  activeOsc = synth;
+
+  synth.triggerAttackRelease(freq, '2n');
+  setTimeout(() => {
+    if (wrap) wrap.classList.remove('playing');
+    try { synth.dispose(); } catch(e) {}
+    if (activeOsc === synth) activeOsc = null;
+  }, 1600);
+}
+
+buildHarmonicBars();
+</script>
+
+<footer class="tm-footer-legal" style="background:var(--ink2);border-top:1px solid rgba(255,255,255,.06);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+  <div class="tm-f-copy" style="font-size:12px;color:var(--ink5);">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div class="tm-f-links" style="display:flex;gap:20px;">
+    <a href="/privacidad" style="font-size:12px;color:var(--ink5);text-decoration:none;">Aviso de Privacidad</a>
+    <a href="/terminos" style="font-size:12px;color:var(--ink5);text-decoration:none;">Términos y Condiciones</a>
+    <a href="/cookies" style="font-size:12px;color:var(--ink5);text-decoration:none;">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

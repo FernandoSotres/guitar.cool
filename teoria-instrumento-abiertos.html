@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Acordes abiertos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<style>
+:root{
+  --paper:#f4ece0;--paper2:#ebe1d2;--paper3:#ddd1bd;--paper4:#c8b99f;--paper5:#b8a890;
+  --copper:#a85a1e;--copper-lt:#c47a36;--copper-dk:#7a3e10;
+  --ink:#1c1410;--ink2:#2e2418;--ink3:#5a4a38;--ink4:#8a7a64;--ink5:#a09080;
+  --tonic:#a05c20;--subdom:#5a7abf;--dominant:#7a4abf;--relative:#4a7c59;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{font-family:var(--mono);font-size:.52em;font-weight:400;color:var(--ink4);letter-spacing:0;margin-left:2px;}
+.nav-link{padding:0 16px;height:60px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+.th-progress{position:fixed;top:56px;left:0;right:0;height:2px;background:rgba(160,92,32,.12);z-index:99;}
+.th-progress-bar{height:100%;background:var(--copper);width:0%;transition:width .08s linear;}
+
+.th-breadcrumb{background:var(--paper2);border-bottom:1px solid var(--paper4);padding:0 48px;height:40px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink5);}
+.th-breadcrumb a{color:var(--ink5);text-decoration:none;}
+.th-breadcrumb a:hover{color:var(--copper);}
+.th-breadcrumb .sep{opacity:.5;}
+.th-breadcrumb .current{color:var(--ink3);font-weight:500;}
+
+.th-hero{background:#13100c;padding:110px 48px 90px;text-align:center;overflow:hidden;}
+.th-chapter{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:28px;display:flex;align-items:center;justify-content:center;gap:14px;}
+.th-chapter::before,.th-chapter::after{content:'';display:block;height:1px;width:48px;background:var(--copper-lt);opacity:.35;}
+.th-title{font-family:var(--serif);font-size:clamp(54px,7.5vw,92px);font-weight:700;line-height:.92;letter-spacing:-.025em;color:var(--paper);margin-bottom:28px;}
+.th-title em{font-style:italic;color:var(--copper-lt);}
+.th-lead{font-family:var(--serif);font-size:clamp(17px,2vw,22px);font-style:italic;color:rgba(250,246,240,.58);max-width:580px;margin:0 auto 44px;line-height:1.65;}
+.th-scroll-hint{font-size:11px;color:rgba(250,246,240,.22);letter-spacing:.14em;text-transform:uppercase;}
+
+.th-section{padding:88px 48px;}
+.th-section.dark{background:#13100c;}
+.th-inner{max-width:1080px;margin:0 auto;}
+.th-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;display:block;}
+.th-section.dark .th-label{color:var(--copper-lt);}
+.th-h2{font-family:var(--serif);font-size:clamp(34px,4.5vw,56px);font-weight:700;line-height:1.02;letter-spacing:-.025em;color:var(--ink);margin-bottom:22px;}
+.th-section.dark .th-h2{color:var(--paper);}
+.th-body{font-size:15px;color:var(--ink3);line-height:1.85;max-width:640px;}
+.th-body+.th-body{margin-top:14px;}
+.th-section.dark .th-body{color:rgba(250,246,240,.58);}
+.th-body strong{color:var(--ink2);font-weight:600;}
+.th-section.dark .th-body strong{color:rgba(244,236,224,.92);}
+.th-split{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;}
+.th-callout{border-left:3px solid var(--copper);border-radius:0 8px 8px 0;padding:16px 20px;margin:28px 0;background:rgba(160,92,32,.07);}
+.th-section.dark .th-callout{background:rgba(255,255,255,.05);border-left-color:var(--copper-lt);}
+.th-callout-label{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);margin-bottom:7px;}
+.th-section.dark .th-callout-label{color:var(--copper-lt);}
+.th-callout p{font-size:14px;color:var(--ink3);line-height:1.65;}
+.th-section.dark .th-callout p{color:rgba(250,246,240,.58);}
+
+/* ── CHORD DIAGRAMS ── */
+.chord-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin:32px 0;}
+.chord-box{background:var(--paper2);border:1px solid var(--paper3);border-radius:14px;padding:20px 16px 16px;text-align:center;cursor:pointer;transition:box-shadow .18s,transform .14s;}
+.chord-box:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(160,92,32,.12);}
+.chord-box.playing{box-shadow:0 8px 28px rgba(160,92,32,.25);transform:translateY(-4px);}
+.chord-name{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--copper);margin-bottom:10px;letter-spacing:-.01em;}
+.chord-minor .chord-name{color:var(--relative);}
+.chord-hint{font-size:11px;color:var(--ink5);margin-top:10px;font-style:italic;}
+
+/* ── NEXT ── */
+.th-next{background:var(--ink);padding:88px 48px;text-align:center;}
+.th-next-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink5);margin-bottom:18px;display:block;}
+.th-next-title{font-family:var(--serif);font-size:clamp(36px,5vw,56px);font-weight:700;color:var(--paper);margin-bottom:10px;letter-spacing:-.02em;}
+.th-next-sub{font-size:14px;color:var(--ink4);margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.th-next-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.th-next-btn{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:13px;font-weight:600;padding:13px 28px;border-radius:8px;text-decoration:none;transition:background .2s;}
+.th-next-btn:hover{background:var(--copper-dk);}
+.th-next-btn.sec{background:transparent;color:rgba(250,246,240,.5);border:1px solid rgba(255,255,255,.12);}
+.th-next-btn.sec:hover{color:var(--paper);border-color:rgba(255,255,255,.3);}
+
+/* ── CHAPTER NAV ── */
+.chapter-nav{display:flex;gap:0;border-top:1px solid rgba(255,255,255,.06);margin-top:64px;}
+.chapter-nav-item{flex:1;padding:28px 24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;transition:background .18s;}
+.chapter-nav-item:hover{background:rgba(255,255,255,.03);}
+.chapter-nav-item.prev{border-right:1px solid rgba(255,255,255,.06);}
+.chapter-nav-dir{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(250,246,240,.25);}
+.chapter-nav-cap{font-size:11px;color:rgba(250,246,240,.25);}
+.chapter-nav-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--paper);}
+
+@media(max-width:768px){
+  nav{padding:0 16px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav>*{flex-shrink:0;}
+  .th-breadcrumb{padding:0 20px;}
+  .th-hero{padding:80px 20px 64px;}
+  .th-section{padding:64px 20px;}
+  .th-split{grid-template-columns:1fr;gap:40px;}
+  .chord-grid{grid-template-columns:repeat(2,1fr);}
+  .th-next{padding:64px 20px;}
+  .chapter-nav{flex-direction:column;}
+  .chapter-nav-item.prev{border-right:none;border-bottom:1px solid rgba(255,255,255,.06);}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link active">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<div class="th-progress"><div class="th-progress-bar" id="prog-bar"></div></div>
+
+<div class="th-breadcrumb">
+  <a href="/teoria">Teoría</a>
+  <span class="sep">›</span>
+  <a href="/teoria/instrumento">Teoría en el Instrumento</a>
+  <span class="sep">›</span>
+  <span class="current">Acordes abiertos</span>
+</div>
+
+<!-- HERO -->
+<section class="th-hero">
+  <div class="th-chapter">Teoría en el Instrumento · 03</div>
+  <h1 class="th-title">Acordes <em>abiertos</em></h1>
+  <p class="th-lead">Los cinco acordes fundamentales con cuerdas al aire, la base de la guitarra acústica y el punto de entrada a todo lo demás.</p>
+  <div class="th-scroll-hint">↓ leer</div>
+</section>
+
+<!-- SECCIÓN 1: Los cinco acordes -->
+<section class="th-section">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">Los cinco acordes</span>
+        <h2 class="th-h2">E, A, D, G, C:<br><em>el vocabulario básico</em></h2>
+        <p class="th-body">Los acordes abiertos usan las cuerdas al aire (sin pisar) de la guitarra como parte integral de la voz del acorde. Los cinco acordes mayores abiertos fundamentales son <strong>E</strong>, <strong>A</strong>, <strong>D</strong>, <strong>G</strong> y <strong>C</strong>. Se llaman "abiertos" porque varias cuerdas suenan sin pisarlas. Tienen un sonido característicamente resonante: las cuerdas libres vibran sin la atenuación que produce la presión de los dedos.</p>
+        <p class="th-body">La mayoría de los guitarristas principiantes aprende estos cinco acordes primero, y la mayor parte de la música acústica los usa con frecuencia, incluyendo rock, folk, country y pop. Dominar estos cinco acordes más sus versiones menores equivale a tener acceso a la mayoría del repertorio de guitarra rítmica en tonalidades comunes.</p>
+        <p class="th-body">Cada acorde abierto es también la forma base del sistema CAGED. El acorde <strong>E mayor</strong> abierto es la forma E; el <strong>A mayor</strong> abierto es la forma A, y así sucesivamente. Comprender los acordes abiertos es, por lo tanto, el primer paso para comprender todo el sistema CAGED.</p>
+        <div class="th-callout">
+          <div class="th-callout-label">Por qué empezar aquí</div>
+          <p>Los acordes abiertos son los más sencillos de tocar y los que suenan más llenos. Son la puerta de entrada al instrumento para la mayoría de los estilos.</p>
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--paper2);border:1px solid var(--paper3);border-radius:14px;padding:28px 24px;">
+          <p style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:16px;">Los cinco acordes mayores abiertos</p>
+          <div id="major-summary"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 2: Los menores -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Los menores</span>
+    <h2 class="th-h2">Em, Am, Dm:<br><em>los tres menores abiertos principales</em></h2>
+    <p class="th-body">Los tres acordes menores abiertos más comunes son <strong>Em</strong>, <strong>Am</strong> y <strong>Dm</strong>. <strong>Em</strong> usa las seis cuerdas y requiere solo dos dedos, lo que lo convierte en uno de los primeros acordes que aprende cualquier guitarrista. <strong>Am</strong> usa cinco cuerdas y tres dedos. <strong>Dm</strong> usa cuatro cuerdas y tres dedos.</p>
+    <p class="th-body">Combinados con los mayores, estos seis acordes (<strong>E</strong>, <strong>A</strong>, <strong>D</strong>, <strong>G</strong>, <strong>C</strong>, <strong>Em</strong>, <strong>Am</strong>, <strong>Dm</strong>) cubren los acordes diatónicos de varias tonalidades comunes. <strong>Sol mayor</strong> usa G, C, D, Em y Am. <strong>Re mayor</strong> usa D, G, A y Em. <strong>La mayor</strong> usa A, D, E y F#m (este último sí requiere barre). Estas tonalidades son las más frecuentes en guitarra precisamente porque los acordes abiertos suenan mejor en ellas.</p>
+    <p class="th-body">La razón técnica es sencilla: las cuerdas al aire de la guitarra (<strong>E</strong>, <strong>A</strong>, <strong>D</strong>, <strong>G</strong>, <strong>B</strong>, <strong>E</strong>) pertenecen en su mayoría a los acordes de estas tonalidades. Tocar en Sol mayor permite que muchas cuerdas suenen libremente, añadiendo riqueza y brillo al sonido. En tonalidades como Fa mayor o Sib mayor, casi ninguna cuerda al aire encaja, y el guitarrista debe usar barre para casi todo.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">Tonalidades "de guitarra"</div>
+      <p>E, A, D, G y C se llaman informalmente las "tonalidades de guitarra" porque permiten el mayor uso de cuerdas al aire. Los guitarristas de rock y folk las favorecen por este motivo.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN INTERACTIVA: 6 diagramas de acordes -->
+<section class="th-section" style="padding-top:0;">
+  <div class="th-inner">
+    <span class="th-label" style="margin-bottom:24px;">Interactivo</span>
+    <p style="font-size:14px;color:var(--ink4);margin-bottom:28px;max-width:560px;">Haz clic en el nombre de cualquier acorde para escucharlo como arpegio de bajo a agudo.</p>
+    <div class="chord-grid" id="chord-grid"></div>
+  </div>
+</section>
+
+<!-- SECCIÓN 3: La lógica de los dedeos -->
+<section class="th-section">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">La lógica de los dedeos</span>
+        <h2 class="th-h2">Por qué cada acorde<br><em>tiene esa forma específica</em></h2>
+        <p class="th-body">Las formas de los acordes abiertos no son arbitrarias: son la digitación más eficiente para cada acorde dada la afinación estándar de la guitarra. <strong>E mayor</strong> usa las cuerdas al aire E2 y E4, que ya son la raíz del acorde, requiriendo solo tres dedos para completar las notas restantes. <strong>D mayor</strong> solo puede usar 4 cuerdas porque la E2 grave y la A2 no contienen notas del acorde de Re mayor en trastes cercanos y accesibles.</p>
+        <p class="th-body"><strong>C mayor</strong> requiere un estiramiento de tres trastes porque las notas del acorde (C, E, G) están distribuidas entre las cuerdas de una forma que exige esa extensión. El acorde de <strong>G mayor</strong> tiene varias digitaciones posibles y es el que más varía entre distintas escuelas de guitarra, precisamente porque la afinación permite más de una solución eficiente.</p>
+        <p class="th-body">Entender por qué cada acorde tiene esa forma específica ayuda a modificarlos de forma inteligente: añadir o quitar una nota, crear variaciones de color, o adaptar el voicing a lo que necesita la canción. Un acorde no es una forma fija sino la instancia más práctica de un conjunto de notas en un instrumento específico.</p>
+      </div>
+      <div>
+        <div style="background:var(--paper2);border:1px solid var(--paper3);border-radius:14px;padding:28px 24px;">
+          <p style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:16px;">Notas de cada acorde abierto</p>
+          <div id="chord-notes-table"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 4: Capotraste -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Capotraste</span>
+    <h2 class="th-h2">El capo:<br><em>transposición sin cambiar forma</em></h2>
+    <p class="th-body">Un <strong>capotraste</strong> es una abrazadera que se coloca sobre todas las cuerdas en un traste específico, elevando todas las afinaciones el número de semitonos correspondiente. Con un capo en el traste 2, una forma de <strong>C mayor</strong> suena como <strong>D mayor</strong>. Esto permite usar las formas familiares de acordes abiertos en cualquier tonalidad, conservando el timbre resonante característico de las cuerdas al aire.</p>
+    <p class="th-body">Los guitarristas acústicos profesionales usan el capo con frecuencia, no como atajo sino como decisión tímbrica. Una forma de <strong>D mayor</strong> con capo en el traste 2 suena más brillante y resonante que un <strong>D mayor</strong> con barre, porque las cuerdas vibran desde un traste metálico en lugar de desde la presión de un dedo. La presión del dedo en el barre añade una pequeña amortiguación que el capo no produce.</p>
+    <p class="th-body">El capo también facilita tocar con cantantes: si una canción en <strong>G mayor</strong> es demasiado grave para una voz, colocar el capo en el traste 2 sube todo a <strong>A mayor</strong> sin cambiar ninguna digitación. Esta flexibilidad hace del capo una herramienta indispensable para el guitarrista acompañante, especialmente en folk, country y música latinoamericana acústica.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">Regla del capo</div>
+      <p>Forma de acorde + posición del capo = nota real. Forma C con capo 2 = D. Forma C con capo 5 = F. Suma los semitonos del traste a la nota de la forma.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER / NEXT -->
+<section class="th-next">
+  <span class="th-next-label">Navegar lecciones</span>
+  <h2 class="th-next-title">Siguiente: acordes barre</h2>
+  <p class="th-next-sub">Con los acordes abiertos dominados, el siguiente paso natural es aprender a moverlos por todo el mástil usando la técnica de barre.</p>
+  <div class="th-next-btns">
+    <a href="/teoria/instrumento/barre" class="th-next-btn">Acordes barre →</a>
+    <a href="/teoria/instrumento/caged" class="th-next-btn sec">← El sistema CAGED</a>
+  </div>
+  <div class="chapter-nav">
+    <a href="/teoria/instrumento/caged" class="chapter-nav-item prev">
+      <span class="chapter-nav-dir">← Anterior</span>
+      <span class="chapter-nav-cap">02</span>
+      <span class="chapter-nav-title">El sistema CAGED</span>
+    </a>
+    <a href="/teoria/instrumento/barre" class="chapter-nav-item">
+      <span class="chapter-nav-dir">Siguiente →</span>
+      <span class="chapter-nav-cap">04</span>
+      <span class="chapter-nav-title">Acordes barre</span>
+    </a>
+  </div>
+</section>
+
+<script>
+// ── Progress bar ──────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('prog-bar').style.width = (h > 0 ? Math.round(window.scrollY / h * 100) : 0) + '%';
+});
+
+// ── Chord data ────────────────────────────────────────────────────────────────
+// Chord box diagram: strings are vertical (top=E2 low, bottom=e1 high),
+// frets are horizontal (left=nut, going right). Standard chord box orientation.
+// dots: [string, fret, finger] string 0=E2, 5=e1. fret 0=open(shown as circle above nut)
+// mutedStrings: set of string indices
+// openStrings: set of string indices
+
+const CHORDS = [
+  {
+    name: 'E',
+    minor: false,
+    midi: [40, 45, 52, 56, 59, 64],
+    // E2 A2 E3 G#3 B3 E4
+    frets: [0, 2, 2, 1, 0, 0],
+    fingers: [null, 2, 3, 1, null, null],
+    mutedStrings: [],
+    openStrings: [0, 4, 5],
+    maxFret: 3,
+    notes: ['E', 'A', 'E', 'G#', 'B', 'E'],
+    noteRoles: ['R', '5', 'R', '3', '5', 'R'],
+  },
+  {
+    name: 'A',
+    minor: false,
+    midi: [null, 45, 52, 57, 61, 64],
+    // x A2 E3 A3 C#4 E4
+    frets: [null, 0, 2, 2, 2, 0],
+    fingers: [null, null, 1, 2, 3, null],
+    mutedStrings: [0],
+    openStrings: [1, 5],
+    maxFret: 3,
+    notes: ['x', 'A', 'E', 'A', 'C#', 'E'],
+    noteRoles: ['', 'R', '5', 'R', '3', '5'],
+  },
+  {
+    name: 'D',
+    minor: false,
+    midi: [null, null, 50, 57, 62, 66],
+    // x x D3 A3 D4 F#4
+    frets: [null, null, 0, 2, 3, 2],
+    fingers: [null, null, null, 1, 3, 2],
+    mutedStrings: [0, 1],
+    openStrings: [2],
+    maxFret: 4,
+    notes: ['x', 'x', 'D', 'A', 'D', 'F#'],
+    noteRoles: ['', '', 'R', '5', 'R', '3'],
+  },
+  {
+    name: 'Em',
+    minor: true,
+    midi: [40, 45, 52, 55, 59, 64],
+    // E2 A2 E3 G3 B3 E4
+    frets: [0, 2, 2, 0, 0, 0],
+    fingers: [null, 2, 3, null, null, null],
+    mutedStrings: [],
+    openStrings: [0, 3, 4, 5],
+    maxFret: 3,
+    notes: ['E', 'A', 'E', 'G', 'B', 'E'],
+    noteRoles: ['R', '5', 'R', 'm3', '5', 'R'],
+  },
+  {
+    name: 'Am',
+    minor: true,
+    midi: [null, 45, 52, 57, 60, 64],
+    // x A2 E3 A3 C4 E4
+    frets: [null, 0, 2, 2, 1, 0],
+    fingers: [null, null, 2, 3, 1, null],
+    mutedStrings: [0],
+    openStrings: [1, 5],
+    maxFret: 3,
+    notes: ['x', 'A', 'E', 'A', 'C', 'E'],
+    noteRoles: ['', 'R', '5', 'R', 'm3', '5'],
+  },
+  {
+    name: 'Dm',
+    minor: true,
+    midi: [null, null, 50, 57, 62, 65],
+    // x x D3 A3 D4 F4
+    frets: [null, null, 0, 2, 3, 1],
+    fingers: [null, null, null, 2, 3, 1],
+    mutedStrings: [0, 1],
+    openStrings: [2],
+    maxFret: 4,
+    notes: ['x', 'x', 'D', 'A', 'D', 'F'],
+    noteRoles: ['', '', 'R', '5', 'R', 'm3'],
+  },
+];
+
+// ── Audio ─────────────────────────────────────────────────────────────────────
+let synth = null;
+async function initAudio() {
+  if (synth) return;
+  await Tone.start();
+  const reverb = new Tone.Freeverb({ roomSize: 0.3, wet: 0.14 }).toDestination();
+  const comp = new Tone.Compressor({ threshold: -22, ratio: 4 }).connect(reverb);
+  synth = new Tone.PolySynth(Tone.Synth, {
+    oscillator: { type: 'triangle' },
+    envelope: { attack: 0.008, decay: 0.7, sustain: 0.1, release: 3.0 },
+    volume: -8,
+  }).connect(comp);
+}
+
+function midiToNoteName(midi) {
+  const pc = midi % 12, oct = Math.floor(midi / 12) - 1;
+  const names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  return names[pc] + oct;
+}
+
+async function playArpeggio(midiArr) {
+  if (!synth) return;
+  let delay = 0.05;
+  midiArr.forEach(m => {
+    if (m === null) return;
+    synth.triggerAttackRelease(midiToNoteName(m), '2n', Tone.now() + delay);
+    delay += 0.08;
+  });
+}
+
+// ── Draw chord box ────────────────────────────────────────────────────────────
+function drawChordBox(chord) {
+  const BOX_W = 120;
+  const BOX_H = 100;
+  const STRING_COUNT = 6;
+  const FRET_COUNT = 4;
+  const LEFT = 18;
+  const TOP = 20;
+  const W = BOX_W - LEFT - 8;
+  const H = BOX_H - TOP - 8;
+  const SW = W / (STRING_COUNT - 1);
+  const FH = H / FRET_COUNT;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = BOX_W;
+  canvas.height = BOX_H;
+  canvas.style.width = BOX_W + 'px';
+  canvas.style.height = BOX_H + 'px';
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = 'transparent';
+
+  // Nut or thick top bar
+  const isAtOpen = chord.frets.some((f, i) => f === 0 && !chord.mutedStrings.includes(i));
+  ctx.fillStyle = '#2e2418';
+  ctx.fillRect(LEFT, TOP, W, isAtOpen ? 3 : 1.5);
+
+  // Fret lines
+  for (let f = 1; f <= FRET_COUNT; f++) {
+    ctx.beginPath();
+    ctx.moveTo(LEFT, TOP + f * FH);
+    ctx.lineTo(LEFT + W, TOP + f * FH);
+    ctx.strokeStyle = 'rgba(46,36,24,.3)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  // String lines
+  for (let s = 0; s < STRING_COUNT; s++) {
+    ctx.beginPath();
+    ctx.moveTo(LEFT + s * SW, TOP);
+    ctx.lineTo(LEFT + s * SW, TOP + H);
+    ctx.strokeStyle = 'rgba(46,36,24,.45)';
+    ctx.lineWidth = 1 + (STRING_COUNT - 1 - s) * 0.22;
+    ctx.stroke();
+  }
+
+  // Open and muted string indicators (above nut)
+  const isMinor = chord.minor;
+  const dotColor = isMinor ? '#4a7c59' : '#a85a1e';
+
+  for (let s = 0; s < STRING_COUNT; s++) {
+    const x = LEFT + s * SW;
+    const fret = chord.frets[s];
+    if (fret === null) {
+      // Muted: draw X
+      ctx.strokeStyle = 'rgba(90,74,56,.5)';
+      ctx.lineWidth = 1.5;
+      const cx = x, cy = TOP - 9;
+      const r = 4;
+      ctx.beginPath();
+      ctx.moveTo(cx - r, cy - r);
+      ctx.lineTo(cx + r, cy + r);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx + r, cy - r);
+      ctx.lineTo(cx - r, cy + r);
+      ctx.stroke();
+    } else if (fret === 0) {
+      // Open string: small circle
+      ctx.beginPath();
+      ctx.arc(x, TOP - 9, 4, 0, Math.PI * 2);
+      ctx.strokeStyle = dotColor;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+  }
+
+  // Finger dots
+  for (let s = 0; s < STRING_COUNT; s++) {
+    const fret = chord.frets[s];
+    if (!fret || fret === 0) continue;
+    const x = LEFT + s * SW;
+    const y = TOP + (fret - 0.5) * FH;
+    ctx.beginPath();
+    ctx.arc(x, y, 6, 0, Math.PI * 2);
+    ctx.fillStyle = dotColor;
+    ctx.fill();
+    // Finger number
+    const finger = chord.fingers[s];
+    if (finger) {
+      ctx.font = '500 8px "Inter", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#f4ece0';
+      ctx.fillText(finger, x, y + 3);
+    }
+  }
+
+  return canvas;
+}
+
+// ── Build chord grid ──────────────────────────────────────────────────────────
+function buildChordGrid() {
+  const grid = document.getElementById('chord-grid');
+  CHORDS.forEach(chord => {
+    const box = document.createElement('div');
+    box.className = 'chord-box' + (chord.minor ? ' chord-minor' : '');
+
+    const nameEl = document.createElement('div');
+    nameEl.className = 'chord-name';
+    nameEl.textContent = chord.name;
+    nameEl.style.cursor = 'pointer';
+
+    const diagramEl = drawChordBox(chord);
+    diagramEl.style.margin = '0 auto 4px';
+    diagramEl.style.display = 'block';
+
+    const hint = document.createElement('div');
+    hint.className = 'chord-hint';
+    const playable = chord.midi.filter(m => m !== null).length;
+    hint.textContent = `${playable} cuerdas · haz clic para escuchar`;
+
+    box.appendChild(nameEl);
+    box.appendChild(diagramEl);
+    box.appendChild(hint);
+
+    box.addEventListener('click', async () => {
+      await initAudio();
+      playArpeggio(chord.midi);
+      box.classList.add('playing');
+      setTimeout(() => box.classList.remove('playing'), 1200);
+    });
+
+    grid.appendChild(box);
+  });
+}
+
+// ── Major summary list ────────────────────────────────────────────────────────
+function buildMajorSummary() {
+  const el = document.getElementById('major-summary');
+  const majors = CHORDS.filter(c => !c.minor);
+  majors.forEach(c => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;margin-bottom:6px;background:rgba(160,92,32,.06);border:1px solid rgba(160,92,32,.14);cursor:pointer;transition:background .15s;';
+    const notable = c.notes.filter(n => n !== 'x').join(' · ');
+    row.innerHTML = `
+      <div style="font-family:var(--serif);font-size:18px;font-weight:700;color:var(--copper);min-width:28px;">${c.name}</div>
+      <div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--ink4);">${notable}</div>
+        <div style="font-size:11px;color:var(--ink5);margin-top:1px;">${c.notes.filter(n => n !== 'x').length} cuerdas sonando</div>
+      </div>
+    `;
+    row.addEventListener('mouseenter', () => row.style.background = 'rgba(160,92,32,.12)');
+    row.addEventListener('mouseleave', () => row.style.background = 'rgba(160,92,32,.06)');
+    row.addEventListener('click', async () => {
+      await initAudio();
+      playArpeggio(c.midi);
+    });
+    el.appendChild(row);
+  });
+}
+
+// ── Chord notes table ─────────────────────────────────────────────────────────
+function buildChordNotesTable() {
+  const el = document.getElementById('chord-notes-table');
+  CHORDS.forEach(c => {
+    const isMinor = c.minor;
+    const color = isMinor ? '#4a7c59' : '#a85a1e';
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-radius:7px;margin-bottom:5px;';
+    row.style.background = isMinor ? 'rgba(74,124,89,.06)' : 'rgba(160,92,32,.06)';
+    row.style.border = isMinor ? '1px solid rgba(74,124,89,.18)' : '1px solid rgba(160,92,32,.14)';
+    const roleDisplay = c.noteRoles.map((r, i) => {
+      if (!r) return null;
+      const n = c.notes[i];
+      if (n === 'x') return null;
+      return `${n}<span style="font-size:9px;color:rgba(90,74,56,.5);vertical-align:super;">${r}</span>`;
+    }).filter(Boolean).join(' ');
+    row.innerHTML = `
+      <div style="font-family:var(--serif);font-size:15px;font-weight:700;color:${color};min-width:28px;">${c.name}</div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--ink4);line-height:1.8;">${roleDisplay}</div>
+    `;
+    el.appendChild(row);
+  });
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+buildMajorSummary();
+buildChordGrid();
+buildChordNotesTable();
+</script>
+
+<footer style="background:var(--ink2);border-top:1px solid rgba(255,255,255,.06);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+  <div style="font-size:12px;color:var(--ink5);">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div style="display:flex;gap:20px;">
+    <a href="/privacidad" style="font-size:12px;color:var(--ink5);text-decoration:none;">Aviso de Privacidad</a>
+    <a href="/terminos" style="font-size:12px;color:var(--ink5);text-decoration:none;">Términos y Condiciones</a>
+    <a href="/cookies" style="font-size:12px;color:var(--ink5);text-decoration:none;">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

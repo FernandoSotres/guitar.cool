@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Escalas diatónicas en el mástil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<style>
+:root{
+  --paper:#f4ece0;--paper2:#ebe1d2;--paper3:#ddd1bd;--paper4:#c8b99f;--paper5:#b8a890;
+  --copper:#a85a1e;--copper-lt:#c47a36;--copper-dk:#7a3e10;
+  --ink:#1c1410;--ink2:#2e2418;--ink3:#5a4a38;--ink4:#8a7a64;--ink5:#a09080;
+  --tonic:#a05c20;--subdom:#5a7abf;--dominant:#7a4abf;--relative:#4a7c59;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{font-family:var(--mono);font-size:.52em;font-weight:400;color:var(--ink4);letter-spacing:0;margin-left:2px;}
+.nav-link{padding:0 16px;height:60px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+.th-progress{position:fixed;top:56px;left:0;right:0;height:2px;background:rgba(160,92,32,.12);z-index:99;}
+.th-progress-bar{height:100%;background:var(--copper);width:0%;transition:width .08s linear;}
+
+.th-breadcrumb{background:var(--paper2);border-bottom:1px solid var(--paper4);padding:0 48px;height:40px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink5);}
+.th-breadcrumb a{color:var(--ink5);text-decoration:none;}
+.th-breadcrumb a:hover{color:var(--copper);}
+.th-breadcrumb .sep{opacity:.5;}
+.th-breadcrumb .current{color:var(--ink3);font-weight:500;}
+
+.th-hero{background:#13100c;padding:110px 48px 90px;text-align:center;overflow:hidden;}
+.th-chapter{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:28px;display:flex;align-items:center;justify-content:center;gap:14px;}
+.th-chapter::before,.th-chapter::after{content:'';display:block;height:1px;width:48px;background:var(--copper-lt);opacity:.35;}
+.th-title{font-family:var(--serif);font-size:clamp(54px,7.5vw,92px);font-weight:700;line-height:.92;letter-spacing:-.025em;color:var(--paper);margin-bottom:28px;}
+.th-title em{font-style:italic;color:var(--copper-lt);}
+.th-lead{font-family:var(--serif);font-size:clamp(17px,2vw,22px);font-style:italic;color:rgba(250,246,240,.58);max-width:580px;margin:0 auto 44px;line-height:1.65;}
+.th-scroll-hint{font-size:11px;color:rgba(250,246,240,.22);letter-spacing:.14em;text-transform:uppercase;}
+
+.th-section{padding:88px 48px;}
+.th-section.dark{background:#13100c;}
+.th-inner{max-width:1080px;margin:0 auto;}
+.th-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;display:block;}
+.th-section.dark .th-label{color:var(--copper-lt);}
+.th-h2{font-family:var(--serif);font-size:clamp(34px,4.5vw,56px);font-weight:700;line-height:1.02;letter-spacing:-.025em;color:var(--ink);margin-bottom:22px;}
+.th-section.dark .th-h2{color:var(--paper);}
+.th-body{font-size:15px;color:var(--ink3);line-height:1.85;max-width:640px;}
+.th-body+.th-body{margin-top:14px;}
+.th-section.dark .th-body{color:rgba(250,246,240,.58);}
+.th-body strong{color:var(--ink2);font-weight:600;}
+.th-section.dark .th-body strong{color:rgba(244,236,224,.92);}
+.th-split{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;}
+.th-callout{border-left:3px solid var(--copper);border-radius:0 8px 8px 0;padding:16px 20px;margin:28px 0;background:rgba(160,92,32,.07);}
+.th-section.dark .th-callout{background:rgba(255,255,255,.05);border-left-color:var(--copper-lt);}
+.th-callout-label{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);margin-bottom:7px;}
+.th-section.dark .th-callout-label{color:var(--copper-lt);}
+.th-callout p{font-size:14px;color:var(--ink3);line-height:1.65;}
+.th-section.dark .th-callout p{color:rgba(250,246,240,.58);}
+
+/* ── MODE TABLE ── */
+.mode-table{width:100%;border-collapse:collapse;margin:24px 0;}
+.mode-table th{font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:10px 14px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);color:rgba(250,246,240,.3);}
+.mode-table td{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.05);vertical-align:middle;}
+.mode-table tr:last-child td{border-bottom:none;}
+.mode-table tr:hover td{background:rgba(255,255,255,.03);}
+.mt-pos{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--copper-lt);}
+.mt-name{font-family:var(--serif);font-size:16px;font-weight:700;color:var(--paper);}
+.mt-degree{font-family:var(--mono);font-size:11px;color:rgba(250,246,240,.35);margin-top:2px;}
+.mt-char{font-size:13px;color:rgba(250,246,240,.5);line-height:1.5;}
+.mt-badge{display:inline-block;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;border-radius:8px;}
+.mt-badge.major{background:rgba(160,92,32,.2);color:rgba(196,122,54,.9);}
+.mt-badge.minor{background:rgba(90,122,191,.2);color:rgba(120,150,210,.9);}
+.mt-badge.dim{background:rgba(122,74,191,.2);color:rgba(160,130,210,.9);}
+
+/* ── FRETBOARD ── */
+.fretboard-wrap{overflow-x:auto;margin:32px 0;}
+.mode-selector{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;}
+.mode-btn{font-family:var(--mono);font-size:12px;font-weight:600;padding:8px 16px;border-radius:6px;border:1.5px solid rgba(255,255,255,.12);background:transparent;color:rgba(250,246,240,.45);cursor:pointer;transition:all .18s;}
+.mode-btn:hover{border-color:var(--copper-lt);color:rgba(250,246,240,.8);}
+.mode-btn.active{background:var(--copper);border-color:var(--copper-dk);color:#fff;}
+
+/* ── NEXT ── */
+.th-next{background:var(--ink);padding:88px 48px;text-align:center;}
+.th-next-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink5);margin-bottom:18px;display:block;}
+.th-next-title{font-family:var(--serif);font-size:clamp(36px,5vw,56px);font-weight:700;color:var(--paper);margin-bottom:10px;letter-spacing:-.02em;}
+.th-next-sub{font-size:14px;color:var(--ink4);margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.th-next-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.th-next-btn{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:13px;font-weight:600;padding:13px 28px;border-radius:8px;text-decoration:none;transition:background .2s;}
+.th-next-btn:hover{background:var(--copper-dk);}
+.th-next-btn.sec{background:transparent;color:rgba(250,246,240,.5);border:1px solid rgba(255,255,255,.12);}
+.th-next-btn.sec:hover{color:var(--paper);border-color:rgba(255,255,255,.3);}
+
+/* ── CHAPTER NAV ── */
+.chapter-nav{display:flex;gap:0;border-top:1px solid rgba(255,255,255,.06);margin-top:64px;}
+.chapter-nav-item{flex:1;padding:28px 24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;transition:background .18s;}
+.chapter-nav-item:hover{background:rgba(255,255,255,.03);}
+.chapter-nav-item.prev{border-right:1px solid rgba(255,255,255,.06);}
+.chapter-nav-dir{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(250,246,240,.25);}
+.chapter-nav-cap{font-size:11px;color:rgba(250,246,240,.25);}
+.chapter-nav-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--paper);}
+
+@media(max-width:768px){
+  nav{padding:0 16px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav>*{flex-shrink:0;}
+  .th-breadcrumb{padding:0 20px;}
+  .th-hero{padding:80px 20px 64px;}
+  .th-section{padding:64px 20px;}
+  .th-split{grid-template-columns:1fr;gap:40px;}
+  .th-next{padding:64px 20px;}
+  .chapter-nav{flex-direction:column;}
+  .chapter-nav-item.prev{border-right:none;border-bottom:1px solid rgba(255,255,255,.06);}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link active">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<div class="th-progress"><div class="th-progress-bar" id="prog-bar"></div></div>
+
+<div class="th-breadcrumb">
+  <a href="/teoria">Teoría</a>
+  <span class="sep">›</span>
+  <a href="/teoria/instrumento">Teoría en el Instrumento</a>
+  <span class="sep">›</span>
+  <span class="current">Escalas diatónicas en el mástil</span>
+</div>
+
+<!-- HERO -->
+<section class="th-hero">
+  <div class="th-chapter">Teoría en el Instrumento · 06</div>
+  <h1 class="th-title">Escalas diatónicas<br><em>en el mástil</em></h1>
+  <p class="th-lead">Las siete posiciones de la escala mayor en el diapasón y su relación con los siete modos.</p>
+  <div class="th-scroll-hint">↓ leer</div>
+</section>
+
+<!-- SECCIÓN 1: Las siete posiciones -->
+<section class="th-section">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">Las siete posiciones</span>
+        <h2 class="th-h2">La escala mayor <em>en siete cuadros</em></h2>
+        <p class="th-body">La escala mayor puede tocarse en <strong>siete posiciones distintas</strong> en el diapasón, cada una cubriendo la escala completa en las seis cuerdas dentro de un rango de cuatro trastes (usando cuatro dedos). Las siete posiciones juntas cubren el mástil entero: combinadas, llenan cada traste desde la cejuela hasta el traste 12.</p>
+        <p class="th-body">Cada posición inicia en un grado diferente de la escala. La Posición 1 (Jónico, a partir de la raíz) es la más enseñada. La Posición 2 inicia en el 2.º grado (modo Dórico). La Posición 3 en el 3.º (Frigio). La Posición 4 en el 4.º (Lidio). La Posición 5 en el 5.º (Mixolidio). La Posición 6 en el 6.º (Eólico, escala menor natural). La Posición 7 en el 7.º (Locrio).</p>
+        <p class="th-body">Una aclaración importante: las siete posiciones no son siete escalas distintas. Son siete formas de digitar exactamente las mismas siete notas en el diapasón. La diferencia entre una posición y la siguiente es solo el punto de inicio y la distribución de los dedos en el mástil, no el contenido musical.</p>
+        <div class="th-callout">
+          <div class="th-callout-label">El patrón de cuatro dedos</div>
+          <p>Cada posición usa exactamente cuatro dedos adyacentes, uno por traste. Esto hace que las siete posiciones sean geométricamente predecibles: el dedo 1 siempre en el traste n, el dedo 4 en el traste n+3.</p>
+        </div>
+      </div>
+      <div>
+        <!-- Mode table in light section -->
+        <div style="background:var(--paper2);border:1px solid var(--paper3);border-radius:14px;padding:24px 20px;">
+          <p style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:16px;">Los 7 modos — Do mayor</p>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(160,92,32,.08);border:1.5px solid rgba(160,92,32,.22);border-radius:7px;">
+              <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--copper);min-width:22px;">I</div>
+              <div style="flex:1;font-family:var(--serif);font-size:15px;font-weight:700;color:var(--ink);">Jónico</div>
+              <div style="font-size:11px;color:var(--ink5);">C mayor</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(90,122,191,.06);border:1.5px solid rgba(90,122,191,.18);border-radius:7px;">
+              <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--subdom);min-width:22px;">II</div>
+              <div style="flex:1;font-family:var(--serif);font-size:15px;font-weight:700;color:var(--ink);">Dórico</div>
+              <div style="font-size:11px;color:var(--ink5);">D menor</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(90,122,191,.06);border:1.5px solid rgba(90,122,191,.18);border-radius:7px;">
+              <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--subdom);min-width:22px;">III</div>
+              <div style="flex:1;font-family:var(--serif);font-size:15px;font-weight:700;color:var(--ink);">Frigio</div>
+              <div style="font-size:11px;color:var(--ink5);">E menor</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(160,92,32,.05);border:1.5px solid rgba(160,92,32,.15);border-radius:7px;">
+              <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--copper);min-width:22px;">IV</div>
+              <div style="flex:1;font-family:var(--serif);font-size:15px;font-weight:700;color:var(--ink);">Lidio</div>
+              <div style="font-size:11px;color:var(--ink5);">F mayor</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(196,122,54,.08);border:1.5px solid rgba(196,122,54,.22);border-radius:7px;">
+              <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--copper-lt);min-width:22px;">V</div>
+              <div style="flex:1;font-family:var(--serif);font-size:15px;font-weight:700;color:var(--ink);">Mixolidio</div>
+              <div style="font-size:11px;color:var(--ink5);">G mayor</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(74,124,89,.06);border:1.5px solid rgba(74,124,89,.2);border-radius:7px;">
+              <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--relative);min-width:22px;">VI</div>
+              <div style="flex:1;font-family:var(--serif);font-size:15px;font-weight:700;color:var(--ink);">Eólico</div>
+              <div style="font-size:11px;color:var(--ink5);">A menor</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:rgba(122,74,191,.06);border:1.5px solid rgba(122,74,191,.18);border-radius:7px;">
+              <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:var(--dominant);min-width:22px;">VII</div>
+              <div style="flex:1;font-family:var(--serif);font-size:15px;font-weight:700;color:var(--ink);">Locrio</div>
+              <div style="font-size:11px;color:var(--ink5);">B disminuido</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 2: Posición y modo -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Posición y modo</span>
+    <h2 class="th-h2">Cada posición <em>es un modo</em></h2>
+    <p class="th-body">Esta es la conexión central entre posiciones y modos: cada una de las siete posiciones de digitación corresponde a uno de los siete modos de la escala mayor. Tocar la Posición 1 de Do mayor de C a C produce el modo Jónico (mayor). Tocar las mismas notas de D a D (Posición 2) produce Dórico. De E a E produce Frigio. De F a F produce Lidio. De G a G produce Mixolidio. De A a A produce Eólico (menor natural). De B a B produce Locrio.</p>
+    <p class="th-body">Las posiciones no son escalas separadas sino puntos de vista sobre las mismas siete notas desde distintos puntos de inicio. Esta distinción es crucial para evitar la confusión más común en el estudio de los modos: creer que Dórico requiere aprender un patrón diferente. No lo hace. Requiere iniciar la misma posición en un grado distinto y, sobre todo, tocarla sobre un contexto armónico que establezca el segundo grado como centro tonal.</p>
+    <p class="th-body">En la práctica guitarrística, el modo queda determinado por el acorde que suena debajo, no por el patrón que se toca encima. Si suena un Dm7 y el guitarrista toca las notas de Do mayor comenzando desde D, el oído escucha Dórico. Si suena un Cmaj7 con las mismas notas, escucha Jónico. El patrón de dedos es idéntico; el sonido del modo lo define la armonía.</p>
+
+    <!-- Interactive mode fretboard -->
+    <div style="margin:36px 0;">
+      <div class="mode-selector" id="mode-selector">
+        <button class="mode-btn active" data-mode="0">Jónico (Pos. 1)</button>
+        <button class="mode-btn" data-mode="1">Dórico (Pos. 2)</button>
+        <button class="mode-btn" data-mode="4">Mixolidio (Pos. 5)</button>
+      </div>
+      <div class="fretboard-wrap">
+        <svg id="mode-fretboard" width="620" height="148" viewBox="0 0 620 148" xmlns="http://www.w3.org/2000/svg" style="display:block;min-width:500px;"></svg>
+      </div>
+      <div id="mode-info" style="margin-top:12px;font-size:13px;color:rgba(250,246,240,.45);font-style:italic;line-height:1.6;"></div>
+    </div>
+
+    <div class="th-callout">
+      <div class="th-callout-label">El modo lo define el acorde, no la escala</div>
+      <p>Para escuchar Dórico no basta con iniciar en D. Hay que tocar sobre un acorde de Dm7 o Dm. La escala por sí sola es neutra: el modo nace de la relación entre la escala y el centro tonal que establece la armonía.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 3: 3NPS -->
+<section class="th-section">
+  <div class="th-inner">
+    <span class="th-label">Otra forma de mapear</span>
+    <h2 class="th-h2">Otra forma de mapear: <em>3NPS</em></h2>
+    <p class="th-body">Una alternativa a las posiciones de cuatro dedos es el sistema <strong>3 notas por cuerda</strong> (3NPS), que coloca exactamente tres notas en cada cuerda. Esto crea siete patrones geométricamente consistentes en todo el mástil y facilita las corridas de legato rápidas (secuencias de ligados ascendentes y descendentes). A diferencia de las posiciones de caja (que usan dos o tres notas por cuerda), los patrones 3NPS abarcan más trastes (cinco o seis) pero habilitan velocidades más altas y cambios de posición más fluidos.</p>
+    <p class="th-body">Muchos guitarristas de rock y metal (Paul Gilbert, John Petrucci, Guthrie Govan) usan el sistema 3NPS principalmente por sus ventajas de velocidad y claridad. En el contexto del legato, tres notas por cuerda permite ejecutar grupos de tres con un solo movimiento de la mano: dos ligados ascendentes o uno descendente y uno de tire. El resultado es una fluidez mecánica que las posiciones de caja no facilitan de la misma manera.</p>
+    <p class="th-body">La elección entre cajas de cuatro dedos y 3NPS depende del estilo y los objetivos. Las cajas son más compactas y se integran mejor con los acordes del sistema CAGED. El 3NPS favorece el fraseo horizontal a lo largo del mástil. La mayoría de los guitarristas terminan usando ambos sistemas según el contexto musical.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">3NPS en la práctica</div>
+      <p>Un patrón 3NPS de Do mayor en la cuerda de La: Do (traste 3), Re (traste 5), Mi (traste 7). Tres notas, tres trastes de separación, un dedo por traste. En la siguiente cuerda (Re): Fa (traste 3), Sol (traste 5), La (traste 7). El patrón se repite con ligeras variaciones por las cuerdas B y e.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 4: En la práctica -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">En la práctica</span>
+    <h2 class="th-h2">Memorizar vs. entender: <em>cuál aprenderlo</em></h2>
+    <p class="th-body">El camino más eficiente: dominar la Caja 1 de la pentatónica (5 notas) y luego añadir el 2.º y el 6.º grado para llegar a la escala mayor en la Posición 1. A continuación, aprender la Posición 6 (Eólico) porque comparte exactamente las mismas notas que la Posición 1 pero se inicia en La en lugar de Do. Estas dos posiciones cubren un porcentaje alto de toda la improvisación en guitarra.</p>
+    <p class="th-body">Las cinco posiciones restantes añaden versatilidad y acceso a todas las regiones del mástil. No son nuevas escalas: son el mismo mapa leído desde nuevos puntos de partida. Entender esa conexión los hace aprendibles en días en lugar de meses, porque cada nueva posición tiene una relación geométrica predecible con las adyacentes.</p>
+    <p class="th-body">El objetivo no es memorizar siete patrones como formas fijas sino entender la escala como un tejido continuo que cubre todo el instrumento. Las posiciones son ventanas sobre ese tejido: cada una revela una región del mástil, y juntas lo cubren por completo. Un guitarrista que entiende eso puede moverse entre posiciones con fluidez, en lugar de estar atrapado en una sola "caja."</p>
+    <div class="th-callout">
+      <div class="th-callout-label">El orden de estudio recomendado</div>
+      <p>1. Pentatónica menor Caja 1 (5 notas) · 2. Escala mayor Posición 1 (añade Re y La a la Caja 1) · 3. Eólico Posición 6 (mismo patrón, raíz en La) · 4. Conectar posiciones adyacentes · 5. Completar las siete posiciones.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER / NEXT -->
+<section class="th-next">
+  <span class="th-next-label">Navegar lecciones</span>
+  <h2 class="th-next-title">Sigue explorando</h2>
+  <p class="th-next-sub">Conocer las notas de la escala en el mástil es el mapa. Los arpegios te dicen cuáles de esas notas suenan mejor sobre cada acorde.</p>
+  <div class="th-next-btns">
+    <a href="/teoria/instrumento/arpegios" class="th-next-btn">Arpegios en el mástil →</a>
+    <a href="/teoria/instrumento/pentatonica" class="th-next-btn sec">← Las 5 posiciones de la pentatónica</a>
+  </div>
+  <div class="chapter-nav">
+    <a href="/teoria/instrumento/pentatonica" class="chapter-nav-item prev">
+      <span class="chapter-nav-dir">← Anterior</span>
+      <span class="chapter-nav-cap">Teoría en el Instrumento · 05</span>
+      <span class="chapter-nav-title">Las 5 posiciones de la pentatónica</span>
+    </a>
+    <a href="/teoria/instrumento/arpegios" class="chapter-nav-item">
+      <span class="chapter-nav-dir">Siguiente →</span>
+      <span class="chapter-nav-cap">Teoría en el Instrumento · 07</span>
+      <span class="chapter-nav-title">Arpegios en el mástil</span>
+    </a>
+  </div>
+</section>
+
+<script>
+// Progress bar
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('prog-bar').style.width = (h > 0 ? Math.round(window.scrollY / h * 100) : 0) + '%';
+});
+
+// Audio
+let synth = null;
+async function initAudio() {
+  if (synth) return;
+  await Tone.start();
+  const reverb = new Tone.Freeverb({ roomSize: 0.25, wet: 0.1 }).toDestination();
+  synth = new Tone.PolySynth(Tone.Synth, {
+    oscillator: { type: 'triangle' },
+    envelope: { attack: 0.008, decay: 0.4, sustain: 0.1, release: 1.8 },
+    volume: -10,
+  }).connect(reverb);
+}
+
+function midiToNote(midi) {
+  const pc = midi % 12, oct = Math.floor(midi / 12) - 1;
+  const names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  return names[pc] + oct;
+}
+
+// C major scale: intervals from C
+const CMAJ_INTERVALS = new Set([0, 2, 4, 5, 7, 9, 11]); // C D E F G A B
+const C_PC = 0;
+
+// Mode data: [modeIndex, startDegreePC, color, label, description]
+const MODES = [
+  { idx: 0, rootPC: 0,  color: '#a85a1e', label: 'Jónico (Pos. 1)',   startFret: 8,  desc: 'Posición 1 — inicia en C (Do) · Traste 8, 6.ª cuerda · Escala mayor pura · Sonido: luminoso, estable' },
+  { idx: 1, rootPC: 2,  color: '#5a7abf', label: 'Dórico (Pos. 2)',   startFret: 10, desc: 'Posición 2 — inicia en D (Re) · Traste 10, 6.ª cuerda · Menor con 6.ª mayor · Sonido: funk, jazz-rock' },
+  { idx: 4, rootPC: 7,  color: '#c47a36', label: 'Mixolidio (Pos. 5)', startFret: 3,  desc: 'Posición 5 — inicia en G (Sol) · Traste 3, 6.ª cuerda · Mayor con 7.ª menor · Sonido: blues, rock, folk' },
+];
+
+const OPEN_MIDI = [40, 45, 50, 55, 59, 64];
+let activeMode = 0;
+
+function buildModeFretboard(modeIdx) {
+  const mode = MODES.find(m => m.idx === modeIdx);
+  const svg = document.getElementById('mode-fretboard');
+  const FRETS = 10;
+  const STRINGS = 6;
+  const LEFT = 36;
+  const TOP = 20;
+  const FRET_W = 56;
+  const STRING_H = 18;
+  const W = LEFT + FRETS * FRET_W + 20;
+  const H = TOP + (STRINGS - 1) * STRING_H + 24;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('width', W);
+  svg.setAttribute('height', H);
+
+  // Show frets startFret to startFret+FRETS
+  const firstFret = mode.startFret;
+  let html = '';
+
+  // Fret numbers
+  for (let fi = 0; fi <= FRETS; fi++) {
+    const fret = firstFret + fi;
+    const x = LEFT + fi * FRET_W;
+    html += `<text x="${x}" y="${TOP - 6}" font-family="JetBrains Mono, monospace" font-size="9" fill="rgba(250,246,240,0.3)" text-anchor="middle">${fret}</text>`;
+  }
+
+  // Nut (if first fret == 0)
+  const nutStroke = firstFret === 0 ? 3 : 1;
+  html += `<line x1="${LEFT}" y1="${TOP}" x2="${LEFT}" y2="${TOP + (STRINGS-1)*STRING_H}" stroke="rgba(250,246,240,${firstFret === 0 ? '0.6' : '0.18'})" stroke-width="${nutStroke}"/>`;
+
+  // Fret lines
+  for (let fi = 1; fi <= FRETS; fi++) {
+    const x = LEFT + fi * FRET_W;
+    html += `<line x1="${x}" y1="${TOP}" x2="${x}" y2="${TOP + (STRINGS-1)*STRING_H}" stroke="rgba(250,246,240,0.12)" stroke-width="1"/>`;
+  }
+
+  // Strings
+  const stringThick = [1.8, 1.6, 1.4, 1.2, 1.0, 0.9];
+  for (let s = 0; s < STRINGS; s++) {
+    const y = TOP + s * STRING_H;
+    html += `<line x1="${LEFT}" y1="${y}" x2="${LEFT + FRETS * FRET_W}" y2="${y}" stroke="rgba(250,246,240,0.2)" stroke-width="${stringThick[s]}"/>`;
+  }
+
+  // Notes
+  for (let s = 0; s < STRINGS; s++) {
+    for (let fi = 0; fi <= FRETS; fi++) {
+      const fret = firstFret + fi;
+      const midi = OPEN_MIDI[s] + fret;
+      const pc = midi % 12;
+      if (!CMAJ_INTERVALS.has((pc - C_PC + 12) % 12)) continue;
+
+      const isRoot = pc === mode.rootPC;
+      const cx = LEFT + fi * FRET_W - FRET_W / 2;
+      const cy = TOP + s * STRING_H;
+
+      if (fi === 0) continue; // skip nut display for range views
+
+      const fillColor = isRoot ? mode.color : 'rgba(255,255,255,0.18)';
+      const r = isRoot ? 8 : 6;
+      html += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fillColor}" style="cursor:pointer" data-midi="${midi}" class="mode-note" opacity="${isRoot ? 1 : 0.8}"/>`;
+      if (isRoot) {
+        html += `<text x="${cx}" y="${cy + 3.5}" font-family="Inter, sans-serif" font-size="8" font-weight="700" fill="#fff" text-anchor="middle" pointer-events="none">R</text>`;
+      }
+    }
+  }
+
+  svg.innerHTML = html;
+  document.getElementById('mode-info').textContent = mode.desc;
+
+  svg.querySelectorAll('.mode-note').forEach(el => {
+    el.addEventListener('click', async () => {
+      await initAudio();
+      const midi = parseInt(el.dataset.midi);
+      synth.triggerAttackRelease(midiToNote(midi), '4n', Tone.now() + 0.05);
+      const orig = el.getAttribute('fill');
+      el.setAttribute('fill', '#fff');
+      setTimeout(() => el.setAttribute('fill', orig), 280);
+    });
+  });
+}
+
+// Mode selector
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeMode = parseInt(btn.dataset.mode);
+    buildModeFretboard(activeMode);
+  });
+});
+
+buildModeFretboard(0);
+</script>
+
+<footer style="background:var(--ink2);border-top:1px solid rgba(255,255,255,.06);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+  <div style="font-size:12px;color:var(--ink5);">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div style="display:flex;gap:20px;">
+    <a href="/privacidad" style="font-size:12px;color:var(--ink5);text-decoration:none;">Aviso de Privacidad</a>
+    <a href="/terminos" style="font-size:12px;color:var(--ink5);text-decoration:none;">Términos y Condiciones</a>
+    <a href="/cookies" style="font-size:12px;color:var(--ink5);text-decoration:none;">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Swing y groove</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<style>
+:root{
+  --paper:#f4ece0;--paper2:#ebe1d2;--paper3:#ddd1bd;--paper4:#c8b99f;--paper5:#b8a890;
+  --copper:#a85a1e;--copper-lt:#c47a36;--copper-dk:#7a3e10;
+  --ink:#1c1410;--ink2:#2e2418;--ink3:#5a4a38;--ink4:#8a7a64;--ink5:#a09080;
+  --tonic:#a05c20;--subdom:#5a7abf;--dominant:#7a4abf;--relative:#4a7c59;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{font-family:var(--mono);font-size:.52em;font-weight:400;color:var(--ink4);letter-spacing:0;margin-left:2px;}
+.nav-link{padding:0 16px;height:60px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+.th-progress{position:fixed;top:56px;left:0;right:0;height:2px;background:rgba(160,92,32,.12);z-index:99;}
+.th-progress-bar{height:100%;background:var(--copper);width:0%;transition:width .08s linear;}
+
+.th-breadcrumb{background:var(--paper2);border-bottom:1px solid var(--paper4);padding:0 48px;height:40px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink5);}
+.th-breadcrumb a{color:var(--ink5);text-decoration:none;}
+.th-breadcrumb a:hover{color:var(--copper);}
+.th-breadcrumb .sep{opacity:.5;}
+.th-breadcrumb .current{color:var(--ink3);font-weight:500;}
+
+.th-hero{background:#13100c;padding:110px 48px 90px;text-align:center;overflow:hidden;}
+.th-chapter{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:28px;display:flex;align-items:center;justify-content:center;gap:14px;}
+.th-chapter::before,.th-chapter::after{content:'';display:block;height:1px;width:48px;background:var(--copper-lt);opacity:.35;}
+.th-title{font-family:var(--serif);font-size:clamp(54px,7.5vw,92px);font-weight:700;line-height:.92;letter-spacing:-.025em;color:var(--paper);margin-bottom:28px;}
+.th-title em{font-style:italic;color:var(--copper-lt);}
+.th-lead{font-family:var(--serif);font-size:clamp(17px,2vw,22px);font-style:italic;color:rgba(250,246,240,.58);max-width:580px;margin:0 auto 44px;line-height:1.65;}
+.th-scroll-hint{font-size:11px;color:rgba(250,246,240,.22);letter-spacing:.14em;text-transform:uppercase;}
+
+.th-section{padding:88px 48px;}
+.th-section.dark{background:#13100c;}
+.th-inner{max-width:1080px;margin:0 auto;}
+.th-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;display:block;}
+.th-section.dark .th-label{color:var(--copper-lt);}
+.th-h2{font-family:var(--serif);font-size:clamp(34px,4.5vw,56px);font-weight:700;line-height:1.02;letter-spacing:-.025em;color:var(--ink);margin-bottom:22px;}
+.th-section.dark .th-h2{color:var(--paper);}
+.th-body{font-size:15px;color:var(--ink3);line-height:1.85;max-width:640px;}
+.th-body+.th-body{margin-top:14px;}
+.th-section.dark .th-body{color:rgba(250,246,240,.58);}
+.th-body strong{color:var(--ink2);font-weight:600;}
+.th-section.dark .th-body strong{color:rgba(244,236,224,.92);}
+.th-split{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;}
+.th-callout{border-left:3px solid var(--copper);border-radius:0 8px 8px 0;padding:16px 20px;margin:28px 0;background:rgba(160,92,32,.07);}
+.th-section.dark .th-callout{background:rgba(255,255,255,.05);border-left-color:var(--copper-lt);}
+.th-callout-label{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);margin-bottom:7px;}
+.th-section.dark .th-callout-label{color:var(--copper-lt);}
+.th-callout p{font-size:14px;color:var(--ink3);line-height:1.65;}
+.th-section.dark .th-callout p{color:rgba(250,246,240,.58);}
+
+/* ── METRONOME (shared) ── */
+.metro-section{padding:88px 48px;background:var(--paper2);}
+.metro-card{background:#1a1410;border-radius:20px;padding:48px;max-width:800px;margin:0 auto;}
+.metro-title{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--paper);margin-bottom:32px;text-align:center;letter-spacing:-.01em;}
+.metro-sig-pills{display:flex;gap:10px;justify-content:center;margin-bottom:32px;}
+.metro-sig-pill{font-family:var(--mono);font-size:14px;font-weight:600;padding:9px 24px;border-radius:24px;border:2px solid rgba(255,255,255,.12);background:transparent;color:rgba(250,246,240,.45);cursor:pointer;transition:all .18s;}
+.metro-sig-pill:hover{border-color:var(--copper-lt);color:rgba(250,246,240,.8);}
+.metro-sig-pill.active{background:var(--copper);border-color:var(--copper-dk);color:#fff;}
+.metro-bpm-row{display:flex;align-items:center;gap:18px;justify-content:center;margin-bottom:36px;}
+.metro-bpm-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(250,246,240,.3);}
+.metro-bpm-val{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--copper-lt);min-width:48px;text-align:right;}
+.metro-slider{-webkit-appearance:none;appearance:none;width:220px;height:4px;border-radius:2px;background:rgba(255,255,255,.12);outline:none;cursor:pointer;}
+.metro-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--copper-lt);cursor:pointer;box-shadow:0 0 0 3px rgba(196,122,54,.2);}
+.metro-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--copper-lt);cursor:pointer;border:none;}
+.metro-beats-row{display:flex;gap:14px;justify-content:center;margin-bottom:28px;flex-wrap:wrap;}
+.metro-beat{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.12);transition:transform .1s,box-shadow .1s,background .1s,border-color .1s;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:600;color:rgba(250,246,240,.3);}
+.metro-beat.accent{width:54px;height:54px;font-size:13px;background:rgba(168,90,30,.15);border-color:rgba(196,122,54,.35);color:var(--copper-lt);}
+.metro-beat.sub-accent{background:rgba(168,90,30,.07);border-color:rgba(196,122,54,.2);color:rgba(196,122,54,.6);}
+.metro-beat.active{transform:scale(1.18);box-shadow:0 0 22px rgba(196,122,54,.45);background:rgba(196,122,54,.28);border-color:var(--copper-lt);color:#fff;}
+.metro-beat.accent.active{transform:scale(1.22);box-shadow:0 0 32px rgba(196,122,54,.6);background:rgba(196,122,54,.45);}
+.metro-play-btn{display:block;margin:0 auto 24px;background:var(--copper);color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;padding:13px 48px;border-radius:10px;border:none;cursor:pointer;transition:background .18s,transform .1s;}
+.metro-play-btn:hover{background:var(--copper-lt);transform:translateY(-1px);}
+.metro-play-btn:active{transform:translateY(0);}
+.metro-desc{text-align:center;font-size:13px;color:rgba(250,246,240,.38);line-height:1.6;font-style:italic;}
+
+/* ── NEXT ── */
+.th-next{background:var(--ink);padding:88px 48px;text-align:center;}
+.th-next-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink5);margin-bottom:18px;display:block;}
+.th-next-title{font-family:var(--serif);font-size:clamp(36px,5vw,56px);font-weight:700;color:var(--paper);margin-bottom:10px;letter-spacing:-.02em;}
+.th-next-sub{font-size:14px;color:var(--ink4);margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.th-next-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.th-next-btn{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:13px;font-weight:600;padding:13px 28px;border-radius:8px;text-decoration:none;transition:background .2s;}
+.th-next-btn:hover{background:var(--copper-dk);}
+.th-next-btn.sec{background:transparent;color:rgba(250,246,240,.5);border:1px solid rgba(255,255,255,.12);}
+.th-next-btn.sec:hover{color:var(--paper);border-color:rgba(255,255,255,.3);}
+.th-next-btn.disabled{background:transparent;color:rgba(250,246,240,.22);border:1px solid rgba(255,255,255,.07);cursor:default;pointer-events:none;}
+
+/* ── CHAPTER NAV ── */
+.chapter-nav{display:flex;gap:0;border-top:1px solid rgba(255,255,255,.06);margin-top:64px;}
+.chapter-nav-item{flex:1;padding:28px 24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;transition:background .18s;}
+.chapter-nav-item:hover{background:rgba(255,255,255,.03);}
+.chapter-nav-item.prev{border-right:1px solid rgba(255,255,255,.06);}
+.chapter-nav-item.disabled{cursor:default;pointer-events:none;opacity:.35;}
+.chapter-nav-dir{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(250,246,240,.25);}
+.chapter-nav-cap{font-size:11px;color:rgba(250,246,240,.25);}
+.chapter-nav-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--paper);}
+
+/* ── SWING VISUAL ── */
+.swing-visual{background:#1a1410;border-radius:20px;padding:40px;max-width:760px;margin:0 auto;}
+.swing-visual-title{font-family:var(--serif);font-size:17px;color:var(--paper);margin-bottom:28px;text-align:center;}
+.swing-row-wrap{margin-bottom:24px;}
+.swing-row-label{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(250,246,240,.3);margin-bottom:10px;}
+.swing-cells{display:flex;gap:4px;align-items:stretch;height:52px;}
+.swing-cell{border-radius:7px;border:2px solid transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:700;transition:transform .1s,box-shadow .12s,opacity .12s;color:var(--copper-lt);}
+.swing-cell:hover{opacity:.8;}
+.swing-cell.active-flash{transform:scale(1.1);box-shadow:0 0 16px rgba(196,122,54,.5);}
+.swing-cell.beat-on{background:rgba(168,90,30,.28);border-color:rgba(196,122,54,.55);}
+.swing-cell.offbeat-on{background:rgba(196,122,54,.12);border-color:rgba(196,122,54,.3);color:rgba(196,122,54,.6);}
+.swing-cell.triplet-on{background:rgba(90,122,191,.22);border-color:rgba(90,122,191,.5);color:#7a9fdf;}
+.swing-cell.triplet-off{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.06);color:rgba(250,246,240,.15);cursor:default;}
+.swing-triplet-row{display:flex;gap:4px;height:52px;align-items:stretch;}
+.swing-triplet-group{display:flex;gap:3px;flex:1;}
+.swing-triplet-cell{flex:1;border-radius:6px;border:2px solid transparent;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;font-weight:700;cursor:pointer;transition:transform .1s,box-shadow .12s;}
+.swing-triplet-cell:hover{opacity:.8;}
+.swing-triplet-cell.active-flash{transform:scale(1.1);box-shadow:0 0 14px rgba(90,122,191,.5);}
+.swing-triplet-cell.trip-on{background:rgba(90,122,191,.22);border-color:rgba(90,122,191,.5);color:#7a9fdf;}
+.swing-triplet-cell.trip-off{background:rgba(255,255,255,.03);border-color:rgba(255,255,255,.06);color:rgba(250,246,240,.12);cursor:default;}
+.swing-legend{display:flex;gap:18px;justify-content:center;margin-top:16px;flex-wrap:wrap;}
+.swing-legend-item{display:flex;align-items:center;gap:7px;font-size:11px;color:rgba(250,246,240,.4);}
+.swing-legend-dot{width:10px;height:10px;border-radius:3px;}
+.swing-play-row{display:flex;gap:12px;justify-content:center;margin-top:20px;flex-wrap:wrap;}
+.swing-play-btn{background:var(--copper);color:#fff;font-family:var(--sans);font-size:13px;font-weight:600;padding:11px 28px;border-radius:8px;border:none;cursor:pointer;transition:background .18s,transform .1s;}
+.swing-play-btn:hover{background:var(--copper-lt);transform:translateY(-1px);}
+.swing-play-btn:active{transform:translateY(0);}
+
+@media(max-width:768px){
+  nav{padding:0 16px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav>*{flex-shrink:0;}
+  .th-breadcrumb{padding:0 20px;}
+  .th-hero{padding:80px 20px 64px;}
+  .th-section{padding:64px 20px;}
+  .th-split{grid-template-columns:1fr;gap:40px;}
+  .metro-section{padding:64px 20px;}
+  .metro-card{padding:28px 18px;}
+  .th-next{padding:64px 20px;}
+  .chapter-nav{flex-direction:column;}
+  .chapter-nav-item.prev{border-right:none;border-bottom:1px solid rgba(255,255,255,.06);}
+  .swing-visual{padding:24px 14px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link active">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<div class="th-progress"><div class="th-progress-bar" id="prog-bar"></div></div>
+
+<div class="th-breadcrumb">
+  <a href="/teoria">Teoría</a>
+  <span class="sep">›</span>
+  <a href="/teoria">Ritmo y Sonido</a>
+  <span class="sep">›</span>
+  <span class="current">Swing y groove</span>
+</div>
+
+<!-- HERO -->
+<section class="th-hero">
+  <div class="th-chapter">Ritmo y Sonido · 07</div>
+  <h1 class="th-title">Swing <em>y groove</em></h1>
+  <p class="th-lead">La diferencia entre ejecutar figuras correctamente y que la música haga querer moverse.</p>
+  <div class="th-scroll-hint">↓ leer</div>
+</section>
+
+<!-- SECCIÓN 1: Straight vs swing -->
+<section class="th-section">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">Straight vs. swing</span>
+        <h2 class="th-h2">Las mismas notas, <em>sensaciones distintas</em></h2>
+        <p class="th-body">Las <strong>corcheas rectas</strong> están igualmente espaciadas: cada una dura la mitad de un tiempo. Las <strong>corcheas con swing</strong> usan un patrón largo-corto: la primera dura aproximadamente 2/3 de un tiempo y la segunda aproximadamente 1/3. Esta no es una proporción fija: varía con el tempo y el estilo.</p>
+        <p class="th-body">A tempos lentos, la proporción de swing se acerca a 3:1 (feel de tresillos). A tempos rápidos, se aproxima a 1:1 (casi rectas). La indicación "swing" en la notación de jazz significa "interpreta las corcheas con este feel", sin especificar una proporción exacta porque ninguna proporción exacta sonaría bien a todos los tempos.</p>
+        <p class="th-body">El swing no es un error de ejecución ni una imprecisión: es una convención interpretativa con reglas propias. Una corchea con swing "corta" no llega tarde al tiempo siguiente, sino que llega justo a tiempo porque el intérprete ya anticipó la siguiente nota fuerte. El swing es precisión con otra forma.</p>
+        <div class="th-callout">
+          <div class="th-callout-label">Para escuchar</div>
+          <p>Compara "Four" de Miles Davis a 200 BPM (casi recto) con "All Blues" del mismo disco (swing moderado y claramente ternario). Las corcheas hacen cosas distintas.</p>
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--paper2);border:1px solid var(--paper3);border-radius:14px;padding:28px 24px;">
+          <p style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:20px;">Proporción de swing por tempo</p>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div>
+              <p style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink5);margin-bottom:7px;">Lento (~60 BPM) — casi 3:1</p>
+              <div style="display:flex;gap:4px;height:24px;">
+                <div style="flex:3;background:rgba(160,92,32,.22);border:2px solid rgba(160,92,32,.4);border-radius:5px;"></div>
+                <div style="flex:1;background:rgba(196,122,54,.14);border:2px solid rgba(196,122,54,.3);border-radius:5px;"></div>
+                <div style="flex:3;background:rgba(160,92,32,.22);border:2px solid rgba(160,92,32,.4);border-radius:5px;"></div>
+                <div style="flex:1;background:rgba(196,122,54,.14);border:2px solid rgba(196,122,54,.3);border-radius:5px;"></div>
+              </div>
+            </div>
+            <div>
+              <p style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink5);margin-bottom:7px;">Medio (~120 BPM) — 2:1</p>
+              <div style="display:flex;gap:4px;height:24px;">
+                <div style="flex:2;background:rgba(160,92,32,.22);border:2px solid rgba(160,92,32,.4);border-radius:5px;"></div>
+                <div style="flex:1;background:rgba(196,122,54,.14);border:2px solid rgba(196,122,54,.3);border-radius:5px;"></div>
+                <div style="flex:2;background:rgba(160,92,32,.22);border:2px solid rgba(160,92,32,.4);border-radius:5px;"></div>
+                <div style="flex:1;background:rgba(196,122,54,.14);border:2px solid rgba(196,122,54,.3);border-radius:5px;"></div>
+              </div>
+            </div>
+            <div>
+              <p style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink5);margin-bottom:7px;">Rápido (~200 BPM) — casi 1:1</p>
+              <div style="display:flex;gap:4px;height:24px;">
+                <div style="flex:1.2;background:rgba(160,92,32,.22);border:2px solid rgba(160,92,32,.4);border-radius:5px;"></div>
+                <div style="flex:1;background:rgba(196,122,54,.14);border:2px solid rgba(196,122,54,.3);border-radius:5px;"></div>
+                <div style="flex:1.2;background:rgba(160,92,32,.22);border:2px solid rgba(160,92,32,.4);border-radius:5px;"></div>
+                <div style="flex:1;background:rgba(196,122,54,.14);border:2px solid rgba(196,122,54,.3);border-radius:5px;"></div>
+              </div>
+            </div>
+          </div>
+          <p style="font-size:12px;color:var(--ink5);margin-top:16px;font-style:italic;line-height:1.6;">La caja ancha es la corchea larga; la estrecha es la corta. A mayor tempo, más se igualan.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 2: El pocket -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">El pocket</span>
+    <h2 class="th-h2">Locked in: <em>cuando el tiempo es una habitación</em></h2>
+    <p class="th-body">"The pocket" es el término que usan los músicos para la cualidad de un groove que se siente asentado, inevitable y profundamente satisfactorio. Emerge de las relaciones de micro-timing entre los músicos, en particular entre el bajo y el bombo de la batería, y entre el bajista y el guitarrista rítmico.</p>
+    <p class="th-body">Tocar "in the pocket" frecuentemente significa tocar <strong>laid-back</strong> (ligeramente detrás del beat, como en el soul y el R&amp;B) o <strong>pushed</strong> (ligeramente adelante, como en cierto rock). Las dos son desviaciones intencionales de la precisión metrónómica que crean caracteres emocionales distintos. Ninguna es imprecisión no controlada.</p>
+    <p class="th-body">El pocket no existe en una sola voz: es una propiedad colectiva. Un baterista puede tener un timing sólido por sí solo y perder el pocket con un bajista cuyo laid-back no coincide con el suyo. El pocket surge cuando todos los miembros del ritmo se referencian mutuamente, no solo al metrónomo interno de cada uno.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">Referencia</div>
+      <p>Clyde Stubblefield (batería de James Brown), Bernard Purdie (sesionista de soul y jazz) y Charlie Watts (Rolling Stones) son tres ejemplos de artistas cuyo laid-back es tan preciso que se puede medir en milisegundos y es consistente canción a canción.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN INTERACTIVA: Straight vs Swing -->
+<section class="metro-section">
+  <div style="max-width:1080px;margin:0 auto;">
+    <span class="th-label" style="display:block;text-align:center;margin-bottom:32px;">Interactivo</span>
+    <div class="swing-visual">
+      <div class="swing-visual-title">Corcheas rectas vs. swing — toca y escucha</div>
+
+      <div class="swing-row-wrap">
+        <div class="swing-row-label">Rectas — 8 corcheas iguales</div>
+        <div class="swing-cells" id="row-straight"></div>
+      </div>
+
+      <div class="swing-row-wrap">
+        <div class="swing-row-label">Swing 2:1 — largo / corto por tiempo</div>
+        <div class="swing-cells" id="row-swing"></div>
+      </div>
+
+      <div class="swing-row-wrap">
+        <div class="swing-row-label">Interpretación de tresillo — notas en 1.ª y 3.ª del tresillo</div>
+        <div class="swing-triplet-row" id="row-triplet"></div>
+      </div>
+
+      <div class="swing-legend">
+        <div class="swing-legend-item">
+          <div class="swing-legend-dot" style="background:rgba(168,90,30,.4);border:1.5px solid rgba(196,122,54,.7);"></div>
+          Tiempo (beat)
+        </div>
+        <div class="swing-legend-item">
+          <div class="swing-legend-dot" style="background:rgba(196,122,54,.18);border:1.5px solid rgba(196,122,54,.4);"></div>
+          Contratiempo (off-beat)
+        </div>
+        <div class="swing-legend-item">
+          <div class="swing-legend-dot" style="background:rgba(90,122,191,.25);border:1.5px solid rgba(90,122,191,.55);"></div>
+          Tresillo activo
+        </div>
+      </div>
+
+      <div class="swing-play-row">
+        <button class="swing-play-btn" id="btn-straight">Reproducir rectas</button>
+        <button class="swing-play-btn" id="btn-swing" style="background:var(--ink3);">Reproducir swing</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 3: Laid-back y pushed -->
+<section class="th-section">
+  <div class="th-inner">
+    <span class="th-label">Laid-back y pushed</span>
+    <h2 class="th-h2">Detrás del beat, <em>delante del beat</em></h2>
+    <p class="th-body">El timing <strong>laid-back</strong> coloca las notas ligeramente después del clic del metrónomo. Esto crea una sensación relajada y pesada, común en el soul, el blues y la producción de hip-hop. La nota "llega tarde" pero nunca se siente fuera de tiempo porque el músico mantiene una relación constante con el beat de referencia.</p>
+    <p class="th-body">El timing <strong>pushed</strong> coloca las notas ligeramente antes del beat, creando urgencia y impulso hacia adelante. Es común en cierto rock y en música latina donde la energía se construye con anticipación. Clyde Stubblefield era conocido por su timing "in the pocket" en el sentido laid-back; los bateristas de rock clásico como John Bonham tendían más a empujar.</p>
+    <p class="th-body">Ninguno de los dos es timing "incorrecto". Los dos requieren un sentido muy desarrollado de dónde está el beat para desviarse de él de forma controlada. Un músico que toca laid-back sin saber que lo está haciendo tiene un problema de ritmo; uno que lo hace intencionalmente con consistencia tiene un recurso expresivo. La diferencia está en la consciencia y en la consistencia.</p>
+  </div>
+</section>
+
+<!-- SECCIÓN 4: Cómo desarrollarlo -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Cómo desarrollarlo</span>
+    <h2 class="th-h2">Practicar el feel: <em>sin metrónomo y con metrónomo</em></h2>
+    <p class="th-body">Practica con metrónomo para internalizar la posición exacta del beat. Practica sin él para desarrollar el feel natural. Luego practica con el metrónomo sonando solo en los tiempos 2 y 4 (el contratiempo o <strong>backbeat</strong>). Esto te obliga a mantener el pulso internamente durante medio compás cada vez, lo que entrena el reloj interno más rápido que un clic constante.</p>
+    <p class="th-body">Una etapa adicional: practica con el metrónomo en tiempo 1 solamente (una vez por compás). Mantener el groove durante tres tiempos sin guía externa y aterrizar en el 1 con precisión es una de las pruebas más claras del reloj interno. Al principio el compás se "alarga" o "acorta" sin darse cuenta; con el tiempo la sensación se estabiliza.</p>
+    <p class="th-body">La etapa final no tiene sustituto: tocar con otros músicos que tienen buen groove. Ninguna práctica en solitario reemplaza la experiencia de bloquearse con una sección rítmica que ya está in the pocket. El pocket se contagia, y también se puede perder si el contexto no lo sostiene. Por eso los músicos de sesión hablan del pocket como algo que se "encuentra" en la sala, no solo en el instrumento propio.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">Ejercicio</div>
+      <p>Pon el metrónomo en tiempos 2 y 4 a 60 BPM. Toca un groove o un rasgueo en 4/4 durante 4 compases sin perder el pulso. Si lo pierdes, no pares: intenta reencontrarlo sin detener la música.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER / NEXT -->
+<section class="th-next">
+  <span class="th-next-label">Navegar capítulos</span>
+  <h2 class="th-next-title">Sigue explorando</h2>
+  <p class="th-next-sub">El ritmo tiene su feel. Ahora el sonido tiene su física: frecuencia, timbre y armónicos.</p>
+  <div class="th-next-btns">
+    <a href="/teoria/sonido" class="th-next-btn">El sonido →</a>
+    <a href="/teoria/ritmo/poliritmia" class="th-next-btn sec">← Poliritmia y hemiola</a>
+  </div>
+  <div class="chapter-nav">
+    <a href="/teoria/ritmo/poliritmia" class="chapter-nav-item prev">
+      <span class="chapter-nav-dir">← Anterior</span>
+      <span class="chapter-nav-cap">Ritmo y Sonido · 06</span>
+      <span class="chapter-nav-title">Poliritmia y hemiola</span>
+    </a>
+    <a href="/teoria/sonido" class="chapter-nav-item">
+      <span class="chapter-nav-dir">Siguiente →</span>
+      <span class="chapter-nav-cap">Ritmo y Sonido · 08</span>
+      <span class="chapter-nav-title">El sonido — frecuencia, timbre y armónicos</span>
+    </a>
+  </div>
+</section>
+
+<script>
+// ── Progress bar ──────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('prog-bar').style.width = (h > 0 ? Math.round(window.scrollY / h * 100) : 0) + '%';
+});
+
+// ── Swing Visual ──────────────────────────────────────────────────────────────
+let swingSynth = null;
+function getSwingSynth() {
+  if (!swingSynth) {
+    swingSynth = new Tone.Synth({
+      oscillator: { type: 'triangle' },
+      envelope: { attack: 0.001, decay: 0.09, sustain: 0, release: 0.04 }
+    }).toDestination();
+    swingSynth.volume.value = -8;
+  }
+  return swingSynth;
+}
+
+async function playSwingNote(pitch) {
+  await Tone.start();
+  getSwingSynth().triggerAttackRelease(pitch, '16n');
+}
+
+function flashCell(el) {
+  el.classList.add('active-flash');
+  setTimeout(() => el.classList.remove('active-flash'), 160);
+}
+
+// Row straight: 8 equal cells
+const rowStraight = document.getElementById('row-straight');
+for (let i = 0; i < 8; i++) {
+  const cell = document.createElement('div');
+  cell.className = 'swing-cell ' + (i % 2 === 0 ? 'beat-on' : 'offbeat-on');
+  cell.style.flex = '1';
+  cell.textContent = i % 2 === 0 ? (Math.floor(i/2)+1) : '+';
+  cell.addEventListener('click', () => {
+    playSwingNote(i % 2 === 0 ? 'C5' : 'G4');
+    flashCell(cell);
+  });
+  rowStraight.appendChild(cell);
+}
+
+// Row swing: 4 pairs of wide(2) + narrow(1)
+const rowSwing = document.getElementById('row-swing');
+for (let beat = 0; beat < 4; beat++) {
+  const wide = document.createElement('div');
+  wide.className = 'swing-cell beat-on';
+  wide.style.flex = '2';
+  wide.textContent = beat + 1;
+  wide.addEventListener('click', () => { playSwingNote('C5'); flashCell(wide); });
+  rowSwing.appendChild(wide);
+
+  const narrow = document.createElement('div');
+  narrow.className = 'swing-cell offbeat-on';
+  narrow.style.flex = '1';
+  narrow.textContent = '+';
+  narrow.addEventListener('click', () => { playSwingNote('G4'); flashCell(narrow); });
+  rowSwing.appendChild(narrow);
+}
+
+// Row triplet: 4 groups of 3, notes on 1st and 3rd of each triplet
+const rowTriplet = document.getElementById('row-triplet');
+for (let beat = 0; beat < 4; beat++) {
+  const group = document.createElement('div');
+  group.className = 'swing-triplet-group';
+
+  for (let sub = 0; sub < 3; sub++) {
+    const cell = document.createElement('div');
+    const isOn = sub === 0 || sub === 2;
+    cell.className = 'swing-triplet-cell ' + (isOn ? 'trip-on' : 'trip-off');
+    cell.textContent = sub === 0 ? (beat+1) : (sub === 2 ? '+' : '·');
+    if (isOn) {
+      const pitch = sub === 0 ? 'C5' : 'G4';
+      cell.addEventListener('click', () => { playSwingNote(pitch); flashCell(cell); });
+    }
+    group.appendChild(cell);
+  }
+  rowTriplet.appendChild(group);
+}
+
+// ── Play buttons ──────────────────────────────────────────────────────────────
+let straightSeq = null, swingSeq = null;
+let straightPlaying = false, swingPlaying = false;
+
+const btnStraight = document.getElementById('btn-straight');
+const btnSwingBtn = document.getElementById('btn-swing');
+
+function stopAll() {
+  if (straightSeq) { straightSeq.dispose(); straightSeq = null; }
+  if (swingSeq) { swingSeq.dispose(); swingSeq = null; }
+  Tone.getTransport().stop();
+  Tone.getTransport().cancel();
+  straightPlaying = false;
+  swingPlaying = false;
+  btnStraight.textContent = 'Reproducir rectas';
+  btnStraight.style.background = '';
+  btnSwingBtn.textContent = 'Reproducir swing';
+  btnSwingBtn.style.background = 'var(--ink3)';
+}
+
+btnStraight.addEventListener('click', async () => {
+  await Tone.start();
+  if (straightPlaying) { stopAll(); return; }
+  stopAll();
+  straightPlaying = true;
+  btnStraight.textContent = 'Detener';
+  btnStraight.style.background = 'var(--copper-dk)';
+
+  Tone.getTransport().bpm.value = 100;
+  const cells = Array.from(rowStraight.children);
+
+  straightSeq = new Tone.Sequence((time, i) => {
+    getSwingSynth().triggerAttackRelease(i % 2 === 0 ? 'C5' : 'G4', '32n', time);
+    Tone.getDraw().schedule(() => flashCell(cells[i]), time);
+  }, [0,1,2,3,4,5,6,7], '8n');
+
+  straightSeq.start(0);
+  Tone.getTransport().start();
+});
+
+btnSwingBtn.addEventListener('click', async () => {
+  await Tone.start();
+  if (swingPlaying) { stopAll(); return; }
+  stopAll();
+  swingPlaying = true;
+  btnSwingBtn.textContent = 'Detener';
+  btnSwingBtn.style.background = 'var(--copper-dk)';
+
+  Tone.getTransport().bpm.value = 100;
+
+  // Swing cells: beat cells are wide (on "8t" positions 0,3 of each triplet group)
+  // Use triplet 8th notes: each beat = 2 triplet 8ths (pos 0 and 2), rest is pos 1
+  // Sequence over 12 steps (4 beats * 3 triplet subdivisions)
+  // Notes: steps 0,2,3,5,6,8,9,11 -> beats on 0,3,6,9; off-beats on 2,5,8,11
+  const swingCells = Array.from(rowSwing.children);
+  // swingCells: [beat0, off0, beat1, off1, beat2, off2, beat3, off3]
+  const stepToCell = {0:0, 2:1, 3:2, 5:3, 6:4, 7:5, 9:6, 11:7};
+  const activeSteps = [0,2,3,5,6,9,11]; // actually [0,2,3,5,6,8,9,11] but mapped
+
+  // simpler: 8 steps with swing timing using manually scheduled notes
+  // Use Tone.Part with swing offset
+  const beatDur = 60 / 100; // seconds per beat at 100 BPM
+  const tripUnit = beatDur / 3;
+  // Notes at: beat+0, beat+2/3 for each of 4 beats
+  const notes = [];
+  for (let b = 0; b < 4; b++) {
+    notes.push({ time: b * beatDur, cell: b*2, pitch: 'C5' });
+    notes.push({ time: b * beatDur + tripUnit * 2, cell: b*2+1, pitch: 'G4' });
+  }
+  // loop: schedule 2 bars
+  const loopLen = 4 * beatDur;
+
+  swingSeq = new Tone.Part((time, val) => {
+    getSwingSynth().triggerAttackRelease(val.pitch, '32n', time);
+    Tone.getDraw().schedule(() => flashCell(swingCells[val.cell]), time);
+  }, notes);
+
+  swingSeq.loop = true;
+  swingSeq.loopEnd = loopLen;
+  swingSeq.start(0);
+  Tone.getTransport().start();
+});
+</script>
+
+<footer style="background:var(--ink2);border-top:1px solid rgba(255,255,255,.06);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+  <div style="font-size:12px;color:var(--ink5);">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div style="display:flex;gap:20px;">
+    <a href="/privacidad" style="font-size:12px;color:var(--ink5);text-decoration:none;">Aviso de Privacidad</a>
+    <a href="/terminos" style="font-size:12px;color:var(--ink5);text-decoration:none;">Términos y Condiciones</a>
+    <a href="/cookies" style="font-size:12px;color:var(--ink5);text-decoration:none;">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

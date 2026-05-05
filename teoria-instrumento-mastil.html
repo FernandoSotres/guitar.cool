@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · El mástil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<style>
+:root{
+  --paper:#f4ece0;--paper2:#ebe1d2;--paper3:#ddd1bd;--paper4:#c8b99f;--paper5:#b8a890;
+  --copper:#a85a1e;--copper-lt:#c47a36;--copper-dk:#7a3e10;
+  --ink:#1c1410;--ink2:#2e2418;--ink3:#5a4a38;--ink4:#8a7a64;--ink5:#a09080;
+  --tonic:#a05c20;--subdom:#5a7abf;--dominant:#7a4abf;--relative:#4a7c59;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{font-family:var(--mono);font-size:.52em;font-weight:400;color:var(--ink4);letter-spacing:0;margin-left:2px;}
+.nav-link{padding:0 16px;height:60px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+.th-progress{position:fixed;top:56px;left:0;right:0;height:2px;background:rgba(160,92,32,.12);z-index:99;}
+.th-progress-bar{height:100%;background:var(--copper);width:0%;transition:width .08s linear;}
+
+.th-breadcrumb{background:var(--paper2);border-bottom:1px solid var(--paper4);padding:0 48px;height:40px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink5);}
+.th-breadcrumb a{color:var(--ink5);text-decoration:none;}
+.th-breadcrumb a:hover{color:var(--copper);}
+.th-breadcrumb .sep{opacity:.5;}
+.th-breadcrumb .current{color:var(--ink3);font-weight:500;}
+
+.th-hero{background:#13100c;padding:110px 48px 90px;text-align:center;overflow:hidden;}
+.th-chapter{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:28px;display:flex;align-items:center;justify-content:center;gap:14px;}
+.th-chapter::before,.th-chapter::after{content:'';display:block;height:1px;width:48px;background:var(--copper-lt);opacity:.35;}
+.th-title{font-family:var(--serif);font-size:clamp(54px,7.5vw,92px);font-weight:700;line-height:.92;letter-spacing:-.025em;color:var(--paper);margin-bottom:28px;}
+.th-title em{font-style:italic;color:var(--copper-lt);}
+.th-lead{font-family:var(--serif);font-size:clamp(17px,2vw,22px);font-style:italic;color:rgba(250,246,240,.58);max-width:580px;margin:0 auto 44px;line-height:1.65;}
+.th-scroll-hint{font-size:11px;color:rgba(250,246,240,.22);letter-spacing:.14em;text-transform:uppercase;}
+
+.th-section{padding:88px 48px;}
+.th-section.dark{background:#13100c;}
+.th-inner{max-width:1080px;margin:0 auto;}
+.th-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;display:block;}
+.th-section.dark .th-label{color:var(--copper-lt);}
+.th-h2{font-family:var(--serif);font-size:clamp(34px,4.5vw,56px);font-weight:700;line-height:1.02;letter-spacing:-.025em;color:var(--ink);margin-bottom:22px;}
+.th-section.dark .th-h2{color:var(--paper);}
+.th-body{font-size:15px;color:var(--ink3);line-height:1.85;max-width:640px;}
+.th-body+.th-body{margin-top:14px;}
+.th-section.dark .th-body{color:rgba(250,246,240,.58);}
+.th-body strong{color:var(--ink2);font-weight:600;}
+.th-section.dark .th-body strong{color:rgba(244,236,224,.92);}
+.th-split{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;}
+.th-callout{border-left:3px solid var(--copper);border-radius:0 8px 8px 0;padding:16px 20px;margin:28px 0;background:rgba(160,92,32,.07);}
+.th-section.dark .th-callout{background:rgba(255,255,255,.05);border-left-color:var(--copper-lt);}
+.th-callout-label{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);margin-bottom:7px;}
+.th-section.dark .th-callout-label{color:var(--copper-lt);}
+.th-callout p{font-size:14px;color:var(--ink3);line-height:1.65;}
+.th-section.dark .th-callout p{color:rgba(250,246,240,.58);}
+
+/* ── FRETBOARD ── */
+.fretboard-wrap{overflow-x:auto;padding-bottom:8px;}
+.fretboard-outer{background:#1a1410;border-radius:16px;padding:32px 28px 28px;}
+.fretboard-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:20px;text-align:center;}
+.fb-string-labels{display:flex;flex-direction:column;gap:0;margin-right:10px;}
+.fb-layout{display:flex;align-items:stretch;}
+.fb-strings-col{display:flex;flex-direction:column;justify-content:space-around;padding-right:8px;padding-top:16px;padding-bottom:4px;}
+.fb-string-name{font-family:var(--mono);font-size:11px;font-weight:600;color:rgba(250,246,240,.4);line-height:1;text-align:right;}
+.fretboard-hint{font-size:12px;color:rgba(250,246,240,.3);text-align:center;margin-top:18px;font-style:italic;line-height:1.6;}
+
+/* ── NEXT ── */
+.th-next{background:var(--ink);padding:88px 48px;text-align:center;}
+.th-next-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink5);margin-bottom:18px;display:block;}
+.th-next-title{font-family:var(--serif);font-size:clamp(36px,5vw,56px);font-weight:700;color:var(--paper);margin-bottom:10px;letter-spacing:-.02em;}
+.th-next-sub{font-size:14px;color:var(--ink4);margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.th-next-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.th-next-btn{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:13px;font-weight:600;padding:13px 28px;border-radius:8px;text-decoration:none;transition:background .2s;}
+.th-next-btn:hover{background:var(--copper-dk);}
+.th-next-btn.sec{background:transparent;color:rgba(250,246,240,.5);border:1px solid rgba(255,255,255,.12);}
+.th-next-btn.sec:hover{color:var(--paper);border-color:rgba(255,255,255,.3);}
+.th-next-btn.disabled{background:transparent;color:rgba(250,246,240,.22);border:1px solid rgba(255,255,255,.07);cursor:default;pointer-events:none;}
+
+/* ── CHAPTER NAV ── */
+.chapter-nav{display:flex;gap:0;border-top:1px solid rgba(255,255,255,.06);margin-top:64px;}
+.chapter-nav-item{flex:1;padding:28px 24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;transition:background .18s;}
+.chapter-nav-item:hover{background:rgba(255,255,255,.03);}
+.chapter-nav-item.prev{border-right:1px solid rgba(255,255,255,.06);}
+.chapter-nav-item.disabled{cursor:default;pointer-events:none;opacity:.35;}
+.chapter-nav-dir{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(250,246,240,.25);}
+.chapter-nav-cap{font-size:11px;color:rgba(250,246,240,.25);}
+.chapter-nav-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--paper);}
+
+@media(max-width:768px){
+  nav{padding:0 16px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav>*{flex-shrink:0;}
+  .th-breadcrumb{padding:0 20px;}
+  .th-hero{padding:80px 20px 64px;}
+  .th-section{padding:64px 20px;}
+  .th-split{grid-template-columns:1fr;gap:40px;}
+  .th-next{padding:64px 20px;}
+  .chapter-nav{flex-direction:column;}
+  .chapter-nav-item.prev{border-right:none;border-bottom:1px solid rgba(255,255,255,.06);}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link active">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<div class="th-progress"><div class="th-progress-bar" id="prog-bar"></div></div>
+
+<div class="th-breadcrumb">
+  <a href="/teoria">Teoría</a>
+  <span class="sep">›</span>
+  <a href="/teoria/instrumento">Teoría en el Instrumento</a>
+  <span class="sep">›</span>
+  <span class="current">El mástil</span>
+</div>
+
+<!-- HERO -->
+<section class="th-hero">
+  <div class="th-chapter">Teoría en el Instrumento · 01</div>
+  <h1 class="th-title">El <em>mástil</em></h1>
+  <p class="th-lead">Cómo está organizado el diapasón y dónde vive cada nota en las seis cuerdas.</p>
+  <div class="th-scroll-hint">↓ leer</div>
+</section>
+
+<!-- SECCIÓN 1: Las cuerdas -->
+<section class="th-section">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">Las cuerdas</span>
+        <h2 class="th-h2">Seis cuerdas,<br><em>seis trayectorias cromáticas</em></h2>
+        <p class="th-body">La guitarra estándar tiene 6 cuerdas afinadas, de la más grave a la más aguda: <strong>E2</strong>, <strong>A2</strong>, <strong>D3</strong>, <strong>G3</strong>, <strong>B3</strong>, <strong>E4</strong>. Cada cuerda es una escala cromática completa: la cuerda al aire es la nota base, el traste 1 sube un semitono, el traste 2 sube dos semitonos, y así sucesivamente. En el traste 12, cada cuerda reproduce su nota al aire una octava más arriba.</p>
+        <p class="th-body">Esto significa que todas las cuerdas recorren la misma escala cromática de 12 notas, solo que comienzan en distintas alturas. El diapasón es, en esencia, seis escalas cromáticas paralelas desfasadas entre sí por intervalos de cuarta justa, con una excepción: el par <strong>G3</strong>-<strong>B3</strong> está separado por una tercera mayor.</p>
+        <p class="th-body">Esa estructura de cuartas hace que los mismos patrones de escala y acorde se repitan de cuerda en cuerda con un desplazamiento predecible. Un guitarrista que entiende esto puede trasladar cualquier patrón a otra cuerda sin memorizarlo de nuevo, simplemente ajustando la posición.</p>
+        <div class="th-callout">
+          <div class="th-callout-label">Por qué cuartas</div>
+          <p>La afinación en cuartas permite que el mismo acorde barre solo cuatro trastes en cualquier posición. Facilita la cobertura del diapasón con un mínimo de desplazamiento de la mano izquierda.</p>
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--paper2);border:1px solid var(--paper3);border-radius:14px;padding:28px 24px;">
+          <p style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:16px;">Afinación estándar</p>
+          <div id="tuning-display"></div>
+          <p style="font-size:12px;color:var(--ink5);margin-top:16px;font-style:italic;line-height:1.6;">Cada flecha indica un intervalo de cuarta justa, excepto la G-B que es una tercera mayor.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 2: Los trastes -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Los trastes</span>
+    <h2 class="th-h2">12 trastes,<br><em>12 semitonos, una octava</em></h2>
+    <p class="th-body">Cada traste sube la afinación de una cuerda exactamente un semitono. Moverse de cualquier traste al siguiente es un intervalo de semitono. Moverse 2 trastes equivale a un tono entero. Moverse 5 trastes equivale a una cuarta justa. Moverse 7 trastes equivale a una quinta justa.</p>
+    <p class="th-body">Este sistema uniforme tiene una consecuencia de gran valor práctico: cualquier forma (acorde, patrón de escala, frase melódica) puede transponerse simplemente desplazando toda la figura hacia arriba o abajo del diapasón. En un piano, el mismo acorde tiene una digitación diferente en cada tonalidad. En la guitarra, la forma del acorde es idéntica en todas las tonalidades, solo cambia de posición.</p>
+    <p class="th-body">Esto convierte al diapasón en un sistema de transposición visual. Un guitarrista que aprende una progresión en <strong>E mayor</strong> puede tocarla en <strong>G mayor</strong> simplemente moviendo la mano tres trastes hacia arriba, sin cambiar ningún dedo. Esta portabilidad de patrones es una ventaja estructural de la guitarra frente a instrumentos de teclado.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">Intervalos clave en trastes</div>
+      <p>1 traste = semitono · 2 trastes = tono · 5 trastes = cuarta justa · 7 trastes = quinta justa · 12 trastes = octava.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN INTERACTIVA: Diapasón completo -->
+<section class="th-section" style="padding-top:0;">
+  <div class="th-inner">
+    <span class="th-label" style="margin-bottom:24px;">Interactivo</span>
+    <div class="fretboard-outer">
+      <div class="fretboard-label">Diapasón completo · haz clic en cualquier nota para escucharla</div>
+      <div class="fretboard-wrap">
+        <canvas id="fb-canvas" style="display:block;cursor:pointer;"></canvas>
+      </div>
+      <p class="fretboard-hint">Círculos cobre = notas naturales (A B C D E F G) · Puntos grises = accidentales · Doble círculo = nota E en todas las cuerdas · Haz clic para escuchar</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 3: Los patrones -->
+<section class="th-section">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">Los patrones</span>
+        <h2 class="th-h2">El mismo patrón<br><em>en seis posiciones distintas</em></h2>
+        <p class="th-body">Dado que la afinación es casi enteramente de cuartas, el mismo patrón de notas se repite en cada par de cuerdas con un desplazamiento predecible. El patrón de escala mayor que comienza en la cuerda <strong>E2</strong> grave es casi idéntico en la cuerda <strong>A2</strong>, desplazado una cuerda hacia abajo y dos trastes hacia adelante.</p>
+        <p class="th-body">La excepción es el par <strong>G3</strong>-<strong>B3</strong>, afinado a una tercera mayor en lugar de una cuarta. Esto genera un desplazamiento de 2 trastes en los patrones que cruzan entre estas dos cuerdas. Los diagramas de escala no pueden simplemente copiarse de un grupo de cuerdas al siguiente sin ajustar este salto.</p>
+        <p class="th-body">Cada guitarrista debe interiorizar esta excepción. Es la razón principal por la que los principiantes encuentran desconcertantes los diagramas de escala cuando los crean manualmente, y es también el primer concepto que separa a quien memoriza formas de quien comprende el sistema.</p>
+      </div>
+      <div>
+        <div style="background:var(--paper2);border:1px solid var(--paper3);border-radius:14px;padding:28px 24px;">
+          <p style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:16px;">Intervalos entre cuerdas adyacentes</p>
+          <div id="string-intervals"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 4: La octava -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">La octava</span>
+    <h2 class="th-h2">Traste 12:<br><em>el mástil se repite</em></h2>
+    <p class="th-body">El traste 12 está afinado exactamente una octava por encima de la cuerda al aire. Esto significa que el patrón completo de 12 trastes de cada cuerda se repite de forma idéntica a partir del traste 12, una octava más arriba. La guitarra dispone así de dos rangos de octava completos por cuerda.</p>
+    <p class="th-body">La mayoría de los guitarristas usa los trastes 0-12 para la mayor parte del repertorio. La técnica avanzada extiende el juego hacia el registro superior (trastes 12-19 y más allá). Aprender la posición de cada nota en los primeros 12 trastes equivale a conocer todo el diapasón, porque los 12 siguientes son idénticos una octava más alto.</p>
+    <p class="th-body">Este principio de repetición es una herramienta de estudio. En lugar de aprender 12 posiciones nuevas para la mitad superior del mástil, el guitarrista reconoce las mismas formas en una octava distinta. La memoria visual del patrón se extiende de forma automática a todo el instrumento.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">Consecuencia práctica</div>
+      <p>Aprende bien los primeros 12 trastes y habrás aprendido el instrumento completo. El resto del mástil es una copia exacta una octava más aguda.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER / NEXT -->
+<section class="th-next">
+  <span class="th-next-label">Navegar lecciones</span>
+  <h2 class="th-next-title">Siguiente: el sistema CAGED</h2>
+  <p class="th-next-sub">Con el mástil mapeado, el siguiente paso es entender las cinco formas que organizan cualquier acorde mayor a lo largo de todo el diapasón.</p>
+  <div class="th-next-btns">
+    <a href="/teoria/instrumento/caged" class="th-next-btn">El sistema CAGED →</a>
+    <a href="/teoria" class="th-next-btn sec">← Volver a Teoría</a>
+  </div>
+  <div class="chapter-nav">
+    <div class="chapter-nav-item prev disabled">
+      <span class="chapter-nav-dir">← Anterior</span>
+      <span class="chapter-nav-cap">Inicio de sección</span>
+      <span class="chapter-nav-title">Teoría en el Instrumento</span>
+    </div>
+    <a href="/teoria/instrumento/caged" class="chapter-nav-item">
+      <span class="chapter-nav-dir">Siguiente →</span>
+      <span class="chapter-nav-cap">02</span>
+      <span class="chapter-nav-title">El sistema CAGED</span>
+    </a>
+  </div>
+</section>
+
+<script>
+// ── Progress bar ──────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('prog-bar').style.width = (h > 0 ? Math.round(window.scrollY / h * 100) : 0) + '%';
+});
+
+// ── Tuning display ────────────────────────────────────────────────────────────
+const STRINGS = [
+  { name: 'E2', midi: 40, color: 'var(--copper)' },
+  { name: 'A2', midi: 45, color: 'var(--copper)' },
+  { name: 'D3', midi: 50, color: 'var(--copper)' },
+  { name: 'G3', midi: 55, color: 'var(--copper)' },
+  { name: 'B3', midi: 59, color: '#c47a36' },
+  { name: 'E4', midi: 64, color: 'var(--copper)' },
+];
+const INTERVALS = ['4ª justa', '4ª justa', '4ª justa', '3ª mayor ⚠', '4ª justa'];
+
+function buildTuningDisplay() {
+  const el = document.getElementById('tuning-display');
+  STRINGS.forEach((s, i) => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:10px;margin-bottom:6px;';
+    const badge = document.createElement('div');
+    badge.style.cssText = `background:rgba(160,92,32,.12);border:1.5px solid rgba(160,92,32,.3);border-radius:8px;padding:6px 14px;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--copper);min-width:52px;text-align:center;cursor:pointer;transition:background .15s;`;
+    badge.textContent = s.name;
+    badge.title = 'Escuchar ' + s.name;
+    badge.addEventListener('click', async () => {
+      await initAudio();
+      playNote(s.midi);
+      badge.style.background = 'rgba(160,92,32,.28)';
+      setTimeout(() => badge.style.background = 'rgba(160,92,32,.12)', 400);
+    });
+    row.appendChild(badge);
+    if (i < INTERVALS.length) {
+      const arrow = document.createElement('div');
+      arrow.style.cssText = 'font-size:11px;color:var(--ink5);flex:1;';
+      arrow.textContent = '↓ ' + INTERVALS[i];
+      if (i === 3) arrow.style.color = 'rgba(168,90,30,.7)';
+      row.appendChild(arrow);
+    }
+    el.appendChild(row);
+  });
+}
+
+// ── String intervals panel ────────────────────────────────────────────────────
+function buildStringIntervals() {
+  const el = document.getElementById('string-intervals');
+  const pairs = [
+    { from: 'E2', to: 'A2', interval: 'Cuarta justa (5 semitonos)', normal: true },
+    { from: 'A2', to: 'D3', interval: 'Cuarta justa (5 semitonos)', normal: true },
+    { from: 'D3', to: 'G3', interval: 'Cuarta justa (5 semitonos)', normal: true },
+    { from: 'G3', to: 'B3', interval: 'Tercera mayor (4 semitonos)', normal: false },
+    { from: 'B3', to: 'E4', interval: 'Cuarta justa (5 semitonos)', normal: true },
+  ];
+  pairs.forEach(p => {
+    const row = document.createElement('div');
+    row.style.cssText = `display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;margin-bottom:6px;background:${p.normal ? 'rgba(160,92,32,.06)' : 'rgba(168,90,30,.14)'};border:1px solid ${p.normal ? 'rgba(160,92,32,.15)' : 'rgba(168,90,30,.35)'};`;
+    row.innerHTML = `
+      <span style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--copper);min-width:32px;">${p.from}</span>
+      <span style="font-size:12px;color:var(--ink5);">→</span>
+      <span style="font-family:var(--mono);font-size:12px;font-weight:700;color:var(--copper);min-width:32px;">${p.to}</span>
+      <span style="font-size:12px;color:${p.normal ? 'var(--ink4)' : 'rgba(168,90,30,.9)'};flex:1;">${p.interval}${p.normal ? '' : ' ← excepción'}</span>
+    `;
+    el.appendChild(row);
+  });
+}
+
+// ── Audio ─────────────────────────────────────────────────────────────────────
+let synth = null;
+async function initAudio() {
+  if (synth) return;
+  await Tone.start();
+  const reverb = new Tone.Freeverb({ roomSize: 0.28, wet: 0.12 }).toDestination();
+  const comp = new Tone.Compressor({ threshold: -22, ratio: 4 }).connect(reverb);
+  synth = new Tone.PolySynth(Tone.Synth, {
+    oscillator: { type: 'triangle' },
+    envelope: { attack: 0.008, decay: 0.6, sustain: 0.1, release: 2.8 },
+    volume: -8,
+  }).connect(comp);
+}
+
+function midiToNoteName(midi) {
+  const pc = midi % 12, oct = Math.floor(midi / 12) - 1;
+  const names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  return names[pc] + oct;
+}
+
+function playNote(midi) {
+  if (!synth) return;
+  synth.triggerAttackRelease(midiToNoteName(midi), '2n', Tone.now() + 0.05);
+}
+
+// ── Fretboard canvas ──────────────────────────────────────────────────────────
+const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const NATURALS = new Set([0, 2, 4, 5, 7, 9, 11]); // C D E F G A B
+const STRING_OPEN_MIDI = [40, 45, 50, 55, 59, 64]; // E2 A2 D3 G3 B3 E4
+const STRING_LABELS = ['E2', 'A2', 'D3', 'G3', 'B3', 'e1'];
+
+const FRET_COUNT = 12;
+const STRING_COUNT = 6;
+const CELL_W = 58;
+const CELL_H = 36;
+const LEFT_PAD = 36;
+const TOP_PAD = 28;
+const NUT_W = 6;
+const BOTTOM_PAD = 14;
+
+const canvas = document.getElementById('fb-canvas');
+const canvasW = LEFT_PAD + NUT_W + FRET_COUNT * CELL_W + 20;
+const canvasH = TOP_PAD + (STRING_COUNT - 1) * CELL_H + BOTTOM_PAD;
+canvas.width = canvasW;
+canvas.height = canvasH;
+canvas.style.width = canvasW + 'px';
+canvas.style.height = canvasH + 'px';
+
+function stringY(s) { return TOP_PAD + s * CELL_H; }
+function fretX(f) { return LEFT_PAD + NUT_W + f * CELL_W; }
+function noteX(f) { return fretX(f) - CELL_W / 2; }
+
+function drawFretboard() {
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvasW, canvasH);
+
+  // Background
+  ctx.fillStyle = '#1a1410';
+  ctx.fillRect(0, 0, canvasW, canvasH);
+
+  // Fret markers (dots) on frets 3, 5, 7, 9, 12
+  const markers = [3, 5, 7, 9];
+  markers.forEach(f => {
+    ctx.beginPath();
+    const mx = fretX(f) - CELL_W / 2;
+    const my = TOP_PAD + (STRING_COUNT - 1) * CELL_H / 2;
+    ctx.arc(mx, my, 5, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,.08)';
+    ctx.fill();
+  });
+  // Double dot at 12
+  [TOP_PAD + CELL_H, TOP_PAD + 3 * CELL_H].forEach(my => {
+    ctx.beginPath();
+    ctx.arc(fretX(12) - CELL_W / 2, my, 5, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,.08)';
+    ctx.fill();
+  });
+
+  // Nut
+  ctx.fillStyle = '#c8b99f';
+  ctx.fillRect(LEFT_PAD, TOP_PAD - 2, NUT_W, (STRING_COUNT - 1) * CELL_H + 4);
+
+  // Fret lines
+  for (let f = 1; f <= FRET_COUNT; f++) {
+    ctx.beginPath();
+    ctx.moveTo(fretX(f), TOP_PAD);
+    ctx.lineTo(fretX(f), TOP_PAD + (STRING_COUNT - 1) * CELL_H);
+    ctx.strokeStyle = 'rgba(255,255,255,.14)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  // String lines
+  for (let s = 0; s < STRING_COUNT; s++) {
+    ctx.beginPath();
+    ctx.moveTo(LEFT_PAD + NUT_W, stringY(s));
+    ctx.lineTo(fretX(FRET_COUNT), stringY(s));
+    const thick = 1 + (STRING_COUNT - 1 - s) * 0.3;
+    ctx.strokeStyle = 'rgba(200,180,140,.55)';
+    ctx.lineWidth = thick;
+    ctx.stroke();
+  }
+
+  // String labels (left)
+  ctx.font = '600 10px "JetBrains Mono", monospace';
+  ctx.textAlign = 'right';
+  for (let s = 0; s < STRING_COUNT; s++) {
+    ctx.fillStyle = 'rgba(250,246,240,.35)';
+    ctx.fillText(STRING_LABELS[s], LEFT_PAD - 4, stringY(s) + 4);
+  }
+
+  // Fret numbers (top)
+  ctx.font = '400 10px "JetBrains Mono", monospace';
+  ctx.textAlign = 'center';
+  for (let f = 0; f <= FRET_COUNT; f++) {
+    const x = f === 0 ? LEFT_PAD + NUT_W / 2 : fretX(f) - CELL_W / 2;
+    ctx.fillStyle = 'rgba(250,246,240,.18)';
+    ctx.fillText(f, x, 14);
+  }
+
+  // Note dots
+  for (let s = 0; s < STRING_COUNT; s++) {
+    for (let f = 0; f <= FRET_COUNT; f++) {
+      const midi = STRING_OPEN_MIDI[s] + f;
+      const pc = midi % 12;
+      const isNatural = NATURALS.has(pc);
+      const isE = pc === 4; // E note
+      const x = f === 0 ? LEFT_PAD + NUT_W / 2 : fretX(f) - CELL_W / 2;
+      const y = stringY(s);
+
+      if (isNatural) {
+        const r = isE ? 14 : 12;
+        // Outer ring for E notes
+        if (isE) {
+          ctx.beginPath();
+          ctx.arc(x, y, r + 2, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(196,122,54,.22)';
+          ctx.fill();
+        }
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fillStyle = '#a85a1e';
+        ctx.fill();
+        // Note name
+        ctx.font = `700 ${isE ? 10 : 9}px "JetBrains Mono", monospace`;
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#f4ece0';
+        ctx.fillText(NOTE_NAMES[pc], x, y + 3);
+      } else {
+        // Accidental: small gray dot
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,255,255,.12)';
+        ctx.fill();
+      }
+    }
+  }
+}
+
+// ── Hit test ──────────────────────────────────────────────────────────────────
+function getFretFromX(x) {
+  if (x < LEFT_PAD + NUT_W) return 0;
+  const relX = x - LEFT_PAD - NUT_W;
+  return Math.round(relX / CELL_W);
+}
+function getStringFromY(y) {
+  return Math.round((y - TOP_PAD) / CELL_H);
+}
+
+canvas.addEventListener('click', async e => {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const cx = (e.clientX - rect.left) * scaleX;
+  const cy = (e.clientY - rect.top) * scaleY;
+
+  const f = getFretFromX(cx);
+  const s = getStringFromY(cy);
+
+  if (f < 0 || f > FRET_COUNT || s < 0 || s >= STRING_COUNT) return;
+
+  const midi = STRING_OPEN_MIDI[s] + f;
+  await initAudio();
+  playNote(midi);
+
+  // Flash the note
+  const ctx = canvas.getContext('2d');
+  const x = f === 0 ? LEFT_PAD + NUT_W / 2 : fretX(f) - CELL_W / 2;
+  const y = stringY(s);
+  ctx.beginPath();
+  ctx.arc(x, y, 16, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(196,122,54,.55)';
+  ctx.fill();
+  setTimeout(drawFretboard, 350);
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+buildTuningDisplay();
+buildStringIntervals();
+drawFretboard();
+</script>
+
+<footer style="background:var(--ink2);border-top:1px solid rgba(255,255,255,.06);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+  <div style="font-size:12px;color:var(--ink5);">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div style="display:flex;gap:20px;">
+    <a href="/privacidad" style="font-size:12px;color:var(--ink5);text-decoration:none;">Aviso de Privacidad</a>
+    <a href="/terminos" style="font-size:12px;color:var(--ink5);text-decoration:none;">Términos y Condiciones</a>
+    <a href="/cookies" style="font-size:12px;color:var(--ink5);text-decoration:none;">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

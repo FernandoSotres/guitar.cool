@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Las 5 posiciones de la pentatónica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<style>
+:root{
+  --paper:#f4ece0;--paper2:#ebe1d2;--paper3:#ddd1bd;--paper4:#c8b99f;--paper5:#b8a890;
+  --copper:#a85a1e;--copper-lt:#c47a36;--copper-dk:#7a3e10;
+  --ink:#1c1410;--ink2:#2e2418;--ink3:#5a4a38;--ink4:#8a7a64;--ink5:#a09080;
+  --tonic:#a05c20;--subdom:#5a7abf;--dominant:#7a4abf;--relative:#4a7c59;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{font-family:var(--mono);font-size:.52em;font-weight:400;color:var(--ink4);letter-spacing:0;margin-left:2px;}
+.nav-link{padding:0 16px;height:60px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+.th-progress{position:fixed;top:56px;left:0;right:0;height:2px;background:rgba(160,92,32,.12);z-index:99;}
+.th-progress-bar{height:100%;background:var(--copper);width:0%;transition:width .08s linear;}
+
+.th-breadcrumb{background:var(--paper2);border-bottom:1px solid var(--paper4);padding:0 48px;height:40px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink5);}
+.th-breadcrumb a{color:var(--ink5);text-decoration:none;}
+.th-breadcrumb a:hover{color:var(--copper);}
+.th-breadcrumb .sep{opacity:.5;}
+.th-breadcrumb .current{color:var(--ink3);font-weight:500;}
+
+.th-hero{background:#13100c;padding:110px 48px 90px;text-align:center;overflow:hidden;}
+.th-chapter{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:28px;display:flex;align-items:center;justify-content:center;gap:14px;}
+.th-chapter::before,.th-chapter::after{content:'';display:block;height:1px;width:48px;background:var(--copper-lt);opacity:.35;}
+.th-title{font-family:var(--serif);font-size:clamp(54px,7.5vw,92px);font-weight:700;line-height:.92;letter-spacing:-.025em;color:var(--paper);margin-bottom:28px;}
+.th-title em{font-style:italic;color:var(--copper-lt);}
+.th-lead{font-family:var(--serif);font-size:clamp(17px,2vw,22px);font-style:italic;color:rgba(250,246,240,.58);max-width:580px;margin:0 auto 44px;line-height:1.65;}
+.th-scroll-hint{font-size:11px;color:rgba(250,246,240,.22);letter-spacing:.14em;text-transform:uppercase;}
+
+.th-section{padding:88px 48px;}
+.th-section.dark{background:#13100c;}
+.th-inner{max-width:1080px;margin:0 auto;}
+.th-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;display:block;}
+.th-section.dark .th-label{color:var(--copper-lt);}
+.th-h2{font-family:var(--serif);font-size:clamp(34px,4.5vw,56px);font-weight:700;line-height:1.02;letter-spacing:-.025em;color:var(--ink);margin-bottom:22px;}
+.th-section.dark .th-h2{color:var(--paper);}
+.th-body{font-size:15px;color:var(--ink3);line-height:1.85;max-width:640px;}
+.th-body+.th-body{margin-top:14px;}
+.th-section.dark .th-body{color:rgba(250,246,240,.58);}
+.th-body strong{color:var(--ink2);font-weight:600;}
+.th-section.dark .th-body strong{color:rgba(244,236,224,.92);}
+.th-split{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;}
+.th-callout{border-left:3px solid var(--copper);border-radius:0 8px 8px 0;padding:16px 20px;margin:28px 0;background:rgba(160,92,32,.07);}
+.th-section.dark .th-callout{background:rgba(255,255,255,.05);border-left-color:var(--copper-lt);}
+.th-callout-label{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);margin-bottom:7px;}
+.th-section.dark .th-callout-label{color:var(--copper-lt);}
+.th-callout p{font-size:14px;color:var(--ink3);line-height:1.65;}
+.th-section.dark .th-callout p{color:rgba(250,246,240,.58);}
+
+/* ── NEXT ── */
+.th-next{background:var(--ink);padding:88px 48px;text-align:center;}
+.th-next-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink5);margin-bottom:18px;display:block;}
+.th-next-title{font-family:var(--serif);font-size:clamp(36px,5vw,56px);font-weight:700;color:var(--paper);margin-bottom:10px;letter-spacing:-.02em;}
+.th-next-sub{font-size:14px;color:var(--ink4);margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.th-next-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.th-next-btn{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:13px;font-weight:600;padding:13px 28px;border-radius:8px;text-decoration:none;transition:background .2s;}
+.th-next-btn:hover{background:var(--copper-dk);}
+.th-next-btn.sec{background:transparent;color:rgba(250,246,240,.5);border:1px solid rgba(255,255,255,.12);}
+.th-next-btn.sec:hover{color:var(--paper);border-color:rgba(255,255,255,.3);}
+
+/* ── CHAPTER NAV ── */
+.chapter-nav{display:flex;gap:0;border-top:1px solid rgba(255,255,255,.06);margin-top:64px;}
+.chapter-nav-item{flex:1;padding:28px 24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;transition:background .18s;}
+.chapter-nav-item:hover{background:rgba(255,255,255,.03);}
+.chapter-nav-item.prev{border-right:1px solid rgba(255,255,255,.06);}
+.chapter-nav-dir{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(250,246,240,.25);}
+.chapter-nav-cap{font-size:11px;color:rgba(250,246,240,.25);}
+.chapter-nav-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--paper);}
+
+/* ── FRETBOARD ── */
+.fretboard-wrap{overflow-x:auto;margin:32px 0;}
+.fretboard-legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;}
+.fb-legend-item{display:flex;align-items:center;gap:7px;font-size:12px;color:rgba(250,246,240,.5);}
+.fb-legend-dot{width:12px;height:12px;border-radius:50%;}
+
+@media(max-width:768px){
+  nav{padding:0 16px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav>*{flex-shrink:0;}
+  .th-breadcrumb{padding:0 20px;}
+  .th-hero{padding:80px 20px 64px;}
+  .th-section{padding:64px 20px;}
+  .th-split{grid-template-columns:1fr;gap:40px;}
+  .th-next{padding:64px 20px;}
+  .chapter-nav{flex-direction:column;}
+  .chapter-nav-item.prev{border-right:none;border-bottom:1px solid rgba(255,255,255,.06);}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link active">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<div class="th-progress"><div class="th-progress-bar" id="prog-bar"></div></div>
+
+<div class="th-breadcrumb">
+  <a href="/teoria">Teoría</a>
+  <span class="sep">›</span>
+  <a href="/teoria/instrumento">Teoría en el Instrumento</a>
+  <span class="sep">›</span>
+  <span class="current">Las 5 posiciones de la pentatónica</span>
+</div>
+
+<!-- HERO -->
+<section class="th-hero">
+  <div class="th-chapter">Teoría en el Instrumento · 05</div>
+  <h1 class="th-title">Las 5 posiciones de<br><em>la pentatónica</em></h1>
+  <p class="th-lead">La escala más usada en rock, blues y folk, colocada en todo el mástil en cinco posiciones conectadas.</p>
+  <div class="th-scroll-hint">↓ leer</div>
+</section>
+
+<!-- SECCIÓN 1 -->
+<section class="th-section">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">La escala pentatónica</span>
+        <h2 class="th-h2">Cinco notas: <em>el vocabulario universal del rock</em></h2>
+        <p class="th-body">La <strong>escala pentatónica menor</strong> contiene 5 notas: raíz, tercera menor, cuarta justa, quinta justa y séptima menor. En La menor: A, C, D, E, G. Es la escala más común en el rock, blues, country y folk porque la ausencia del 2.º y 6.º grados elimina los intervalos más disonantes, haciendo que casi cualquier combinación de notas suene consonante.</p>
+        <p class="th-body">La <strong>escala de blues</strong> añade una nota a la pentatónica menor: la quinta disminuida (nota blue, también llamada tritono). Esa sola nota añade la tensión característica del blues sin comprometer la consonancia del resto de la escala. Ambas escalas funcionan directamente sobre contextos de acorde dominante séptima y menor.</p>
+        <p class="th-body">Su simplicidad explica su universalidad: con cinco notas se puede improvisar sobre una progresión en La menor sin que ninguna suene "fuera." Eso la convierte en el punto de entrada ideal para el guitarrista que comienza a improvisar, y en el lenguaje base de miles de solos de guitarra en la historia del rock.</p>
+        <div class="th-callout">
+          <div class="th-callout-label">La escala de blues</div>
+          <p>Pentatónica menor + b5: A – C – D – E♭ – E – G. La nota E♭ es la "nota blue," la fuente del sonido característico del blues cuando se llega a ella por deslizamiento o con vibrato.</p>
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--paper2);border:1px solid var(--paper3);border-radius:14px;padding:28px 24px;">
+          <p style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:18px;">La menor pentatónica — intervalos</p>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(160,92,32,.12);border:1.5px solid rgba(160,92,32,.3);border-radius:8px;">
+              <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--copper);min-width:28px;">1</div>
+              <div style="flex:1;font-family:var(--serif);font-size:16px;font-weight:700;color:var(--ink);">A</div>
+              <div style="font-size:11px;color:var(--ink5);">Raíz</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(160,92,32,.06);border:1.5px solid rgba(160,92,32,.15);border-radius:8px;">
+              <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--ink5);min-width:28px;">b3</div>
+              <div style="flex:1;font-family:var(--serif);font-size:16px;font-weight:700;color:var(--ink);">C</div>
+              <div style="font-size:11px;color:var(--ink5);">Tercera menor</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(160,92,32,.06);border:1.5px solid rgba(160,92,32,.15);border-radius:8px;">
+              <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--ink5);min-width:28px;">4</div>
+              <div style="flex:1;font-family:var(--serif);font-size:16px;font-weight:700;color:var(--ink);">D</div>
+              <div style="font-size:11px;color:var(--ink5);">Cuarta justa</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(160,92,32,.06);border:1.5px solid rgba(160,92,32,.15);border-radius:8px;">
+              <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--ink5);min-width:28px;">5</div>
+              <div style="flex:1;font-family:var(--serif);font-size:16px;font-weight:700;color:var(--ink);">E</div>
+              <div style="font-size:11px;color:var(--ink5);">Quinta justa</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(160,92,32,.06);border:1.5px solid rgba(160,92,32,.15);border-radius:8px;">
+              <div style="font-family:var(--mono);font-size:11px;font-weight:700;color:var(--ink5);min-width:28px;">b7</div>
+              <div style="flex:1;font-family:var(--serif);font-size:16px;font-weight:700;color:var(--ink);">G</div>
+              <div style="font-size:11px;color:var(--ink5);">Séptima menor</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 2: Las cinco cajas -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Las cinco cajas</span>
+    <h2 class="th-h2">El mástil dividido <em>en cinco zonas</em></h2>
+    <p class="th-body">La pentatónica menor se aprende típicamente en <strong>cinco posiciones</strong> (también llamadas "cajas" o "patrones"). Cada caja es un patrón de digitación que abarca aproximadamente cuatro trastes en las seis cuerdas. Se superponen: la parte superior de la Caja 1 conecta con la Caja 2, que conecta con la Caja 3, y así hasta que la Caja 5 vuelve a conectar con la Caja 1 una octava más arriba.</p>
+    <p class="th-body">Para La menor pentatónica: Caja 1 inicia en el traste 5, Caja 2 en el traste 7, Caja 3 en el traste 9, Caja 4 en el traste 12 (idéntica a la posición abierta), Caja 5 en el traste 2. Juntas cubren el mástil completo. La nota raíz (La) aparece en múltiples cuerdas dentro de cada caja, lo que permite anclar la tonalidad en cualquier parte del diapasón.</p>
+    <p class="th-body">Cada caja tiene el mismo patrón interválico que las demás, transportado al inicio de un grado distinto de la escala. Esto significa que dominar la Caja 1 en La menor equivale a saber exactamente qué notas caen en la Caja 1 de cualquier otra tonalidad menor: solo hay que desplazar la forma al traste correspondiente.</p>
+
+    <!-- Full fretboard visual -->
+    <div class="fretboard-wrap">
+      <svg id="penta-fretboard" width="860" height="148" viewBox="0 0 860 148" xmlns="http://www.w3.org/2000/svg" style="display:block;min-width:700px;">
+        <!-- Built by JS -->
+      </svg>
+    </div>
+    <div class="fretboard-legend" id="penta-legend"></div>
+
+    <div class="th-callout" style="margin-top:28px;">
+      <div class="th-callout-label">Caja 1: el punto de partida</div>
+      <p>La Caja 1 de la pentatónica menor en el traste 5 es el punto de partida de casi todo guitarrista que aprende a improvisar. Es la posición del solo de "Smoke on the Water," "Back in Black" y cientos de clásicos del rock. Dominarla es el paso cero.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 3: Conectar las cajas -->
+<section class="th-section">
+  <div class="th-inner">
+    <span class="th-label">Conectar las cajas</span>
+    <h2 class="th-h2">De una caja a la siguiente: <em>el mástil como un todo</em></h2>
+    <p class="th-body">La mayoría de los guitarristas aprenden la Caja 1 y se detienen ahí. La consecuencia: los solos quedan confinados a una región del mástil y suenan predecibles. Conectar cajas significa aprender las superposiciones de dos a tres notas en los límites entre ellas: las mismas notas que aparecen en la parte superior de una caja aparecen en la parte inferior de la siguiente.</p>
+    <p class="th-body"><strong>Deslizamientos</strong>, cambios de posición y corridas diagonales a través de la zona de superposición conectan las cajas en un sistema unificado. En la práctica, la transición de la Caja 1 a la Caja 2 ocurre cuando el dedo meñique en la cuerda más aguda llega a la primera nota de la Caja 2 con el índice. Ese instante de transición es el que hay que practicar de forma aislada.</p>
+    <p class="th-body">La diferencia entre tocar "dentro de una caja" y tocar el mástil completo es la diferencia entre un solo que sube y baja siempre en el mismo registro y uno que recorre el instrumento con fluidez. Los guitarristas con vocabulario amplio (B.B. King, Joe Bonamassa, Eric Clapton) se mueven entre cajas de forma constante, usando la geografía completa del mástil para construir frases con arco y dirección.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">Ejercicio de conexión</div>
+      <p>Toca la Caja 1 de La menor desde la nota más grave hasta la más aguda, y sin soltar el último dedo, inicia la Caja 2 desde su nota más grave. Repite el movimiento hacia arriba por todas las cajas y luego desciende. Ese ejercicio continuo revela dónde se superponen las posiciones.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 4: Pentatónica mayor -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Pentatónica mayor</span>
+    <h2 class="th-h2">La mayor: <em>mismas notas, raíz diferente</em></h2>
+    <p class="th-body">La <strong>pentatónica mayor</strong> contiene exactamente las mismas notas que su relativa menor pentatónica, solo con una raíz diferente. La menor pentatónica (A–C–D–E–G) tiene las mismas cinco notas que Do mayor pentatónica (C–D–E–G–A). Esto significa que las cinco posiciones sirven para ambas escalas: la Caja 1 de La menor es la Caja 4 de Do mayor.</p>
+    <p class="th-body">La pentatónica mayor funciona sobre contextos de acorde mayor (country, folk, blues en tonalidad mayor) mientras que la menor funciona sobre contextos de dominante séptima y menor (blues, rock, funk). El guitarrista que conoce una sola relativa puede acceder a ambos colores sonoros simplemente cambiando dónde coloca el énfasis melódico: sobre la raíz de La (sonido menor) o sobre la raíz de Do (sonido mayor).</p>
+    <p class="th-body">Aprender este sistema doble es una de las inversiones de tiempo más eficientes en el estudio de la guitarra. Un solo sistema de cinco cajas cubre doce tonalidades mayores, doce menores, y los dos colores pentatónicos principales. La llave es entender que se trata del mismo mapa con dos formas de leerlo.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">La regla de la relativa</div>
+      <p>La menor pentatónica y Do mayor pentatónica son la misma escala con diferente raíz. La menor está tres semitonos por encima de Do mayor. Para cualquier tonalidad menor, la pentatónica mayor equivalente está tres semitonos más abajo (o nueve más arriba).</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER / NEXT -->
+<section class="th-next">
+  <span class="th-next-label">Navegar lecciones</span>
+  <h2 class="th-next-title">Sigue explorando</h2>
+  <p class="th-next-sub">La pentatónica es el núcleo. Las escalas diatónicas añaden los dos grados que la amplían a siete notas y siete modos.</p>
+  <div class="th-next-btns">
+    <a href="/teoria/instrumento/escalas" class="th-next-btn">Escalas diatónicas en el mástil →</a>
+    <a href="/teoria/instrumento/barre" class="th-next-btn sec">← Acordes barre</a>
+  </div>
+  <div class="chapter-nav">
+    <a href="/teoria/instrumento/barre" class="chapter-nav-item prev">
+      <span class="chapter-nav-dir">← Anterior</span>
+      <span class="chapter-nav-cap">Teoría en el Instrumento · 04</span>
+      <span class="chapter-nav-title">Acordes barre</span>
+    </a>
+    <a href="/teoria/instrumento/escalas" class="chapter-nav-item">
+      <span class="chapter-nav-dir">Siguiente →</span>
+      <span class="chapter-nav-cap">Teoría en el Instrumento · 06</span>
+      <span class="chapter-nav-title">Escalas diatónicas en el mástil</span>
+    </a>
+  </div>
+</section>
+
+<script>
+// Progress bar
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('prog-bar').style.width = (h > 0 ? Math.round(window.scrollY / h * 100) : 0) + '%';
+});
+
+// Audio
+let synth = null;
+async function initAudio() {
+  if (synth) return;
+  await Tone.start();
+  const reverb = new Tone.Freeverb({ roomSize: 0.28, wet: 0.12 }).toDestination();
+  synth = new Tone.PolySynth(Tone.Synth, {
+    oscillator: { type: 'triangle' },
+    envelope: { attack: 0.008, decay: 0.4, sustain: 0.1, release: 2 },
+    volume: -10,
+  }).connect(reverb);
+}
+
+function midiToNote(midi) {
+  const pc = midi % 12, oct = Math.floor(midi / 12) - 1;
+  const names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  return names[pc] + oct;
+}
+
+// ── Pentatonic fretboard diagram ──────────────────────────────────────────────
+// A minor pentatonic notes across all strings, frets 0-14
+// Standard tuning open MIDI: E2=40, A2=45, D3=50, G3=55, B3=59, E4=64
+const OPEN_MIDI = [40, 45, 50, 55, 59, 64]; // strings 0=low E to 5=high e
+// A minor pentatonic intervals from root: 0, 3, 5, 7, 10
+const PENTA_INTERVALS = new Set([0, 3, 5, 7, 10]);
+const ROOT_PC = 9; // A
+
+// Box color definitions: [startFret, endFret, color, name]
+const BOXES = [
+  { start: 5,  end: 8,  color: '#a85a1e', label: 'Caja 1', textColor: '#fff' },
+  { start: 7,  end: 10, color: '#5a7abf', label: 'Caja 2', textColor: '#fff' },
+  { start: 9,  end: 12, color: '#4a7c59', label: 'Caja 3', textColor: '#fff' },
+  { start: 12, end: 15, color: '#c47a36', label: 'Caja 4', textColor: '#fff' },
+  { start: 2,  end: 5,  color: '#7a4abf', label: 'Caja 5', textColor: '#fff' },
+];
+
+function getBoxColor(fret) {
+  // Return color of the first matching box (or overlapping)
+  const matches = BOXES.filter(b => fret >= b.start && fret <= b.end);
+  if (matches.length === 0) return null;
+  if (matches.length === 1) return matches[0].color;
+  // Blend indicator for overlap: use copper
+  return '#c47a36';
+}
+
+function buildPentaFretboard() {
+  const svg = document.getElementById('penta-fretboard');
+  const FRETS = 13; // 0 to 12
+  const STRINGS = 6;
+  const LEFT = 36;
+  const TOP = 20;
+  const FRET_W = 62;
+  const STRING_H = 18;
+  const W = LEFT + FRETS * FRET_W + 20;
+  const H = TOP + (STRINGS - 1) * STRING_H + 20;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('width', W);
+  svg.setAttribute('height', H);
+
+  let html = '';
+
+  // Fret numbers
+  for (let f = 0; f <= FRETS; f++) {
+    const x = LEFT + f * FRET_W;
+    html += `<text x="${x}" y="${TOP - 6}" font-family="JetBrains Mono, monospace" font-size="9" fill="rgba(250,246,240,0.3)" text-anchor="middle">${f}</text>`;
+  }
+
+  // Nut
+  html += `<line x1="${LEFT}" y1="${TOP}" x2="${LEFT}" y2="${TOP + (STRINGS-1)*STRING_H}" stroke="rgba(250,246,240,0.6)" stroke-width="3"/>`;
+
+  // Fret lines
+  for (let f = 1; f <= FRETS; f++) {
+    const x = LEFT + f * FRET_W;
+    html += `<line x1="${x}" y1="${TOP}" x2="${x}" y2="${TOP + (STRINGS-1)*STRING_H}" stroke="rgba(250,246,240,0.12)" stroke-width="1"/>`;
+  }
+
+  // String lines
+  const stringThick = [1.8, 1.6, 1.4, 1.2, 1.0, 0.9];
+  for (let s = 0; s < STRINGS; s++) {
+    const y = TOP + s * STRING_H;
+    html += `<line x1="${LEFT}" y1="${y}" x2="${LEFT + FRETS * FRET_W}" y2="${y}" stroke="rgba(250,246,240,0.2)" stroke-width="${stringThick[s]}"/>`;
+  }
+
+  // Pentatonic notes
+  for (let s = 0; s < STRINGS; s++) {
+    for (let f = 0; f <= FRETS; f++) {
+      const midi = OPEN_MIDI[s] + f;
+      const pc = midi % 12;
+      if (!PENTA_INTERVALS.has((pc - ROOT_PC + 12) % 12)) continue;
+
+      const isRoot = pc === ROOT_PC;
+      const cx = LEFT + f * FRET_W - FRET_W / 2;
+      const cy = TOP + s * STRING_H;
+
+      // Determine box color
+      let fillColor = 'rgba(160,92,32,0.5)';
+      const matchingBoxes = BOXES.filter(b => f > b.start && f <= b.end);
+      if (matchingBoxes.length > 0) fillColor = matchingBoxes[0].color;
+      else if (f === 0) {
+        // Open string — check if in box 5 (2-5)
+        const b5 = BOXES[4];
+        fillColor = b5.color;
+      }
+
+      if (f === 0) {
+        // Open string note: small circle left of nut
+        const ocx = LEFT - 10;
+        html += `<circle cx="${ocx}" cy="${cy}" r="${isRoot ? 7 : 5}" fill="${isRoot ? fillColor : fillColor}" opacity="${isRoot ? 1 : 0.7}" style="cursor:pointer" data-midi="${midi}" class="penta-note"/>`;
+        if (isRoot) {
+          html += `<text x="${ocx}" y="${cy + 3.5}" font-family="Inter, sans-serif" font-size="7" font-weight="700" fill="#fff" text-anchor="middle" pointer-events="none">R</text>`;
+        }
+      } else {
+        html += `<circle cx="${cx}" cy="${cy}" r="${isRoot ? 8 : 6}" fill="${fillColor}" opacity="${isRoot ? 1 : 0.85}" style="cursor:pointer" data-midi="${midi}" class="penta-note"/>`;
+        if (isRoot) {
+          html += `<text x="${cx}" y="${cy + 3.5}" font-family="Inter, sans-serif" font-size="8" font-weight="700" fill="#fff" text-anchor="middle" pointer-events="none">R</text>`;
+        }
+      }
+    }
+  }
+
+  svg.innerHTML = html;
+
+  // Click to play
+  svg.querySelectorAll('.penta-note').forEach(el => {
+    el.addEventListener('click', async () => {
+      await initAudio();
+      const midi = parseInt(el.dataset.midi);
+      synth.triggerAttackRelease(midiToNote(midi), '4n', Tone.now() + 0.05);
+      const origFill = el.getAttribute('fill');
+      el.setAttribute('fill', '#fff');
+      setTimeout(() => el.setAttribute('fill', origFill), 280);
+    });
+  });
+}
+
+function buildLegend() {
+  const legend = document.getElementById('penta-legend');
+  BOXES.forEach(b => {
+    const item = document.createElement('div');
+    item.className = 'fb-legend-item';
+    item.innerHTML = `<div class="fb-legend-dot" style="background:${b.color}"></div><span>${b.label} (trastes ${b.start}-${b.end})</span>`;
+    legend.appendChild(item);
+  });
+}
+
+buildPentaFretboard();
+buildLegend();
+</script>
+
+<footer style="background:var(--ink2);border-top:1px solid rgba(255,255,255,.06);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+  <div style="font-size:12px;color:var(--ink5);">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div style="display:flex;gap:20px;">
+    <a href="/privacidad" style="font-size:12px;color:var(--ink5);text-decoration:none;">Aviso de Privacidad</a>
+    <a href="/terminos" style="font-size:12px;color:var(--ink5);text-decoration:none;">Términos y Condiciones</a>
+    <a href="/cookies" style="font-size:12px;color:var(--ink5);text-decoration:none;">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

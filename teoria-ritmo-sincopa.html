@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Síncopa y contratiempo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<style>
+:root{
+  --paper:#f4ece0;--paper2:#ebe1d2;--paper3:#ddd1bd;--paper4:#c8b99f;--paper5:#b8a890;
+  --copper:#a85a1e;--copper-lt:#c47a36;--copper-dk:#7a3e10;
+  --ink:#1c1410;--ink2:#2e2418;--ink3:#5a4a38;--ink4:#8a7a64;--ink5:#a09080;
+  --tonic:#a05c20;--subdom:#5a7abf;--dominant:#7a4abf;--relative:#4a7c59;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{font-family:var(--mono);font-size:.52em;font-weight:400;color:var(--ink4);letter-spacing:0;margin-left:2px;}
+.nav-link{padding:0 16px;height:60px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+.th-progress{position:fixed;top:56px;left:0;right:0;height:2px;background:rgba(160,92,32,.12);z-index:99;}
+.th-progress-bar{height:100%;background:var(--copper);width:0%;transition:width .08s linear;}
+
+.th-breadcrumb{background:var(--paper2);border-bottom:1px solid var(--paper4);padding:0 48px;height:40px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink5);}
+.th-breadcrumb a{color:var(--ink5);text-decoration:none;}
+.th-breadcrumb a:hover{color:var(--copper);}
+.th-breadcrumb .sep{opacity:.5;}
+.th-breadcrumb .current{color:var(--ink3);font-weight:500;}
+
+.th-hero{background:#13100c;padding:110px 48px 90px;text-align:center;overflow:hidden;}
+.th-chapter{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:28px;display:flex;align-items:center;justify-content:center;gap:14px;}
+.th-chapter::before,.th-chapter::after{content:'';display:block;height:1px;width:48px;background:var(--copper-lt);opacity:.35;}
+.th-title{font-family:var(--serif);font-size:clamp(54px,7.5vw,92px);font-weight:700;line-height:.92;letter-spacing:-.025em;color:var(--paper);margin-bottom:28px;}
+.th-title em{font-style:italic;color:var(--copper-lt);}
+.th-lead{font-family:var(--serif);font-size:clamp(17px,2vw,22px);font-style:italic;color:rgba(250,246,240,.58);max-width:580px;margin:0 auto 44px;line-height:1.65;}
+.th-scroll-hint{font-size:11px;color:rgba(250,246,240,.22);letter-spacing:.14em;text-transform:uppercase;}
+
+.th-section{padding:88px 48px;}
+.th-section.dark{background:#13100c;}
+.th-inner{max-width:1080px;margin:0 auto;}
+.th-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;display:block;}
+.th-section.dark .th-label{color:var(--copper-lt);}
+.th-h2{font-family:var(--serif);font-size:clamp(34px,4.5vw,56px);font-weight:700;line-height:1.02;letter-spacing:-.025em;color:var(--ink);margin-bottom:22px;}
+.th-section.dark .th-h2{color:var(--paper);}
+.th-body{font-size:15px;color:var(--ink3);line-height:1.85;max-width:640px;}
+.th-body+.th-body{margin-top:14px;}
+.th-section.dark .th-body{color:rgba(250,246,240,.58);}
+.th-body strong{color:var(--ink2);font-weight:600;}
+.th-section.dark .th-body strong{color:rgba(244,236,224,.92);}
+.th-split{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;}
+.th-callout{border-left:3px solid var(--copper);border-radius:0 8px 8px 0;padding:16px 20px;margin:28px 0;background:rgba(160,92,32,.07);}
+.th-section.dark .th-callout{background:rgba(255,255,255,.05);border-left-color:var(--copper-lt);}
+.th-callout-label{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);margin-bottom:7px;}
+.th-section.dark .th-callout-label{color:var(--copper-lt);}
+.th-callout p{font-size:14px;color:var(--ink3);line-height:1.65;}
+.th-section.dark .th-callout p{color:rgba(250,246,240,.58);}
+
+/* ── METRONOME ── */
+.metro-section{padding:88px 48px;background:var(--paper2);}
+.metro-card{background:#1a1410;border-radius:20px;padding:48px;max-width:800px;margin:0 auto;}
+.metro-title{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--paper);margin-bottom:32px;text-align:center;letter-spacing:-.01em;}
+.metro-sig-pills{display:flex;gap:10px;justify-content:center;margin-bottom:32px;}
+.metro-sig-pill{font-family:var(--mono);font-size:14px;font-weight:600;padding:9px 24px;border-radius:24px;border:2px solid rgba(255,255,255,.12);background:transparent;color:rgba(250,246,240,.45);cursor:pointer;transition:all .18s;}
+.metro-sig-pill:hover{border-color:var(--copper-lt);color:rgba(250,246,240,.8);}
+.metro-sig-pill.active{background:var(--copper);border-color:var(--copper-dk);color:#fff;}
+.metro-bpm-row{display:flex;align-items:center;gap:18px;justify-content:center;margin-bottom:36px;}
+.metro-bpm-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(250,246,240,.3);}
+.metro-bpm-val{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--copper-lt);min-width:48px;text-align:right;}
+.metro-slider{-webkit-appearance:none;appearance:none;width:220px;height:4px;border-radius:2px;background:rgba(255,255,255,.12);outline:none;cursor:pointer;}
+.metro-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--copper-lt);cursor:pointer;box-shadow:0 0 0 3px rgba(196,122,54,.2);}
+.metro-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--copper-lt);cursor:pointer;border:none;}
+.metro-beats-row{display:flex;gap:14px;justify-content:center;margin-bottom:28px;flex-wrap:wrap;}
+.metro-beat{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.12);transition:transform .1s,box-shadow .1s,background .1s,border-color .1s;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:600;color:rgba(250,246,240,.3);}
+.metro-beat.accent{width:54px;height:54px;font-size:13px;background:rgba(168,90,30,.15);border-color:rgba(196,122,54,.35);color:var(--copper-lt);}
+.metro-beat.sub-accent{background:rgba(168,90,30,.07);border-color:rgba(196,122,54,.2);color:rgba(196,122,54,.6);}
+.metro-beat.active{transform:scale(1.18);box-shadow:0 0 22px rgba(196,122,54,.45);background:rgba(196,122,54,.28);border-color:var(--copper-lt);color:#fff;}
+.metro-beat.accent.active{transform:scale(1.22);box-shadow:0 0 32px rgba(196,122,54,.6);background:rgba(196,122,54,.45);}
+.metro-play-btn{display:block;margin:0 auto 24px;background:var(--copper);color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;padding:13px 48px;border-radius:10px;border:none;cursor:pointer;transition:background .18s,transform .1s;}
+.metro-play-btn:hover{background:var(--copper-lt);transform:translateY(-1px);}
+.metro-play-btn:active{transform:translateY(0);}
+.metro-desc{text-align:center;font-size:13px;color:rgba(250,246,240,.38);line-height:1.6;font-style:italic;}
+
+/* ── NEXT ── */
+.th-next{background:var(--ink);padding:88px 48px;text-align:center;}
+.th-next-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink5);margin-bottom:18px;display:block;}
+.th-next-title{font-family:var(--serif);font-size:clamp(36px,5vw,56px);font-weight:700;color:var(--paper);margin-bottom:10px;letter-spacing:-.02em;}
+.th-next-sub{font-size:14px;color:var(--ink4);margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.th-next-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.th-next-btn{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:13px;font-weight:600;padding:13px 28px;border-radius:8px;text-decoration:none;transition:background .2s;}
+.th-next-btn:hover{background:var(--copper-dk);}
+.th-next-btn.sec{background:transparent;color:rgba(250,246,240,.5);border:1px solid rgba(255,255,255,.12);}
+.th-next-btn.sec:hover{color:var(--paper);border-color:rgba(255,255,255,.3);}
+.th-next-btn.disabled{background:transparent;color:rgba(250,246,240,.22);border:1px solid rgba(255,255,255,.07);cursor:default;pointer-events:none;}
+
+/* ── CHAPTER NAV ── */
+.chapter-nav{display:flex;gap:0;border-top:1px solid rgba(255,255,255,.06);margin-top:64px;}
+.chapter-nav-item{flex:1;padding:28px 24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;transition:background .18s;}
+.chapter-nav-item:hover{background:rgba(255,255,255,.03);}
+.chapter-nav-item.prev{border-right:1px solid rgba(255,255,255,.06);}
+.chapter-nav-item.disabled{cursor:default;pointer-events:none;opacity:.35;}
+.chapter-nav-dir{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(250,246,240,.25);}
+.chapter-nav-cap{font-size:11px;color:rgba(250,246,240,.25);}
+.chapter-nav-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--paper);}
+
+/* ── GRID VISUAL ── */
+.grid-card{background:#1a1410;border-radius:20px;padding:48px;max-width:860px;margin:0 auto;}
+.grid-title{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--paper);margin-bottom:8px;text-align:center;letter-spacing:-.01em;}
+.grid-subtitle{text-align:center;font-size:13px;color:rgba(250,246,240,.38);margin-bottom:36px;font-style:italic;}
+.grid-pattern{margin-bottom:28px;}
+.grid-pattern-label{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:10px;}
+.grid-cells{display:flex;gap:4px;height:48px;}
+.grid-cell{flex:1;border-radius:5px;cursor:pointer;border:2px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);transition:filter .15s,box-shadow .15s;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;color:rgba(250,246,240,.25);}
+.grid-cell.beat1{border-color:rgba(196,122,54,.6);background:rgba(196,122,54,.3);}
+.grid-cell.beat3{border-color:rgba(200,185,159,.5);background:rgba(200,185,159,.2);}
+.grid-cell.backbeat{border-color:rgba(196,122,54,.55);background:rgba(196,122,54,.25);}
+.grid-cell.synco{border-color:rgba(90,122,191,.55);background:rgba(90,122,191,.25);}
+.grid-cell.active{filter:brightness(1.5);box-shadow:0 0 14px rgba(196,122,54,.5);}
+.grid-beat-numbers{display:flex;gap:4px;margin-bottom:4px;}
+.grid-beat-num{flex:1;text-align:center;font-family:var(--mono);font-size:9px;color:rgba(250,246,240,.2);}
+.grid-beat-num.strong{color:rgba(250,246,240,.5);}
+
+@media(max-width:768px){
+  nav{padding:0 16px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav>*{flex-shrink:0;}
+  .th-breadcrumb{padding:0 20px;}
+  .th-hero{padding:80px 20px 64px;}
+  .th-section{padding:64px 20px;}
+  .th-split{grid-template-columns:1fr;gap:40px;}
+  .metro-section{padding:64px 20px;}
+  .metro-card{padding:28px 18px;}
+  .th-next{padding:64px 20px;}
+  .chapter-nav{flex-direction:column;}
+  .chapter-nav-item.prev{border-right:none;border-bottom:1px solid rgba(255,255,255,.06);}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link active">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<div class="th-progress"><div class="th-progress-bar" id="prog-bar"></div></div>
+
+<div class="th-breadcrumb">
+  <a href="/teoria">Teoría</a>
+  <span class="sep">›</span>
+  <a href="/teoria">Ritmo y Sonido</a>
+  <span class="sep">›</span>
+  <span class="current">Síncopa y contratiempo</span>
+</div>
+
+<!-- HERO -->
+<section class="th-hero">
+  <div class="th-chapter">Ritmo y Sonido · 03</div>
+  <h1 class="th-title">Síncopa<br><em>y contratiempo</em></h1>
+  <p class="th-lead">Cuando el acento cae donde no se espera, y por qué eso es lo que hace bailar a la gente.</p>
+  <div class="th-scroll-hint">↓ leer</div>
+</section>
+
+<!-- SECCIÓN 1: El acento -->
+<section class="th-section">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">El acento</span>
+        <h2 class="th-h2">El ritmo esperado <em>y el que te sorprende</em></h2>
+        <p class="th-body">En un compás estándar de 4/4, los tiempos naturalmente fuertes son el 1 y el 3: ahí cae el pie de forma instintiva. La <strong>síncopa</strong> desplaza el acento musical de esos tiempos fuertes hacia los tiempos débiles (2 y 4) o hacia las subdivisiones entre ellos.</p>
+        <p class="th-body">La tensión entre lo que el oyente espera (acento en tiempo fuerte) y lo que realmente suena (acento desplazado) genera interés rítmico. El oído sigue proyectando el pulso de fondo mientras escucha los acentos fuera de lugar, y esa doble percepción es la experiencia del groove.</p>
+        <p class="th-body">La mayor parte de la música basada en groove depende completamente de esta tensión. Sin la expectativa del tiempo fuerte no hay síncopa, solo ritmo desorganizado. El oyente necesita sentir el pulso para que el desplazamiento tenga significado.</p>
+        <div class="th-callout">
+          <div class="th-callout-label">Definición clave</div>
+          <p>Síncopa: acento colocado donde el metro no lo predice. Para que exista, el oyente debe poder predecir el metro.</p>
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--paper2);border:1px solid var(--paper3);border-radius:14px;padding:28px 24px;">
+          <p style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:18px;">Tiempos fuertes vs. débiles (4/4)</p>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;gap:8px;align-items:center;">
+              <div style="flex:1;height:46px;display:flex;align-items:center;justify-content:center;background:rgba(168,90,30,.3);border:2px solid rgba(196,122,54,.5);border-radius:7px;font-family:var(--mono);font-size:14px;font-weight:700;color:var(--copper-lt);">1</div>
+              <div style="flex:1;height:34px;display:flex;align-items:center;justify-content:center;background:rgba(168,90,30,.07);border:1px solid rgba(168,90,30,.18);border-radius:7px;font-family:var(--mono);font-size:12px;color:rgba(250,246,240,.35) ;">2</div>
+              <div style="flex:1;height:38px;display:flex;align-items:center;justify-content:center;background:rgba(168,90,30,.15);border:1.5px solid rgba(196,122,54,.3);border-radius:7px;font-family:var(--mono);font-size:13px;color:rgba(250,246,240,.6);">3</div>
+              <div style="flex:1;height:34px;display:flex;align-items:center;justify-content:center;background:rgba(168,90,30,.07);border:1px solid rgba(168,90,30,.18);border-radius:7px;font-family:var(--mono);font-size:12px;color:rgba(250,246,240,.35);">4</div>
+            </div>
+            <p style="font-size:11px;color:var(--ink5);font-style:italic;line-height:1.5;">Acentos naturales en 4/4: fuerte-débil-medio-débil</p>
+          </div>
+          <div style="margin-top:20px;">
+            <p style="font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);margin-bottom:10px;">Con síncopa</p>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <div style="flex:1;height:30px;display:flex;align-items:center;justify-content:center;background:rgba(168,90,30,.05);border:1px solid rgba(168,90,30,.12);border-radius:7px;font-family:var(--mono);font-size:12px;color:rgba(250,246,240,.2);">1</div>
+              <div style="flex:1;height:44px;display:flex;align-items:center;justify-content:center;background:rgba(90,122,191,.28);border:2px solid rgba(90,122,191,.5);border-radius:7px;font-family:var(--mono);font-size:14px;font-weight:700;color:rgba(90,122,191,.9);">2</div>
+              <div style="flex:1;height:30px;display:flex;align-items:center;justify-content:center;background:rgba(168,90,30,.05);border:1px solid rgba(168,90,30,.12);border-radius:7px;font-family:var(--mono);font-size:12px;color:rgba(250,246,240,.2);">3</div>
+              <div style="flex:1;height:44px;display:flex;align-items:center;justify-content:center;background:rgba(90,122,191,.28);border:2px solid rgba(90,122,191,.5);border-radius:7px;font-family:var(--mono);font-size:14px;font-weight:700;color:rgba(90,122,191,.9);">4</div>
+            </div>
+            <p style="font-size:11px;color:var(--ink5);font-style:italic;margin-top:8px;line-height:1.5;">Backbeat: el acento se traslada a los tiempos débiles.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 2: El contratiempo -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">El contratiempo</span>
+    <h2 class="th-h2">Beats 2 y 4: <em>el corazón del groove</em></h2>
+    <p class="th-body">El <strong>contragolpe</strong> (backbeat) es el acento en los tiempos 2 y 4 en 4/4. En el rock y el pop, la caja casi siempre cae en 2 y 4. En el reggae, la guitarra (skank) toca en esos mismos tiempos con un rasgueo apagado característico. El contragolpe está tan arraigado en la música popular que la mayoría de los oyentes lo sienten como "el pulso," aunque técnicamente caiga en los tiempos débiles del compás.</p>
+    <p class="th-body">En el funk, los acentos se distribuyen sobre la cuadrícula de semicorcheas en patrones sincopados más complejos: James Brown y Sly Stone convirtieron ese territorio en un lenguaje completo. En la salsa y el son cubano, el patrón de clave organiza los acentos en ciclos de dos compases que cruzan constantemente los tiempos fuertes.</p>
+    <p class="th-body">El contragolpe no elimina la sensación de los tiempos 1 y 3: los refuerza por contraste. Cuando la caja golpea en 2 y 4, el oyente siente el 1 y el 3 como huecos que el cuerpo quiere llenar. Ese tirón hacia los tiempos vacíos es gran parte de lo que hace que la música groove-based sea físicamente difícil de escuchar sin moverse.</p>
+  </div>
+</section>
+
+<!-- SECCIÓN INTERACTIVA: Grilla de síncopa -->
+<section class="metro-section">
+  <div style="max-width:1080px;margin:0 auto;">
+    <span class="th-label" style="display:block;text-align:center;margin-bottom:32px;">Interactivo</span>
+    <div class="grid-card">
+      <div class="grid-title">Grilla de síncopa — haz clic en cualquier celda</div>
+      <div class="grid-subtitle">16 semicorcheas en 4/4 · celdas resaltadas indican acentos del patrón</div>
+      <div id="sync-grid"></div>
+      <p class="metro-desc" id="sync-desc" style="margin-top:20px;">Haz clic en una celda para escuchar su acento.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 3: La síncopa -->
+<section class="th-section">
+  <div class="th-inner">
+    <span class="th-label">La síncopa</span>
+    <h2 class="th-h2">El acento anticipado: <em>llega antes de lo esperado</em></h2>
+    <p class="th-body">La forma más común de síncopa es el <strong>beat anticipado</strong>: una nota comienza en la subdivisión "y" y se sostiene a través del siguiente tiempo fuerte. El ataque ocurre donde el oído no lo espera, y la nota cruza el barline o el downbeat sin un nuevo ataque. En el jazz esto crea frases "que se adelantan" al cambio de acorde antes de que llegue.</p>
+    <p class="th-body">En la bossa nova, la guitarra toca en el "y" antes de los tiempos 1, 2, 3 y 4, creando una sensación perpetuamente suspendida sobre el pulso. En el reggae, el skank llega sistemáticamente en el "y" del tiempo 1 y el tiempo 3, siempre un corchea antes de donde el oído espera el acento. Estos no son accidentes: son patrones fijos de acentos desplazados.</p>
+    <p class="th-body">La síncopa no es aleatoriedad, es un patrón predecible de acentos desplazados que crea un groove consistente. Una vez que el oído reconoce el patrón sincopado de un género, lo anticipa igual que anticipa el downbeat: la "sorpresa" se convierte en expectativa de segundo orden.</p>
+  </div>
+</section>
+
+<!-- SECCIÓN 4: Aplicaciones -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Aplicaciones</span>
+    <h2 class="th-h2">Géneros que viven <em>de la síncopa</em></h2>
+    <p class="th-body">El <strong>shuffle</strong> (blues) tiene un swing implícito que hace que las corcheas rectas suenen "erróneas" en ese contexto. El <strong>reggae</strong> solo tiene sentido como síncopa contra un tiempo fuerte implícito. La <strong>salsa</strong> y la <strong>bossa nova</strong> se construyen sobre patrones de clave sincopada que cruzan la barra de compás.</p>
+    <p class="th-body">El <strong>funk</strong> fragmenta la cuadrícula de semicorcheas en colocaciones de acento impredecibles al oído casual, pero internamente consistentes. Lo fundamental en todos estos casos: el pulso interno del oyente, el tiempo fuerte esperado, permanece constante. La música actúa contra él, no en su lugar.</p>
+    <p class="th-body">Para el guitarrista, esto se traduce en una habilidad práctica: tocar corcheas y semicorcheas sincopadas requiere mantener la subdivisión interna activa mientras se elige deliberadamente no atacar en los tiempos fuertes. Es una combinación de control técnico y comprensión métrica.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">Práctica</div>
+      <p>Golpea el pie en 1-2-3-4 y toca solo en los "y": corcheas sincopadas puras. Si el pie se mueve y la mano cae entre tiempos, la síncopa está funcionando.</p>
+    </div>
+  </div>
+</section>
+
+<!-- NEXT / NAV -->
+<section class="th-next">
+  <span class="th-next-label">Navegar capítulos</span>
+  <h2 class="th-next-title">Continúa la serie</h2>
+  <p class="th-next-sub">La síncopa desplaza el acento dentro del compás simple. El siguiente paso: compases donde cada tiempo se divide en tres.</p>
+  <div class="th-next-btns">
+    <a href="/teoria/ritmo/compases-compuestos" class="th-next-btn">Compases compuestos →</a>
+    <a href="/teoria/ritmo/figuras" class="th-next-btn sec">← Figuras rítmicas y silencios</a>
+  </div>
+  <div class="chapter-nav">
+    <a href="/teoria/ritmo/figuras" class="chapter-nav-item prev">
+      <span class="chapter-nav-dir">← Anterior</span>
+      <span class="chapter-nav-cap">Ritmo y Sonido · 02</span>
+      <span class="chapter-nav-title">Figuras rítmicas y silencios</span>
+    </a>
+    <a href="/teoria/ritmo/compases-compuestos" class="chapter-nav-item">
+      <span class="chapter-nav-dir">Siguiente →</span>
+      <span class="chapter-nav-cap">Ritmo y Sonido · 04</span>
+      <span class="chapter-nav-title">Compases compuestos</span>
+    </a>
+  </div>
+</section>
+
+<script>
+// ── Progress bar ──────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('prog-bar').style.width = (h > 0 ? Math.round(window.scrollY / h * 100) : 0) + '%';
+});
+
+// ── Sync grid ─────────────────────────────────────────────────────────────────
+// 16 positions = 16th notes in one 4/4 bar
+// beat 1 = pos 0, beat 1e = pos 1, beat 1& = pos 2, beat 1a = pos 3
+// beat 2 = pos 4, beat 3 = pos 8, beat 4 = pos 12
+const PATTERNS = [
+  {
+    id: 'straight',
+    label: 'Straight (sin síncopa)',
+    desc: 'Acentos en tiempos 1 y 3 — los tiempos fuertes naturales del 4/4',
+    // accent positions: beat1=0, beat3=8
+    accents: [0, 8],
+    cellClass: (pos) => {
+      if (pos === 0) return 'beat1';
+      if (pos === 8) return 'beat3';
+      return '';
+    }
+  },
+  {
+    id: 'backbeat',
+    label: 'Contragolpe (rock/pop)',
+    desc: 'Acentos en tiempos 2 y 4 — el backbeat del rock y el pop',
+    // beat2=4, beat4=12
+    accents: [4, 12],
+    cellClass: (pos) => {
+      if (pos === 4 || pos === 12) return 'backbeat';
+      return '';
+    }
+  },
+  {
+    id: 'synco',
+    label: 'Síncopa (funk/jazz)',
+    desc: 'Acentos en los "y" entre tiempos — semicorcheas en posiciones 2, 6, 10, 14',
+    // "and" positions: beat1&=2, beat2&=6, beat3&=10, beat4&=14
+    accents: [2, 6, 10, 14],
+    cellClass: (pos) => {
+      if ([2, 6, 10, 14].includes(pos)) return 'synco';
+      return '';
+    }
+  }
+];
+
+// Beat position labels for numbers row
+const POS_LABELS = ['1','e','y','a','2','e','y','a','3','e','y','a','4','e','y','a'];
+const BEAT_STRONG = [0, 4, 8, 12];
+
+const gridContainer = document.getElementById('sync-grid');
+
+PATTERNS.forEach((pat, patIdx) => {
+  const patDiv = document.createElement('div');
+  patDiv.className = 'grid-pattern';
+
+  const labelEl = document.createElement('div');
+  labelEl.className = 'grid-pattern-label';
+  labelEl.textContent = pat.label;
+  patDiv.appendChild(labelEl);
+
+  // Beat numbers
+  const numRow = document.createElement('div');
+  numRow.className = 'grid-beat-numbers';
+  for (let i = 0; i < 16; i++) {
+    const num = document.createElement('div');
+    num.className = 'grid-beat-num' + (BEAT_STRONG.includes(i) ? ' strong' : '');
+    num.textContent = POS_LABELS[i];
+    numRow.appendChild(num);
+  }
+  patDiv.appendChild(numRow);
+
+  const cellsDiv = document.createElement('div');
+  cellsDiv.className = 'grid-cells';
+
+  for (let i = 0; i < 16; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'grid-cell';
+    const cls = pat.cellClass(i);
+    if (cls) cell.classList.add(cls);
+    cell.dataset.patIdx = patIdx;
+    cell.dataset.pos = i;
+    cell.dataset.accent = pat.accents.includes(i) ? '1' : '0';
+    cellsDiv.appendChild(cell);
+  }
+  patDiv.appendChild(cellsDiv);
+  gridContainer.appendChild(patDiv);
+});
+
+gridContainer.addEventListener('click', async (e) => {
+  const cell = e.target.closest('.grid-cell');
+  if (!cell) return;
+  await Tone.start();
+
+  const isAccent = cell.dataset.accent === '1';
+  const patIdx = parseInt(cell.dataset.patIdx);
+  const pos = parseInt(cell.dataset.pos);
+  const pat = PATTERNS[patIdx];
+
+  document.getElementById('sync-desc').textContent =
+    pat.label + ' · pos ' + (pos + 1) + ' (' + POS_LABELS[pos] + ') · ' +
+    (isAccent ? 'ACENTO' : 'débil') + ' — ' + pat.desc;
+
+  cell.classList.add('active');
+  setTimeout(() => cell.classList.remove('active'), 200);
+
+  const synth = new Tone.Synth({
+    oscillator: { type: 'triangle' },
+    envelope: { attack: 0.001, decay: 0.08, sustain: 0, release: 0.05 }
+  }).toDestination();
+  synth.volume.value = isAccent ? -4 : -14;
+  synth.triggerAttackRelease(isAccent ? 'C5' : 'G3', '32n');
+  setTimeout(() => { try { synth.dispose(); } catch(e) {} }, 300);
+});
+</script>
+
+<footer class="tm-footer-legal" style="background:var(--ink2);border-top:1px solid rgba(255,255,255,.06);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+  <div class="tm-f-copy" style="font-size:12px;color:var(--ink5);">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div class="tm-f-links" style="display:flex;gap:20px;">
+    <a href="/privacidad" style="font-size:12px;color:var(--ink5);text-decoration:none;">Aviso de Privacidad</a>
+    <a href="/terminos" style="font-size:12px;color:var(--ink5);text-decoration:none;">Términos y Condiciones</a>
+    <a href="/cookies" style="font-size:12px;color:var(--ink5);text-decoration:none;">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

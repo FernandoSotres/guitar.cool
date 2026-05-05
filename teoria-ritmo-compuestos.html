@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Compases compuestos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<style>
+:root{
+  --paper:#f4ece0;--paper2:#ebe1d2;--paper3:#ddd1bd;--paper4:#c8b99f;--paper5:#b8a890;
+  --copper:#a85a1e;--copper-lt:#c47a36;--copper-dk:#7a3e10;
+  --ink:#1c1410;--ink2:#2e2418;--ink3:#5a4a38;--ink4:#8a7a64;--ink5:#a09080;
+  --tonic:#a05c20;--subdom:#5a7abf;--dominant:#7a4abf;--relative:#4a7c59;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{font-family:var(--mono);font-size:.52em;font-weight:400;color:var(--ink4);letter-spacing:0;margin-left:2px;}
+.nav-link{padding:0 16px;height:60px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+.th-progress{position:fixed;top:56px;left:0;right:0;height:2px;background:rgba(160,92,32,.12);z-index:99;}
+.th-progress-bar{height:100%;background:var(--copper);width:0%;transition:width .08s linear;}
+
+.th-breadcrumb{background:var(--paper2);border-bottom:1px solid var(--paper4);padding:0 48px;height:40px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink5);}
+.th-breadcrumb a{color:var(--ink5);text-decoration:none;}
+.th-breadcrumb a:hover{color:var(--copper);}
+.th-breadcrumb .sep{opacity:.5;}
+.th-breadcrumb .current{color:var(--ink3);font-weight:500;}
+
+.th-hero{background:#13100c;padding:110px 48px 90px;text-align:center;overflow:hidden;}
+.th-chapter{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:28px;display:flex;align-items:center;justify-content:center;gap:14px;}
+.th-chapter::before,.th-chapter::after{content:'';display:block;height:1px;width:48px;background:var(--copper-lt);opacity:.35;}
+.th-title{font-family:var(--serif);font-size:clamp(54px,7.5vw,92px);font-weight:700;line-height:.92;letter-spacing:-.025em;color:var(--paper);margin-bottom:28px;}
+.th-title em{font-style:italic;color:var(--copper-lt);}
+.th-lead{font-family:var(--serif);font-size:clamp(17px,2vw,22px);font-style:italic;color:rgba(250,246,240,.58);max-width:580px;margin:0 auto 44px;line-height:1.65;}
+.th-scroll-hint{font-size:11px;color:rgba(250,246,240,.22);letter-spacing:.14em;text-transform:uppercase;}
+
+.th-section{padding:88px 48px;}
+.th-section.dark{background:#13100c;}
+.th-inner{max-width:1080px;margin:0 auto;}
+.th-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;display:block;}
+.th-section.dark .th-label{color:var(--copper-lt);}
+.th-h2{font-family:var(--serif);font-size:clamp(34px,4.5vw,56px);font-weight:700;line-height:1.02;letter-spacing:-.025em;color:var(--ink);margin-bottom:22px;}
+.th-section.dark .th-h2{color:var(--paper);}
+.th-body{font-size:15px;color:var(--ink3);line-height:1.85;max-width:640px;}
+.th-body+.th-body{margin-top:14px;}
+.th-section.dark .th-body{color:rgba(250,246,240,.58);}
+.th-body strong{color:var(--ink2);font-weight:600;}
+.th-section.dark .th-body strong{color:rgba(244,236,224,.92);}
+.th-split{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;}
+.th-callout{border-left:3px solid var(--copper);border-radius:0 8px 8px 0;padding:16px 20px;margin:28px 0;background:rgba(160,92,32,.07);}
+.th-section.dark .th-callout{background:rgba(255,255,255,.05);border-left-color:var(--copper-lt);}
+.th-callout-label{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);margin-bottom:7px;}
+.th-section.dark .th-callout-label{color:var(--copper-lt);}
+.th-callout p{font-size:14px;color:var(--ink3);line-height:1.65;}
+.th-section.dark .th-callout p{color:rgba(250,246,240,.58);}
+
+/* ── METRONOME ── */
+.metro-section{padding:88px 48px;background:var(--paper2);}
+.metro-card{background:#1a1410;border-radius:20px;padding:48px;max-width:800px;margin:0 auto;}
+.metro-title{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--paper);margin-bottom:32px;text-align:center;letter-spacing:-.01em;}
+.metro-sig-pills{display:flex;gap:10px;justify-content:center;margin-bottom:32px;}
+.metro-sig-pill{font-family:var(--mono);font-size:14px;font-weight:600;padding:9px 24px;border-radius:24px;border:2px solid rgba(255,255,255,.12);background:transparent;color:rgba(250,246,240,.45);cursor:pointer;transition:all .18s;}
+.metro-sig-pill:hover{border-color:var(--copper-lt);color:rgba(250,246,240,.8);}
+.metro-sig-pill.active{background:var(--copper);border-color:var(--copper-dk);color:#fff;}
+.metro-bpm-row{display:flex;align-items:center;gap:18px;justify-content:center;margin-bottom:36px;}
+.metro-bpm-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(250,246,240,.3);}
+.metro-bpm-val{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--copper-lt);min-width:48px;text-align:right;}
+.metro-slider{-webkit-appearance:none;appearance:none;width:220px;height:4px;border-radius:2px;background:rgba(255,255,255,.12);outline:none;cursor:pointer;}
+.metro-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--copper-lt);cursor:pointer;box-shadow:0 0 0 3px rgba(196,122,54,.2);}
+.metro-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--copper-lt);cursor:pointer;border:none;}
+.metro-beats-row{display:flex;gap:14px;justify-content:center;margin-bottom:28px;flex-wrap:wrap;}
+.metro-beat{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.12);transition:transform .1s,box-shadow .1s,background .1s,border-color .1s;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:600;color:rgba(250,246,240,.3);}
+.metro-beat.accent{width:54px;height:54px;font-size:13px;background:rgba(168,90,30,.15);border-color:rgba(196,122,54,.35);color:var(--copper-lt);}
+.metro-beat.sub-accent{background:rgba(168,90,30,.07);border-color:rgba(196,122,54,.2);color:rgba(196,122,54,.6);}
+.metro-beat.active{transform:scale(1.18);box-shadow:0 0 22px rgba(196,122,54,.45);background:rgba(196,122,54,.28);border-color:var(--copper-lt);color:#fff;}
+.metro-beat.accent.active{transform:scale(1.22);box-shadow:0 0 32px rgba(196,122,54,.6);background:rgba(196,122,54,.45);}
+.metro-play-btn{display:block;margin:0 auto 24px;background:var(--copper);color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;padding:13px 48px;border-radius:10px;border:none;cursor:pointer;transition:background .18s,transform .1s;}
+.metro-play-btn:hover{background:var(--copper-lt);transform:translateY(-1px);}
+.metro-play-btn:active{transform:translateY(0);}
+.metro-desc{text-align:center;font-size:13px;color:rgba(250,246,240,.38);line-height:1.6;font-style:italic;}
+
+/* ── NEXT ── */
+.th-next{background:var(--ink);padding:88px 48px;text-align:center;}
+.th-next-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink5);margin-bottom:18px;display:block;}
+.th-next-title{font-family:var(--serif);font-size:clamp(36px,5vw,56px);font-weight:700;color:var(--paper);margin-bottom:10px;letter-spacing:-.02em;}
+.th-next-sub{font-size:14px;color:var(--ink4);margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.th-next-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.th-next-btn{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:13px;font-weight:600;padding:13px 28px;border-radius:8px;text-decoration:none;transition:background .2s;}
+.th-next-btn:hover{background:var(--copper-dk);}
+.th-next-btn.sec{background:transparent;color:rgba(250,246,240,.5);border:1px solid rgba(255,255,255,.12);}
+.th-next-btn.sec:hover{color:var(--paper);border-color:rgba(255,255,255,.3);}
+.th-next-btn.disabled{background:transparent;color:rgba(250,246,240,.22);border:1px solid rgba(255,255,255,.07);cursor:default;pointer-events:none;}
+
+/* ── CHAPTER NAV ── */
+.chapter-nav{display:flex;gap:0;border-top:1px solid rgba(255,255,255,.06);margin-top:64px;}
+.chapter-nav-item{flex:1;padding:28px 24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;transition:background .18s;}
+.chapter-nav-item:hover{background:rgba(255,255,255,.03);}
+.chapter-nav-item.prev{border-right:1px solid rgba(255,255,255,.06);}
+.chapter-nav-item.disabled{cursor:default;pointer-events:none;opacity:.35;}
+.chapter-nav-dir{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(250,246,240,.25);}
+.chapter-nav-cap{font-size:11px;color:rgba(250,246,240,.25);}
+.chapter-nav-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--paper);}
+
+/* ── COMPOUND GRID ── */
+.comp-card{background:#1a1410;border-radius:20px;padding:48px;max-width:860px;margin:0 auto;}
+.comp-title{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--paper);margin-bottom:8px;text-align:center;letter-spacing:-.01em;}
+.comp-subtitle{text-align:center;font-size:13px;color:rgba(250,246,240,.38);margin-bottom:36px;font-style:italic;}
+.comp-row{margin-bottom:28px;}
+.comp-row-label{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:10px;}
+.comp-cells{display:flex;gap:3px;height:52px;}
+.comp-cell{flex:1;border-radius:5px;cursor:pointer;border:2px solid rgba(255,255,255,.08);background:rgba(255,255,255,.05);transition:filter .15s,box-shadow .15s;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:rgba(250,246,240,.3);}
+.comp-cell.group-a{background:rgba(168,90,30,.22);border-color:rgba(196,122,54,.45);}
+.comp-cell.group-b{background:rgba(168,90,30,.12);border-color:rgba(196,122,54,.28);}
+.comp-cell.group-c{background:rgba(200,185,159,.16);border-color:rgba(200,185,159,.35);}
+.comp-cell.group-d{background:rgba(200,185,159,.08);border-color:rgba(200,185,159,.2);}
+.comp-cell.active{filter:brightness(1.6);box-shadow:0 0 14px rgba(196,122,54,.5);}
+.comp-group-sep{width:3px;height:100%;background:rgba(196,122,54,.35);border-radius:2px;flex-shrink:0;}
+
+@media(max-width:768px){
+  nav{padding:0 16px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav>*{flex-shrink:0;}
+  .th-breadcrumb{padding:0 20px;}
+  .th-hero{padding:80px 20px 64px;}
+  .th-section{padding:64px 20px;}
+  .th-split{grid-template-columns:1fr;gap:40px;}
+  .metro-section{padding:64px 20px;}
+  .metro-card{padding:28px 18px;}
+  .th-next{padding:64px 20px;}
+  .chapter-nav{flex-direction:column;}
+  .chapter-nav-item.prev{border-right:none;border-bottom:1px solid rgba(255,255,255,.06);}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link active">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<div class="th-progress"><div class="th-progress-bar" id="prog-bar"></div></div>
+
+<div class="th-breadcrumb">
+  <a href="/teoria">Teoría</a>
+  <span class="sep">›</span>
+  <a href="/teoria">Ritmo y Sonido</a>
+  <span class="sep">›</span>
+  <span class="current">Compases compuestos</span>
+</div>
+
+<!-- HERO -->
+<section class="th-hero">
+  <div class="th-chapter">Ritmo y Sonido · 04</div>
+  <h1 class="th-title">Compases<br><em>compuestos</em></h1>
+  <p class="th-lead">6/8, 9/8, 12/8: cuando cada beat se divide en tres en lugar de dos.</p>
+  <div class="th-scroll-hint">↓ leer</div>
+</section>
+
+<!-- SECCIÓN 1: Pulso ternario -->
+<section class="th-section">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">Pulso ternario</span>
+        <h2 class="th-h2">Dividir en tres: <em>el compás que balancea</em></h2>
+        <p class="th-body">Los compases simples (2/4, 3/4, 4/4) dividen cada tiempo en dos partes iguales. Los <strong>compases compuestos</strong> dividen cada tiempo en tres partes iguales. En 6/8 hay 6 corcheas por compás, pero se sienten como 2 tiempos de 3 corcheas cada uno, no como 6 tiempos separados.</p>
+        <p class="th-body">La unidad de pulso en los compases compuestos es la <strong>negra con puntillo</strong>, que equivale a 3 corcheas. A un tempo moderado o rápido, el oído agrupa las 3 corcheas y las percibe como un solo tiempo; a tempos muy lentos puede que se escuchen las 6 corcheas individualmente. Lo que define si un compás es compuesto no es el tempo sino cómo se agrupan las notas.</p>
+        <p class="th-body">Esta subdivisión ternaria crea la sensación característica de "balanceo" o "rodamiento" de los compases compuestos: cada tiempo tiene un impulso interno de tres que da la impresión de estar en continuo movimiento, como una ola.</p>
+        <div class="th-callout">
+          <div class="th-callout-label">Definición clave</div>
+          <p>Compuesto: cada beat se subdivide en tres. Simple: cada beat se subdivide en dos. Esa diferencia determina toda la sensación rítmica.</p>
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--paper2);border:1px solid var(--paper3);border-radius:14px;padding:28px 24px;">
+          <p style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:20px;">Simple vs. compuesto</p>
+          <div style="margin-bottom:20px;">
+            <p style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink5);margin-bottom:10px;">4/4 — simple (cada beat ÷ 2)</p>
+            <div style="display:flex;gap:3px;">
+              <div style="flex:1;height:36px;background:rgba(168,90,30,.25);border:2px solid rgba(168,90,30,.4);border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:rgba(250,246,240,.7);">1</div>
+              <div style="flex:1;height:36px;background:rgba(168,90,30,.12);border:1.5px solid rgba(168,90,30,.25);border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:rgba(250,246,240,.4);">y</div>
+              <div style="flex:1;height:36px;background:rgba(168,90,30,.18);border:2px solid rgba(168,90,30,.3);border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:rgba(250,246,240,.6);">2</div>
+              <div style="flex:1;height:36px;background:rgba(168,90,30,.12);border:1.5px solid rgba(168,90,30,.25);border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:rgba(250,246,240,.4);">y</div>
+              <div style="flex:1;height:36px;background:rgba(168,90,30,.18);border:2px solid rgba(168,90,30,.3);border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:rgba(250,246,240,.6);">3</div>
+              <div style="flex:1;height:36px;background:rgba(168,90,30,.12);border:1.5px solid rgba(168,90,30,.25);border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:rgba(250,246,240,.4);">y</div>
+              <div style="flex:1;height:36px;background:rgba(168,90,30,.18);border:2px solid rgba(168,90,30,.3);border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:rgba(250,246,240,.6);">4</div>
+              <div style="flex:1;height:36px;background:rgba(168,90,30,.12);border:1.5px solid rgba(168,90,30,.25);border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:rgba(250,246,240,.4);">y</div>
+            </div>
+            <p style="font-size:11px;color:var(--ink5);margin-top:8px;font-style:italic;">4 beats, cada uno dividido en 2 corcheas</p>
+          </div>
+          <div>
+            <p style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink5);margin-bottom:10px;">6/8 — compuesto (cada beat ÷ 3)</p>
+            <div style="display:flex;gap:3px;">
+              <div style="flex:1;height:36px;background:rgba(168,90,30,.28);border:2px solid rgba(168,90,30,.45);border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:rgba(250,246,240,.75);">1</div>
+              <div style="flex:1;height:36px;background:rgba(168,90,30,.12);border:1.5px solid rgba(168,90,30,.22);border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:rgba(250,246,240,.4);">y</div>
+              <div style="flex:1;height:36px;background:rgba(168,90,30,.12);border:1.5px solid rgba(168,90,30,.22);border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:rgba(250,246,240,.4);">a</div>
+              <div style="width:2px;background:rgba(196,122,54,.35);border-radius:1px;flex-shrink:0;"></div>
+              <div style="flex:1;height:36px;background:rgba(168,90,30,.18);border:2px solid rgba(168,90,30,.32);border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:rgba(250,246,240,.6);">2</div>
+              <div style="flex:1;height:36px;background:rgba(168,90,30,.12);border:1.5px solid rgba(168,90,30,.22);border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:rgba(250,246,240,.4);">y</div>
+              <div style="flex:1;height:36px;background:rgba(168,90,30,.12);border:1.5px solid rgba(168,90,30,.22);border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;color:rgba(250,246,240,.4);">a</div>
+            </div>
+            <p style="font-size:11px;color:var(--ink5);margin-top:8px;font-style:italic;">2 beats, cada uno dividido en 3 corcheas</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 2: 6/8, 9/8, 12/8 -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">6/8, 9/8, 12/8</span>
+    <h2 class="th-h2">Cómo se sienten <em>los tres compuestos principales</em></h2>
+    <p class="th-body"><strong>6/8</strong> tiene 2 tiempos de negra con puntillo (grupos de 3+3 corcheas). Aparece en baladas, música folk y en el blues de 12/8. La jiga irlandesa usa 6/8 a tempo vivo, donde los dos tiempos se sienten como un balanceo de dos.</p>
+    <p class="th-body"><strong>9/8</strong> tiene 3 tiempos de negra con puntillo (3+3+3). Es el compás del hornpipe irlandés y del slip jig. La sensación de tres tiempos ternarios crea un groove muy particular, más raro en la música popular pero presente en algunas formas de música étnica y experimental.</p>
+    <p class="th-body"><strong>12/8</strong> tiene 4 tiempos de negra con puntillo (3+3+3+3) y suena prácticamente idéntico a un 4/4 con shuffle: el blues del Delta, las baladas lentas de rock y los slow blues usan 12/8 con frecuencia. Los tres compuestos aplican el mismo principio ternario a distinto número de tiempos por compás.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">Dato útil</div>
+      <p>Para reconocer un compuesto de oído: si cada tiempo parece tener un "tri-ple-te" interno, es compuesto. Si cada tiempo se siente como "un-dos," es simple.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN INTERACTIVA: 4/4 vs 6/8 -->
+<section class="metro-section">
+  <div style="max-width:1080px;margin:0 auto;">
+    <span class="th-label" style="display:block;text-align:center;margin-bottom:32px;">Interactivo</span>
+    <div class="comp-card">
+      <div class="comp-title">4/4 vs. 6/8 — la misma cantidad de notas, agrupación diferente</div>
+      <div class="comp-subtitle">8 corcheas · haz clic en cualquier celda para escuchar · las barras verticales indican límites de grupo</div>
+      <div id="comp-grid"></div>
+      <p class="metro-desc" id="comp-desc" style="margin-top:20px;">Haz clic en una celda para escuchar.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 3: 6/8 vs. 3/4 -->
+<section class="th-section">
+  <div class="th-inner">
+    <span class="th-label">6/8 vs. 3/4</span>
+    <h2 class="th-h2">Mismas notas, <em>sensación diferente</em></h2>
+    <p class="th-body">6/8 y 3/4 contienen el mismo número de corcheas por compás (seis), pero se sienten radicalmente distintos. En el <strong>vals</strong> (3/4), hay 3 tiempos de negra con igual peso y el acento cae en el tiempo 1. En 6/8, hay 2 tiempos grandes de negra con puntillo: el primero es más fuerte que el segundo, y cada tiempo tiene una subdivisión ternaria interna.</p>
+    <p class="th-body">Un violinista que toca seis corcheas seguidas podría estar en 3/4 o en 6/8 dependiendo únicamente de cómo agrupe los acentos. Tocar "Um-pa-pa / Um-pa-pa" con énfasis en cada primer pulso es vals. Tocar "UMpa-pa-UMpa-pa" con énfasis en el primero de cada grupo de tres es 6/8. La diferencia no está en las notas sino en la acentuación.</p>
+    <p class="th-body">Lo que importa no es cuántas notas hay sino cómo se agrupan los pulsos. Dos corcheas de más no convierten un 4/4 en 6/8: lo que define el compuesto es la subdivisión ternaria del tiempo, no el recuento de corcheas.</p>
+  </div>
+</section>
+
+<!-- SECCIÓN 4: El shuffle -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">El shuffle</span>
+    <h2 class="th-h2">12/8 y el shuffle: <em>cuando el blues rueda</em></h2>
+    <p class="th-body">El feel de shuffle en el blues y el rock es esencialmente un 12/8 escrito como 4/4 con corcheas de tripleta. Cuando un músico dice "tócalo con shuffle," quiere decir: divide cada tiempo de negra en 3 partes y toca solo la primera y la tercera, creando un patrón largo-corto, largo-corto, largo-corto. Eso es exactamente lo que escribe explícitamente el 12/8.</p>
+    <p class="th-body">La indicación de shuffle en la partitura suele aparecer como una nota al inicio: "♩=♩" con una corchea reemplazada por dos corcheas de tripleta (primera y tercera). Esta convención evita escribir tripletas en cada compás, pero el resultado sonoro es idéntico a un 12/8. Los dos sistemas son formas distintas de notación de la misma cosa.</p>
+    <p class="th-body">El shuffle es tan frecuente en la música americana que la mayoría de los músicos lo aprenden de oído antes de entender su origen métrico. Aprender a leer y escribir el 12/8 explícitamente aclara por qué el shuffle suena como suena: no es solo un "feeling", sino una estructura ternaria precisa aplicada a cada tiempo del compás.</p>
+    <div class="th-callout">
+      <div class="th-callout-label">Conexión práctica</div>
+      <p>Escucha "Sweet Home Chicago" de Robert Johnson o "The Thrill Is Gone" de B.B. King y cuenta 1-y-a, 2-y-a, 3-y-a, 4-y-a con el groove. Estás contando 12/8.</p>
+    </div>
+  </div>
+</section>
+
+<!-- NEXT / NAV -->
+<section class="th-next">
+  <span class="th-next-label">Navegar capítulos</span>
+  <h2 class="th-next-title">Continúa la serie</h2>
+  <p class="th-next-sub">Los compuestos agrupan el tiempo en treses. El siguiente paso: compases que mezclan grupos de dos y tres.</p>
+  <div class="th-next-btns">
+    <a href="/teoria/ritmo/asimetricos" class="th-next-btn">Compases asimétricos →</a>
+    <a href="/teoria/ritmo/sincopa" class="th-next-btn sec">← Síncopa y contratiempo</a>
+  </div>
+  <div class="chapter-nav">
+    <a href="/teoria/ritmo/sincopa" class="chapter-nav-item prev">
+      <span class="chapter-nav-dir">← Anterior</span>
+      <span class="chapter-nav-cap">Ritmo y Sonido · 03</span>
+      <span class="chapter-nav-title">Síncopa y contratiempo</span>
+    </a>
+    <a href="/teoria/ritmo/asimetricos" class="chapter-nav-item">
+      <span class="chapter-nav-dir">Siguiente →</span>
+      <span class="chapter-nav-cap">Ritmo y Sonido · 05</span>
+      <span class="chapter-nav-title">Compases asimétricos</span>
+    </a>
+  </div>
+</section>
+
+<script>
+// ── Progress bar ──────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('prog-bar').style.width = (h > 0 ? Math.round(window.scrollY / h * 100) : 0) + '%';
+});
+
+// ── Compound grid ─────────────────────────────────────────────────────────────
+// 4/4 with 8 eighth notes: groups of 2+2+2+2
+// 6/8 with 8 eighth notes: groups of 3+3 (plus 2 extra to fill same visual width)
+// We'll show exactly 8 cells each row and explain the grouping via color
+
+const COMP_PATTERNS = [
+  {
+    id: '44',
+    label: '4/4 (2+2+2+2) — cuatro tiempos, cada uno = 2 corcheas',
+    cells: [
+      { label: '1', cls: 'group-a', desc: 'Tiempo 1 — fuerte', pitch: 'C5' },
+      { label: 'y', cls: 'group-b', desc: 'Tiempo 1 "y" — débil', pitch: 'G3' },
+      { label: '2', cls: 'group-c', desc: 'Tiempo 2 — semi-fuerte', pitch: 'A4' },
+      { label: 'y', cls: 'group-d', desc: 'Tiempo 2 "y" — débil', pitch: 'G3' },
+      { label: '3', cls: 'group-a', desc: 'Tiempo 3 — semi-fuerte', pitch: 'B4' },
+      { label: 'y', cls: 'group-b', desc: 'Tiempo 3 "y" — débil', pitch: 'G3' },
+      { label: '4', cls: 'group-c', desc: 'Tiempo 4 — débil', pitch: 'A4' },
+      { label: 'y', cls: 'group-d', desc: 'Tiempo 4 "y" — débil', pitch: 'G3' },
+    ],
+    seps: [2, 4, 6] // separators after these indices
+  },
+  {
+    id: '68',
+    label: '6/8 (3+3) — dos tiempos, cada uno = 3 corcheas',
+    cells: [
+      { label: '1', cls: 'group-a', desc: 'Tiempo 1 — fuerte (inicio del grupo ternario 1)', pitch: 'C5' },
+      { label: 'y', cls: 'group-b', desc: 'Subdivsión 1 "y" — interno del grupo', pitch: 'G3' },
+      { label: 'a', cls: 'group-b', desc: 'Subdivsión 1 "a" — interno del grupo', pitch: 'G3' },
+      { label: '2', cls: 'group-c', desc: 'Tiempo 2 — medio-fuerte (inicio del grupo ternario 2)', pitch: 'B4' },
+      { label: 'y', cls: 'group-d', desc: 'Subdivisión 2 "y" — interno del grupo', pitch: 'G3' },
+      { label: 'a', cls: 'group-d', desc: 'Subdivisión 2 "a" — interno del grupo', pitch: 'G3' },
+      // padding cells to align width
+      { label: '', cls: '', desc: '', pitch: 'G3', empty: true },
+      { label: '', cls: '', desc: '', pitch: 'G3', empty: true },
+    ],
+    seps: [3] // separator between the two groups of 3
+  }
+];
+
+const compGrid = document.getElementById('comp-grid');
+
+COMP_PATTERNS.forEach((pat, pIdx) => {
+  const rowDiv = document.createElement('div');
+  rowDiv.className = 'comp-row';
+
+  const lbl = document.createElement('div');
+  lbl.className = 'comp-row-label';
+  lbl.textContent = pat.label;
+  rowDiv.appendChild(lbl);
+
+  const cellsDiv = document.createElement('div');
+  cellsDiv.className = 'comp-cells';
+
+  pat.cells.forEach((cellData, cIdx) => {
+    if (pat.seps.includes(cIdx)) {
+      const sep = document.createElement('div');
+      sep.className = 'comp-group-sep';
+      cellsDiv.appendChild(sep);
+    }
+
+    const cell = document.createElement('div');
+    if (cellData.empty) {
+      cell.style.flex = '1';
+      cell.style.background = 'transparent';
+      cell.style.border = 'none';
+    } else {
+      cell.className = 'comp-cell ' + cellData.cls;
+      cell.textContent = cellData.label;
+      cell.dataset.pitch = cellData.pitch;
+      cell.dataset.desc = cellData.desc;
+      cell.dataset.pat = pat.id;
+    }
+    cellsDiv.appendChild(cell);
+  });
+
+  rowDiv.appendChild(cellsDiv);
+  compGrid.appendChild(rowDiv);
+});
+
+compGrid.addEventListener('click', async (e) => {
+  const cell = e.target.closest('.comp-cell');
+  if (!cell || !cell.dataset.pitch) return;
+  await Tone.start();
+
+  document.getElementById('comp-desc').textContent =
+    cell.dataset.pat.toUpperCase() + ' · ' + cell.dataset.desc;
+
+  cell.classList.add('active');
+  setTimeout(() => cell.classList.remove('active'), 200);
+
+  const isStrong = cell.dataset.pitch !== 'G3';
+  const synth = new Tone.Synth({
+    oscillator: { type: 'triangle' },
+    envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.06 }
+  }).toDestination();
+  synth.volume.value = isStrong ? -5 : -13;
+  synth.triggerAttackRelease(cell.dataset.pitch, '16n');
+  setTimeout(() => { try { synth.dispose(); } catch(e) {} }, 400);
+});
+</script>
+
+<footer class="tm-footer-legal" style="background:var(--ink2);border-top:1px solid rgba(255,255,255,.06);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+  <div class="tm-f-copy" style="font-size:12px;color:var(--ink5);">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div class="tm-f-links" style="display:flex;gap:20px;">
+    <a href="/privacidad" style="font-size:12px;color:var(--ink5);text-decoration:none;">Aviso de Privacidad</a>
+    <a href="/terminos" style="font-size:12px;color:var(--ink5);text-decoration:none;">Términos y Condiciones</a>
+    <a href="/cookies" style="font-size:12px;color:var(--ink5);text-decoration:none;">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>
