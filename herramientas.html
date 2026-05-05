@@ -221,46 +221,53 @@ nav {
       <!-- Guitarra -->
       <a href="/herramientas/guitarra" class="tool-card">
         <div class="tool-card-visual">
-          <!-- Do mayor x32010 — portrait chord box (strings=cols, frets=rows) -->
-          <!-- Strings x: 103,119,135,151,167,183 (16px gap) — low E→high E left→right -->
-          <!-- Nut y=32, frets y=54,76,98 (22px gap) — dot centers: f1=43, f2=65, f3=87 -->
-          <svg viewBox="0 0 280 130" width="280" height="130" xmlns="http://www.w3.org/2000/svg">
-            <!-- String lines (run top→bottom through marker area) -->
-            <line x1="103" y1="8" x2="103" y2="98" stroke="rgba(192,120,48,.54)" stroke-width="2.2"/>
-            <line x1="119" y1="8" x2="119" y2="98" stroke="rgba(192,120,48,.49)" stroke-width="1.9"/>
-            <line x1="135" y1="8" x2="135" y2="98" stroke="rgba(192,120,48,.45)" stroke-width="1.6"/>
-            <line x1="151" y1="8" x2="151" y2="98" stroke="rgba(192,120,48,.41)" stroke-width="1.3"/>
-            <line x1="167" y1="8" x2="167" y2="98" stroke="rgba(192,120,48,.37)" stroke-width="1.1"/>
-            <line x1="183" y1="8" x2="183" y2="98" stroke="rgba(192,120,48,.33)" stroke-width="0.9"/>
-            <!-- Nut (thick horizontal bar) -->
-            <line x1="101" y1="32" x2="185" y2="32" stroke="rgba(250,246,240,.72)" stroke-width="5" stroke-linecap="square"/>
-            <!-- Fret lines -->
-            <line x1="101" y1="54" x2="185" y2="54" stroke="rgba(250,246,240,.22)" stroke-width="1.3"/>
-            <line x1="101" y1="76" x2="185" y2="76" stroke="rgba(250,246,240,.18)" stroke-width="1.1"/>
-            <line x1="101" y1="98" x2="185" y2="98" stroke="rgba(250,246,240,.14)" stroke-width="1.0"/>
+          <!--
+            Do mayor x32010 — standard portrait chord box
+            6 strings (vertical) · low E=left · high E=right
+            strings x: 28 48 68 88 108 128 · spacing 20px
+            nut y=46 · frets y=74,102,130 · spacing 28px
+            dot centers: fret1=60, fret2=88, fret3=116
+          -->
+          <svg viewBox="0 0 160 188" width="130" height="153" xmlns="http://www.w3.org/2000/svg">
+            <!-- chord box background -->
+            <rect x="16" y="46" width="128" height="90" rx="3" fill="rgba(255,255,255,.035)"/>
+            <!-- 6 string lines (vertical, top→bottom) -->
+            <line x1="28"  y1="30" x2="28"  y2="136" stroke="rgba(192,120,48,.72)" stroke-width="2.4"/>
+            <line x1="48"  y1="30" x2="48"  y2="136" stroke="rgba(192,120,48,.62)" stroke-width="2.0"/>
+            <line x1="68"  y1="30" x2="68"  y2="136" stroke="rgba(192,120,48,.54)" stroke-width="1.7"/>
+            <line x1="88"  y1="30" x2="88"  y2="136" stroke="rgba(192,120,48,.46)" stroke-width="1.4"/>
+            <line x1="108" y1="30" x2="108" y2="136" stroke="rgba(192,120,48,.38)" stroke-width="1.2"/>
+            <line x1="128" y1="30" x2="128" y2="136" stroke="rgba(192,120,48,.30)" stroke-width="1.0"/>
+            <!-- Nut (thick white bar) -->
+            <line x1="26" y1="46" x2="130" y2="46" stroke="rgba(250,246,240,.80)" stroke-width="6" stroke-linecap="square"/>
+            <!-- Fret lines (horizontal) -->
+            <line x1="26" y1="74"  x2="130" y2="74"  stroke="rgba(250,246,240,.28)" stroke-width="1.4"/>
+            <line x1="26" y1="102" x2="130" y2="102" stroke="rgba(250,246,240,.22)" stroke-width="1.2"/>
+            <line x1="26" y1="130" x2="130" y2="130" stroke="rgba(250,246,240,.18)" stroke-width="1.0"/>
             <!-- Fret numbers (right side) -->
-            <text x="191" y="47"  fill="rgba(250,246,240,.28)" font-size="8" font-family="Inter,sans-serif">1</text>
-            <text x="191" y="69"  fill="rgba(250,246,240,.28)" font-size="8" font-family="Inter,sans-serif">2</text>
-            <text x="191" y="91"  fill="rgba(250,246,240,.28)" font-size="8" font-family="Inter,sans-serif">3</text>
-            <!-- Muted/open markers above nut -->
-            <!-- String 6 (E low): × muted -->
-            <text x="103" y="22" text-anchor="middle" fill="rgba(192,120,48,.65)" font-size="11" font-weight="700" font-family="Inter,sans-serif">×</text>
-            <!-- String 3 (G): open ○ -->
-            <circle cx="151" cy="19" r="4.5" fill="none" stroke="rgba(192,120,48,.58)" stroke-width="1.5"/>
-            <!-- String 1 (E high): open ○ -->
-            <circle cx="183" cy="19" r="4.5" fill="none" stroke="rgba(192,120,48,.58)" stroke-width="1.5"/>
-            <!-- Fretted dots -->
-            <!-- A string (x=119), fret 3 (y=87): note C -->
-            <circle cx="119" cy="87" r="8" fill="#b06828" opacity=".95"/>
-            <text x="119" y="91" text-anchor="middle" fill="#fff" font-size="9" font-weight="700" font-family="JetBrains Mono,monospace">C</text>
-            <!-- D string (x=135), fret 2 (y=65): note E -->
-            <circle cx="135" cy="65" r="8" fill="#b06828" opacity=".95"/>
-            <text x="135" y="69" text-anchor="middle" fill="#fff" font-size="9" font-weight="700" font-family="JetBrains Mono,monospace">E</text>
-            <!-- B string (x=167), fret 1 (y=43): note C -->
-            <circle cx="167" cy="43" r="8" fill="#b06828" opacity=".95"/>
-            <text x="167" y="47" text-anchor="middle" fill="#fff" font-size="9" font-weight="700" font-family="JetBrains Mono,monospace">C</text>
+            <text x="138" y="64"  fill="rgba(250,246,240,.35)" font-size="9" font-family="Inter,sans-serif">1</text>
+            <text x="138" y="92"  fill="rgba(250,246,240,.35)" font-size="9" font-family="Inter,sans-serif">2</text>
+            <text x="138" y="120" fill="rgba(250,246,240,.35)" font-size="9" font-family="Inter,sans-serif">3</text>
+            <!-- Open / muted markers above nut -->
+            <!-- String 6 (E low, x=28): × muted -->
+            <text x="28" y="34" text-anchor="middle" fill="rgba(192,120,48,.80)" font-size="13" font-weight="700" font-family="Inter,sans-serif">×</text>
+            <!-- String 4 (D, x=68): open ○ -->
+            <!-- String 3 (G, x=88): open ○ -->
+            <circle cx="88"  cy="33" r="5" fill="none" stroke="rgba(192,120,48,.72)" stroke-width="1.6"/>
+            <!-- String 1 (E high, x=128): open ○ -->
+            <circle cx="128" cy="33" r="5" fill="none" stroke="rgba(192,120,48,.72)" stroke-width="1.6"/>
+            <!-- Fretted dots: x32010 -->
+            <!-- A string (x=48),  fret 3 (y=116): C -->
+            <circle cx="48"  cy="116" r="10" fill="#b06828" opacity=".95"/>
+            <text   x="48"  y="120" text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="JetBrains Mono,monospace">C</text>
+            <!-- D string (x=68),  fret 2 (y=88):  E -->
+            <circle cx="68"  cy="88"  r="10" fill="#b06828" opacity=".95"/>
+            <text   x="68"  y="92"  text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="JetBrains Mono,monospace">E</text>
+            <!-- B string (x=108), fret 1 (y=60):  C -->
+            <circle cx="108" cy="60"  r="10" fill="#b06828" opacity=".95"/>
+            <text   x="108" y="64"  text-anchor="middle" fill="#fff" font-size="10" font-weight="700" font-family="JetBrains Mono,monospace">C</text>
             <!-- Chord label -->
-            <text x="140" y="118" text-anchor="middle" fill="rgba(192,120,48,.38)" font-size="9" letter-spacing="2.5" font-family="Inter,sans-serif">DO  M</text>
+            <text x="80" y="158" text-anchor="middle" fill="rgba(192,120,48,.45)" font-size="10" letter-spacing="3" font-family="Inter,sans-serif">DO  M</text>
           </svg>
         </div>
         <div class="tool-card-body">
