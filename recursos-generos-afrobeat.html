@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Afrobeat — Géneros y Tradiciones</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:    #f4ece0; --paper2: #f2ece3; --paper3: #e8e0d4;
+  --paper4:   #c8b99f; --paper5: #cec4b0;
+  --copper:   #a85a1e; --copper-lt: #c47a36; --copper-dk: #7a3e10;
+  --ink:      #1c1410; --ink2: #2e2418; --ink3: #4a3c2c;
+  --ink4:     #8a7a64; --ink5: #8a7a66;
+  --serif: 'Marcellus', Georgia, serif;
+  --sans:  'Inter', system-ui, sans-serif;
+  --mono:  'JetBrains Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+
+nav { position: sticky; top: 0; z-index: 100; background: rgba(244,236,224,.94); backdrop-filter: blur(12px); border-bottom: 1px solid var(--paper4); padding: 0 48px; display: flex; align-items: center; height: 60px; gap: 0; }
+.nav-logo { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--ink); margin-right: 36px; letter-spacing: -.01em; text-decoration: none; }
+.nav-logo span { font-family: var(--mono); font-size: 0.52em; font-weight: 400; color: var(--ink4); letter-spacing: 0; margin-left: 2px; }
+.nav-link { padding: 0 16px; height: 56px; display: flex; align-items: center; font-size: 13px; font-weight: 500; color: var(--ink4); text-decoration: none; border-bottom: 2px solid transparent; transition: color .2s, border-color .2s; }
+.nav-link:hover { color: var(--ink2); }
+.nav-link.active { color: var(--copper); border-bottom-color: var(--copper); }
+.nav-cta { margin-left: auto; background: var(--copper); color: #fff; font-size: 12px; font-weight: 600; padding: 7px 18px; border-radius: 6px; text-decoration: none; transition: background .2s; }
+.nav-cta:hover { background: var(--copper-dk); }
+
+.ch-hero { background: #0d0804; padding: 80px 48px 90px; position: relative; overflow: hidden; }
+.ch-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 50% at 50% 120%, rgba(100,60,20,.4) 0%, transparent 70%); pointer-events: none; }
+.ch-breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(250,246,240,.35); margin-bottom: 40px; }
+.ch-breadcrumb a { color: var(--copper-lt); text-decoration: none; transition: opacity .2s; }
+.ch-breadcrumb a:hover { opacity: .8; }
+.ch-breadcrumb span { color: rgba(250,246,240,.2); }
+.ch-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.ch-num { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .1em; color: var(--copper-lt); border: 1px solid rgba(192,120,48,.3); padding: 4px 10px; border-radius: 4px; }
+.ch-era { font-size: 12px; color: rgba(250,246,240,.35); font-style: italic; }
+.ch-title { font-family: var(--serif); font-size: clamp(52px, 7vw, 92px); font-weight: 700; line-height: .9; letter-spacing: -.025em; color: var(--paper); max-width: 760px; margin-bottom: 12px; }
+.ch-title em { font-style: italic; color: var(--copper-lt); }
+.ch-subtitle { font-family: var(--serif); font-size: clamp(18px, 2vw, 24px); font-style: italic; color: rgba(250,246,240,.42); margin-bottom: 36px; }
+.ch-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.ch-tag { font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; background: rgba(250,246,240,.07); color: rgba(250,246,240,.45); border: 1px solid rgba(250,246,240,.1); }
+
+.ch-body { max-width: 720px; margin: 0 auto; padding: 80px 48px 0; }
+.ch-section { margin-bottom: 72px; }
+.ch-section-label { font-size: 10px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--copper); margin-bottom: 14px; display: block; }
+.ch-h2 { font-family: var(--serif); font-size: clamp(28px, 3.5vw, 40px); font-weight: 700; line-height: 1.06; letter-spacing: -.02em; color: var(--ink); margin-bottom: 24px; }
+.ch-h2 em { font-style: italic; color: var(--copper); }
+.ch-body p { font-size: 16px; color: var(--ink3); line-height: 1.85; margin-bottom: 22px; }
+.ch-body p:last-child { margin-bottom: 0; }
+.ch-body strong { font-weight: 600; color: var(--ink2); }
+
+.ch-pullquote { border-left: 3px solid var(--copper); padding: 16px 24px; background: var(--paper2); border-radius: 0 8px 8px 0; margin: 36px 0; }
+.ch-pullquote p { font-family: var(--serif); font-size: 21px !important; font-style: italic; color: var(--ink2); line-height: 1.55; margin: 0 !important; }
+
+.ch-section-photo { float: right; width: 42%; margin: 6px 0 22px 30px; border-radius: 10px; overflow: hidden; shape-outside: border-box; }
+.ch-section-photo img { width: 100%; height: 210px; object-fit: cover; object-position: center; display: block; }
+.ch-section::after { content: ''; display: table; clear: both; }
+@media (max-width: 600px) { .ch-section-photo { float: none; width: 100%; margin: 0 0 22px 0; } }
+
+.ch-visual-wrap { max-width: 860px; margin: 0 auto; padding: 0 48px 72px; }
+.ch-visual { background: var(--paper2); border: 1px solid var(--paper3); border-radius: 14px; overflow: hidden; }
+.ch-visual-header { padding: 13px 20px; border-bottom: 1px solid var(--paper3); display: flex; align-items: center; justify-content: space-between; }
+.ch-visual-title { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--ink5); }
+.ch-audio-hint { font-size: 11px; color: var(--copper); font-weight: 500; font-style: italic; letter-spacing: .02em; }
+.ch-visual-body { padding: 28px 24px; overflow-x: auto; }
+.ch-visual-caption { padding: 12px 24px 16px; border-top: 1px solid var(--paper3); font-size: 12px; color: var(--ink5); font-style: italic; line-height: 1.5; }
+
+.ch-theory-link { background: #13100c; border-radius: 12px; padding: 28px 32px; margin: 36px 0; display: flex; align-items: flex-start; gap: 20px; }
+.ch-theory-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+.ch-theory-label { font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--copper-lt); margin-bottom: 6px; display: block; }
+.ch-theory-text { font-size: 14px; color: rgba(250,246,240,.55); line-height: 1.7; margin-bottom: 12px; }
+.ch-theory-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--copper-lt); text-decoration: none; border-bottom: 1px solid rgba(192,120,48,.35); padding-bottom: 1px; transition: border-color .2s; }
+.ch-theory-btn:hover { border-color: var(--copper-lt); }
+
+.ch-nav { max-width: 860px; margin: 0 auto; padding: 0 48px 80px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.ch-nav-back, .ch-nav-next { display: flex; flex-direction: column; gap: 4px; text-decoration: none; padding: 20px 24px; border-radius: 12px; border: 1px solid var(--paper4); transition: border-color .2s, box-shadow .2s; max-width: 48%; }
+.ch-nav-back:hover, .ch-nav-next:hover { border-color: var(--copper); box-shadow: 0 4px 16px rgba(160,92,32,.1); }
+.ch-nav-next { align-items: flex-end; }
+.ch-nav-dir { font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--copper); }
+.ch-nav-name { font-family: var(--serif); font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.2; }
+.ch-nav-desc { font-size: 12px; color: var(--ink5); }
+
+@media (max-width: 768px) {
+  nav { padding: 0 16px; overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; scrollbar-width: none; }
+  nav::-webkit-scrollbar { display: none; }
+  nav > * { flex-shrink: 0; }
+  .ch-hero { padding: 60px 20px 72px; }
+  .ch-body { padding: 56px 20px 0; }
+  .ch-visual-wrap { padding: 0 20px 56px; }
+  .ch-nav { padding: 0 20px 60px; flex-direction: column; }
+  .ch-nav-back, .ch-nav-next { max-width: 100%; width: 100%; }
+  .ch-nav-next { align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link active">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<section class="ch-hero">
+  <div class="ch-breadcrumb">
+    <a href="/recursos">Recursos</a>
+    <span>·</span>
+    <a href="/recursos/generos">Géneros y Tradiciones</a>
+    <span>·</span>
+    <span style="color:rgba(250,246,240,.5)">Afrobeat</span>
+  </div>
+  <div class="ch-meta">
+    <span class="ch-num">15 · Nigeria</span>
+    <span class="ch-era">1970 – presente</span>
+  </div>
+  <h1 class="ch-title"><em>Afrobeat</em></h1>
+  <p class="ch-subtitle">El ritmo como acto político</p>
+  <div class="ch-tags">
+    <span class="ch-tag">Clave</span>
+    <span class="ch-tag">Ostinato</span>
+    <span class="ch-tag">Poliritmia</span>
+    <span class="ch-tag">Fela Kuti</span>
+    <span class="ch-tag">Vamp</span>
+  </div>
+</section>
+
+<!-- ── SECCIÓN 1 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Punto de partida</span>
+  <h2 class="ch-h2">Fela Kuti:<br><em>el músico más peligroso del mundo.</em></h2>
+
+  <p>Fela Anikulapo-Kuti creó el afrobeat en Nigeria a finales de los años 60 y en los 70 fusionando el jazz (estudió en Londres e incorporó la influencia de Miles Davis y James Brown), el highlife (la música popular dominante del África Occidental) y la música tradicional yoruba. El resultado fue una nueva forma: obras instrumentales largas (de 10 a 30 minutos) construidas sobre vamps cíclicos con grandes secciones de vientos, riffs de bajo extendidos y percusión polirrítmica.</p>
+
+  <p>Sus letras, en inglés criollo, atacaban directamente a la dictadura militar nigeriana. Fela fue arrestado múltiples veces. Su compuesto en Lagos, que llamó Kalakuta Republic y declaró estado soberano, fue incendiado por soldados en 1977. Su madre murió de las heridas. Siguió grabando. Esta biografía no es contexto adicional: es parte de lo que hace al afrobeat lo que es. La música suena como suena porque fue creada por alguien que la usó como arma.</p>
+
+  <p>Después de Fela, el afrobeat influyó directamente en el afropop contemporáneo (Burna Boy, Wizkid), en el jazz post-moderno (Antibalas, Snarky Puppy), y en el funk de los años 80. La estructura del vamp, la relación entre el bajo y los vientos, y el tratamiento polirrítmico de la percusión son vocabularios activos en la música de estudio y de concierto contemporánea.</p>
+</div>
+</div>
+
+<!-- ── SECCIÓN 2 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">La estructura de vamp</span>
+  <h2 class="ch-h2">Una progresión<br><em>que dura media hora</em></h2>
+
+  <p>Las canciones de afrobeat están construidas sobre ciclos armónicos cortos: a menudo solo 2-4 acordes, repetidos durante toda la duración de la pieza (que puede superar los 20 minutos). Dentro de esa repetición, la música se desarrolla a través de la introducción gradual de nuevos instrumentos, la intensificación de las partes existentes y la interacción dinámica entre la sección de vientos, la percusión y el cantante/director de banda. No hay desarrollo armónico en el sentido clásico: el desarrollo ocurre en el ritmo, la textura y la dinámica.</p>
+
+  <p>La estructura de vamp toma del jazz modal de Miles Davis (especialmente de "Kind of Blue" y "Bitches Brew") y de la música africana tradicional, donde la repetición extendida es un vehículo para la participación colectiva y el trance comunitario. En este contexto, la repetición no es ausencia de desarrollo: es el método del desarrollo. Cada vuelta del ciclo es diferente porque los músicos que tocan encima de él han cambiado lo que hacen.</p>
+
+  <p>Para un compositor o arreglista contemporáneo, el vamp de afrobeat es un modelo de cómo crear tensión y forma sin cambios armónicos. El desafío no es encontrar acordes nuevos: es encontrar qué hacer dentro de los que ya están. Este principio aparece en el drone de la música india, en el ostinato del minimalismo, en el loop de la música electrónica. Fela lo llevó a un extremo de rigor y potencia que pocos han igualado.</p>
+
+  <div class="ch-pullquote">
+    <p>La repetición en el afrobeat no es estancamiento. Es el suelo firme sobre el que 20 músicos construyen algo diferente cada noche.</p>
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 3 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">La clave yoruba</span>
+  <h2 class="ch-h2">Los ritmos<br><em>que organizan el universo</em></h2>
+
+  <p>La música tradicional yoruba de Nigeria está basada en estructuras polirrítmicas donde múltiples ciclos rítmicos (de longitudes diferentes) se tocan simultáneamente, creando patrones entrelazados complejos. No es que cada músico toque un ritmo diferente: es que cada ritmo existe en una relación matemática específica con los demás, de modo que el conjunto crea una textura donde ninguna parte individual contiene toda la información. La "clave" es el patrón de referencia que hace posible que todos los demás se orienten.</p>
+
+  <p>Fela incorporó estas estructuras a su sección de batería, creando una textura rítmica donde múltiples contratiempos coexisten sin colisionar. El característico feel rítmico del afrobeat viene de esta poliritmia africana combinada con el approach funk de James Brown: ambas tradiciones están construidas sobre principios similares (la síncopa, el acento en el contratiempo, la independencia entre el bajo y la percusión) pero se originaron en contextos completamente distintos.</p>
+
+  <p>El punto de cruce entre el ritmo yoruba y el funk de James Brown no es accidental: ambos comparten una herencia africana que llegó a los Estados Unidos vía la trata de esclavos. Cuando Fela los combinó, no estaba fusionando dos culturas ajenas: estaba reconectando dos ramificaciones de la misma raíz. Eso explica por qué la combinación suena tan orgánica, tan inevitable.</p>
+</div>
+</div>
+
+<!-- VISUAL: Cuadrícula de poliritmia 3-contra-4 sobre 12 pulsos -->
+<div class="ch-visual-wrap">
+<div class="ch-visual">
+  <div class="ch-visual-header">
+    <span class="ch-visual-title">Poliritmia afrobeat — patrón de 4 contra patrón de 3 sobre 12 pulsos</span>
+    <span class="ch-audio-hint">♪ toca cada casilla</span>
+  </div>
+  <div class="ch-visual-body">
+    <svg viewBox="0 0 760 240" width="100%" style="display:block;min-width:460px;max-width:760px">
+      <rect width="760" height="240" fill="#f2ece3" rx="8"/>
+
+      <!-- Row labels -->
+      <text x="20" y="82" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#8a7a66" text-anchor="middle" dominant-baseline="middle">4/4</text>
+      <text x="20" y="152" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#a85a1e" text-anchor="middle" dominant-baseline="middle">3/4</text>
+
+      <!-- 12 boxes per row, x: 50 + i*58 for i=0..11 -->
+      <!-- 4/4 pattern: accents on pulses 1,4,7,10 (every 3rd of 12) = indices 0,3,6,9 -->
+      <!-- 3/4 pattern: accents on pulses 1,5,9 (every 4th of 12) = indices 0,4,8 -->
+      <!-- Both coincide at index 0 -->
+
+      <!-- MIDI notes for clicks -->
+      <!-- Row 1 (4/4): 45,48,52,57,60,64,52,48,45,52,55,60 -->
+      <!-- Row 2 (3/4): same notes -->
+
+      <!-- Row 1: 4/4 pattern -->
+      <!-- i=0: accent (both coincide) - bright amber -->
+      <rect x="50"  y="56" width="50" height="50" rx="5" fill="#e8a838" opacity=".95"/>
+      <!-- i=1: off -->
+      <rect x="108" y="62" width="50" height="38" rx="5" fill="#e8d8c4" opacity=".7"/>
+      <!-- i=2: off -->
+      <rect x="166" y="62" width="50" height="38" rx="5" fill="#e8d8c4" opacity=".7"/>
+      <!-- i=3: accent (4/4 only) - copper -->
+      <rect x="224" y="59" width="50" height="44" rx="5" fill="#c47a36" opacity=".85"/>
+      <!-- i=4: off -->
+      <rect x="282" y="62" width="50" height="38" rx="5" fill="#e8d8c4" opacity=".7"/>
+      <!-- i=5: off -->
+      <rect x="340" y="62" width="50" height="38" rx="5" fill="#e8d8c4" opacity=".7"/>
+      <!-- i=6: accent (4/4 only) -->
+      <rect x="398" y="59" width="50" height="44" rx="5" fill="#c47a36" opacity=".85"/>
+      <!-- i=7: off -->
+      <rect x="456" y="62" width="50" height="38" rx="5" fill="#e8d8c4" opacity=".7"/>
+      <!-- i=8: off -->
+      <rect x="514" y="62" width="50" height="38" rx="5" fill="#e8d8c4" opacity=".7"/>
+      <!-- i=9: accent (4/4 only) -->
+      <rect x="572" y="59" width="50" height="44" rx="5" fill="#c47a36" opacity=".85"/>
+      <!-- i=10: off -->
+      <rect x="630" y="62" width="50" height="38" rx="5" fill="#e8d8c4" opacity=".7"/>
+      <!-- i=11: off -->
+      <rect x="688" y="62" width="50" height="38" rx="5" fill="#e8d8c4" opacity=".7"/>
+
+      <!-- Row 1 numbers -->
+      <text x="75"  y="81" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#7a3e10" text-anchor="middle" dominant-baseline="middle">1</text>
+      <text x="133" y="81" font-family="JetBrains Mono,monospace" font-size="11" fill="#8a7a66" text-anchor="middle" dominant-baseline="middle">2</text>
+      <text x="191" y="81" font-family="JetBrains Mono,monospace" font-size="11" fill="#8a7a66" text-anchor="middle" dominant-baseline="middle">3</text>
+      <text x="249" y="81" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">4</text>
+      <text x="307" y="81" font-family="JetBrains Mono,monospace" font-size="11" fill="#8a7a66" text-anchor="middle" dominant-baseline="middle">5</text>
+      <text x="365" y="81" font-family="JetBrains Mono,monospace" font-size="11" fill="#8a7a66" text-anchor="middle" dominant-baseline="middle">6</text>
+      <text x="423" y="81" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">7</text>
+      <text x="481" y="81" font-family="JetBrains Mono,monospace" font-size="11" fill="#8a7a66" text-anchor="middle" dominant-baseline="middle">8</text>
+      <text x="539" y="81" font-family="JetBrains Mono,monospace" font-size="11" fill="#8a7a66" text-anchor="middle" dominant-baseline="middle">9</text>
+      <text x="597" y="81" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">10</text>
+      <text x="655" y="81" font-family="JetBrains Mono,monospace" font-size="11" fill="#8a7a66" text-anchor="middle" dominant-baseline="middle">11</text>
+      <text x="713" y="81" font-family="JetBrains Mono,monospace" font-size="11" fill="#8a7a66" text-anchor="middle" dominant-baseline="middle">12</text>
+
+      <!-- Row 2: 3/4 pattern -->
+      <!-- i=0: accent (both coincide) - bright amber -->
+      <rect x="50"  y="126" width="50" height="50" rx="5" fill="#e8a838" opacity=".95"/>
+      <!-- i=1: off -->
+      <rect x="108" y="132" width="50" height="38" rx="5" fill="#e8e0d8" opacity=".6"/>
+      <!-- i=2: off -->
+      <rect x="166" y="132" width="50" height="38" rx="5" fill="#e8e0d8" opacity=".6"/>
+      <!-- i=3: off -->
+      <rect x="224" y="132" width="50" height="38" rx="5" fill="#e8e0d8" opacity=".6"/>
+      <!-- i=4: accent (3/4 only) - copper-red -->
+      <rect x="282" y="129" width="50" height="44" rx="5" fill="#a85a1e" opacity=".8"/>
+      <!-- i=5: off -->
+      <rect x="340" y="132" width="50" height="38" rx="5" fill="#e8e0d8" opacity=".6"/>
+      <!-- i=6: off -->
+      <rect x="398" y="132" width="50" height="38" rx="5" fill="#e8e0d8" opacity=".6"/>
+      <!-- i=7: off -->
+      <rect x="456" y="132" width="50" height="38" rx="5" fill="#e8e0d8" opacity=".6"/>
+      <!-- i=8: accent (3/4 only) -->
+      <rect x="514" y="129" width="50" height="44" rx="5" fill="#a85a1e" opacity=".8"/>
+      <!-- i=9: off -->
+      <rect x="572" y="132" width="50" height="38" rx="5" fill="#e8e0d8" opacity=".6"/>
+      <!-- i=10: off -->
+      <rect x="630" y="132" width="50" height="38" rx="5" fill="#e8e0d8" opacity=".6"/>
+      <!-- i=11: off -->
+      <rect x="688" y="132" width="50" height="38" rx="5" fill="#e8e0d8" opacity=".6"/>
+
+      <!-- Row 2 numbers -->
+      <text x="75"  y="151" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#7a3e10" text-anchor="middle" dominant-baseline="middle">1</text>
+      <text x="133" y="151" font-family="JetBrains Mono,monospace" font-size="11" fill="#8a7a66" text-anchor="middle" dominant-baseline="middle">2</text>
+      <text x="191" y="151" font-family="JetBrains Mono,monospace" font-size="11" fill="#8a7a66" text-anchor="middle" dominant-baseline="middle">3</text>
+      <text x="249" y="151" font-family="JetBrains Mono,monospace" font-size="11" fill="#8a7a66" text-anchor="middle" dominant-baseline="middle">4</text>
+      <text x="307" y="151" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">5</text>
+      <text x="365" y="151" font-family="JetBrains Mono,monospace" font-size="11" fill="#8a7a66" text-anchor="middle" dominant-baseline="middle">6</text>
+      <text x="423" y="151" font-family="JetBrains Mono,monospace" font-size="11" fill="#8a7a66" text-anchor="middle" dominant-baseline="middle">7</text>
+      <text x="481" y="151" font-family="JetBrains Mono,monospace" font-size="11" fill="#8a7a66" text-anchor="middle" dominant-baseline="middle">8</text>
+      <text x="539" y="151" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">9</text>
+      <text x="597" y="151" font-family="JetBrains Mono,monospace" font-size="11" fill="#8a7a66" text-anchor="middle" dominant-baseline="middle">10</text>
+      <text x="655" y="151" font-family="JetBrains Mono,monospace" font-size="11" fill="#8a7a66" text-anchor="middle" dominant-baseline="middle">11</text>
+      <text x="713" y="151" font-family="JetBrains Mono,monospace" font-size="11" fill="#8a7a66" text-anchor="middle" dominant-baseline="middle">12</text>
+
+      <!-- Coincidence marker -->
+      <text x="75" y="188" font-family="Inter,sans-serif" font-size="10" fill="#a07030" text-anchor="middle" font-style="italic">coinciden</text>
+      <path d="M 75,193 L 75,200" fill="none" stroke="#e8a838" stroke-width="1.5"/>
+
+      <!-- Legend -->
+      <rect x="50" y="212" width="10" height="10" rx="2" fill="#e8a838" opacity=".95"/>
+      <text x="66" y="218" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" dominant-baseline="middle">coincidencia de ambos patrones</text>
+      <rect x="270" y="212" width="10" height="10" rx="2" fill="#c47a36" opacity=".85"/>
+      <text x="286" y="218" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" dominant-baseline="middle">acento 4/4</text>
+      <rect x="400" y="212" width="10" height="10" rx="2" fill="#a85a1e" opacity=".8"/>
+      <text x="416" y="218" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" dominant-baseline="middle">acento 3/4</text>
+      <rect x="530" y="212" width="10" height="10" rx="2" fill="#e8d8c4" opacity=".7"/>
+      <text x="546" y="218" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" dominant-baseline="middle">pulso libre</text>
+
+      <!-- Click zones row 1 -->
+      <rect data-midi="45" x="50"  y="51" width="50" height="60" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="48" x="108" y="57" width="50" height="48" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="52" x="166" y="57" width="50" height="48" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="57" x="224" y="54" width="50" height="54" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="60" x="282" y="57" width="50" height="48" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="64" x="340" y="57" width="50" height="48" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="52" x="398" y="54" width="50" height="54" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="48" x="456" y="57" width="50" height="48" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="45" x="514" y="57" width="50" height="48" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="52" x="572" y="54" width="50" height="54" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="55" x="630" y="57" width="50" height="48" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="60" x="688" y="57" width="50" height="48" fill="transparent" style="cursor:pointer"/>
+      <!-- Click zones row 2 -->
+      <rect data-midi="45" x="50"  y="121" width="50" height="60" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="48" x="108" y="127" width="50" height="48" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="52" x="166" y="127" width="50" height="48" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="57" x="224" y="127" width="50" height="48" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="60" x="282" y="124" width="50" height="54" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="64" x="340" y="127" width="50" height="48" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="52" x="398" y="127" width="50" height="48" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="48" x="456" y="127" width="50" height="48" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="45" x="514" y="124" width="50" height="54" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="52" x="572" y="127" width="50" height="48" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="55" x="630" y="127" width="50" height="48" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="60" x="688" y="127" width="50" height="48" fill="transparent" style="cursor:pointer"/>
+    </svg>
+  </div>
+  <div class="ch-visual-caption">
+    Dos capas rítmicas sobre 12 pulsos: la fila superior marca el patrón de 4/4 (acentos cada 3 pulsos: posiciones 1, 4, 7, 10), la inferior marca el patrón de 3/4 (acentos cada 4 pulsos: posiciones 1, 5, 9). Solo el pulso 1 coincide en ambas capas (ámbar brillante). El resultado es una poliritmia donde ninguna de las dos capas domina completamente la otra. Este es el principio estructural de la percusión del afrobeat.
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 4 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">La sección de vientos</span>
+  <h2 class="ch-h2">El coro de metal<br><em>que habla en ritmo</em></h2>
+
+  <p>La sección de vientos del afrobeat (típicamente 5-8 instrumentos: trompeta, saxo alto, saxo tenor, saxo barítono, trombón) toca patrones de riff escritos que funcionan más rítmicamente que melódicamente. Son frases cortas y repetidas que se entrelazan con el bajo y la percusión en lugar de enunciar melodías desarrolladas. Este enfoque de los vientos (tomado de los arreglos funk de James Brown) crea una textura densa y propulsora donde los vientos actúan como una capa rítmica de registro agudo.</p>
+
+  <p>La diferencia fundamental entre los vientos del afrobeat y los de cualquier big band es la función: en el jazz, la sección de vientos enuncia temas, desarrolla solos, construye armonías complejas. En el afrobeat, los vientos son percusión con altura. Sus patrones están diseñados para complementar el kick y el snare, no para competir con la voz en interés melódico. Esta subordinación de la melodía al ritmo es una decisión estética deliberada, no una limitación técnica.</p>
+
+  <p>El call and response entre la sección de vientos y el vocalista en el afrobeat es estructuralmente idéntico al del gospel y el blues: la voz llama, los vientos responden. Esta continuidad de estructura a través de géneros completamente diferentes (iglesia afroamericana, Lagos de los años 70) confirma que el call and response no es una característica de un género específico sino una forma de organizar la energía musical que reaparece en cualquier tradición con raíces africanas.</p>
+
+  <div class="ch-pullquote">
+    <p>Fela usó la música para decir lo que los periódicos no podían imprimir. Cuando el gobierno te lee las letras como evidencia en un juicio, la música ha hecho su trabajo.</p>
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 5 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Lo que puedes llevarte</span>
+  <h2 class="ch-h2">Tres ideas<br><em>del vamp infinito</em></h2>
+
+  <p>La repetición como desarrollo: permanecer en un ciclo armónico obliga a encontrar el desarrollo a través del ritmo, la dinámica, la textura y el timbre en lugar de cambios de acorde. Esta es una lección profunda de economía musical. En la práctica: tomar una progresión de dos acordes y encontrar cómo construir y liberar tensión en 5 minutos sin cambiar nada de la armonía. Es más difícil de lo que parece y más revelador.</p>
+
+  <p>El <strong>contratiempo</strong> (cross-rhythm): practicar un 3-contra-4 o 4-contra-3 desarrolla una independencia rítmica fundamental que mejora el timing en cualquier contexto. Un ejercicio concreto: tocar con el pie un pulso de cuatro tiempos y con la mano un ciclo de tres tiempos contra él, de manera sostenida. La sensación de ambos patrones coexistiendo sin que ninguno "gane" es el feeling del afrobeat.</p>
+
+  <p>La música como declaración colectiva: el poder del afrobeat viene de 20 músicos bloqueados en un groove con una intención compartida. La lección aplica a cualquier ensemble: cuando todos los integrantes de una banda entienden para qué existe una pieza, el resultado es diferente a cuando cada uno toca bien su parte individual. La diferencia entre músicos tocando juntos y músicos tocando la misma cosa al mismo tiempo no es técnica.</p>
+
+  <div class="ch-theory-link">
+    <div class="ch-theory-icon">◎</div>
+    <div>
+      <span class="ch-theory-label">Concepto relacionado · Teoría</span>
+      <p class="ch-theory-text">Los grados de la escala y las funciones armónicas (tónica, subdominante, dominante) son el vocabulario de las progresiones de vamp del afrobeat. La sección de Grados los explica.</p>
+      <a href="/teoria/grados" class="ch-theory-btn">Ver Grados de la Escala →</a>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="ch-nav">
+  <a href="/recursos/generos/clasica-espanola" class="ch-nav-back">
+    <span class="ch-nav-dir">← Anterior</span>
+    <span class="ch-nav-name">Música Clásica Española</span>
+    <span class="ch-nav-desc">Granados, Albéniz y De Falla</span>
+  </a>
+  <a href="/recursos/generos/celta" class="ch-nav-next">
+    <span class="ch-nav-dir">Siguiente →</span>
+    <span class="ch-nav-name">Música Celta e Irlandesa</span>
+    <span class="ch-nav-desc">Las escalas del norte atlántico</span>
+  </a>
+</div>
+
+<script>
+(function () {
+  var _synth = null;
+
+  function _midiNote(m) {
+    var names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    return names[m % 12] + (Math.floor(m / 12) - 1);
+  }
+
+  async function _initAudio() {
+    if (_synth) return;
+    await Tone.start();
+    var comp   = new Tone.Compressor(-18, 4).toDestination();
+    var reverb = new Tone.Freeverb({ roomSize: 0.22, dampening: 4200, wet: 0.12 }).connect(comp);
+    _synth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'triangle' },
+      envelope:   { attack: 0.006, decay: 0.35, sustain: 0.12, release: 1.4 }
+    }).connect(reverb);
+  }
+
+  async function playNote(midi) {
+    try {
+      await _initAudio();
+      _synth.triggerAttackRelease(_midiNote(midi), '8n');
+    } catch(e) {}
+  }
+
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-midi]');
+    if (!el) return;
+    var midi = parseInt(el.getAttribute('data-midi'), 10);
+    if (!isNaN(midi)) playNote(midi);
+  });
+})();
+</script>
+
+<footer class="tm-footer-legal">
+  <div class="tm-f-copy">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div class="tm-f-links">
+    <a href="/privacidad">Aviso de Privacidad</a>
+    <a href="/terminos">Términos y Condiciones</a>
+    <a href="/cookies">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

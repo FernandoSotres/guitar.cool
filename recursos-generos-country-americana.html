@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Country y Americana — Géneros y Tradiciones</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:    #f4ece0; --paper2: #f2ece3; --paper3: #e8e0d4;
+  --paper4:   #c8b99f; --paper5: #cec4b0;
+  --copper:   #a85a1e; --copper-lt: #c47a36; --copper-dk: #7a3e10;
+  --ink:      #1c1410; --ink2: #2e2418; --ink3: #4a3c2c;
+  --ink4:     #8a7a64; --ink5: #8a7a66;
+  --serif: 'Marcellus', Georgia, serif;
+  --sans:  'Inter', system-ui, sans-serif;
+  --mono:  'JetBrains Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+
+nav { position: sticky; top: 0; z-index: 100; background: rgba(244,236,224,.94); backdrop-filter: blur(12px); border-bottom: 1px solid var(--paper4); padding: 0 48px; display: flex; align-items: center; height: 60px; gap: 0; }
+.nav-logo { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--ink); margin-right: 36px; letter-spacing: -.01em; text-decoration: none; }
+.nav-logo span { font-family: var(--mono); font-size: 0.52em; font-weight: 400; color: var(--ink4); letter-spacing: 0; margin-left: 2px; }
+.nav-link { padding: 0 16px; height: 56px; display: flex; align-items: center; font-size: 13px; font-weight: 500; color: var(--ink4); text-decoration: none; border-bottom: 2px solid transparent; transition: color .2s, border-color .2s; }
+.nav-link:hover { color: var(--ink2); }
+.nav-link.active { color: var(--copper); border-bottom-color: var(--copper); }
+.nav-cta { margin-left: auto; background: var(--copper); color: #fff; font-size: 12px; font-weight: 600; padding: 7px 18px; border-radius: 6px; text-decoration: none; transition: background .2s; }
+.nav-cta:hover { background: var(--copper-dk); }
+
+.ch-hero { background: #0d0804; padding: 80px 48px 90px; position: relative; overflow: hidden; }
+.ch-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 50% at 50% 120%, rgba(100,60,20,.4) 0%, transparent 70%); pointer-events: none; }
+.ch-breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(250,246,240,.35); margin-bottom: 40px; }
+.ch-breadcrumb a { color: var(--copper-lt); text-decoration: none; transition: opacity .2s; }
+.ch-breadcrumb a:hover { opacity: .8; }
+.ch-breadcrumb span { color: rgba(250,246,240,.2); }
+.ch-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.ch-num { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .1em; color: var(--copper-lt); border: 1px solid rgba(192,120,48,.3); padding: 4px 10px; border-radius: 4px; }
+.ch-era { font-size: 12px; color: rgba(250,246,240,.35); font-style: italic; }
+.ch-title { font-family: var(--serif); font-size: clamp(52px, 7vw, 92px); font-weight: 700; line-height: .9; letter-spacing: -.025em; color: var(--paper); max-width: 760px; margin-bottom: 12px; }
+.ch-title em { font-style: italic; color: var(--copper-lt); }
+.ch-subtitle { font-family: var(--serif); font-size: clamp(18px, 2vw, 24px); font-style: italic; color: rgba(250,246,240,.42); margin-bottom: 36px; }
+.ch-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.ch-tag { font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; background: rgba(250,246,240,.07); color: rgba(250,246,240,.45); border: 1px solid rgba(250,246,240,.1); }
+
+.ch-body { max-width: 720px; margin: 0 auto; padding: 80px 48px 0; }
+.ch-section { margin-bottom: 72px; }
+.ch-section-label { font-size: 10px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--copper); margin-bottom: 14px; display: block; }
+.ch-h2 { font-family: var(--serif); font-size: clamp(28px, 3.5vw, 40px); font-weight: 700; line-height: 1.06; letter-spacing: -.02em; color: var(--ink); margin-bottom: 24px; }
+.ch-h2 em { font-style: italic; color: var(--copper); }
+.ch-body p { font-size: 16px; color: var(--ink3); line-height: 1.85; margin-bottom: 22px; }
+.ch-body p:last-child { margin-bottom: 0; }
+.ch-body strong { font-weight: 600; color: var(--ink2); }
+
+.ch-pullquote { border-left: 3px solid var(--copper); padding: 16px 24px; background: var(--paper2); border-radius: 0 8px 8px 0; margin: 36px 0; }
+.ch-pullquote p { font-family: var(--serif); font-size: 21px !important; font-style: italic; color: var(--ink2); line-height: 1.55; margin: 0 !important; }
+
+.ch-section-photo { float: right; width: 42%; margin: 6px 0 22px 30px; border-radius: 10px; overflow: hidden; shape-outside: border-box; }
+.ch-section-photo img { width: 100%; height: 210px; object-fit: cover; object-position: center; display: block; }
+.ch-section::after { content: ''; display: table; clear: both; }
+@media (max-width: 600px) { .ch-section-photo { float: none; width: 100%; margin: 0 0 22px 0; } }
+
+.ch-visual-wrap { max-width: 860px; margin: 0 auto; padding: 0 48px 72px; }
+.ch-visual { background: var(--paper2); border: 1px solid var(--paper3); border-radius: 14px; overflow: hidden; }
+.ch-visual-header { padding: 13px 20px; border-bottom: 1px solid var(--paper3); display: flex; align-items: center; justify-content: space-between; }
+.ch-visual-title { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--ink5); }
+.ch-audio-hint { font-size: 11px; color: var(--copper); font-weight: 500; font-style: italic; letter-spacing: .02em; }
+.ch-visual-body { padding: 28px 24px; overflow-x: auto; }
+.ch-visual-caption { padding: 12px 24px 16px; border-top: 1px solid var(--paper3); font-size: 12px; color: var(--ink5); font-style: italic; line-height: 1.5; }
+
+.ch-theory-link { background: #13100c; border-radius: 12px; padding: 28px 32px; margin: 36px 0; display: flex; align-items: flex-start; gap: 20px; }
+.ch-theory-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+.ch-theory-label { font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--copper-lt); margin-bottom: 6px; display: block; }
+.ch-theory-text { font-size: 14px; color: rgba(250,246,240,.55); line-height: 1.7; margin-bottom: 12px; }
+.ch-theory-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--copper-lt); text-decoration: none; border-bottom: 1px solid rgba(192,120,48,.35); padding-bottom: 1px; transition: border-color .2s; }
+.ch-theory-btn:hover { border-color: var(--copper-lt); }
+
+.ch-nav { max-width: 860px; margin: 0 auto; padding: 0 48px 80px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.ch-nav-back, .ch-nav-next { display: flex; flex-direction: column; gap: 4px; text-decoration: none; padding: 20px 24px; border-radius: 12px; border: 1px solid var(--paper4); transition: border-color .2s, box-shadow .2s; max-width: 48%; }
+.ch-nav-back:hover, .ch-nav-next:hover { border-color: var(--copper); box-shadow: 0 4px 16px rgba(160,92,32,.1); }
+.ch-nav-next { align-items: flex-end; }
+.ch-nav-dir { font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--copper); }
+.ch-nav-name { font-family: var(--serif); font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.2; }
+.ch-nav-desc { font-size: 12px; color: var(--ink5); }
+
+@media (max-width: 768px) {
+  nav { padding: 0 16px; overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; scrollbar-width: none; }
+  nav::-webkit-scrollbar { display: none; }
+  nav > * { flex-shrink: 0; }
+  .ch-hero { padding: 60px 20px 72px; }
+  .ch-body { padding: 56px 20px 0; }
+  .ch-visual-wrap { padding: 0 20px 56px; }
+  .ch-nav { padding: 0 20px 60px; flex-direction: column; }
+  .ch-nav-back, .ch-nav-next { max-width: 100%; width: 100%; }
+  .ch-nav-next { align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link active">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<section class="ch-hero">
+  <div class="ch-breadcrumb">
+    <a href="/recursos">Recursos</a>
+    <span>·</span>
+    <a href="/recursos/generos">Géneros y Tradiciones</a>
+    <span>·</span>
+    <span style="color:rgba(250,246,240,.5)">Country y Americana</span>
+  </div>
+  <div class="ch-meta">
+    <span class="ch-num">13 · EE.UU.</span>
+    <span class="ch-era">1920 – presente</span>
+  </div>
+  <h1 class="ch-title">Country <em>y Americana</em></h1>
+  <p class="ch-subtitle">La canción que cuenta historias</p>
+  <div class="ch-tags">
+    <span class="ch-tag">Fingerpicking</span>
+    <span class="ch-tag">Pentatónica mayor</span>
+    <span class="ch-tag">I–IV–V</span>
+    <span class="ch-tag">Hank Williams</span>
+    <span class="ch-tag">Merle Travis</span>
+  </div>
+</section>
+
+<!-- ── SECCIÓN 1 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Punto de partida</span>
+  <h2 class="ch-h2">La canción de tres minutos<br><em>que cuenta una vida.</em></h2>
+
+  <p>La música country creció de la música folclórica del sur de los Estados Unidos y las montañas Apalaches: tradiciones folk británicas e irlandesas encontrándose con la música afroamericana y el blues en el sureste rural. Las primeras grabaciones comerciales de country se realizaron en los años 20 del siglo pasado, con Jimmie Rodgers y la Carter Family como figuras fundacionales que definieron los dos polos del género: el yodel de Rodgers apuntando al virtuosismo individual, la Carter Family apuntando a la canción colectiva y el repertorio folclórico.</p>
+
+  <p>La característica formal que define al country sobre todo lo demás es la canción de historia de tres minutos: un arco narrativo completo entregado a través de verso, coro y puente sin exceso musical. La letra lleva el peso emocional y la música existe para sostenerla, no para competir con ella. Esta economía no es sencillez: es la disciplina de no poner nada que no sirva.</p>
+
+  <p>Hank Williams, Johnny Cash y Loretta Lynn son los tres vértices del triángulo clásico: Williams como maestro de la forma breve y devastadora, Cash como narrador épico y moral, Lynn como documentalista de la vida de las mujeres del campo americano. Los tres trabajaron con los mismos tres acordes y produjeron algunos de los momentos más intensos de la canción popular del siglo XX.</p>
+</div>
+</div>
+
+<!-- ── SECCIÓN 2 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">La narrativa</span>
+  <h2 class="ch-h2">Verso, coro, puente:<br><em>la arquitectura de la canción</em></h2>
+
+  <p>El country estableció la forma de canción que se convirtió en el estándar de toda la música popular después de 1950: AABA (verso-verso-estribillo-verso) y ABABCB (verso-coro-verso-coro-puente-coro). Pero lo que importa más que la forma es la economía del lenguaje: una gran canción country cuenta una historia con imágenes concretas y casi ninguna abstracción. La especificidad es la regla, no la excepción.</p>
+
+  <p>"He stopped loving her today" (George Jones, 1980) es un lírica más poderosa que cualquier metáfora poética elaborada porque es específica y final. El oyente no necesita interpretar: la imagen está completa. Esta preferencia por lo concreto sobre lo abstracto es la lección más transferible de toda la tradición country para cualquier compositor.</p>
+
+  <p>El movimiento Americana (Townes Van Zandt, Gillian Welch, Jason Isbell) extiende esta tradición incorporando influencias del folk, el blues y el rock sin abandonar el compromiso con la narrativa. Welch en particular ha llevado la economía de lenguaje del country a un extremo: canciones donde cada palabra ha sido pesada antes de quedarse.</p>
+
+  <div class="ch-pullquote">
+    <p>Una imagen concreta siempre gana a una emoción abstracta. El oyente llega solo a la emoción si le das la imagen correcta.</p>
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 3 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">La armonía</span>
+  <h2 class="ch-h2">I, IV, V:<br><em>tres acordes que contienen todo</em></h2>
+
+  <p>La armonía clásica del country está construida sobre la tríada I–IV–V. En la tonalidad de Sol: Sol mayor (I), Do mayor (IV), Re mayor (V). Estos tres acordes contienen entre ellos las siete notas de la escala de Sol mayor, lo que significa que cualquier melodía en Sol mayor armoniza naturalmente sobre ellos. La estructura no es una limitación técnica: es una elección estética consciente.</p>
+
+  <p>La simplicidad existe para que la voz y la letra carguen el peso emocional, con la armonía como vehículo en lugar de ser el tema. Muchas de las canciones country emocionalmente más devastadoras no usan nada más que estos tres acordes. El desafío no es encontrar acordes más interesantes: es encontrar qué decir con los que ya están ahí.</p>
+
+  <p>El <strong>acorde dominante</strong> (V) en el country funciona de manera menos ornamentada que en el jazz o en la música clásica. No hay sustituciones ni reharmonizaciones: el V resuelve al I de forma directa y sin ambigüedad. Esa franqueza armónica es parte del lenguaje, no una limitación del vocabulario.</p>
+</div>
+</div>
+
+<!-- VISUAL: Progresión I-IV-V en Sol -->
+<div class="ch-visual-wrap">
+<div class="ch-visual">
+  <div class="ch-visual-header">
+    <span class="ch-visual-title">Progresión I–IV–V–I en Sol — los tres acordes del country</span>
+    <span class="ch-audio-hint">♪ toca cada acorde</span>
+  </div>
+  <div class="ch-visual-body">
+    <svg viewBox="0 0 760 270" width="100%" style="display:block;min-width:460px;max-width:760px">
+      <rect width="760" height="270" fill="#f2ece3" rx="8"/>
+
+      <!-- Four chord blocks: G (I), C (IV), D (V), G (I) -->
+      <!-- Each block shows note circles stacked -->
+
+      <!-- G major (I) - amber/home -->
+      <rect x="30" y="30" width="155" height="170" rx="9" fill="#e8a838" opacity=".18" stroke="#e8a838" stroke-width="1.5"/>
+      <text x="107" y="54" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#a07030" text-anchor="middle">I · Sol mayor</text>
+      <circle cx="107" cy="82"  r="22" fill="#e8a838" opacity=".9"/>
+      <circle cx="107" cy="120" r="22" fill="#e8a838" opacity=".7"/>
+      <circle cx="107" cy="158" r="22" fill="#e8a838" opacity=".55"/>
+      <text x="107" y="82"  font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#7a3e10" text-anchor="middle" dominant-baseline="middle">G</text>
+      <text x="107" y="120" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#7a3e10" text-anchor="middle" dominant-baseline="middle">B</text>
+      <text x="107" y="158" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#7a3e10" text-anchor="middle" dominant-baseline="middle">D</text>
+
+      <!-- Arrow I to IV -->
+      <path d="M 192,120 L 216,120" fill="none" stroke="#c8b99f" stroke-width="2" marker-end="url(#arr-chord)"/>
+
+      <!-- C major (IV) - light copper/subdominant -->
+      <rect x="222" y="30" width="155" height="170" rx="9" fill="#c47a36" opacity=".18" stroke="#c47a36" stroke-width="1.5"/>
+      <text x="299" y="54" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#a07030" text-anchor="middle">IV · Do mayor</text>
+      <circle cx="299" cy="82"  r="22" fill="#c47a36" opacity=".85"/>
+      <circle cx="299" cy="120" r="22" fill="#c47a36" opacity=".65"/>
+      <circle cx="299" cy="158" r="22" fill="#c47a36" opacity=".5"/>
+      <text x="299" y="82"  font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">C</text>
+      <text x="299" y="120" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">E</text>
+      <text x="299" y="158" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">G</text>
+
+      <!-- Arrow IV to V -->
+      <path d="M 384,120 L 408,120" fill="none" stroke="#c8b99f" stroke-width="2" marker-end="url(#arr-chord)"/>
+
+      <!-- D major (V) - dark copper/tension -->
+      <rect x="414" y="30" width="155" height="170" rx="9" fill="#7a3e10" opacity=".18" stroke="#7a3e10" stroke-width="1.5"/>
+      <text x="491" y="54" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#a07030" text-anchor="middle">V · Re mayor</text>
+      <circle cx="491" cy="82"  r="22" fill="#7a3e10" opacity=".85"/>
+      <circle cx="491" cy="120" r="22" fill="#7a3e10" opacity=".65"/>
+      <circle cx="491" cy="158" r="22" fill="#7a3e10" opacity=".5"/>
+      <text x="491" y="82"  font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">D</text>
+      <text x="491" y="120" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">F#</text>
+      <text x="491" y="158" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">A</text>
+
+      <!-- Arrow V to I (resolve) -->
+      <path d="M 576,120 L 600,120" fill="none" stroke="#a85a1e" stroke-width="2.5" marker-end="url(#arr-resolve)"/>
+
+      <!-- G major (I) repeat - resolution -->
+      <rect x="606" y="30" width="130" height="170" rx="9" fill="#e8a838" opacity=".28" stroke="#e8a838" stroke-width="2"/>
+      <text x="671" y="54" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#a07030" text-anchor="middle">I · reposo</text>
+      <circle cx="671" cy="82"  r="22" fill="#e8a838" opacity=".9"/>
+      <circle cx="671" cy="120" r="22" fill="#e8a838" opacity=".7"/>
+      <circle cx="671" cy="158" r="22" fill="#e8a838" opacity=".55"/>
+      <text x="671" y="82"  font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#7a3e10" text-anchor="middle" dominant-baseline="middle">G</text>
+      <text x="671" y="120" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#7a3e10" text-anchor="middle" dominant-baseline="middle">B</text>
+      <text x="671" y="158" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#7a3e10" text-anchor="middle" dominant-baseline="middle">D</text>
+
+      <defs>
+        <marker id="arr-chord" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 Z" fill="#c8b99f"/>
+        </marker>
+        <marker id="arr-resolve" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 Z" fill="#a85a1e"/>
+        </marker>
+      </defs>
+
+      <!-- Function labels -->
+      <text x="107" y="218" font-family="Inter,sans-serif" font-size="11" fill="#a07030" text-anchor="middle">tónica</text>
+      <text x="299" y="218" font-family="Inter,sans-serif" font-size="11" fill="#a07030" text-anchor="middle">subdominante</text>
+      <text x="491" y="218" font-family="Inter,sans-serif" font-size="11" fill="#7a3e10" text-anchor="middle">dominante</text>
+      <text x="671" y="218" font-family="Inter,sans-serif" font-size="11" fill="#a07030" text-anchor="middle">resolución</text>
+
+      <!-- Legend -->
+      <rect x="30" y="242" width="10" height="10" rx="2" fill="#e8a838" opacity=".9"/>
+      <text x="46" y="248" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" dominant-baseline="middle">I — centro tonal (home)</text>
+      <rect x="250" y="242" width="10" height="10" rx="2" fill="#c47a36" opacity=".85"/>
+      <text x="266" y="248" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" dominant-baseline="middle">IV — movimiento (color)</text>
+      <rect x="470" y="242" width="10" height="10" rx="2" fill="#7a3e10" opacity=".85"/>
+      <text x="486" y="248" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" dominant-baseline="middle">V — tensión (quiere resolver)</text>
+
+      <!-- Click zones -->
+      <rect data-midi="43" x="30"  y="25" width="155" height="180" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="48" x="222" y="25" width="155" height="180" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="50" x="414" y="25" width="155" height="180" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="43" x="606" y="25" width="130" height="180" fill="transparent" style="cursor:pointer"/>
+    </svg>
+  </div>
+  <div class="ch-visual-caption">
+    La progresión I–IV–V–I en Sol mayor: G–C–D–G. Los tres acordes contienen entre ellos las siete notas de la escala. El V (Re mayor) crea tensión que pide resolver al I. La flecha más gruesa entre V e I marca la cadencia, el momento de mayor gravedad armónica de la progresión.
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 4 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">El fingerpicking</span>
+  <h2 class="ch-h2">El pulgar<br><em>y cuatro dedos haciendo de banda</em></h2>
+
+  <p>El <strong>Travis picking</strong> (nombrado por Merle Travis, codificado por Chet Atkins) es la base de la técnica de guitarra country: el pulgar alterna notas de bajo en los tiempos 1 y 3 mientras los dedos tocan las cuerdas agudas en patrones rítmicos en los contratiempos. Esto permite que un solo guitarrista proporcione simultáneamente bajo, ritmo y melodía. El resultado es una textura completa que no necesita banda para ser comprensible.</p>
+
+  <p>La técnica es exigente: el pulgar y los dedos deben coordinarse de manera independiente, lo que requiere que el pulgar funcione como un metrónomo autónomo mientras los dedos improvisan encima. Una vez internalizado, este principio transforma la guitarra acústica de instrumento rítmico en ensemble completo. Mississippi John Hurt y Elizabeth Cotten aplicaron variantes de este mismo principio en el blues y el folk antes de que Travis lo sistematizara para el country.</p>
+
+  <p>La técnica de <strong>flatpicking</strong> (con plectro) es el otro polo de la guitarra country: Doc Watson y Tony Rice la llevaron a velocidades y precisiones que compiten con el violín y el mandolín en términos de agilidad melódica. Flatpicking y Travis picking son los dos vocabularios técnicos fundamentales de la guitarra acústica americana y sus descendientes directos cubren casi todo el espacio del fingerstyle contemporáneo.</p>
+
+  <div class="ch-pullquote">
+    <p>El pulgar no acompaña. El pulgar es la banda. Los dedos son el solista que toca encima de ella.</p>
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 5 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Lo que puedes llevarte</span>
+  <h2 class="ch-h2">Tres lecciones<br><em>de la escuela del tres acordes</em></h2>
+
+  <p>La economía armónica: escribir con I–IV–V no es una limitación, es una restricción que redirige la energía creativa hacia la melodía, el ritmo y la letra. Estudia qué hacen los grandes compositores country dentro de estos límites: la variedad que producen no viene de la armonía, viene de todo lo demás. La restricción como herramienta pedagógica es una de las lecciones más útiles del género.</p>
+
+  <p>La <strong>escala pentatónica mayor</strong>: mientras el blues usa la pentatónica menor, el country usa la mayor. Las mismas cinco notas, distinta tonalidad, registro emocional completamente diferente. La pentatónica mayor suena brillante, abierta, sin las tensiones de la menor. Saber manejar ambas en el mismo mástil duplica el vocabulario melódico disponible.</p>
+
+  <p>La narrativa en canciones: contar una historia en 3 minutos con imágenes concretas es una de las habilidades más difíciles de la música. El country la desarrolló con más rigor que cualquier otra tradición. Ejercicio práctico: tomar una canción de Townes Van Zandt o Gillian Welch y analizar qué imagen concreta aparece en cada verso, cuándo aparecen abstracciones, y si las abstracciones funcionan mejor o peor que las imágenes.</p>
+
+  <div class="ch-theory-link">
+    <div class="ch-theory-icon">◎</div>
+    <div>
+      <span class="ch-theory-label">Concepto relacionado · Teoría</span>
+      <p class="ch-theory-text">Los grados I, IV y V son los pilares de la armonía tonal. La sección de Grados explica por qué estas tres funciones armónicas son suficientes para organizar cualquier progresión.</p>
+      <a href="/teoria/grados" class="ch-theory-btn">Ver Grados de la Escala →</a>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="ch-nav">
+  <a href="/recursos/generos/gospel-soul" class="ch-nav-back">
+    <span class="ch-nav-dir">← Anterior</span>
+    <span class="ch-nav-name">Gospel y Soul</span>
+    <span class="ch-nav-desc">La voz como instrumento sagrado</span>
+  </a>
+  <a href="/recursos/generos/clasica-espanola" class="ch-nav-next">
+    <span class="ch-nav-dir">Siguiente →</span>
+    <span class="ch-nav-name">Música Clásica Española</span>
+    <span class="ch-nav-desc">Granados, Albéniz y De Falla</span>
+  </a>
+</div>
+
+<script>
+(function () {
+  var _synth = null;
+
+  function _midiNote(m) {
+    var names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    return names[m % 12] + (Math.floor(m / 12) - 1);
+  }
+
+  async function _initAudio() {
+    if (_synth) return;
+    await Tone.start();
+    var comp   = new Tone.Compressor(-18, 4).toDestination();
+    var reverb = new Tone.Freeverb({ roomSize: 0.22, dampening: 4200, wet: 0.12 }).connect(comp);
+    _synth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'triangle' },
+      envelope:   { attack: 0.006, decay: 0.35, sustain: 0.12, release: 1.4 }
+    }).connect(reverb);
+  }
+
+  async function playNote(midi) {
+    try {
+      await _initAudio();
+      _synth.triggerAttackRelease(_midiNote(midi), '8n');
+    } catch(e) {}
+  }
+
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-midi]');
+    if (!el) return;
+    var midi = parseInt(el.getAttribute('data-midi'), 10);
+    if (!isNaN(midi)) playNote(midi);
+  });
+})();
+</script>
+
+<footer class="tm-footer-legal">
+  <div class="tm-f-copy">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div class="tm-f-links">
+    <a href="/privacidad">Aviso de Privacidad</a>
+    <a href="/terminos">Términos y Condiciones</a>
+    <a href="/cookies">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Raga — Géneros y Tradiciones Musicales</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:    #f4ece0; --paper2: #f2ece3; --paper3: #e8e0d4;
+  --paper4:   #c8b99f; --paper5: #cec4b0;
+  --copper:   #a85a1e; --copper-lt: #c47a36; --copper-dk: #7a3e10;
+  --ink:      #1c1410; --ink2: #2e2418; --ink3: #4a3c2c;
+  --ink4:     #8a7a64; --ink5: #8a7a66;
+  --serif: 'Marcellus', Georgia, serif;
+  --sans:  'Inter', system-ui, sans-serif;
+  --mono:  'JetBrains Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+
+nav { position: sticky; top: 0; z-index: 100; background: rgba(244,236,224,.94); backdrop-filter: blur(12px); border-bottom: 1px solid var(--paper4); padding: 0 48px; display: flex; align-items: center; height: 60px; gap: 0; }
+.nav-logo { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--ink); margin-right: 36px; letter-spacing: -.01em; text-decoration: none; }
+.nav-logo span { font-family: var(--mono); font-size: 0.52em; font-weight: 400; color: var(--ink4); letter-spacing: 0; margin-left: 2px; }
+.nav-link { padding: 0 16px; height: 56px; display: flex; align-items: center; font-size: 13px; font-weight: 500; color: var(--ink4); text-decoration: none; border-bottom: 2px solid transparent; transition: color .2s, border-color .2s; }
+.nav-link:hover { color: var(--ink2); }
+.nav-link.active { color: var(--copper); border-bottom-color: var(--copper); }
+.nav-cta { margin-left: auto; background: var(--copper); color: #fff; font-size: 12px; font-weight: 600; padding: 7px 18px; border-radius: 6px; text-decoration: none; transition: background .2s; }
+.nav-cta:hover { background: var(--copper-dk); }
+
+.ch-hero { background: #0d0804; padding: 80px 48px 90px; position: relative; overflow: hidden; }
+.ch-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 50% at 50% 120%, rgba(100,60,20,.4) 0%, transparent 70%); pointer-events: none; }
+.ch-breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(250,246,240,.35); margin-bottom: 40px; }
+.ch-breadcrumb a { color: var(--copper-lt); text-decoration: none; transition: opacity .2s; }
+.ch-breadcrumb a:hover { opacity: .8; }
+.ch-breadcrumb span { color: rgba(250,246,240,.2); }
+.ch-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.ch-num { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .1em; color: var(--copper-lt); border: 1px solid rgba(192,120,48,.3); padding: 4px 10px; border-radius: 4px; }
+.ch-era { font-size: 12px; color: rgba(250,246,240,.35); font-style: italic; }
+.ch-title { font-family: var(--serif); font-size: clamp(52px, 7vw, 92px); font-weight: 700; line-height: .9; letter-spacing: -.025em; color: var(--paper); max-width: 760px; margin-bottom: 12px; }
+.ch-title em { font-style: italic; color: var(--copper-lt); }
+.ch-subtitle { font-family: var(--serif); font-size: clamp(18px, 2vw, 24px); font-style: italic; color: rgba(250,246,240,.42); margin-bottom: 36px; }
+.ch-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.ch-tag { font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; background: rgba(250,246,240,.07); color: rgba(250,246,240,.45); border: 1px solid rgba(250,246,240,.1); }
+
+.ch-body { max-width: 720px; margin: 0 auto; padding: 80px 48px 0; }
+.ch-section { margin-bottom: 72px; }
+.ch-section-label { font-size: 10px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--copper); margin-bottom: 14px; display: block; }
+.ch-h2 { font-family: var(--serif); font-size: clamp(28px, 3.5vw, 40px); font-weight: 700; line-height: 1.06; letter-spacing: -.02em; color: var(--ink); margin-bottom: 24px; }
+.ch-h2 em { font-style: italic; color: var(--copper); }
+.ch-body p { font-size: 16px; color: var(--ink3); line-height: 1.85; margin-bottom: 22px; }
+.ch-body p:last-child { margin-bottom: 0; }
+.ch-body strong { font-weight: 600; color: var(--ink2); }
+
+.ch-pullquote { border-left: 3px solid var(--copper); padding: 16px 24px; background: var(--paper2); border-radius: 0 8px 8px 0; margin: 36px 0; }
+.ch-pullquote p { font-family: var(--serif); font-size: 21px !important; font-style: italic; color: var(--ink2); line-height: 1.55; margin: 0 !important; }
+
+.ch-section-photo { float: right; width: 42%; margin: 6px 0 22px 30px; border-radius: 10px; overflow: hidden; shape-outside: border-box; }
+.ch-section-photo img { width: 100%; height: 210px; object-fit: cover; object-position: center; display: block; }
+.ch-section::after { content: ''; display: table; clear: both; }
+@media (max-width: 600px) { .ch-section-photo { float: none; width: 100%; margin: 0 0 22px 0; } }
+
+.ch-visual-wrap { max-width: 860px; margin: 0 auto; padding: 0 48px 72px; }
+.ch-visual { background: var(--paper2); border: 1px solid var(--paper3); border-radius: 14px; overflow: hidden; }
+.ch-visual-header { padding: 13px 20px; border-bottom: 1px solid var(--paper3); display: flex; align-items: center; justify-content: space-between; }
+.ch-visual-title { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--ink5); }
+.ch-audio-hint { font-size: 11px; color: var(--copper); font-weight: 500; font-style: italic; letter-spacing: .02em; }
+.ch-visual-body { padding: 28px 24px; overflow-x: auto; }
+.ch-visual-caption { padding: 12px 24px 16px; border-top: 1px solid var(--paper3); font-size: 12px; color: var(--ink5); font-style: italic; line-height: 1.5; }
+
+.ch-theory-link { background: #13100c; border-radius: 12px; padding: 28px 32px; margin: 36px 0; display: flex; align-items: flex-start; gap: 20px; }
+.ch-theory-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+.ch-theory-label { font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--copper-lt); margin-bottom: 6px; display: block; }
+.ch-theory-text { font-size: 14px; color: rgba(250,246,240,.55); line-height: 1.7; margin-bottom: 12px; }
+.ch-theory-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--copper-lt); text-decoration: none; border-bottom: 1px solid rgba(192,120,48,.35); padding-bottom: 1px; transition: border-color .2s; }
+.ch-theory-btn:hover { border-color: var(--copper-lt); }
+
+.ch-nav { max-width: 860px; margin: 0 auto; padding: 0 48px 80px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.ch-nav-back, .ch-nav-next { display: flex; flex-direction: column; gap: 4px; text-decoration: none; padding: 20px 24px; border-radius: 12px; border: 1px solid var(--paper4); transition: border-color .2s, box-shadow .2s; max-width: 48%; }
+.ch-nav-back:hover, .ch-nav-next:hover { border-color: var(--copper); box-shadow: 0 4px 16px rgba(160,92,32,.1); }
+.ch-nav-next { align-items: flex-end; }
+.ch-nav-dir { font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--copper); }
+.ch-nav-name { font-family: var(--serif); font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.2; }
+.ch-nav-desc { font-size: 12px; color: var(--ink5); }
+
+@media (max-width: 768px) {
+  nav { padding: 0 16px; overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; scrollbar-width: none; }
+  nav::-webkit-scrollbar { display: none; }
+  nav > * { flex-shrink: 0; }
+  .ch-hero { padding: 60px 20px 72px; }
+  .ch-body { padding: 56px 20px 0; }
+  .ch-visual-wrap { padding: 0 20px 56px; }
+  .ch-nav { padding: 0 20px 60px; flex-direction: column; }
+  .ch-nav-back, .ch-nav-next { max-width: 100%; width: 100%; }
+  .ch-nav-next { align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link active">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<section class="ch-hero">
+  <div class="ch-breadcrumb">
+    <a href="/recursos">Recursos</a>
+    <span>·</span>
+    <a href="/recursos/generos">Géneros y Tradiciones</a>
+    <span>·</span>
+    <span style="color:rgba(250,246,240,.5)">Raga</span>
+  </div>
+  <div class="ch-meta">
+    <span class="ch-num">04 · India</span>
+    <span class="ch-era">s. II a.C. – presente</span>
+  </div>
+  <h1 class="ch-title">Raga — Música <em>Clásica India</em></h1>
+  <p class="ch-subtitle">El tiempo como forma sagrada</p>
+  <div class="ch-tags">
+    <span class="ch-tag">Ragas</span>
+    <span class="ch-tag">Talas</span>
+    <span class="ch-tag">Microtonalidad</span>
+    <span class="ch-tag">Alap</span>
+    <span class="ch-tag">Rasa</span>
+  </div>
+</section>
+
+<!-- ── SECCIÓN 1 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Punto de partida</span>
+  <h2 class="ch-h2">Una escala<br><em>que tiene hora y emoción.</em></h2>
+
+  <p>Un raga no es equivalente a una escala occidental. Es simultáneamente un marco melódico, un conjunto de frases características, una hora del día en que debe interpretarse y un estado emocional (<strong>rasa</strong>) que evoca. Dos ragas pueden usar exactamente las mismas notas y ser universos melódicos completamente distintos porque sus frases características, sus ornamentos y su carácter emocional son diferentes. La escala es el material; el raga es el mundo que se construye con ese material.</p>
+
+  <p>La tradición clásica india tiene al menos 2.000 años de historia documentada. Los primeros textos teóricos sistemáticos — el Natya Shastra de Bharata — datan del siglo II a.C. y ya contienen una teoría elaborada de las notas, los intervalos y sus asociaciones emocionales. Esta no es una tradición que evolucionó sin registro: fue teorizada, debatida y codificada a lo largo de dos milenios, con una riqueza documental que pocas tradiciones musicales del mundo pueden igualar.</p>
+
+  <p>Existen dos ramas principales: la música clásica <strong>hindustani</strong> del norte de India (asociada con el sitar, el sarod, el tablá y el vocal clásico de los grandes gharanas) y la música <strong>carnática</strong> del sur (con el veena, el violín clásico indio y una relación más estrecha con el texto y la composición fija). Comparten la misma base teórica pero se desarrollaron en direcciones distintas, con repertorios y estéticas que no son intercambiables.</p>
+</div>
+</div>
+
+<!-- ── SECCIÓN 2 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">El raga como cosmos</span>
+  <h2 class="ch-h2">No hay escalas.<br><em>Hay ragas.</em></h2>
+
+  <p>Lo que define a un raga es una constelación de elementos que no tiene equivalente en la teoría occidental. Primero, las notas que usa: no siempre las siete, algunos ragas usan cinco o seis, y las notas pueden ser diferentes en la subida (<strong>arohana</strong>) que en la bajada (<strong>avarohana</strong>). El Raga Bhairav sube con ciertos notas y baja con otras: la escala ascendente y la descendente no son simétricas. Esto no es un error ni una irregularidad; es una característica definitoria.</p>
+
+  <p>Luego están los <strong>gamaks</strong>: los ornamentos y las inflexiones microtonales que se aplican a notas específicas del raga. Una nota tocada sin su gamak correcto es como una palabra pronunciada sin su acento: técnicamente presente pero vaciada de significado. El gamak puede ser un vibrato de cierta amplitud y velocidad, un glide hacia la nota desde abajo o desde arriba, o una oscilación microtonal que no tiene nombre en la notación occidental. Finalmente están el <strong>vadi</strong> (la nota más importante del raga, el centro melódico alrededor del que orbita todo) y el <strong>samvadi</strong> (la nota secundaria más importante, generalmente a una cuarta o quinta de distancia).</p>
+
+  <p>Un músico que conoce bien un raga sabe todo esto sin pensarlo: la jerarquía de las notas, qué frases son características y cuáles están prohibidas, qué ornamento va en cada nota, qué emoción debe guiar la interpretación. Un raga contiene toda esa información de forma integrada. No es una herramienta de composición: es una forma de habitar un estado musical.</p>
+
+  <div class="ch-pullquote">
+    <p>Una escala es una lista de notas. Un raga es una forma de moverse entre ellas, de habitarlas, de saber cuál es el hogar y cuál es la lejanía.</p>
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 3 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Los talas</span>
+  <h2 class="ch-h2">El ritmo<br><em>que se memoriza, no se cuenta</em></h2>
+
+  <p>Un <strong>tala</strong> es un ciclo rítmico con un número fijo de tiempos llamados <strong>matras</strong>. El tala más común en la música hindustani es el <strong>teentaal</strong>, de 16 matras divididas en cuatro secciones (<strong>vibhags</strong>) de cuatro tiempos cada una. Pero los talas van desde 6 matras hasta ciclos de 64 o más. El ciclo no es una convención arbitraria: cada tala tiene un carácter rítmico específico, una forma de acentuarse que lo hace reconocible, y una relación emocional con los ragas con los que se combina.</p>
+
+  <p>El concepto central del sistema tala es la <strong>sama</strong>: el primer tiempo del ciclo, el punto de regreso al que converge toda la actividad rítmica. La sama tiene un peso especial que tanto el músico como el oyente experimentado sienten físicamente. Cuando el tablista y el vocalista o el instrumentista llegan juntos al sama después de una elaboración rítmica libre, hay una satisfacción de resolución que no necesita explicación verbal: se siente como la llegada después de un viaje.</p>
+
+  <p>El teentaal también tiene una <strong>khali</strong> (el "tiempo vacío" en el noveno matra, marcado con un gesto diferente por el tablista) y dos <strong>talis</strong> adicionales (los matra 5 y 13). Esta estructura no es solo una convención de conteo: crea un mapa interno del ciclo que permite a los músicos improvisar libremente sabiendo exactamente dónde están y adónde van. El tablista y el solista se comunican a través de esta estructura sin director, sin señas, solo a través del conocimiento compartido del mapa rítmico.</p>
+</div>
+</div>
+
+<!-- VISUAL: Teentaal — ciclo de 16 matras -->
+<div class="ch-visual-wrap">
+<div class="ch-visual">
+  <div class="ch-visual-header">
+    <span class="ch-visual-title">Teentaal — ciclo de 16 matras, 4 vibhags</span>
+    <span class="ch-audio-hint">♪ toca cada matra</span>
+  </div>
+  <div class="ch-visual-body">
+    <svg viewBox="0 0 760 230" width="100%" style="display:block;min-width:460px;max-width:760px">
+      <rect width="760" height="230" fill="#f2ece3" rx="8"/>
+
+      <!-- 4 vibhags of 4 matras each -->
+      <!-- Vibhag 1 (matras 1-4): sama on beat 1, tali -->
+      <!-- Vibhag 2 (matras 5-8): tali on beat 5 -->
+      <!-- Vibhag 3 (matras 9-12): khali on beat 9 -->
+      <!-- Vibhag 4 (matras 13-16): tali on beat 13 -->
+
+      <!-- Box width: each matra = (760-40)/16 = 45, with small gaps -->
+      <!-- Vibhag background colors -->
+      <rect x="18"  y="46" width="178" height="80" rx="8" fill="#a85a1e" opacity=".18"/>
+      <rect x="202" y="46" width="178" height="80" rx="8" fill="#c47a36" opacity=".18"/>
+      <rect x="386" y="46" width="178" height="80" rx="8" fill="#c8b99f" opacity=".45"/>
+      <rect x="570" y="46" width="178" height="80" rx="8" fill="#c47a36" opacity=".18"/>
+
+      <!-- Vibhag labels -->
+      <text x="107" y="38" font-family="Inter,sans-serif" font-size="10" fill="#a85a1e" text-anchor="middle" font-weight="600">vibhag 1 — sama</text>
+      <text x="291" y="38" font-family="Inter,sans-serif" font-size="10" fill="#c47a36" text-anchor="middle" font-weight="600">vibhag 2 — tali</text>
+      <text x="475" y="38" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" text-anchor="middle" font-weight="600">vibhag 3 — khali</text>
+      <text x="659" y="38" font-family="Inter,sans-serif" font-size="10" fill="#c47a36" text-anchor="middle" font-weight="600">vibhag 4 — tali</text>
+
+      <!-- Individual matras -->
+      <!-- Vibhag 1: matras 1-4 -->
+      <!-- Matra 1: SAMA (strongest) -->
+      <rect x="22"  y="52" width="40" height="68" rx="5" fill="#a85a1e" opacity=".85"/>
+      <text x="42"  y="82" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">1</text>
+      <text x="42"  y="108" font-family="Inter,sans-serif" font-size="8" fill="#fff" text-anchor="middle" opacity=".8">sama</text>
+
+      <rect x="68"  y="56" width="40" height="60" rx="5" fill="#c8b099" opacity=".7"/>
+      <text x="88"  y="88" font-family="JetBrains Mono,monospace" font-size="13" fill="#4a3c2c" text-anchor="middle" dominant-baseline="middle">2</text>
+      <rect x="114" y="56" width="40" height="60" rx="5" fill="#c8b099" opacity=".7"/>
+      <text x="134" y="88" font-family="JetBrains Mono,monospace" font-size="13" fill="#4a3c2c" text-anchor="middle" dominant-baseline="middle">3</text>
+      <rect x="160" y="56" width="40" height="60" rx="5" fill="#c8b099" opacity=".7"/>
+      <text x="180" y="88" font-family="JetBrains Mono,monospace" font-size="13" fill="#4a3c2c" text-anchor="middle" dominant-baseline="middle">4</text>
+
+      <!-- Vibhag 2: matras 5-8 (tali) -->
+      <rect x="206" y="52" width="40" height="68" rx="5" fill="#c47a36" opacity=".85"/>
+      <text x="226" y="82" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">5</text>
+      <text x="226" y="108" font-family="Inter,sans-serif" font-size="8" fill="#fff" text-anchor="middle" opacity=".8">tali</text>
+
+      <rect x="252" y="56" width="40" height="60" rx="5" fill="#c8b099" opacity=".7"/>
+      <text x="272" y="88" font-family="JetBrains Mono,monospace" font-size="13" fill="#4a3c2c" text-anchor="middle" dominant-baseline="middle">6</text>
+      <rect x="298" y="56" width="40" height="60" rx="5" fill="#c8b099" opacity=".7"/>
+      <text x="318" y="88" font-family="JetBrains Mono,monospace" font-size="13" fill="#4a3c2c" text-anchor="middle" dominant-baseline="middle">7</text>
+      <rect x="344" y="56" width="40" height="60" rx="5" fill="#c8b099" opacity=".7"/>
+      <text x="364" y="88" font-family="JetBrains Mono,monospace" font-size="13" fill="#4a3c2c" text-anchor="middle" dominant-baseline="middle">8</text>
+
+      <!-- Vibhag 3: matras 9-12 (khali) -->
+      <rect x="390" y="52" width="40" height="68" rx="5" fill="#8a7a66" opacity=".6"/>
+      <text x="410" y="82" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">9</text>
+      <text x="410" y="108" font-family="Inter,sans-serif" font-size="8" fill="#fff" text-anchor="middle" opacity=".8">khali</text>
+
+      <rect x="436" y="56" width="40" height="60" rx="5" fill="#d8cfc4" opacity=".7"/>
+      <text x="456" y="88" font-family="JetBrains Mono,monospace" font-size="13" fill="#4a3c2c" text-anchor="middle" dominant-baseline="middle">10</text>
+      <rect x="482" y="56" width="40" height="60" rx="5" fill="#d8cfc4" opacity=".7"/>
+      <text x="502" y="88" font-family="JetBrains Mono,monospace" font-size="13" fill="#4a3c2c" text-anchor="middle" dominant-baseline="middle">11</text>
+      <rect x="528" y="56" width="40" height="60" rx="5" fill="#d8cfc4" opacity=".7"/>
+      <text x="548" y="88" font-family="JetBrains Mono,monospace" font-size="13" fill="#4a3c2c" text-anchor="middle" dominant-baseline="middle">12</text>
+
+      <!-- Vibhag 4: matras 13-16 (tali) -->
+      <rect x="574" y="52" width="40" height="68" rx="5" fill="#c47a36" opacity=".85"/>
+      <text x="594" y="82" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">13</text>
+      <text x="594" y="108" font-family="Inter,sans-serif" font-size="8" fill="#fff" text-anchor="middle" opacity=".8">tali</text>
+
+      <rect x="620" y="56" width="40" height="60" rx="5" fill="#c8b099" opacity=".7"/>
+      <text x="640" y="88" font-family="JetBrains Mono,monospace" font-size="13" fill="#4a3c2c" text-anchor="middle" dominant-baseline="middle">14</text>
+      <rect x="666" y="56" width="40" height="60" rx="5" fill="#c8b099" opacity=".7"/>
+      <text x="686" y="88" font-family="JetBrains Mono,monospace" font-size="13" fill="#4a3c2c" text-anchor="middle" dominant-baseline="middle">15</text>
+      <rect x="712" y="56" width="40" height="60" rx="5" fill="#c8b099" opacity=".7"/>
+      <text x="732" y="88" font-family="JetBrains Mono,monospace" font-size="13" fill="#4a3c2c" text-anchor="middle" dominant-baseline="middle">16</text>
+
+      <!-- Return arrow -->
+      <path d="M 748,86 Q 754,86 754,140 Q 754,170 42,170 Q 22,170 22,130" fill="none" stroke="#a85a1e" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <polygon points="18,124 26,124 22,130" fill="#a85a1e"/>
+
+      <!-- Legend -->
+      <rect x="18"  y="188" width="12" height="12" rx="2" fill="#a85a1e" opacity=".85"/>
+      <text x="36"  y="194" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" dominant-baseline="middle">sama (matra 1)</text>
+      <rect x="188" y="188" width="12" height="12" rx="2" fill="#c47a36" opacity=".85"/>
+      <text x="206" y="194" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" dominant-baseline="middle">tali (matras 5 y 13)</text>
+      <rect x="380" y="188" width="12" height="12" rx="2" fill="#8a7a66" opacity=".6"/>
+      <text x="398" y="194" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" dominant-baseline="middle">khali (matra 9 — "vacío")</text>
+      <rect x="580" y="188" width="12" height="12" rx="2" fill="#d8cfc4" opacity=".7"/>
+      <text x="598" y="194" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" dominant-baseline="middle">matra libre</text>
+
+      <!-- Click zones: Raga Yaman notes -->
+      <rect data-midi="60" x="22"  y="48" width="40" height="76" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="66" x="68"  y="52" width="40" height="68" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="69" x="114" y="52" width="40" height="68" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="71" x="160" y="52" width="40" height="68" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="64" x="206" y="48" width="40" height="76" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="67" x="252" y="52" width="40" height="68" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="62" x="298" y="52" width="40" height="68" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="72" x="344" y="52" width="40" height="68" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="60" x="390" y="48" width="40" height="76" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="66" x="436" y="52" width="40" height="68" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="69" x="482" y="52" width="40" height="68" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="71" x="528" y="52" width="40" height="68" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="64" x="574" y="48" width="40" height="76" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="67" x="620" y="52" width="40" height="68" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="62" x="666" y="52" width="40" height="68" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="72" x="712" y="52" width="40" height="68" fill="transparent" style="cursor:pointer"/>
+    </svg>
+  </div>
+  <div class="ch-visual-caption">
+    El teentaal: 16 matras divididas en cuatro vibhags. La sama (matra 1) es el punto de retorno del ciclo. La khali (matra 9) es el "tiempo vacío", marcado con un gesto diferente en el tablá, que crea asimetría dentro de la simetría general. Los clics reproducen notas del Raga Yaman, un raga hindustani de noche temprana con la cuarta aumentada característica.
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 4 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">La ornamentación</span>
+  <h2 class="ch-h2">El espacio entre las notas<br><em>es la música</em></h2>
+
+  <p>Los <strong>gamaks</strong> son los ornamentos microtonales de la música clásica india. Algunos tienen equivalentes aproximados en la música occidental: el <strong>meend</strong> es una glissando controlada entre dos notas, parecida al slide de guitarra pero con una precisión de afinación y velocidad que convierte el deslizamiento en una frase melódica completa. El <strong>kan</strong> es una nota de adorno desde una nota adyacente, un mordente rápido que llega a la nota principal desde arriba o desde abajo. Pero la mayoría de los gamaks no tienen traducción: son inflexiones de afinación, variaciones de presión y velocidad que solo existen en el vocabulario específico de cada raga.</p>
+
+  <p>La diferencia fundamental es que los gamaks no son ornamentos en el sentido occidental del término. En la música clásica europea, un ornamento (trino, mordente, appoggiatura) es algo que se añade a una melodía existente, un embellecimiento opcional. En la música clásica india, los gamaks son la melodía. La "nota" sin su ornamento es una abstracción teórica, no una entidad musical practicable. El raga se compone de frases con sus gamaks incluidos, no de notas que luego se adornan.</p>
+
+  <p>Ravi Shankar describía el sitar como un instrumento diseñado para imitar la voz humana: sus cuerdas simpáticas vibran en simpatía con las notas tocadas, creando un halo armónico continuo, y las cuerdas principales pueden doblarse para producir exactamente los glissandos y microtonos que los gamaks requieren. La técnica del sitar, y del vocalismo clásico indio, está diseñada desde sus fundamentos para ejecutar ornamentos que la notación occidental no puede escribir con precisión.</p>
+
+  <div class="ch-pullquote">
+    <p>En la música clásica india, la nota sin ornamento es como una palabra sin entonación: gramaticalmente correcta, comunicativamente vacía.</p>
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 5 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Lo que puedes llevarte</span>
+  <h2 class="ch-h2">Tres ideas<br><em>de la tradición más profunda</em></h2>
+
+  <p>El <strong>alap</strong> — la sección introductoria libre de ritmo donde el instrumentista o vocalista establece el raga sin tablá, sin pulso medido — enseña que la melodía antes del ritmo tiene su propia lógica. No es una melodía "incompleta" a la que le falta el acompañamiento: es una forma de explorar el espacio armónico que solo es posible sin la obligación del pulso. Improvisar sin tempo fijo, solo con el vocabulario del raga como guía, es uno de los ejercicios más efectivos para desarrollar el pensamiento melódico independiente del groove.</p>
+
+  <p>El ornamento como lenguaje, no como decoración, es la idea más transferible de esta tradición. Añadir slides microtonales, bends de cuarto de tono, y grace notes desde notas adyacentes a cualquier fraseo — en guitarra, en voz, en piano — añade especificidad expresiva que las notas solas no tienen. Los guitarristas de blues saben esto intuitivamente; la teoría del raga lo formaliza con dos milenios de vocabulario preciso.</p>
+
+  <p>La intención emocional antes de la ejecución técnica es la lección más antigua de esta tradición. Antes de tocar la primera nota, el músico clásico indio decide el rasa: la emoción que el raga debe evocar. Esa decisión no es simbólica sino operativa: la misma nota se toca diferente en un raga de devoción que en uno de tristeza o uno de amor. Decidir el carácter emocional de lo que vas a tocar antes de empezar cambia cada decisión técnica que sigue.</p>
+
+  <div class="ch-theory-link">
+    <div class="ch-theory-icon">◎</div>
+    <div>
+      <span class="ch-theory-label">Concepto relacionado · Teoría</span>
+      <p class="ch-theory-text">Los modos octatónicos y las escalas con alteraciones — como el lidio ♭7 o el frigio dominante — son los equivalentes occidentales más cercanos a algunos ragas. La sección de Escalas explora todos los modos.</p>
+      <a href="/teoria/escalas" class="ch-theory-btn">Ver Escalas y Modos →</a>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="ch-nav">
+  <a href="/recursos/generos/metal-progresivo" class="ch-nav-back">
+    <span class="ch-nav-dir">← Anterior</span>
+    <span class="ch-nav-name">Metal Progresivo</span>
+    <span class="ch-nav-desc">La complejidad como lenguaje</span>
+  </a>
+  <a href="/recursos/generos/tango" class="ch-nav-next">
+    <span class="ch-nav-dir">Siguiente →</span>
+    <span class="ch-nav-name">Tango</span>
+    <span class="ch-nav-desc">La armonía del abrazo</span>
+  </a>
+</div>
+
+<script>
+(function () {
+  var _synth = null;
+
+  function _midiNote(m) {
+    var names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    return names[m % 12] + (Math.floor(m / 12) - 1);
+  }
+
+  async function _initAudio() {
+    if (_synth) return;
+    await Tone.start();
+    var comp   = new Tone.Compressor(-18, 4).toDestination();
+    var reverb = new Tone.Freeverb({ roomSize: 0.22, dampening: 4200, wet: 0.12 }).connect(comp);
+    _synth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'triangle' },
+      envelope:   { attack: 0.006, decay: 0.35, sustain: 0.12, release: 1.4 }
+    }).connect(reverb);
+  }
+
+  async function playNote(midi) {
+    try {
+      await _initAudio();
+      _synth.triggerAttackRelease(_midiNote(midi), '8n');
+    } catch(e) {}
+  }
+
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-midi]');
+    if (!el) return;
+    var midi = parseInt(el.getAttribute('data-midi'), 10);
+    if (!isNaN(midi)) playNote(midi);
+  });
+})();
+</script>
+
+<footer class="tm-footer-legal">
+  <div class="tm-f-copy">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div class="tm-f-links">
+    <a href="/privacidad">Aviso de Privacidad</a>
+    <a href="/terminos">Términos y Condiciones</a>
+    <a href="/cookies">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

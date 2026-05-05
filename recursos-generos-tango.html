@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Tango — Géneros y Tradiciones Musicales</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:    #f4ece0; --paper2: #f2ece3; --paper3: #e8e0d4;
+  --paper4:   #c8b99f; --paper5: #cec4b0;
+  --copper:   #a85a1e; --copper-lt: #c47a36; --copper-dk: #7a3e10;
+  --ink:      #1c1410; --ink2: #2e2418; --ink3: #4a3c2c;
+  --ink4:     #8a7a64; --ink5: #8a7a66;
+  --serif: 'Marcellus', Georgia, serif;
+  --sans:  'Inter', system-ui, sans-serif;
+  --mono:  'JetBrains Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+
+nav { position: sticky; top: 0; z-index: 100; background: rgba(244,236,224,.94); backdrop-filter: blur(12px); border-bottom: 1px solid var(--paper4); padding: 0 48px; display: flex; align-items: center; height: 60px; gap: 0; }
+.nav-logo { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--ink); margin-right: 36px; letter-spacing: -.01em; text-decoration: none; }
+.nav-logo span { font-family: var(--mono); font-size: 0.52em; font-weight: 400; color: var(--ink4); letter-spacing: 0; margin-left: 2px; }
+.nav-link { padding: 0 16px; height: 56px; display: flex; align-items: center; font-size: 13px; font-weight: 500; color: var(--ink4); text-decoration: none; border-bottom: 2px solid transparent; transition: color .2s, border-color .2s; }
+.nav-link:hover { color: var(--ink2); }
+.nav-link.active { color: var(--copper); border-bottom-color: var(--copper); }
+.nav-cta { margin-left: auto; background: var(--copper); color: #fff; font-size: 12px; font-weight: 600; padding: 7px 18px; border-radius: 6px; text-decoration: none; transition: background .2s; }
+.nav-cta:hover { background: var(--copper-dk); }
+
+.ch-hero { background: #0d0804; padding: 80px 48px 90px; position: relative; overflow: hidden; }
+.ch-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 50% at 50% 120%, rgba(100,60,20,.4) 0%, transparent 70%); pointer-events: none; }
+.ch-breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(250,246,240,.35); margin-bottom: 40px; }
+.ch-breadcrumb a { color: var(--copper-lt); text-decoration: none; transition: opacity .2s; }
+.ch-breadcrumb a:hover { opacity: .8; }
+.ch-breadcrumb span { color: rgba(250,246,240,.2); }
+.ch-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.ch-num { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .1em; color: var(--copper-lt); border: 1px solid rgba(192,120,48,.3); padding: 4px 10px; border-radius: 4px; }
+.ch-era { font-size: 12px; color: rgba(250,246,240,.35); font-style: italic; }
+.ch-title { font-family: var(--serif); font-size: clamp(52px, 7vw, 92px); font-weight: 700; line-height: .9; letter-spacing: -.025em; color: var(--paper); max-width: 760px; margin-bottom: 12px; }
+.ch-title em { font-style: italic; color: var(--copper-lt); }
+.ch-subtitle { font-family: var(--serif); font-size: clamp(18px, 2vw, 24px); font-style: italic; color: rgba(250,246,240,.42); margin-bottom: 36px; }
+.ch-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.ch-tag { font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; background: rgba(250,246,240,.07); color: rgba(250,246,240,.45); border: 1px solid rgba(250,246,240,.1); }
+
+.ch-body { max-width: 720px; margin: 0 auto; padding: 80px 48px 0; }
+.ch-section { margin-bottom: 72px; }
+.ch-section-label { font-size: 10px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--copper); margin-bottom: 14px; display: block; }
+.ch-h2 { font-family: var(--serif); font-size: clamp(28px, 3.5vw, 40px); font-weight: 700; line-height: 1.06; letter-spacing: -.02em; color: var(--ink); margin-bottom: 24px; }
+.ch-h2 em { font-style: italic; color: var(--copper); }
+.ch-body p { font-size: 16px; color: var(--ink3); line-height: 1.85; margin-bottom: 22px; }
+.ch-body p:last-child { margin-bottom: 0; }
+.ch-body strong { font-weight: 600; color: var(--ink2); }
+
+.ch-pullquote { border-left: 3px solid var(--copper); padding: 16px 24px; background: var(--paper2); border-radius: 0 8px 8px 0; margin: 36px 0; }
+.ch-pullquote p { font-family: var(--serif); font-size: 21px !important; font-style: italic; color: var(--ink2); line-height: 1.55; margin: 0 !important; }
+
+.ch-section-photo { float: right; width: 42%; margin: 6px 0 22px 30px; border-radius: 10px; overflow: hidden; shape-outside: border-box; }
+.ch-section-photo img { width: 100%; height: 210px; object-fit: cover; object-position: center; display: block; }
+.ch-section::after { content: ''; display: table; clear: both; }
+@media (max-width: 600px) { .ch-section-photo { float: none; width: 100%; margin: 0 0 22px 0; } }
+
+.ch-visual-wrap { max-width: 860px; margin: 0 auto; padding: 0 48px 72px; }
+.ch-visual { background: var(--paper2); border: 1px solid var(--paper3); border-radius: 14px; overflow: hidden; }
+.ch-visual-header { padding: 13px 20px; border-bottom: 1px solid var(--paper3); display: flex; align-items: center; justify-content: space-between; }
+.ch-visual-title { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--ink5); }
+.ch-audio-hint { font-size: 11px; color: var(--copper); font-weight: 500; font-style: italic; letter-spacing: .02em; }
+.ch-visual-body { padding: 28px 24px; overflow-x: auto; }
+.ch-visual-caption { padding: 12px 24px 16px; border-top: 1px solid var(--paper3); font-size: 12px; color: var(--ink5); font-style: italic; line-height: 1.5; }
+
+.ch-theory-link { background: #13100c; border-radius: 12px; padding: 28px 32px; margin: 36px 0; display: flex; align-items: flex-start; gap: 20px; }
+.ch-theory-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+.ch-theory-label { font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--copper-lt); margin-bottom: 6px; display: block; }
+.ch-theory-text { font-size: 14px; color: rgba(250,246,240,.55); line-height: 1.7; margin-bottom: 12px; }
+.ch-theory-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--copper-lt); text-decoration: none; border-bottom: 1px solid rgba(192,120,48,.35); padding-bottom: 1px; transition: border-color .2s; }
+.ch-theory-btn:hover { border-color: var(--copper-lt); }
+
+.ch-nav { max-width: 860px; margin: 0 auto; padding: 0 48px 80px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.ch-nav-back, .ch-nav-next { display: flex; flex-direction: column; gap: 4px; text-decoration: none; padding: 20px 24px; border-radius: 12px; border: 1px solid var(--paper4); transition: border-color .2s, box-shadow .2s; max-width: 48%; }
+.ch-nav-back:hover, .ch-nav-next:hover { border-color: var(--copper); box-shadow: 0 4px 16px rgba(160,92,32,.1); }
+.ch-nav-next { align-items: flex-end; }
+.ch-nav-dir { font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--copper); }
+.ch-nav-name { font-family: var(--serif); font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.2; }
+.ch-nav-desc { font-size: 12px; color: var(--ink5); }
+
+@media (max-width: 768px) {
+  nav { padding: 0 16px; overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; scrollbar-width: none; }
+  nav::-webkit-scrollbar { display: none; }
+  nav > * { flex-shrink: 0; }
+  .ch-hero { padding: 60px 20px 72px; }
+  .ch-body { padding: 56px 20px 0; }
+  .ch-visual-wrap { padding: 0 20px 56px; }
+  .ch-nav { padding: 0 20px 60px; flex-direction: column; }
+  .ch-nav-back, .ch-nav-next { max-width: 100%; width: 100%; }
+  .ch-nav-next { align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link active">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<section class="ch-hero">
+  <div class="ch-breadcrumb">
+    <a href="/recursos">Recursos</a>
+    <span>·</span>
+    <a href="/recursos/generos">Géneros y Tradiciones</a>
+    <span>·</span>
+    <span style="color:rgba(250,246,240,.5)">Tango</span>
+  </div>
+  <div class="ch-meta">
+    <span class="ch-num">05 · Argentina</span>
+    <span class="ch-era">1880 – presente</span>
+  </div>
+  <h1 class="ch-title"><em>Tango</em></h1>
+  <p class="ch-subtitle">La armonía del abrazo</p>
+  <div class="ch-tags">
+    <span class="ch-tag">Cromatismo</span>
+    <span class="ch-tag">Bandoneón</span>
+    <span class="ch-tag">Piazzolla</span>
+    <span class="ch-tag">2×4</span>
+    <span class="ch-tag">Tango nuevo</span>
+  </div>
+</section>
+
+<!-- ── SECCIÓN 1 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Punto de partida</span>
+  <h2 class="ch-h2">Nació en los márgenes<br><em>para terminar en los conservatorios.</em></h2>
+
+  <p>El tango surgió en los arrabales de Buenos Aires en la década de 1880, en los conventillos y academias de baile donde convivían inmigrantes italianos y españoles, descendientes de africanos traídos como esclavos, y criollos del interior. Esa mezcla produjo una música que combinaba el ritmo del <strong>candombe</strong> africano, la síncopa de la <strong>habanera</strong> cubana y las formas de baile europeas: polca, mazurca, vals. Ninguno de sus ingredientes era rioplatense, pero el resultado fue inequívocamente porteño.</p>
+
+  <p>Durante décadas fue una música "de los bajos fondos" que la clase alta argentina rechazaba por considerarla vulgar y de origen innoble. La paradoja: el tango se volvió respetable en Buenos Aires después de que París lo adoptara como moda en la primera década del siglo XX. Los europeos le dieron el sello de legitimidad cultural que sus propios creadores no habían podido conseguir. Hoy es Patrimonio Cultural Inmaterial de la Humanidad de la UNESCO y forma parte de los programas de los conservatorios que alguna vez lo ignoraron.</p>
+
+  <p>El tango más europeo-sonante de toda la música latinoamericana es también uno de los más visceralmente emocionales. Esa combinación no es una contradicción: la armonía y el contrapunto aprendidos de la música de cámara europea fueron la herramienta que usaron compositores como Piazzolla para expresar algo que la música europea nunca había podido decir con esos medios.</p>
+</div>
+</div>
+
+<!-- ── SECCIÓN 2 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">El ritmo</span>
+  <h2 class="ch-h2">El 2×4:<br><em>no es un compás sino una actitud</em></h2>
+
+  <p>La base rítmica del tango es el compás de 2/4, llamado "2×4" en Argentina. Dentro de ese compás, dos células rítmicas definen el género. La primera es la <strong>habanera</strong>: una negra con punto seguida de una corchea y dos corcheas, un patrón que viene de Cuba por vía de la contradanza y que Bizet usó en Carmen, Ravel en la Rapsodia española. La segunda es el <strong>marcato</strong>: golpes fuertes en los tiempos principales del compás, que la orquesta típica ejecuta con el peso completo del conjunto. La tensión entre estos dos patrones, la habanera sincopada y el marcato directo, genera el vaivén característico del tango.</p>
+
+  <p>Astor Piazzolla transformó estos materiales entre los años 50 y 80 en algo que escandalizó a los puristas del tango tradicional. Incorporó el contrapunto del barroco, la armonía del jazz moderno, y tiempos que alternaban entre el tango tradicional y métricas más libres. Sus opositores decían que lo que tocaba ya no era tango. Piazzolla respondía que era el único tango posible para él, el de alguien que había crecido en Buenos Aires escuchando a Troilo y a Bach en igual medida.</p>
+
+  <p>La <strong>milonga</strong> (ritmo más rápido y sincopado que el tango) y el <strong>vals criollo</strong> (vals en 3/4 con swing latinoamericano) son los géneros hermanos del tango en el circuito de los salones de baile. Los tres comparten muchos recursos armónicos y de fraseo, pero tienen caracteres físicos distintos: la milonga es más urgente, el vals más circular, el tango más vertical y cortado.</p>
+
+  <div class="ch-pullquote">
+    <p>El 2×4 no es solo un compás. Es la forma en que el cuerpo del tango respira: dos tiempos que se apoyan y se tensan uno contra el otro, sin llegar a resolverse del todo.</p>
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 3 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">La armonía</span>
+  <h2 class="ch-h2">Cromatismo y tensión:<br><em>la armonía como conversación</em></h2>
+
+  <p>El tango tiene una firma armónica reconocible: el uso intensivo de acordes <strong>disminuidos</strong> como acordes de paso cromáticos, la <strong>cadencia tanguera</strong> (la progresión ii°7–V7–i que aparece en la mayoría de los tangos clásicos como momento cadencial), y un gusto por el cromatismo en las voces interiores que crea movimientos de semitono entre un acorde y el siguiente. En el tango de la Guardia Vieja (1900-1935) estos acordes disminuidos son el sonido que define el género: densos, nostálgicos, un poco cursis en el peor sentido y muy emotivos en el mejor.</p>
+
+  <p>Piazzolla extendió ese vocabulario hacia el jazz moderno: <strong>maj7</strong>, <strong>min9</strong>, sustituciones de tritono, acordes con tensiones que el tango clásico nunca usó. Pero no abandonó el cromatismo ni la cadencia tanguera: los integró en un lenguaje más amplio sin que perdieran su identidad. Una progresión de Piazzolla puede moverse de un acorde alterado de jazz a un ii°7 tanguero a una cadencia modal y volver a empezar, y en ese recorrido el oyente experimenta simultáneamente lo nuevo y lo reconocible.</p>
+
+  <p>El <strong>bandoneón</strong> determina la textura armónica del tango de una forma que ningún otro instrumento podría replicar. Sus voicings naturales, condicionados por la disposición física de los botones y por la diferencia entre el fuelle abierto y cerrado, producen acordes con una densidad y un color específicos. Los arreglistas de orquesta típica escriben pensando en esos voicings. La armonía del tango no es abstracta: está encarnada en el instrumento que la toca.</p>
+</div>
+</div>
+
+<!-- VISUAL: Células rítmicas del tango -->
+<div class="ch-visual-wrap">
+<div class="ch-visual">
+  <div class="ch-visual-header">
+    <span class="ch-visual-title">Células rítmicas del tango — habanera y marcato</span>
+    <span class="ch-audio-hint">♪ toca cada posición</span>
+  </div>
+  <div class="ch-visual-body">
+    <svg viewBox="0 0 760 250" width="100%" style="display:block;min-width:460px;max-width:760px">
+      <rect width="760" height="250" fill="#f2ece3" rx="8"/>
+
+      <!-- Row 1: Habanera pattern -->
+      <text x="20" y="60" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#6a5a46" dominant-baseline="middle">habanera</text>
+
+      <!-- Habanera: LONG (2 units) + SHORT (1 unit) + SHORT (1 unit) + SHORT (1 unit) + SHORT (1 unit) -->
+      <!-- Total 8 subdivisions: beat 1 = long (2), beat 2 = short (1), beat 3 = short (1), beat 4 = short (1), beat 5 = short (1) — simplified to 4 positions shown -->
+      <!-- Actually habanera in 2/4: dotted quarter + eighth + two eighths -->
+      <!-- Show as 4 blocks: block1 wide (dotted), block2, block3, block4 equal -->
+      <rect x="110" y="38" width="190" height="44" rx="5" fill="#a85a1e" opacity=".85"/>
+      <text x="205" y="60" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">♩.</text>
+      <text x="205" y="74" font-family="Inter,sans-serif" font-size="9" fill="#fff" text-anchor="middle" opacity=".8">larga (punto)</text>
+
+      <rect x="306" y="38" width="94" height="44" rx="5" fill="#c47a36" opacity=".85"/>
+      <text x="353" y="60" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">♪</text>
+      <text x="353" y="74" font-family="Inter,sans-serif" font-size="9" fill="#fff" text-anchor="middle" opacity=".8">corta</text>
+
+      <rect x="406" y="38" width="94" height="44" rx="5" fill="#c8b99f" opacity=".85"/>
+      <text x="453" y="60" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#4a3c2c" text-anchor="middle" dominant-baseline="middle">♪</text>
+
+      <rect x="506" y="38" width="94" height="44" rx="5" fill="#c8b99f" opacity=".85"/>
+      <text x="553" y="60" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#4a3c2c" text-anchor="middle" dominant-baseline="middle">♪</text>
+
+      <!-- Row 2: Marcato pattern -->
+      <text x="20" y="150" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#6a5a46" dominant-baseline="middle">marcato</text>
+
+      <rect x="110" y="128" width="190" height="44" rx="5" fill="#1c1410" opacity=".75"/>
+      <text x="205" y="150" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">GOLPE</text>
+      <text x="205" y="164" font-family="Inter,sans-serif" font-size="9" fill="#fff" text-anchor="middle" opacity=".7">tiempo 1</text>
+
+      <rect x="306" y="128" width="94" height="44" rx="5" fill="#e8ddd0" stroke="#c8b99f" stroke-width="1"/>
+      <text x="353" y="150" font-family="JetBrains Mono,monospace" font-size="12" fill="#c8b99f" text-anchor="middle" dominant-baseline="middle">—</text>
+
+      <rect x="406" y="128" width="94" height="44" rx="5" fill="#4a3c2c" opacity=".65"/>
+      <text x="453" y="150" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">GOLPE</text>
+      <text x="453" y="164" font-family="Inter,sans-serif" font-size="9" fill="#fff" text-anchor="middle" opacity=".7">tiempo 2</text>
+
+      <rect x="506" y="128" width="94" height="44" rx="5" fill="#e8ddd0" stroke="#c8b99f" stroke-width="1"/>
+      <text x="553" y="150" font-family="JetBrains Mono,monospace" font-size="12" fill="#c8b99f" text-anchor="middle" dominant-baseline="middle">—</text>
+
+      <!-- Column alignment indicator -->
+      <line x1="110" y1="86" x2="110" y2="124" stroke="#c8b99f" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="406" y1="86" x2="406" y2="124" stroke="#c8b99f" stroke-width="1" stroke-dasharray="3,3"/>
+
+      <!-- Legend -->
+      <rect x="18"  y="196" width="12" height="12" rx="2" fill="#a85a1e" opacity=".85"/>
+      <text x="36"  y="202" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" dominant-baseline="middle">nota larga con punto (habanera)</text>
+      <rect x="260" y="196" width="12" height="12" rx="2" fill="#1c1410" opacity=".75"/>
+      <text x="278" y="202" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" dominant-baseline="middle">golpe fuerte (marcato)</text>
+      <rect x="450" y="196" width="12" height="12" rx="2" fill="#e8ddd0" stroke="#c8b99f" stroke-width="1"/>
+      <text x="468" y="202" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" dominant-baseline="middle">silencio</text>
+
+      <!-- Breve explanation -->
+      <text x="18" y="222" font-family="Inter,sans-serif" font-size="11" fill="#6a5a46" font-style="italic">Ambas células en 2/4. La habanera desplaza el acento; el marcato lo afirma. En la orquesta típica conviven simultáneamente.</text>
+
+      <!-- Click zones: diminished chord stacked -->
+      <rect data-midi="45" x="110" y="34" width="190" height="52" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="48" x="306" y="34" width="94"  height="52" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="51" x="406" y="34" width="94"  height="52" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="54" x="506" y="34" width="94"  height="52" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="57" x="110" y="124" width="190" height="52" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="60" x="306" y="124" width="94"  height="52" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="63" x="406" y="124" width="94"  height="52" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="66" x="506" y="124" width="94"  height="52" fill="transparent" style="cursor:pointer"/>
+    </svg>
+  </div>
+  <div class="ch-visual-caption">
+    Arriba: la habanera, con su nota larga con punto que desplaza el acento del segundo tiempo. Abajo: el marcato, con golpes directos en los tiempos fuertes del 2/4. Los clics reproducen notas del acorde disminuido apilado (A2–C3–Eb3–F#3–A3–C4–Eb4–F#4), la sonoridad más característica del tango clásico.
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 4 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">El bandoneón</span>
+  <h2 class="ch-h2">El instrumento<br><em>que le dio voz al Río de la Plata</em></h2>
+
+  <p>El <strong>bandoneón</strong> es una concertina de origen alemán inventada en el siglo XIX para llevar música religiosa a las iglesias rurales que no podían costear un órgano. Llegó a Argentina en la década de 1890 por vía de marineros y emigrantes alemanes, y en menos de veinte años se había convertido en el instrumento iremplazable del tango. Su sonido, oscuro y nasalizado en los registros graves, brillante y casi vocal en los agudos, tiene una cualidad expresiva que ningún otro instrumento de su familia puede replicar.</p>
+
+  <p>El bandoneón es bisonoro: las notas que produce al abrir el fuelle son diferentes a las que produce al cerrarlo. Esta característica, que lo distingue de un acordeón, obliga al músico a aprender dos configuraciones de notas en el mismo instrumento. Pero también determina la articulación del tango: el cambio entre fuelle abierto y cerrado produce un cambio de timbre que los bandoneonistas usan expresivamente, como un cantante usa el cambio de registro. Las frases melódicas del tango tienen esa articulación incorporada desde la mecánica del instrumento.</p>
+
+  <p>Piazzolla transformó el bandoneón de instrumento de baile en instrumento de concierto. Estudió con Nadia Boulanger en París, quien le dijo que su voz propia estaba en el tango y no en la música clásica que intentaba componer. Volvió a Buenos Aires y creó el Octeto Buenos Aires, luego los distintos Quintetos, con los que llevó al bandoneón a ejecutar contrapunto de Bach, armonías de jazz y disonanciad contemporáneas sin que el instrumento perdiera su identidad tanguera.</p>
+
+  <div class="ch-pullquote">
+    <p>Piazzolla decía que el bandoneón llora cuando lo tocás mal y llora todavía más cuando lo tocás bien. Esa es la diferencia entre el instrumento y el músico.</p>
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 5 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Lo que puedes llevarte</span>
+  <h2 class="ch-h2">Tres vocabularios<br><em>del Río de la Plata</em></h2>
+
+  <p>El <strong>cromatismo en el movimiento de voces</strong> es una herramienta central del tango que funciona en cualquier género. Mover las notas internas de un acorde por semitonos hacia el siguiente acorde crea progresiones que suenan inevitables sin ser predecibles. La secuencia ii°7–V7–i del tango clásico es uno de los ejemplos más eficientes de este movimiento: cada voz del acorde disminuido se mueve medio tono para resolver en el dominante, y el dominante resuelve en el tónico menor con el mismo principio.</p>
+
+  <p>El ritmo de la <strong>habanera</strong>, el patrón de nota larga con punto seguida de cortas, aparece en Ravel, en Bizet, en Gershwin, en el rock de los años 60 como marcador de lo "latinoamericano" en la música de concierto y popular europea. Reconocerlo como una célula rítmica específica con nombre e historia cambia la forma en que lo escuchas en todos esos contextos. Es uno de los patrones rítmicos de mayor alcance geográfico e histórico de la música occidental.</p>
+
+  <p>El silencio dramático de Piazzolla es la lección más difícil de aplicar: sus pausas, los momentos donde el quinteto completo se detiene en mitad de una frase, tienen tanto peso musical como las notas que las rodean. Usar el silencio con esa deliberación, como un elemento activo de la composición en lugar de como un espacio entre notas, cambia la relación del oyente con el tiempo de la música.</p>
+
+  <div class="ch-theory-link">
+    <div class="ch-theory-icon">◎</div>
+    <div>
+      <span class="ch-theory-label">Concepto relacionado · Teoría</span>
+      <p class="ch-theory-text">Los acordes disminuidos y la armonía cromática son herramientas centrales del tango y de la armonía jazzística. La sección de Armonía los explica desde sus fundamentos.</p>
+      <a href="/teoria/armonia" class="ch-theory-btn">Ver Armonía y Acordes →</a>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="ch-nav">
+  <a href="/recursos/generos/raga" class="ch-nav-back">
+    <span class="ch-nav-dir">← Anterior</span>
+    <span class="ch-nav-name">Raga</span>
+    <span class="ch-nav-desc">El tiempo como forma sagrada</span>
+  </a>
+  <a href="/recursos/generos/reggae-dub" class="ch-nav-next">
+    <span class="ch-nav-dir">Siguiente →</span>
+    <span class="ch-nav-name">Reggae y Dub</span>
+    <span class="ch-nav-desc">El bajo como protagonista</span>
+  </a>
+</div>
+
+<script>
+(function () {
+  var _synth = null;
+
+  function _midiNote(m) {
+    var names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    return names[m % 12] + (Math.floor(m / 12) - 1);
+  }
+
+  async function _initAudio() {
+    if (_synth) return;
+    await Tone.start();
+    var comp   = new Tone.Compressor(-18, 4).toDestination();
+    var reverb = new Tone.Freeverb({ roomSize: 0.22, dampening: 4200, wet: 0.12 }).connect(comp);
+    _synth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'triangle' },
+      envelope:   { attack: 0.006, decay: 0.35, sustain: 0.12, release: 1.4 }
+    }).connect(reverb);
+  }
+
+  async function playNote(midi) {
+    try {
+      await _initAudio();
+      _synth.triggerAttackRelease(_midiNote(midi), '8n');
+    } catch(e) {}
+  }
+
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-midi]');
+    if (!el) return;
+    var midi = parseInt(el.getAttribute('data-midi'), 10);
+    if (!isNaN(midi)) playNote(midi);
+  });
+})();
+</script>
+
+<footer class="tm-footer-legal">
+  <div class="tm-f-copy">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div class="tm-f-links">
+    <a href="/privacidad">Aviso de Privacidad</a>
+    <a href="/terminos">Términos y Condiciones</a>
+    <a href="/cookies">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

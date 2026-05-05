@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Música Clásica Española — Géneros y Tradiciones</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:    #f4ece0; --paper2: #f2ece3; --paper3: #e8e0d4;
+  --paper4:   #c8b99f; --paper5: #cec4b0;
+  --copper:   #a85a1e; --copper-lt: #c47a36; --copper-dk: #7a3e10;
+  --ink:      #1c1410; --ink2: #2e2418; --ink3: #4a3c2c;
+  --ink4:     #8a7a64; --ink5: #8a7a66;
+  --serif: 'Marcellus', Georgia, serif;
+  --sans:  'Inter', system-ui, sans-serif;
+  --mono:  'JetBrains Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+
+nav { position: sticky; top: 0; z-index: 100; background: rgba(244,236,224,.94); backdrop-filter: blur(12px); border-bottom: 1px solid var(--paper4); padding: 0 48px; display: flex; align-items: center; height: 60px; gap: 0; }
+.nav-logo { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--ink); margin-right: 36px; letter-spacing: -.01em; text-decoration: none; }
+.nav-logo span { font-family: var(--mono); font-size: 0.52em; font-weight: 400; color: var(--ink4); letter-spacing: 0; margin-left: 2px; }
+.nav-link { padding: 0 16px; height: 56px; display: flex; align-items: center; font-size: 13px; font-weight: 500; color: var(--ink4); text-decoration: none; border-bottom: 2px solid transparent; transition: color .2s, border-color .2s; }
+.nav-link:hover { color: var(--ink2); }
+.nav-link.active { color: var(--copper); border-bottom-color: var(--copper); }
+.nav-cta { margin-left: auto; background: var(--copper); color: #fff; font-size: 12px; font-weight: 600; padding: 7px 18px; border-radius: 6px; text-decoration: none; transition: background .2s; }
+.nav-cta:hover { background: var(--copper-dk); }
+
+.ch-hero { background: #0d0804; padding: 80px 48px 90px; position: relative; overflow: hidden; }
+.ch-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 50% at 50% 120%, rgba(100,60,20,.4) 0%, transparent 70%); pointer-events: none; }
+.ch-breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(250,246,240,.35); margin-bottom: 40px; }
+.ch-breadcrumb a { color: var(--copper-lt); text-decoration: none; transition: opacity .2s; }
+.ch-breadcrumb a:hover { opacity: .8; }
+.ch-breadcrumb span { color: rgba(250,246,240,.2); }
+.ch-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.ch-num { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .1em; color: var(--copper-lt); border: 1px solid rgba(192,120,48,.3); padding: 4px 10px; border-radius: 4px; }
+.ch-era { font-size: 12px; color: rgba(250,246,240,.35); font-style: italic; }
+.ch-title { font-family: var(--serif); font-size: clamp(52px, 7vw, 92px); font-weight: 700; line-height: .9; letter-spacing: -.025em; color: var(--paper); max-width: 760px; margin-bottom: 12px; }
+.ch-title em { font-style: italic; color: var(--copper-lt); }
+.ch-subtitle { font-family: var(--serif); font-size: clamp(18px, 2vw, 24px); font-style: italic; color: rgba(250,246,240,.42); margin-bottom: 36px; }
+.ch-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.ch-tag { font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; background: rgba(250,246,240,.07); color: rgba(250,246,240,.45); border: 1px solid rgba(250,246,240,.1); }
+
+.ch-body { max-width: 720px; margin: 0 auto; padding: 80px 48px 0; }
+.ch-section { margin-bottom: 72px; }
+.ch-section-label { font-size: 10px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--copper); margin-bottom: 14px; display: block; }
+.ch-h2 { font-family: var(--serif); font-size: clamp(28px, 3.5vw, 40px); font-weight: 700; line-height: 1.06; letter-spacing: -.02em; color: var(--ink); margin-bottom: 24px; }
+.ch-h2 em { font-style: italic; color: var(--copper); }
+.ch-body p { font-size: 16px; color: var(--ink3); line-height: 1.85; margin-bottom: 22px; }
+.ch-body p:last-child { margin-bottom: 0; }
+.ch-body strong { font-weight: 600; color: var(--ink2); }
+
+.ch-pullquote { border-left: 3px solid var(--copper); padding: 16px 24px; background: var(--paper2); border-radius: 0 8px 8px 0; margin: 36px 0; }
+.ch-pullquote p { font-family: var(--serif); font-size: 21px !important; font-style: italic; color: var(--ink2); line-height: 1.55; margin: 0 !important; }
+
+.ch-section-photo { float: right; width: 42%; margin: 6px 0 22px 30px; border-radius: 10px; overflow: hidden; shape-outside: border-box; }
+.ch-section-photo img { width: 100%; height: 210px; object-fit: cover; object-position: center; display: block; }
+.ch-section::after { content: ''; display: table; clear: both; }
+@media (max-width: 600px) { .ch-section-photo { float: none; width: 100%; margin: 0 0 22px 0; } }
+
+.ch-visual-wrap { max-width: 860px; margin: 0 auto; padding: 0 48px 72px; }
+.ch-visual { background: var(--paper2); border: 1px solid var(--paper3); border-radius: 14px; overflow: hidden; }
+.ch-visual-header { padding: 13px 20px; border-bottom: 1px solid var(--paper3); display: flex; align-items: center; justify-content: space-between; }
+.ch-visual-title { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--ink5); }
+.ch-audio-hint { font-size: 11px; color: var(--copper); font-weight: 500; font-style: italic; letter-spacing: .02em; }
+.ch-visual-body { padding: 28px 24px; overflow-x: auto; }
+.ch-visual-caption { padding: 12px 24px 16px; border-top: 1px solid var(--paper3); font-size: 12px; color: var(--ink5); font-style: italic; line-height: 1.5; }
+
+.ch-theory-link { background: #13100c; border-radius: 12px; padding: 28px 32px; margin: 36px 0; display: flex; align-items: flex-start; gap: 20px; }
+.ch-theory-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+.ch-theory-label { font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--copper-lt); margin-bottom: 6px; display: block; }
+.ch-theory-text { font-size: 14px; color: rgba(250,246,240,.55); line-height: 1.7; margin-bottom: 12px; }
+.ch-theory-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--copper-lt); text-decoration: none; border-bottom: 1px solid rgba(192,120,48,.35); padding-bottom: 1px; transition: border-color .2s; }
+.ch-theory-btn:hover { border-color: var(--copper-lt); }
+
+.ch-nav { max-width: 860px; margin: 0 auto; padding: 0 48px 80px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.ch-nav-back, .ch-nav-next { display: flex; flex-direction: column; gap: 4px; text-decoration: none; padding: 20px 24px; border-radius: 12px; border: 1px solid var(--paper4); transition: border-color .2s, box-shadow .2s; max-width: 48%; }
+.ch-nav-back:hover, .ch-nav-next:hover { border-color: var(--copper); box-shadow: 0 4px 16px rgba(160,92,32,.1); }
+.ch-nav-next { align-items: flex-end; }
+.ch-nav-dir { font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--copper); }
+.ch-nav-name { font-family: var(--serif); font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.2; }
+.ch-nav-desc { font-size: 12px; color: var(--ink5); }
+
+@media (max-width: 768px) {
+  nav { padding: 0 16px; overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; scrollbar-width: none; }
+  nav::-webkit-scrollbar { display: none; }
+  nav > * { flex-shrink: 0; }
+  .ch-hero { padding: 60px 20px 72px; }
+  .ch-body { padding: 56px 20px 0; }
+  .ch-visual-wrap { padding: 0 20px 56px; }
+  .ch-nav { padding: 0 20px 60px; flex-direction: column; }
+  .ch-nav-back, .ch-nav-next { max-width: 100%; width: 100%; }
+  .ch-nav-next { align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link active">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<section class="ch-hero">
+  <div class="ch-breadcrumb">
+    <a href="/recursos">Recursos</a>
+    <span>·</span>
+    <a href="/recursos/generos">Géneros y Tradiciones</a>
+    <span>·</span>
+    <span style="color:rgba(250,246,240,.5)">Música Clásica Española</span>
+  </div>
+  <div class="ch-meta">
+    <span class="ch-num">14 · España</span>
+    <span class="ch-era">1880 – 1940</span>
+  </div>
+  <h1 class="ch-title">Música Clásica <em>Española</em></h1>
+  <p class="ch-subtitle">Granados, Albéniz y De Falla</p>
+  <div class="ch-tags">
+    <span class="ch-tag">Nacionalismo</span>
+    <span class="ch-tag">Modo frigio</span>
+    <span class="ch-tag">Folclore</span>
+    <span class="ch-tag">Albéniz</span>
+    <span class="ch-tag">Guitarra de concierto</span>
+  </div>
+</section>
+
+<!-- ── SECCIÓN 1 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Punto de partida</span>
+  <h2 class="ch-h2">El piano<br><em>que siempre suena a guitarra.</em></h2>
+
+  <p>La música clásica española de finales del siglo XIX y principios del XX creó una síntesis entre la tradición del piano romántico europeo y la música folk, flamenca y morisca de España. Isaac Albéniz, Enrique Granados y Manuel de Falla escribieron música formalmente sofisticada, en la tradición de Liszt y Chopin, con un lenguaje armónico y melódico enraizado en el folclore español y el flamenco. El resultado fue un corpus que sonaba completamente original dentro de la música de concierto europea.</p>
+
+  <p>La paradoja central de esta tradición: la guitarra casi nunca se escucha, pero siempre está presente. Albéniz escribió para piano piezas cuya escritura imita tan de cerca la técnica guitarrística (arpegios que simulan el rasgueado, melodías con pedales de bajo que recuerdan las cuerdas al aire de la guitarra, texturas de voces independientes que recuerdan el contrapunto guitarrístico) que las transcripciones para guitarra de clásica de estas obras no son adaptaciones forzadas: son el instrumento encontrando su forma natural.</p>
+
+  <p>El contexto cultural fue el nacionalismo musical del fin de siglo, un movimiento europeo donde compositores de distintos países buscaron un lenguaje propio fuera del mainstream germánico. En España, ese lenguaje propio ya existía en la música popular y folclórica, y Albéniz, Granados y De Falla lo reconocieron como materia prima de primer orden, no como curiosidad etnográfica.</p>
+</div>
+</div>
+
+<!-- ── SECCIÓN 2 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">El color español</span>
+  <h2 class="ch-h2">Frigio, flamenca, Andalucía:<br><em>la paleta modal</em></h2>
+
+  <p>El lenguaje armónico de la música clásica española bebe profundamente del <strong>modo frigio</strong> (con su característica segunda bemol que crea el "sonido español"), de la <strong>escala flamenca</strong> (frigio dominante, con la tercera mayor) y de armonías modales tomadas de tradiciones folclóricas. Esta mezcla de modal y tonal, de antiguo y romántico, es lo que hace que la música de Albéniz suene como no suena ningún otro compositor de su época.</p>
+
+  <p>"Asturias" de Albéniz, originalmente escrita para piano, se interpreta hoy casi exclusivamente en guitarra clásica porque la escritura pianística imita tan de cerca la técnica guitarrística. La melodía de apertura es puro frigio, con las notas de aproximación de segunda menor características. Cuando Julian Bream o John Williams la tocan, no parece una transcripción: parece que siempre fue para guitarra.</p>
+
+  <p>Granados exploró un territorio diferente: su "Goyescas" evoca la España del siglo XVIII a través de Goya, con un lenguaje armónico más cromático y romántico que el de Albéniz. De Falla fue el más riguroso en su uso del folclore: sus obras de madurez citan o simulan materiales específicos de la música andaluza, con una precisión casi etnomusicológica que no excluye la invención.</p>
+
+  <div class="ch-pullquote">
+    <p>Albéniz pensó para piano y sonó a guitarra. Cuando la guitarra toca su música, no interpreta una transcripción: recupera el instrumento que el compositor tenía en la cabeza.</p>
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 3 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">La armonía colorista</span>
+  <h2 class="ch-h2">Debussy aprendió<br><em>de Albéniz</em></h2>
+
+  <p>La influencia corrió en ambas direcciones: los compositores españoles tomaron prestada la técnica del piano romántico de las escuelas francesa y alemana, pero las innovaciones armónicas de la música española (mezcla modal, notas pedales sostenidas del flamenco, armonías cromáticas inesperadas) influyeron en Debussy y Ravel. El concepto de "armonía de color", usar progresiones de acordes no para la resolución funcional sino para el color tonal y la atmósfera, se desarrolló en parte en este intercambio español-francés.</p>
+
+  <p>Debussy reconoció explícitamente su deuda con Albéniz. Sus propias piezas ibéricas ("Ibéria" de los Images orquestales, los preludios "La Puerta del Vino" y "La Sérénade interrompue") son respuestas directas a lo que escuchó en la música española: la pedal de bajo sostenida mientras la armonía se mueve encima, las yuxtaposiciones de acordes sin resolución funcional entre ellos, el uso del silencio como elemento estructural.</p>
+
+  <p>Para un guitarrista contemporáneo, esta historia tiene una implicación práctica: el vocabulario armónico de Albéniz, Granados y De Falla es una fuente directa de los colores que aparecen en el jazz modal, en el ambient, en el post-rock. El frigio dominante que usa Albéniz en "Asturias" es el mismo que usa Carlos Santana en "Oye Como Va". Las fuentes se conectan de maneras inesperadas.</p>
+</div>
+</div>
+
+<!-- VISUAL: Modo frigio vs frigio dominante en Mi -->
+<div class="ch-visual-wrap">
+<div class="ch-visual">
+  <div class="ch-visual-header">
+    <span class="ch-visual-title">Modo frigio vs. frigio dominante en Mi — la diferencia que importa</span>
+    <span class="ch-audio-hint">♪ toca cada nota</span>
+  </div>
+  <div class="ch-visual-body">
+    <svg viewBox="0 0 760 300" width="100%" style="display:block;min-width:460px;max-width:760px">
+      <rect width="760" height="300" fill="#f2ece3" rx="8"/>
+
+      <!-- Row labels -->
+      <text x="20" y="95" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#8a7a66" dominant-baseline="middle">Frigio</text>
+      <text x="20" y="195" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#a85a1e" dominant-baseline="middle">Frigio</text>
+      <text x="20" y="211" font-family="Inter,sans-serif" font-size="11" font-weight="600" fill="#a85a1e" dominant-baseline="middle">Dom.</text>
+
+      <!-- Phrygian E: E F G A B C D E -->
+      <!-- MIDI: 52 53 55 57 59 60 62 64 -->
+      <!-- 8 notes, x from 60, spacing 86 -->
+
+      <!-- E (tónica) - copper -->
+      <rect x="60"  y="60" width="72" height="68" rx="6" fill="#a85a1e" opacity=".75"/>
+      <!-- F (b2) - red -->
+      <rect x="148" y="60" width="72" height="68" rx="6" fill="#e05840" opacity=".8"/>
+      <!-- G (b3) - neutral copper -->
+      <rect x="236" y="68" width="72" height="60" rx="6" fill="#c8b99f" opacity=".9"/>
+      <!-- A (4) - neutral -->
+      <rect x="324" y="68" width="72" height="60" rx="6" fill="#c8b99f" opacity=".9"/>
+      <!-- B (5) - neutral -->
+      <rect x="412" y="68" width="72" height="60" rx="6" fill="#c8b99f" opacity=".9"/>
+      <!-- C (b6) - neutral -->
+      <rect x="500" y="68" width="72" height="60" rx="6" fill="#c8b99f" opacity=".9"/>
+      <!-- D (b7) - neutral -->
+      <rect x="588" y="68" width="72" height="60" rx="6" fill="#c8b99f" opacity=".9"/>
+      <!-- E8 - copper -->
+      <rect x="676" y="60" width="72" height="68" rx="6" fill="#a85a1e" opacity=".5"/>
+
+      <!-- Note names row 1 -->
+      <text x="96"  y="94" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">E</text>
+      <text x="184" y="94" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">F</text>
+      <text x="272" y="98" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="#6a5a46" text-anchor="middle" dominant-baseline="middle">G</text>
+      <text x="360" y="98" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="#6a5a46" text-anchor="middle" dominant-baseline="middle">A</text>
+      <text x="448" y="98" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="#6a5a46" text-anchor="middle" dominant-baseline="middle">B</text>
+      <text x="536" y="98" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="#6a5a46" text-anchor="middle" dominant-baseline="middle">C</text>
+      <text x="624" y="98" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="#6a5a46" text-anchor="middle" dominant-baseline="middle">D</text>
+      <text x="712" y="94" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">E</text>
+
+      <!-- Separator line -->
+      <line x1="60" y1="148" x2="748" y2="148" stroke="#e8e0d4" stroke-width="1"/>
+
+      <!-- Phrygian Dominant E: E F G# A B C D E -->
+      <!-- MIDI: 52 53 56 57 59 60 62 64 -->
+
+      <!-- E (tónica) -->
+      <rect x="60"  y="160" width="72" height="68" rx="6" fill="#a85a1e" opacity=".75"/>
+      <!-- F (b2) - red -->
+      <rect x="148" y="160" width="72" height="68" rx="6" fill="#e05840" opacity=".8"/>
+      <!-- G# (3M) - BRIGHT AMBER — the key difference -->
+      <rect x="236" y="154" width="72" height="80" rx="6" fill="#e8a838" opacity=".95"/>
+      <!-- A (4) -->
+      <rect x="324" y="168" width="72" height="60" rx="6" fill="#c8b99f" opacity=".9"/>
+      <!-- B (5) -->
+      <rect x="412" y="168" width="72" height="60" rx="6" fill="#c8b99f" opacity=".9"/>
+      <!-- C (b6) -->
+      <rect x="500" y="168" width="72" height="60" rx="6" fill="#c8b99f" opacity=".9"/>
+      <!-- D (b7) -->
+      <rect x="588" y="168" width="72" height="60" rx="6" fill="#c8b99f" opacity=".9"/>
+      <!-- E8 -->
+      <rect x="676" y="160" width="72" height="68" rx="6" fill="#a85a1e" opacity=".5"/>
+
+      <!-- Note names row 2 -->
+      <text x="96"  y="194" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">E</text>
+      <text x="184" y="194" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">F</text>
+      <text x="272" y="194" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#7a3e10" text-anchor="middle" dominant-baseline="middle">G#</text>
+      <text x="360" y="198" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="#6a5a46" text-anchor="middle" dominant-baseline="middle">A</text>
+      <text x="448" y="198" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="#6a5a46" text-anchor="middle" dominant-baseline="middle">B</text>
+      <text x="536" y="198" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="#6a5a46" text-anchor="middle" dominant-baseline="middle">C</text>
+      <text x="624" y="198" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="#6a5a46" text-anchor="middle" dominant-baseline="middle">D</text>
+      <text x="712" y="194" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">E</text>
+
+      <!-- Arrow pointing at G vs G# difference -->
+      <path d="M 272,238 L 272,248" fill="none" stroke="#e8a838" stroke-width="2" marker-end="url(#arr-diff)"/>
+      <text x="272" y="262" font-family="Inter,sans-serif" font-size="11" fill="#a07030" text-anchor="middle" font-style="italic">G→G#: el sonido flamenco</text>
+
+      <defs>
+        <marker id="arr-diff" markerWidth="7" markerHeight="7" refX="3.5" refY="3.5" orient="auto">
+          <path d="M0,0 L7,3.5 L0,7 Z" fill="#e8a838"/>
+        </marker>
+      </defs>
+
+      <!-- Legend -->
+      <rect x="60" y="278" width="10" height="10" rx="2" fill="#e8a838" opacity=".95"/>
+      <text x="76" y="284" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" dominant-baseline="middle">3ª mayor — crea el color flamenco/español</text>
+      <rect x="360" y="278" width="10" height="10" rx="2" fill="#e05840" opacity=".8"/>
+      <text x="376" y="284" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" dominant-baseline="middle">2ª menor (b2) — gravedad frigia</text>
+
+      <!-- Click zones row 1 (Phrygian) -->
+      <rect data-midi="52" x="60"  y="55" width="72" height="78" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="53" x="148" y="55" width="72" height="78" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="55" x="236" y="55" width="72" height="78" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="57" x="324" y="55" width="72" height="78" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="59" x="412" y="55" width="72" height="78" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="60" x="500" y="55" width="72" height="78" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="62" x="588" y="55" width="72" height="78" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="64" x="676" y="55" width="72" height="78" fill="transparent" style="cursor:pointer"/>
+      <!-- Click zones row 2 (Phrygian Dominant) -->
+      <rect data-midi="52" x="60"  y="155" width="72" height="78" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="53" x="148" y="155" width="72" height="78" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="56" x="236" y="149" width="72" height="90" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="57" x="324" y="155" width="72" height="78" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="59" x="412" y="155" width="72" height="78" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="60" x="500" y="155" width="72" height="78" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="62" x="588" y="155" width="72" height="78" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="64" x="676" y="155" width="72" height="78" fill="transparent" style="cursor:pointer"/>
+    </svg>
+  </div>
+  <div class="ch-visual-caption">
+    Modo frigio en Mi (arriba): E–F–G–A–B–C–D–E. Frigio dominante en Mi (abajo): E–F–G#–A–B–C–D–E. La única diferencia es la tercera: G natural en el frigio estándar, G# en el frigio dominante. Ese semitono adicional crea el color flamenco: la tónica pasa de acorde menor a acorde mayor, lo que produce la tensión característica de la música andaluza.
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 4 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">La guitarra clásica</span>
+  <h2 class="ch-h2">Tárrega, Segovia<br><em>y el instrumento que se inventó a sí mismo</em></h2>
+
+  <p>Francisco Tárrega (1852-1909) y Andrés Segovia (1893-1987) establecieron la guitarra clásica como instrumento de concierto serio. Tárrega desarrolló gran parte de la técnica moderna de la mano derecha (la posición de la muñeca, el ángulo de ataque de los dedos, la articulación de los dedos en la producción del sonido) y arregló para guitarra música de piano y de orquesta que expandió el repertorio disponible. Sin Tárrega, la guitarra clásica del siglo XX no tendría su vocabulario técnico.</p>
+
+  <p>Segovia hizo lo que Tárrega no pudo: llevar la guitarra a las salas de concierto más importantes del mundo y convencer a compositores de que el instrumento merecía obras nuevas escritas directamente para él. Encargó y estrenó obras que definieron el repertorio: el Concierto de Aranjuez de Rodrigo, las obras de Castelnuovo-Tedesco y Villa-Lobos, las Cinco Piezas del Sur de Federico Moreno Torroba. Sin estos encargos, el instrumento no habría tenido literatura propia de primer nivel en el siglo XX.</p>
+
+  <p>La técnica de <strong>uña de la mano derecha</strong>, la posición clásica del instrumento (guitarra apoyada en la pierna izquierda, ligeramente inclinada), y el repertorio del siglo XX son en gran medida el legado de esta tradición española. Cuando un guitarrista clásico contemporáneo en cualquier parte del mundo se sienta a tocar, está usando un sistema desarrollado en España entre 1870 y 1950.</p>
+
+  <div class="ch-pullquote">
+    <p>Segovia no tocó la música que existía: encargó la música que quería que existiera. Así construyó un instrumento nuevo a partir de uno viejo.</p>
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 5 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Lo que puedes llevarte</span>
+  <h2 class="ch-h2">Tres vocabularios<br><em>de la música más bella de España</em></h2>
+
+  <p>El <strong>modo frigio</strong> y sus variantes: aprender a improvisar en frigio y frigio dominante añade un color sonoro específico a cualquier estilo, del metal al jazz al folk. La segunda menor (b2) es el intervalo que define el carácter; la tercera mayor añade el color flamenco. Practicar las frases melódicas naturales de cada uno de estos modos en el mástil desarrolla un vocabulario que la pentatónica y la escala mayor no cubren.</p>
+
+  <p>La técnica de fingerstyle clásico: el enfoque de la guitarra clásica al fingerpicking (alternancia im, golpe de apoyo para la melodía, golpe libre para los arpegios) es técnicamente exigente pero produce una claridad de timbre no disponible con plectro. Los principios básicos de la técnica de mano derecha de Tárrega son transferibles a cualquier estilo de guitarra acústica: posición, ángulo de ataque, producción del sonido.</p>
+
+  <p>La transcripción como estudio: las piezas de piano de Albéniz en guitarra revelan cómo los dos instrumentos comparten una lógica armónica común. "Asturias", "Granada", "Sevilla": transcribir estas piezas o simplemente analizar cómo el guitarrista adapta la escritura pianística abre un ángulo de comprensión del instrumento que el repertorio guitarrístico original no provee.</p>
+
+  <div class="ch-theory-link">
+    <div class="ch-theory-icon">◎</div>
+    <div>
+      <span class="ch-theory-label">Concepto relacionado · Teoría</span>
+      <p class="ch-theory-text">El modo frigio y la escala flamenca (frigio dominante) son el vocabulario modal de la música española clásica y del flamenco. La sección de Escalas los explica en contexto.</p>
+      <a href="/teoria/escalas" class="ch-theory-btn">Ver Escalas y Modos →</a>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="ch-nav">
+  <a href="/recursos/generos/country-americana" class="ch-nav-back">
+    <span class="ch-nav-dir">← Anterior</span>
+    <span class="ch-nav-name">Country y Americana</span>
+    <span class="ch-nav-desc">La canción que cuenta historias</span>
+  </a>
+  <a href="/recursos/generos/afrobeat" class="ch-nav-next">
+    <span class="ch-nav-dir">Siguiente →</span>
+    <span class="ch-nav-name">Afrobeat</span>
+    <span class="ch-nav-desc">El ritmo como acto político</span>
+  </a>
+</div>
+
+<script>
+(function () {
+  var _synth = null;
+
+  function _midiNote(m) {
+    var names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    return names[m % 12] + (Math.floor(m / 12) - 1);
+  }
+
+  async function _initAudio() {
+    if (_synth) return;
+    await Tone.start();
+    var comp   = new Tone.Compressor(-18, 4).toDestination();
+    var reverb = new Tone.Freeverb({ roomSize: 0.22, dampening: 4200, wet: 0.12 }).connect(comp);
+    _synth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'triangle' },
+      envelope:   { attack: 0.006, decay: 0.35, sustain: 0.12, release: 1.4 }
+    }).connect(reverb);
+  }
+
+  async function playNote(midi) {
+    try {
+      await _initAudio();
+      _synth.triggerAttackRelease(_midiNote(midi), '8n');
+    } catch(e) {}
+  }
+
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-midi]');
+    if (!el) return;
+    var midi = parseInt(el.getAttribute('data-midi'), 10);
+    if (!isNaN(midi)) playNote(midi);
+  });
+})();
+</script>
+
+<footer class="tm-footer-legal">
+  <div class="tm-f-copy">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div class="tm-f-links">
+    <a href="/privacidad">Aviso de Privacidad</a>
+    <a href="/terminos">Términos y Condiciones</a>
+    <a href="/cookies">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

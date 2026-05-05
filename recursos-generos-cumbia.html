@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Cumbia — Géneros y Tradiciones</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:    #f4ece0; --paper2: #f2ece3; --paper3: #e8e0d4;
+  --paper4:   #c8b99f; --paper5: #cec4b0;
+  --copper:   #a85a1e; --copper-lt: #c47a36; --copper-dk: #7a3e10;
+  --ink:      #1c1410; --ink2: #2e2418; --ink3: #4a3c2c;
+  --ink4:     #8a7a64; --ink5: #8a7a66;
+  --serif: 'Marcellus', Georgia, serif;
+  --sans:  'Inter', system-ui, sans-serif;
+  --mono:  'JetBrains Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+
+nav { position: sticky; top: 0; z-index: 100; background: rgba(244,236,224,.94); backdrop-filter: blur(12px); border-bottom: 1px solid var(--paper4); padding: 0 48px; display: flex; align-items: center; height: 60px; gap: 0; }
+.nav-logo { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--ink); margin-right: 36px; letter-spacing: -.01em; text-decoration: none; }
+.nav-logo span { font-family: var(--mono); font-size: 0.52em; font-weight: 400; color: var(--ink4); letter-spacing: 0; margin-left: 2px; }
+.nav-link { padding: 0 16px; height: 56px; display: flex; align-items: center; font-size: 13px; font-weight: 500; color: var(--ink4); text-decoration: none; border-bottom: 2px solid transparent; transition: color .2s, border-color .2s; }
+.nav-link:hover { color: var(--ink2); }
+.nav-link.active { color: var(--copper); border-bottom-color: var(--copper); }
+.nav-cta { margin-left: auto; background: var(--copper); color: #fff; font-size: 12px; font-weight: 600; padding: 7px 18px; border-radius: 6px; text-decoration: none; transition: background .2s; }
+.nav-cta:hover { background: var(--copper-dk); }
+
+.ch-hero { background: #0d0804; padding: 80px 48px 90px; position: relative; overflow: hidden; }
+.ch-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 50% at 50% 120%, rgba(100,60,20,.4) 0%, transparent 70%); pointer-events: none; }
+.ch-breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(250,246,240,.35); margin-bottom: 40px; }
+.ch-breadcrumb a { color: var(--copper-lt); text-decoration: none; transition: opacity .2s; }
+.ch-breadcrumb a:hover { opacity: .8; }
+.ch-breadcrumb span { color: rgba(250,246,240,.2); }
+.ch-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.ch-num { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .1em; color: var(--copper-lt); border: 1px solid rgba(192,120,48,.3); padding: 4px 10px; border-radius: 4px; }
+.ch-era { font-size: 12px; color: rgba(250,246,240,.35); font-style: italic; }
+.ch-title { font-family: var(--serif); font-size: clamp(52px, 7vw, 92px); font-weight: 700; line-height: .9; letter-spacing: -.025em; color: var(--paper); max-width: 760px; margin-bottom: 12px; }
+.ch-title em { font-style: italic; color: var(--copper-lt); }
+.ch-subtitle { font-family: var(--serif); font-size: clamp(18px, 2vw, 24px); font-style: italic; color: rgba(250,246,240,.42); margin-bottom: 36px; }
+.ch-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.ch-tag { font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; background: rgba(250,246,240,.07); color: rgba(250,246,240,.45); border: 1px solid rgba(250,246,240,.1); }
+
+.ch-body { max-width: 720px; margin: 0 auto; padding: 80px 48px 0; }
+.ch-section { margin-bottom: 72px; }
+.ch-section-label { font-size: 10px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--copper); margin-bottom: 14px; display: block; }
+.ch-h2 { font-family: var(--serif); font-size: clamp(28px, 3.5vw, 40px); font-weight: 700; line-height: 1.06; letter-spacing: -.02em; color: var(--ink); margin-bottom: 24px; }
+.ch-h2 em { font-style: italic; color: var(--copper); }
+.ch-body p { font-size: 16px; color: var(--ink3); line-height: 1.85; margin-bottom: 22px; }
+.ch-body p:last-child { margin-bottom: 0; }
+.ch-body strong { font-weight: 600; color: var(--ink2); }
+
+.ch-pullquote { border-left: 3px solid var(--copper); padding: 16px 24px; background: var(--paper2); border-radius: 0 8px 8px 0; margin: 36px 0; }
+.ch-pullquote p { font-family: var(--serif); font-size: 21px !important; font-style: italic; color: var(--ink2); line-height: 1.55; margin: 0 !important; }
+
+.ch-section-photo { float: right; width: 42%; margin: 6px 0 22px 30px; border-radius: 10px; overflow: hidden; shape-outside: border-box; }
+.ch-section-photo img { width: 100%; height: 210px; object-fit: cover; object-position: center; display: block; }
+.ch-section::after { content: ''; display: table; clear: both; }
+@media (max-width: 600px) { .ch-section-photo { float: none; width: 100%; margin: 0 0 22px 0; } }
+
+.ch-visual-wrap { max-width: 860px; margin: 0 auto; padding: 0 48px 72px; }
+.ch-visual { background: var(--paper2); border: 1px solid var(--paper3); border-radius: 14px; overflow: hidden; }
+.ch-visual-header { padding: 13px 20px; border-bottom: 1px solid var(--paper3); display: flex; align-items: center; justify-content: space-between; }
+.ch-visual-title { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--ink5); }
+.ch-audio-hint { font-size: 11px; color: var(--copper); font-weight: 500; font-style: italic; letter-spacing: .02em; }
+.ch-visual-body { padding: 28px 24px; overflow-x: auto; }
+.ch-visual-caption { padding: 12px 24px 16px; border-top: 1px solid var(--paper3); font-size: 12px; color: var(--ink5); font-style: italic; line-height: 1.5; }
+
+.ch-theory-link { background: #13100c; border-radius: 12px; padding: 28px 32px; margin: 36px 0; display: flex; align-items: flex-start; gap: 20px; }
+.ch-theory-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+.ch-theory-label { font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--copper-lt); margin-bottom: 6px; display: block; }
+.ch-theory-text { font-size: 14px; color: rgba(250,246,240,.55); line-height: 1.7; margin-bottom: 12px; }
+.ch-theory-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--copper-lt); text-decoration: none; border-bottom: 1px solid rgba(192,120,48,.35); padding-bottom: 1px; transition: border-color .2s; }
+.ch-theory-btn:hover { border-color: var(--copper-lt); }
+
+.ch-nav { max-width: 860px; margin: 0 auto; padding: 0 48px 80px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.ch-nav-back, .ch-nav-next { display: flex; flex-direction: column; gap: 4px; text-decoration: none; padding: 20px 24px; border-radius: 12px; border: 1px solid var(--paper4); transition: border-color .2s, box-shadow .2s; max-width: 48%; }
+.ch-nav-back:hover, .ch-nav-next:hover { border-color: var(--copper); box-shadow: 0 4px 16px rgba(160,92,32,.1); }
+.ch-nav-next { align-items: flex-end; }
+.ch-nav-dir { font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--copper); }
+.ch-nav-name { font-family: var(--serif); font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.2; }
+.ch-nav-desc { font-size: 12px; color: var(--ink5); }
+
+@media (max-width: 768px) {
+  nav { padding: 0 16px; overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; scrollbar-width: none; }
+  nav::-webkit-scrollbar { display: none; }
+  nav > * { flex-shrink: 0; }
+  .ch-hero { padding: 60px 20px 72px; }
+  .ch-body { padding: 56px 20px 0; }
+  .ch-visual-wrap { padding: 0 20px 56px; }
+  .ch-nav { padding: 0 20px 60px; flex-direction: column; }
+  .ch-nav-back, .ch-nav-next { max-width: 100%; width: 100%; }
+  .ch-nav-next { align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link active">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<section class="ch-hero">
+  <div class="ch-breadcrumb">
+    <a href="/recursos">Recursos</a>
+    <span>·</span>
+    <a href="/recursos/generos">Géneros y Tradiciones</a>
+    <span>·</span>
+    <span style="color:rgba(250,246,240,.5)">Cumbia</span>
+  </div>
+  <div class="ch-meta">
+    <span class="ch-num">20 · Colombia · Global</span>
+    <span class="ch-era">s. XVII – presente</span>
+  </div>
+  <h1 class="ch-title"><em>Cumbia</em></h1>
+  <p class="ch-subtitle">El viaje de un ritmo continental</p>
+  <div class="ch-tags">
+    <span class="ch-tag">Clave</span>
+    <span class="ch-tag">Gaita</span>
+    <span class="ch-tag">Mestizaje musical</span>
+    <span class="ch-tag">Colombia</span>
+    <span class="ch-tag">Chicha peruana</span>
+  </div>
+</section>
+
+<!-- ── SECCIÓN 1 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Punto de partida</span>
+  <h2 class="ch-h2">Un ritmo<br><em>que cruzó todo un continente.</em></h2>
+
+  <p>La cumbia nació en la costa Caribe de Colombia entre los siglos XVII y XVIII, emergiendo del encuentro entre esclavos africanos, pueblos indígenas del Caribe y colonizadores españoles. Cada grupo aportó algo que permanece audible en la música actual: la polirritmia y el canto responsorial africano, la <strong>gaita</strong> y la percusión indígena, la sensibilidad melódica europea. El resultado no fue una mezcla sino una síntesis, algo que ninguna de las tres tradiciones había producido por separado.</p>
+
+  <p>Para el siglo XX, la cumbia era la música folclórica más importante de Colombia. Luego se dispersó por todo el continente, transformándose en cada país en algo ligeramente distinto: cumbia mexicana, cumbia argentina, <strong>chicha</strong> peruana, cumbia andina. El ritmo central viajó intacto; todo lo demás se negoció con la cultura local.</p>
+
+  <p>Lo que hace de la cumbia un caso de estudio singular es que sus transformaciones no son degradaciones ni apropiaciones superficiales: son adaptaciones genuinas, en cada caso producidas por músicos que absorbieron el ritmo y lo pensaron desde su propia tradición. La chicha peruana de los años 70 no suena a Colombia, pero sin Colombia no existiría.</p>
+</div>
+</div>
+
+<!-- ── SECCIÓN 2 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">La transformación continental</span>
+  <h2 class="ch-h2">La misma célula,<br><em>veinte tradiciones</em></h2>
+
+  <p>A medida que la cumbia viajó hacia el sur y el oeste a través de Latinoamérica, absorbió las tradiciones musicales locales. En México, la cumbia se fusionó con la tradición del acordeón norteño, dándole un color más cantinero y melancólico. En Argentina, la <strong>cumbia villera</strong> emergió de los barrios populares de Buenos Aires con percusión electrónica y letras que documentaban la vida en los márgenes de la ciudad.</p>
+
+  <p>En Perú, la <strong>chicha</strong> (o cumbia andina) fusionó la cumbia con las escalas pentatónicas andinas y los sonidos de la guitarra eléctrica del surf americano, creando algo que para un oído colombiano resulta irreconocible como cumbia pero que tiene una coherencia interna completa. Los grupos de chicha de Lima en los años 70 eran hijos de la migración interna: campesinos andinos llegados a la ciudad que encontraron en esa síntesis su propio lenguaje.</p>
+
+  <p>El estudio de las migraciones de la cumbia es un modelo de cómo evoluciona la música a través del intercambio cultural. El ritmo es el ADN: tan compacto y tan robusto que puede atravesar cualquier frontera sin perderse, cargando siempre suficiente información para que el siguiente músico que lo encuentre sepa qué hacer con él.</p>
+
+  <div class="ch-pullquote">
+    <p>Un ritmo sobrevive el viaje cuando tiene la estructura suficiente para ser reconocible pero la flexibilidad suficiente para adaptarse. La cumbia lleva cuatro siglos demostrando que cumple exactamente esa condición.</p>
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 3 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">El ritmo</span>
+  <h2 class="ch-h2">La célula que viajó:<br><em>el patrón de cumbia</em></h2>
+
+  <p>El ritmo básico de la cumbia se construye sobre una combinación de patrones de <strong>clave</strong> y una interacción específica entre el bajo y la percusión. El bajo toca en el tiempo 1, el tambor/bombo ejecuta un patrón de <strong>tumba</strong> que sincopa a través de los tiempos 2, 3 y 4, y una guira o raspa toca un patrón continuo de semicorcheas. Cada capa es sencilla; la interacción entre ellas crea el groove característico.</p>
+
+  <p>El "feel de cumbia" proviene de la interacción entre el tiempo 1 fuerte del bajo y el patrón sincopado del tambor que anticipa el siguiente tiempo fuerte. Esta anticipación, la sensación de que el ritmo siempre está llegando un poco antes de donde el oído lo espera, es lo que hace que la cumbia mueva el cuerpo de una manera particular. No empuja hacia adelante: tira desde adelante.</p>
+
+  <p>La versatilidad de esta célula rítmica es notable: funciona a cualquier tempo, desde la velocidad de un bolero hasta un baile rápido, sin perder su identidad. Esto es parte de lo que explica su capacidad de adaptarse a tantos contextos sin desintegrarse. El patrón tiene una forma reconocible a cualquier velocidad.</p>
+</div>
+</div>
+
+<!-- VISUAL: Patrón rítmico de cumbia -->
+<div class="ch-visual-wrap">
+<div class="ch-visual">
+  <div class="ch-visual-header">
+    <span class="ch-visual-title">Patrón rítmico de cumbia — 8 corcheas, tres capas</span>
+    <span class="ch-audio-hint">♪ toca cada golpe</span>
+  </div>
+  <div class="ch-visual-body">
+    <svg viewBox="0 0 760 260" width="100%" style="display:block;min-width:460px;max-width:760px">
+      <rect width="760" height="260" fill="#f2ece3" rx="8"/>
+
+      <!-- Column headers: 8 eighth notes -->
+      <!-- x positions: 60 + i*86 for i=0..7 -->
+      <text x="60"  y="22" font-family="JetBrains Mono,monospace" font-size="11" fill="#8a7a66" text-anchor="middle">1</text>
+      <text x="146" y="22" font-family="JetBrains Mono,monospace" font-size="11" fill="#8a7a66" text-anchor="middle">1+</text>
+      <text x="232" y="22" font-family="JetBrains Mono,monospace" font-size="11" fill="#8a7a66" text-anchor="middle">2</text>
+      <text x="318" y="22" font-family="JetBrains Mono,monospace" font-size="11" fill="#8a7a66" text-anchor="middle">2+</text>
+      <text x="404" y="22" font-family="JetBrains Mono,monospace" font-size="11" fill="#8a7a66" text-anchor="middle">3</text>
+      <text x="490" y="22" font-family="JetBrains Mono,monospace" font-size="11" fill="#8a7a66" text-anchor="middle">3+</text>
+      <text x="576" y="22" font-family="JetBrains Mono,monospace" font-size="11" fill="#8a7a66" text-anchor="middle">4</text>
+      <text x="662" y="22" font-family="JetBrains Mono,monospace" font-size="11" fill="#8a7a66" text-anchor="middle">4+</text>
+
+      <!-- Row labels -->
+      <text x="24" y="72"  font-family="JetBrains Mono,monospace" font-size="10" fill="#4a3c2c" text-anchor="middle" dominant-baseline="middle">BAJO</text>
+      <text x="24" y="142" font-family="JetBrains Mono,monospace" font-size="10" fill="#4a3c2c" text-anchor="middle" dominant-baseline="middle">TAMB</text>
+      <text x="24" y="210" font-family="JetBrains Mono,monospace" font-size="10" fill="#4a3c2c" text-anchor="middle" dominant-baseline="middle">GUIRA</text>
+
+      <!-- Grid lines -->
+      <line x1="40" y1="40" x2="40" y2="235" stroke="#e0d4c4" stroke-width="1"/>
+      <line x1="40" y1="40" x2="720" y2="40" stroke="#e0d4c4" stroke-width="1"/>
+      <line x1="40" y1="110" x2="720" y2="110" stroke="#e0d4c4" stroke-width="1"/>
+      <line x1="40" y1="178" x2="720" y2="178" stroke="#e0d4c4" stroke-width="1"/>
+      <line x1="40" y1="235" x2="720" y2="235" stroke="#e0d4c4" stroke-width="1"/>
+      <line x1="720" y1="40" x2="720" y2="235" stroke="#e0d4c4" stroke-width="1"/>
+
+      <!-- Empty cells (all rows, all columns) as light rectangles -->
+      <!-- Row 1 (bajo) empty cells -->
+      <rect x="44"  y="44" width="78" height="62" rx="5" fill="#e8d8c4" opacity=".35"/>
+      <rect x="130" y="44" width="78" height="62" rx="5" fill="#e8d8c4" opacity=".20"/>
+      <rect x="216" y="44" width="78" height="62" rx="5" fill="#e8d8c4" opacity=".20"/>
+      <rect x="302" y="44" width="78" height="62" rx="5" fill="#e8d8c4" opacity=".20"/>
+      <rect x="388" y="44" width="78" height="62" rx="5" fill="#e8d8c4" opacity=".20"/>
+      <rect x="474" y="44" width="78" height="62" rx="5" fill="#e8d8c4" opacity=".20"/>
+      <rect x="560" y="44" width="78" height="62" rx="5" fill="#e8d8c4" opacity=".20"/>
+      <rect x="646" y="44" width="70" height="62" rx="5" fill="#e8d8c4" opacity=".20"/>
+
+      <!-- Row 2 (tambor) empty cells -->
+      <rect x="44"  y="114" width="78" height="60" rx="5" fill="#e8d8c4" opacity=".20"/>
+      <rect x="130" y="114" width="78" height="60" rx="5" fill="#e8d8c4" opacity=".20"/>
+      <rect x="216" y="114" width="78" height="60" rx="5" fill="#e8d8c4" opacity=".35"/>
+      <rect x="302" y="114" width="78" height="60" rx="5" fill="#e8d8c4" opacity=".20"/>
+      <rect x="388" y="114" width="78" height="60" rx="5" fill="#e8d8c4" opacity=".20"/>
+      <rect x="474" y="114" width="78" height="60" rx="5" fill="#e8d8c4" opacity=".35"/>
+      <rect x="560" y="114" width="78" height="60" rx="5" fill="#e8d8c4" opacity=".35"/>
+      <rect x="646" y="114" width="70" height="60" rx="5" fill="#e8d8c4" opacity=".20"/>
+
+      <!-- Row 3 (guira) — all 8 cells active -->
+      <rect x="44"  y="182" width="78" height="50" rx="5" fill="#e8d8c4" opacity=".35"/>
+      <rect x="130" y="182" width="78" height="50" rx="5" fill="#e8d8c4" opacity=".35"/>
+      <rect x="216" y="182" width="78" height="50" rx="5" fill="#e8d8c4" opacity=".35"/>
+      <rect x="302" y="182" width="78" height="50" rx="5" fill="#e8d8c4" opacity=".35"/>
+      <rect x="388" y="182" width="78" height="50" rx="5" fill="#e8d8c4" opacity=".35"/>
+      <rect x="474" y="182" width="78" height="50" rx="5" fill="#e8d8c4" opacity=".35"/>
+      <rect x="560" y="182" width="78" height="50" rx="5" fill="#e8d8c4" opacity=".35"/>
+      <rect x="646" y="182" width="70" height="50" rx="5" fill="#e8d8c4" opacity=".35"/>
+
+      <!-- ACTIVE HITS -->
+
+      <!-- BAJO: beat 1 only (time 1) -->
+      <rect x="44"  y="44" width="78" height="62" rx="5" fill="#8c4018" opacity=".90"/>
+      <text x="83"  y="75" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">A</text>
+
+      <!-- TAMBOR/TUMBA: beat 2, "and" of 2, "and" of 3, beat 4 -->
+      <!-- beat 2 = col 3 (x=216) -->
+      <rect x="216" y="114" width="78" height="60" rx="5" fill="#c47a36" opacity=".88"/>
+      <text x="255" y="144" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">tum</text>
+      <!-- and of 2 = col 4 (x=302) -->
+      <rect x="302" y="114" width="78" height="60" rx="5" fill="#c47a36" opacity=".70"/>
+      <text x="341" y="144" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">ba</text>
+      <!-- and of 3 = col 6 (x=474) -->
+      <rect x="474" y="114" width="78" height="60" rx="5" fill="#c47a36" opacity=".80"/>
+      <text x="513" y="144" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">tum</text>
+      <!-- beat 4 = col 7 (x=560) -->
+      <rect x="560" y="114" width="78" height="60" rx="5" fill="#c47a36" opacity=".88"/>
+      <text x="599" y="144" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">ba</text>
+
+      <!-- GUIRA: all 8 hits -->
+      <rect x="44"  y="182" width="78" height="50" rx="5" fill="#e8d0a0" opacity=".80"/>
+      <rect x="130" y="182" width="78" height="50" rx="5" fill="#e8d0a0" opacity=".80"/>
+      <rect x="216" y="182" width="78" height="50" rx="5" fill="#e8d0a0" opacity=".80"/>
+      <rect x="302" y="182" width="78" height="50" rx="5" fill="#e8d0a0" opacity=".80"/>
+      <rect x="388" y="182" width="78" height="50" rx="5" fill="#e8d0a0" opacity=".80"/>
+      <rect x="474" y="182" width="78" height="50" rx="5" fill="#e8d0a0" opacity=".80"/>
+      <rect x="560" y="182" width="78" height="50" rx="5" fill="#e8d0a0" opacity=".80"/>
+      <rect x="646" y="182" width="70" height="50" rx="5" fill="#e8d0a0" opacity=".80"/>
+      <!-- guira tick marks -->
+      <text x="83"  y="207" font-family="JetBrains Mono,monospace" font-size="9" fill="#7a5c20" text-anchor="middle" dominant-baseline="middle">tss</text>
+      <text x="169" y="207" font-family="JetBrains Mono,monospace" font-size="9" fill="#7a5c20" text-anchor="middle" dominant-baseline="middle">tss</text>
+      <text x="255" y="207" font-family="JetBrains Mono,monospace" font-size="9" fill="#7a5c20" text-anchor="middle" dominant-baseline="middle">tss</text>
+      <text x="341" y="207" font-family="JetBrains Mono,monospace" font-size="9" fill="#7a5c20" text-anchor="middle" dominant-baseline="middle">tss</text>
+      <text x="427" y="207" font-family="JetBrains Mono,monospace" font-size="9" fill="#7a5c20" text-anchor="middle" dominant-baseline="middle">tss</text>
+      <text x="513" y="207" font-family="JetBrains Mono,monospace" font-size="9" fill="#7a5c20" text-anchor="middle" dominant-baseline="middle">tss</text>
+      <text x="599" y="207" font-family="JetBrains Mono,monospace" font-size="9" fill="#7a5c20" text-anchor="middle" dominant-baseline="middle">tss</text>
+      <text x="681" y="207" font-family="JetBrains Mono,monospace" font-size="9" fill="#7a5c20" text-anchor="middle" dominant-baseline="middle">tss</text>
+
+      <!-- Click zones -->
+      <!-- bajo: beat 1 -->
+      <rect data-midi="45" x="44"  y="44" width="78" height="62" fill="transparent" style="cursor:pointer" rx="5"/>
+      <!-- tambor: beats 2, 2+, 3+, 4 -->
+      <rect data-midi="41" x="216" y="114" width="78" height="60" fill="transparent" style="cursor:pointer" rx="5"/>
+      <rect data-midi="41" x="302" y="114" width="78" height="60" fill="transparent" style="cursor:pointer" rx="5"/>
+      <rect data-midi="41" x="474" y="114" width="78" height="60" fill="transparent" style="cursor:pointer" rx="5"/>
+      <rect data-midi="41" x="560" y="114" width="78" height="60" fill="transparent" style="cursor:pointer" rx="5"/>
+      <!-- guira: all 8 -->
+      <rect data-midi="42" x="44"  y="182" width="78" height="50" fill="transparent" style="cursor:pointer" rx="5"/>
+      <rect data-midi="42" x="130" y="182" width="78" height="50" fill="transparent" style="cursor:pointer" rx="5"/>
+      <rect data-midi="42" x="216" y="182" width="78" height="50" fill="transparent" style="cursor:pointer" rx="5"/>
+      <rect data-midi="42" x="302" y="182" width="78" height="50" fill="transparent" style="cursor:pointer" rx="5"/>
+      <rect data-midi="42" x="388" y="182" width="78" height="50" fill="transparent" style="cursor:pointer" rx="5"/>
+      <rect data-midi="42" x="474" y="182" width="78" height="50" fill="transparent" style="cursor:pointer" rx="5"/>
+      <rect data-midi="42" x="560" y="182" width="78" height="50" fill="transparent" style="cursor:pointer" rx="5"/>
+      <rect data-midi="42" x="646" y="182" width="70" height="50" fill="transparent" style="cursor:pointer" rx="5"/>
+
+      <!-- Legend -->
+      <rect x="44"  y="242" width="12" height="12" rx="2" fill="#8c4018" opacity=".90"/>
+      <text x="62" y="248" font-family="Inter,sans-serif" font-size="10" fill="#6a5a46" dominant-baseline="middle">bajo (A2)</text>
+      <rect x="170" y="242" width="12" height="12" rx="2" fill="#c47a36" opacity=".88"/>
+      <text x="188" y="248" font-family="Inter,sans-serif" font-size="10" fill="#6a5a46" dominant-baseline="middle">tambor tumba (sincopado)</text>
+      <rect x="430" y="242" width="12" height="12" rx="2" fill="#e8d0a0" opacity=".80"/>
+      <text x="448" y="248" font-family="Inter,sans-serif" font-size="10" fill="#6a5a46" dominant-baseline="middle">guira (continuo)</text>
+    </svg>
+  </div>
+  <div class="ch-visual-caption">
+    El patrón de cumbia en un compás de 4/4 dividido en 8 corcheas. El bajo cae en el tiempo 1 (golpe fuerte). El tambor/tumba sincopa en los tiempos 2, "y" de 2, "y" de 3 y 4, anticipando siempre el siguiente tiempo fuerte. La guira corre en semicorcheas constantes, tejiendo el groove sin parar. Toca cada celda para escuchar su timbre.
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 4 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">La gaita</span>
+  <h2 class="ch-h2">El instrumento<br><em>que viene antes de América</em></h2>
+
+  <p>La <strong>gaita colombiana</strong> es una flauta vertical hecha de tallo de cactus con una boquilla de cañón de pluma de pájaro, originaria de los pueblos Kogui y otros grupos indígenas de la costa Caribe. Se presenta en dos formas: <strong>gaita hembra</strong> (melódica, con cinco agujeros) y <strong>gaita macho</strong> (rítmica, con dos agujeros, que proporciona el pulso rítmico y los bordones). Las dos se tocan siempre juntas.</p>
+
+  <p>La escala de la gaita es pentatónica o hexatónica: no puede tocar los doce tonos del sistema occidental. Esta limitación da forma al vocabulario melódico de la cumbia tradicional. Las melodías de gaita no tienen la misma paleta que una flauta traversa de orquesta: tienen la suya propia, marcada por los intervalos que el instrumento puede producir y por los que no puede. Esa restricción es compositivamente productiva, no una carencia.</p>
+
+  <p>El sonido de la gaita es oscuro, algo ronco, con un cuerpo de aire audible en el ataque de cada nota. No es un sonido limpio ni brillante. Es exactamente el opuesto del sonido de la flauta clásica, y esa diferencia de timbre dice todo sobre la diferencia entre las dos tradiciones a las que pertenecen.</p>
+
+  <div class="ch-pullquote">
+    <p>La gaita colombiana lleva siglos antes de que Colombia existiera como nombre. Cada vez que alguien la toca en una cumbia moderna, sea en Bogotá, en Ciudad de México o en Buenos Aires, carga esa historia sin necesidad de explicarla.</p>
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 5 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Lo que puedes llevarte</span>
+  <h2 class="ch-h2">Tres lecciones<br><em>del ritmo que no se detiene</em></h2>
+
+  <p>El patrón sincopado como locomoción: la célula rítmica de la cumbia, donde el tiempo fuerte es claro pero los tiempos débiles tiran hacia adelante, crea un groove que sigue moviéndose sin esfuerzo. Practicar el patrón de tumba en cualquier instrumento (percusión, guitarra muted, bajo) entrena la anticipación de beat, una habilidad que mejora cualquier sentido rítmico.</p>
+
+  <p>La mutación como creatividad: las transformaciones de la cumbia a lo largo de Latinoamérica muestran que un ritmo puede cargar material melódico y armónico completamente nuevo sin perder su identidad. El ADN rítmico es la continuidad; todo lo demás puede cambiar. Este principio es aplicable a cualquier composición: identificar qué elemento de una pieza es el núcleo invariable libera todos los demás para la experimentación.</p>
+
+  <p>Raíces y modernidad: las bandas de chicha del Perú en los años 70 combinaron el ritmo de cumbia con la guitarra eléctrica psicodélica, no como pastiche sino como síntesis genuina. Este modelo, tomar una base rítmica tradicional y articularla con un lenguaje instrumental contemporáneo, es aplicable en cualquier dirección. La tradición no es un archivo: es un conjunto de herramientas vivas.</p>
+
+  <div class="ch-theory-link">
+    <div class="ch-theory-icon">◎</div>
+    <div>
+      <span class="ch-theory-label">Concepto relacionado · Teoría</span>
+      <p class="ch-theory-text">Las escalas pentatónicas (usadas en la gaita y en la chicha andina) son el vocabulario melódico más universal de la música. La sección de Escalas explica las versiones mayor y menor.</p>
+      <a href="/teoria/escalas" class="ch-theory-btn">Ver Escalas y Modos →</a>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="ch-nav">
+  <a href="/recursos/generos/post-rock" class="ch-nav-back">
+    <span class="ch-nav-dir">← Anterior</span>
+    <span class="ch-nav-name">Post-Rock</span>
+    <span class="ch-nav-desc">El rock que decidió no cantar</span>
+  </a>
+  <a href="/recursos/generos" class="ch-nav-next">
+    <span class="ch-nav-dir">↑ Volver</span>
+    <span class="ch-nav-name">Géneros y Tradiciones</span>
+    <span class="ch-nav-desc">Ver todas las tradiciones</span>
+  </a>
+</div>
+
+<script>
+(function () {
+  var _synth = null;
+
+  function _midiNote(m) {
+    var names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    return names[m % 12] + (Math.floor(m / 12) - 1);
+  }
+
+  async function _initAudio() {
+    if (_synth) return;
+    await Tone.start();
+    var comp   = new Tone.Compressor(-18, 4).toDestination();
+    var reverb = new Tone.Freeverb({ roomSize: 0.22, dampening: 4200, wet: 0.12 }).connect(comp);
+    _synth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'triangle' },
+      envelope:   { attack: 0.006, decay: 0.35, sustain: 0.12, release: 1.4 }
+    }).connect(reverb);
+  }
+
+  async function playNote(midi) {
+    try {
+      await _initAudio();
+      _synth.triggerAttackRelease(_midiNote(midi), '8n');
+    } catch(e) {}
+  }
+
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-midi]');
+    if (!el) return;
+    var midi = parseInt(el.getAttribute('data-midi'), 10);
+    if (!isNaN(midi)) playNote(midi);
+  });
+})();
+</script>
+
+<footer class="tm-footer-legal">
+  <div class="tm-f-copy">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div class="tm-f-links">
+    <a href="/privacidad">Aviso de Privacidad</a>
+    <a href="/terminos">Términos y Condiciones</a>
+    <a href="/cookies">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

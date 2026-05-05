@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Post-Rock — Géneros y Tradiciones</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:    #f4ece0; --paper2: #f2ece3; --paper3: #e8e0d4;
+  --paper4:   #c8b99f; --paper5: #cec4b0;
+  --copper:   #a85a1e; --copper-lt: #c47a36; --copper-dk: #7a3e10;
+  --ink:      #1c1410; --ink2: #2e2418; --ink3: #4a3c2c;
+  --ink4:     #8a7a64; --ink5: #8a7a66;
+  --serif: 'Marcellus', Georgia, serif;
+  --sans:  'Inter', system-ui, sans-serif;
+  --mono:  'JetBrains Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+
+nav { position: sticky; top: 0; z-index: 100; background: rgba(244,236,224,.94); backdrop-filter: blur(12px); border-bottom: 1px solid var(--paper4); padding: 0 48px; display: flex; align-items: center; height: 60px; gap: 0; }
+.nav-logo { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--ink); margin-right: 36px; letter-spacing: -.01em; text-decoration: none; }
+.nav-logo span { font-family: var(--mono); font-size: 0.52em; font-weight: 400; color: var(--ink4); letter-spacing: 0; margin-left: 2px; }
+.nav-link { padding: 0 16px; height: 56px; display: flex; align-items: center; font-size: 13px; font-weight: 500; color: var(--ink4); text-decoration: none; border-bottom: 2px solid transparent; transition: color .2s, border-color .2s; }
+.nav-link:hover { color: var(--ink2); }
+.nav-link.active { color: var(--copper); border-bottom-color: var(--copper); }
+.nav-cta { margin-left: auto; background: var(--copper); color: #fff; font-size: 12px; font-weight: 600; padding: 7px 18px; border-radius: 6px; text-decoration: none; transition: background .2s; }
+.nav-cta:hover { background: var(--copper-dk); }
+
+.ch-hero { background: #0d0804; padding: 80px 48px 90px; position: relative; overflow: hidden; }
+.ch-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 50% at 50% 120%, rgba(100,60,20,.4) 0%, transparent 70%); pointer-events: none; }
+.ch-breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(250,246,240,.35); margin-bottom: 40px; }
+.ch-breadcrumb a { color: var(--copper-lt); text-decoration: none; transition: opacity .2s; }
+.ch-breadcrumb a:hover { opacity: .8; }
+.ch-breadcrumb span { color: rgba(250,246,240,.2); }
+.ch-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.ch-num { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .1em; color: var(--copper-lt); border: 1px solid rgba(192,120,48,.3); padding: 4px 10px; border-radius: 4px; }
+.ch-era { font-size: 12px; color: rgba(250,246,240,.35); font-style: italic; }
+.ch-title { font-family: var(--serif); font-size: clamp(52px, 7vw, 92px); font-weight: 700; line-height: .9; letter-spacing: -.025em; color: var(--paper); max-width: 760px; margin-bottom: 12px; }
+.ch-title em { font-style: italic; color: var(--copper-lt); }
+.ch-subtitle { font-family: var(--serif); font-size: clamp(18px, 2vw, 24px); font-style: italic; color: rgba(250,246,240,.42); margin-bottom: 36px; }
+.ch-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.ch-tag { font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; background: rgba(250,246,240,.07); color: rgba(250,246,240,.45); border: 1px solid rgba(250,246,240,.1); }
+
+.ch-body { max-width: 720px; margin: 0 auto; padding: 80px 48px 0; }
+.ch-section { margin-bottom: 72px; }
+.ch-section-label { font-size: 10px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--copper); margin-bottom: 14px; display: block; }
+.ch-h2 { font-family: var(--serif); font-size: clamp(28px, 3.5vw, 40px); font-weight: 700; line-height: 1.06; letter-spacing: -.02em; color: var(--ink); margin-bottom: 24px; }
+.ch-h2 em { font-style: italic; color: var(--copper); }
+.ch-body p { font-size: 16px; color: var(--ink3); line-height: 1.85; margin-bottom: 22px; }
+.ch-body p:last-child { margin-bottom: 0; }
+.ch-body strong { font-weight: 600; color: var(--ink2); }
+
+.ch-pullquote { border-left: 3px solid var(--copper); padding: 16px 24px; background: var(--paper2); border-radius: 0 8px 8px 0; margin: 36px 0; }
+.ch-pullquote p { font-family: var(--serif); font-size: 21px !important; font-style: italic; color: var(--ink2); line-height: 1.55; margin: 0 !important; }
+
+.ch-section-photo { float: right; width: 42%; margin: 6px 0 22px 30px; border-radius: 10px; overflow: hidden; shape-outside: border-box; }
+.ch-section-photo img { width: 100%; height: 210px; object-fit: cover; object-position: center; display: block; }
+.ch-section::after { content: ''; display: table; clear: both; }
+@media (max-width: 600px) { .ch-section-photo { float: none; width: 100%; margin: 0 0 22px 0; } }
+
+.ch-visual-wrap { max-width: 860px; margin: 0 auto; padding: 0 48px 72px; }
+.ch-visual { background: var(--paper2); border: 1px solid var(--paper3); border-radius: 14px; overflow: hidden; }
+.ch-visual-header { padding: 13px 20px; border-bottom: 1px solid var(--paper3); display: flex; align-items: center; justify-content: space-between; }
+.ch-visual-title { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--ink5); }
+.ch-audio-hint { font-size: 11px; color: var(--copper); font-weight: 500; font-style: italic; letter-spacing: .02em; }
+.ch-visual-body { padding: 28px 24px; overflow-x: auto; }
+.ch-visual-caption { padding: 12px 24px 16px; border-top: 1px solid var(--paper3); font-size: 12px; color: var(--ink5); font-style: italic; line-height: 1.5; }
+
+.ch-theory-link { background: #13100c; border-radius: 12px; padding: 28px 32px; margin: 36px 0; display: flex; align-items: flex-start; gap: 20px; }
+.ch-theory-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+.ch-theory-label { font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--copper-lt); margin-bottom: 6px; display: block; }
+.ch-theory-text { font-size: 14px; color: rgba(250,246,240,.55); line-height: 1.7; margin-bottom: 12px; }
+.ch-theory-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--copper-lt); text-decoration: none; border-bottom: 1px solid rgba(192,120,48,.35); padding-bottom: 1px; transition: border-color .2s; }
+.ch-theory-btn:hover { border-color: var(--copper-lt); }
+
+.ch-nav { max-width: 860px; margin: 0 auto; padding: 0 48px 80px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.ch-nav-back, .ch-nav-next { display: flex; flex-direction: column; gap: 4px; text-decoration: none; padding: 20px 24px; border-radius: 12px; border: 1px solid var(--paper4); transition: border-color .2s, box-shadow .2s; max-width: 48%; }
+.ch-nav-back:hover, .ch-nav-next:hover { border-color: var(--copper); box-shadow: 0 4px 16px rgba(160,92,32,.1); }
+.ch-nav-next { align-items: flex-end; }
+.ch-nav-dir { font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--copper); }
+.ch-nav-name { font-family: var(--serif); font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.2; }
+.ch-nav-desc { font-size: 12px; color: var(--ink5); }
+
+@media (max-width: 768px) {
+  nav { padding: 0 16px; overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; scrollbar-width: none; }
+  nav::-webkit-scrollbar { display: none; }
+  nav > * { flex-shrink: 0; }
+  .ch-hero { padding: 60px 20px 72px; }
+  .ch-body { padding: 56px 20px 0; }
+  .ch-visual-wrap { padding: 0 20px 56px; }
+  .ch-nav { padding: 0 20px 60px; flex-direction: column; }
+  .ch-nav-back, .ch-nav-next { max-width: 100%; width: 100%; }
+  .ch-nav-next { align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link active">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<section class="ch-hero">
+  <div class="ch-breadcrumb">
+    <a href="/recursos">Recursos</a>
+    <span>·</span>
+    <a href="/recursos/generos">Géneros y Tradiciones</a>
+    <span>·</span>
+    <span style="color:rgba(250,246,240,.5)">Post-Rock</span>
+  </div>
+  <div class="ch-meta">
+    <span class="ch-num">19 · Global</span>
+    <span class="ch-era">1992 – presente</span>
+  </div>
+  <h1 class="ch-title"><em>Post-Rock</em></h1>
+  <p class="ch-subtitle">El rock que decidió no cantar</p>
+  <div class="ch-tags">
+    <span class="ch-tag">Crescendo</span>
+    <span class="ch-tag">Capas de guitarra</span>
+    <span class="ch-tag">Cinematic</span>
+    <span class="ch-tag">Godspeed You!</span>
+    <span class="ch-tag">Mogwai</span>
+  </div>
+</section>
+
+<!-- ── SECCIÓN 1 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Punto de partida</span>
+  <h2 class="ch-h2">Rock sin voz,<br><em>sin verso, sin estribillo.</em></h2>
+
+  <p>El post-rock emergió a principios de los años 90 (Bark Psychosis, Slint, los últimos álbumes de Talk Talk) como una forma de música de rock que rechazaba la estructura verso-estribillo y la tradición centrada en la voz. No fue un movimiento programático sino una convergencia de bandas en distintos países que llegaron, independientemente, a la misma conclusión: que el timbre eléctrico del rock y su dinámica potente podían servir a fines formales mucho más ambiciosos.</p>
+
+  <p>Godspeed You! Black Emperor (Montreal, 1994), Mogwai (Glasgow, 1995), Explosions in the Sky (Austin, 2000) y Sigur Rós (Reikiavik, 1994) crearon piezas instrumentales de larga duración que tomaban el timbre de la guitarra eléctrica y la dinámica del rock mientras perseguían las ambiciones formales de la música clásica y el ambient. El resultado no era ni lo uno ni lo otro, sino algo que no tenía nombre anterior.</p>
+
+  <p>La ausencia de letra no era un defecto ni una limitación: era el punto. Sin palabras, la música debía crear estados emocionales específicos con medios puramente sonoros. Que lo lograra consistentemente, en discos escuchados por cientos de miles de personas, fue una demostración de que el lenguaje instrumental puede ser tan emocionalmente específico como cualquier canción.</p>
+</div>
+</div>
+
+<!-- ── SECCIÓN 2 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">La estructura crescendo</span>
+  <h2 class="ch-h2">Del susurro<br><em>a la catedral de ruido</em></h2>
+
+  <p>La forma estructural definitoria del post-rock es el <strong>crescendo</strong>: una pieza que empieza en silencio (guitarra escueta, batería mínima, volumen bajo) y crece gradualmente durante 5 a 15 minutos hasta un clímax de textura de guitarra densa y ruidosa, para luego resolverse de nuevo al silencio. No hay otra forma en la música popular que ocupe tanto tiempo en construir una sola curva emocional.</p>
+
+  <p>La estructura "quieto-fuerte-quieto" fue pionera de los Pixies en el indie rock de los 80, pero el post-rock la convirtió en el dispositivo formal central, la razón de ser de cada pieza. En el post-rock, la espera es funcional: el oyente sabe que algo viene, y esa anticipación acumulada es parte del efecto. Cuando el clímax llega, el oyente lleva diez minutos preparándose para él.</p>
+
+  <p>El efecto emocional, cuando está bien ejecutado, es físico: el público experimenta la pieza como un evento de presión sonora, no solo musical. Las actuaciones de Godspeed You! Black Emperor a volúmenes altos crean exactamente esa sensación: la música no solo se escucha, se siente en el pecho.</p>
+
+  <div class="ch-pullquote">
+    <p>El arco quieto-fuerte-quieto es una de las herramientas formales más efectivas de cualquier música. Lo que el post-rock descubrió es que esa curva necesita tiempo, mucho más tiempo del que el formato canción le permite. Diez minutos de construcción hacen que el clímax sea inevitable.</p>
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 3 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Las capas de guitarra</span>
+  <h2 class="ch-h2">Una guitarra,<br><em>diez guitarras</em></h2>
+
+  <p>El arreglo característico del post-rock usa múltiples pistas de guitarra tocando partes diferentes pero complementarias: una guitarra toca una melodía de nota individual con <strong>trémolo picking</strong>, otra toca un <strong>arpeggio</strong> en un registro diferente, una tercera añade texturas de acordes con reverberación densa. Cada capa es reconocible por separado; juntas crean algo cualitativamente distinto.</p>
+
+  <p>Cuando todas las capas se combinan y se añade distorsión a todas simultáneamente, el resultado sonoro es orquestal en densidad. La guitarra eléctrica, un instrumento pensado para melodías o acordes de tres o cuatro notas, se convierte en algo más cercano a una sección de cuerdas que a un instrumento solista. Esta transformación tímbrica es la técnica central del género.</p>
+
+  <p>Guitarristas que habían estudiado composición clásica (Kevin Shields de My Bloody Valentine, Jonny Greenwood de Radiohead) llevaron técnicas de composición formal a la guitarra de rock en capas: contrapunto, densidad orquestal, control del registro como dispositivo expresivo. El resultado no sonaba a música clásica, pero aplicaba su rigor compositivo.</p>
+</div>
+</div>
+
+<!-- VISUAL: Capas de arreglo post-rock -->
+<div class="ch-visual-wrap">
+<div class="ch-visual">
+  <div class="ch-visual-header">
+    <span class="ch-visual-title">Estructura de capas post-rock — acumulación a lo largo de 16 compases</span>
+    <span class="ch-audio-hint">♪ toca cada capa</span>
+  </div>
+  <div class="ch-visual-body">
+    <svg viewBox="0 0 760 320" width="100%" style="display:block;min-width:460px;max-width:760px">
+      <rect width="760" height="320" fill="#f2ece3" rx="8"/>
+
+      <!-- Time axis label -->
+      <text x="380" y="18" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" text-anchor="middle" font-style="italic">16 compases — acumulación progresiva</text>
+
+      <!-- Fase labels at top -->
+      <text x="110" y="32" font-family="Inter,sans-serif" font-size="9" fill="#c8b99f" text-anchor="middle">solo bajo</text>
+      <text x="290" y="32" font-family="Inter,sans-serif" font-size="9" fill="#a89070" text-anchor="middle">bajo + arpegios</text>
+      <text x="490" y="32" font-family="Inter,sans-serif" font-size="9" fill="#886848" text-anchor="middle">+ melodía</text>
+      <text x="660" y="32" font-family="Inter,sans-serif" font-size="9" fill="#a85a1e" text-anchor="middle">clímax: todas</text>
+
+      <!-- Phase dividers -->
+      <line x1="200" y1="38" x2="200" y2="290" stroke="#e8d8c4" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="390" y1="38" x2="390" y2="290" stroke="#e8d8c4" stroke-width="1" stroke-dasharray="3,3"/>
+      <line x1="580" y1="38" x2="580" y2="290" stroke="#e8d8c4" stroke-width="1" stroke-dasharray="3,3"/>
+
+      <!-- Row labels -->
+      <text x="28" y="76" font-family="JetBrains Mono,monospace" font-size="10" fill="#4a3c2c" dominant-baseline="middle" text-anchor="end">melodía</text>
+      <text x="28" y="136" font-family="JetBrains Mono,monospace" font-size="10" fill="#4a3c2c" dominant-baseline="middle" text-anchor="end">arpegios</text>
+      <text x="28" y="196" font-family="JetBrains Mono,monospace" font-size="10" fill="#4a3c2c" dominant-baseline="middle" text-anchor="end">acordes</text>
+      <text x="28" y="256" font-family="JetBrains Mono,monospace" font-size="10" fill="#4a3c2c" dominant-baseline="middle" text-anchor="end">bajo</text>
+
+      <!-- ROW 4: Bass — present from start (full width) -->
+      <!-- Phase 1: faint -->
+      <rect x="36" y="242" width="160" height="28" rx="4" fill="#8c4018" opacity=".40"/>
+      <!-- Phase 2: slightly stronger -->
+      <rect x="204" y="242" width="182" height="28" rx="4" fill="#8c4018" opacity=".55"/>
+      <!-- Phase 3: stronger -->
+      <rect x="394" y="242" width="182" height="28" rx="4" fill="#8c4018" opacity=".70"/>
+      <!-- Phase 4: full -->
+      <rect x="584" y="242" width="168" height="28" rx="4" fill="#8c4018" opacity=".92"/>
+      <!-- Bass pulse dots -->
+      <circle cx="56"  cy="256" r="4" fill="#fff" opacity=".5"/>
+      <circle cx="96"  cy="256" r="4" fill="#fff" opacity=".5"/>
+      <circle cx="136" cy="256" r="4" fill="#fff" opacity=".5"/>
+      <circle cx="176" cy="256" r="4" fill="#fff" opacity=".5"/>
+      <circle cx="224" cy="256" r="4" fill="#fff" opacity=".6"/>
+      <circle cx="264" cy="256" r="4" fill="#fff" opacity=".6"/>
+      <circle cx="304" cy="256" r="4" fill="#fff" opacity=".6"/>
+      <circle cx="344" cy="256" r="4" fill="#fff" opacity=".6"/>
+      <circle cx="414" cy="256" r="5" fill="#fff" opacity=".7"/>
+      <circle cx="454" cy="256" r="5" fill="#fff" opacity=".7"/>
+      <circle cx="494" cy="256" r="5" fill="#fff" opacity=".7"/>
+      <circle cx="534" cy="256" r="5" fill="#fff" opacity=".7"/>
+      <circle cx="604" cy="256" r="6" fill="#fff" opacity=".9"/>
+      <circle cx="644" cy="256" r="6" fill="#fff" opacity=".9"/>
+      <circle cx="684" cy="256" r="6" fill="#fff" opacity=".9"/>
+      <circle cx="724" cy="256" r="6" fill="#fff" opacity=".9"/>
+
+      <!-- ROW 3: Chord pads — enter phase 2 -->
+      <!-- Phase 1: empty -->
+      <rect x="36"  y="182" width="160" height="28" rx="4" fill="#e8d8c4" opacity=".20"/>
+      <!-- Phase 2: faint blocks -->
+      <rect x="204" y="182" width="182" height="28" rx="4" fill="#c47a36" opacity=".25"/>
+      <!-- Phase 3: medium blocks -->
+      <rect x="394" y="182" width="182" height="28" rx="4" fill="#c47a36" opacity=".45"/>
+      <!-- Phase 4: full distorted blocks -->
+      <rect x="584" y="182" width="168" height="28" rx="4" fill="#c47a36" opacity=".80"/>
+      <!-- Chord block shapes in phases 3+4 -->
+      <rect x="404" y="186" width="32" height="20" rx="3" fill="#fff" opacity=".20"/>
+      <rect x="446" y="186" width="32" height="20" rx="3" fill="#fff" opacity=".20"/>
+      <rect x="488" y="186" width="32" height="20" rx="3" fill="#fff" opacity=".20"/>
+      <rect x="530" y="186" width="32" height="20" rx="3" fill="#fff" opacity=".20"/>
+      <rect x="594" y="186" width="32" height="20" rx="3" fill="#fff" opacity=".35"/>
+      <rect x="636" y="186" width="32" height="20" rx="3" fill="#fff" opacity=".35"/>
+      <rect x="678" y="186" width="32" height="20" rx="3" fill="#fff" opacity=".35"/>
+      <rect x="720" y="186" width="28" height="20" rx="3" fill="#fff" opacity=".35"/>
+
+      <!-- ROW 2: Arpeggios — enter phase 2 -->
+      <!-- Phase 1: empty -->
+      <rect x="36"  y="122" width="160" height="28" rx="4" fill="#e8d8c4" opacity=".20"/>
+      <!-- Phase 2: dots pattern -->
+      <rect x="204" y="122" width="182" height="28" rx="4" fill="#d4882a" opacity=".40"/>
+      <!-- Phase 3: denser dots -->
+      <rect x="394" y="122" width="182" height="28" rx="4" fill="#d4882a" opacity=".60"/>
+      <!-- Phase 4: full bright -->
+      <rect x="584" y="122" width="168" height="28" rx="4" fill="#d4882a" opacity=".88"/>
+      <!-- Arpeggio dots -->
+      <circle cx="218" cy="136" r="3" fill="#fff" opacity=".7"/>
+      <circle cx="234" cy="130" r="3" fill="#fff" opacity=".7"/>
+      <circle cx="250" cy="136" r="3" fill="#fff" opacity=".7"/>
+      <circle cx="266" cy="128" r="3" fill="#fff" opacity=".7"/>
+      <circle cx="282" cy="136" r="3" fill="#fff" opacity=".7"/>
+      <circle cx="298" cy="130" r="3" fill="#fff" opacity=".7"/>
+      <circle cx="314" cy="136" r="3" fill="#fff" opacity=".7"/>
+      <circle cx="330" cy="128" r="3" fill="#fff" opacity=".7"/>
+      <circle cx="346" cy="136" r="3" fill="#fff" opacity=".7"/>
+      <circle cx="362" cy="130" r="3" fill="#fff" opacity=".7"/>
+      <!-- Phase 3+4 arpeggio dots (denser) -->
+      <circle cx="408" cy="136" r="3" fill="#fff" opacity=".8"/>
+      <circle x="420" cy="128" r="3" fill="#fff" opacity=".8"/>
+      <circle cx="424" cy="130" r="3" fill="#fff" opacity=".8"/>
+      <circle cx="440" cy="136" r="3" fill="#fff" opacity=".8"/>
+      <circle cx="456" cy="128" r="3" fill="#fff" opacity=".8"/>
+      <circle cx="472" cy="136" r="3" fill="#fff" opacity=".8"/>
+      <circle cx="488" cy="130" r="3" fill="#fff" opacity=".8"/>
+      <circle cx="504" cy="136" r="3" fill="#fff" opacity=".8"/>
+      <circle cx="520" cy="128" r="3" fill="#fff" opacity=".8"/>
+      <circle cx="536" cy="136" r="3" fill="#fff" opacity=".8"/>
+      <circle cx="552" cy="130" r="3" fill="#fff" opacity=".8"/>
+      <circle cx="568" cy="136" r="3" fill="#fff" opacity=".8"/>
+
+      <!-- ROW 1: Melody tremolo — enter phase 3 -->
+      <!-- Phase 1+2: empty -->
+      <rect x="36"  y="62" width="160" height="28" rx="4" fill="#e8d8c4" opacity=".20"/>
+      <rect x="204" y="62" width="182" height="28" rx="4" fill="#e8d8c4" opacity=".20"/>
+      <!-- Phase 3: thin tremolo line -->
+      <rect x="394" y="62" width="182" height="28" rx="4" fill="#e8a838" opacity=".50"/>
+      <!-- Phase 4: bright tremolo -->
+      <rect x="584" y="62" width="168" height="28" rx="4" fill="#e8a838" opacity=".90"/>
+      <!-- Tremolo line phase 3 -->
+      <path d="M 400,76 L 410,70 L 420,76 L 430,70 L 440,76 L 450,70 L 460,76 L 470,70 L 480,76 L 490,70 L 500,76 L 510,70 L 520,76 L 530,70 L 540,76 L 550,70 L 560,76 L 570,70 L 575,76" fill="none" stroke="rgba(255,255,255,.6)" stroke-width="1.5"/>
+      <!-- Tremolo line phase 4 -->
+      <path d="M 590,76 L 600,68 L 610,76 L 620,68 L 630,76 L 640,68 L 650,76 L 660,68 L 670,76 L 680,68 L 690,76 L 700,68 L 710,76 L 720,68 L 745,76" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="2"/>
+
+      <!-- Click zones -->
+      <rect data-midi="76" x="36"  y="58"  width="720" height="36" fill="transparent" style="cursor:pointer" rx="4"/>
+      <rect data-midi="64" x="36"  y="118" width="720" height="36" fill="transparent" style="cursor:pointer" rx="4"/>
+      <rect data-midi="59" x="36"  y="178" width="720" height="36" fill="transparent" style="cursor:pointer" rx="4"/>
+      <rect data-midi="40" x="36"  y="238" width="720" height="36" fill="transparent" style="cursor:pointer" rx="4"/>
+
+      <!-- Intensity arrow -->
+      <path d="M 36,300 L 752,300" fill="none" stroke="#c8b99f" stroke-width="1.5" marker-end="url(#arr-int)"/>
+      <defs>
+        <marker id="arr-int" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+          <path d="M0,0 L7,3.5 L0,7 Z" fill="#c8b99f"/>
+        </marker>
+      </defs>
+      <text x="390" y="314" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" text-anchor="middle" font-style="italic">intensidad y densidad crecientes</text>
+    </svg>
+  </div>
+  <div class="ch-visual-caption">
+    Cuatro capas de un arreglo post-rock a lo largo de 16 compases. Primero entra solo el bajo (E2). En la segunda fase se añaden los arpegios y los acordes con pad. En la tercera, la melodía a trémolo. En la cuarta, todas las capas con distorsión y máxima densidad. Toca cada capa para escuchar su nota raíz dentro del espectro en Mi menor.
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 4 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">La producción como composición</span>
+  <h2 class="ch-h2">El estudio<br><em>es el instrumento principal</em></h2>
+
+  <p>El post-rock trató el estudio de grabación como herramienta compositiva, no como dispositivo de documentación. El sonido de Godspeed You! Black Emperor depende tanto de la colocación de sus micrófonos, la acústica de su estudio en Montreal y las decisiones de mezcla, como de las notas que tocan. Las mismas notas en otra sala, con otra mezcla, no serían la misma música.</p>
+
+  <p>Stuart Braithwaite de Mogwai ha dicho que los pedales de distorsión son instrumentos compositivos: el sonido específico de un <strong>Big Muff</strong> en una sala determinada a un volumen determinado es tan parte de la composición como la elección de un acorde. Esta actitud hacia el timbre como decisión compositiva (no como accidente o adorno) viene directamente del ambient y de la música concreta, y distingue el post-rock del rock convencional.</p>
+
+  <p>El resultado de esta actitud es que las grabaciones de post-rock son, en muchos sentidos, las obras definitivas: las versiones en vivo son interpretaciones de las grabaciones, no al revés. El disco de Sigur Rós "Ágætis byrjun" (1999) existe como objeto sonoro con una identidad tímbrica tan específica que ninguna actuación en directo puede reproducirla completamente.</p>
+
+  <div class="ch-pullquote">
+    <p>El estudio como instrumento no es una metáfora. Significa que el productor o el ingeniero de sonido es un compositor igual que el guitarrista. La distancia del micrófono, la cantidad de reverb, la compresión del master: cada una de esas decisiones cambia la nota.</p>
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 5 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Lo que puedes llevarte</span>
+  <h2 class="ch-h2">Tres ideas<br><em>del rock que miró hacia afuera</em></h2>
+
+  <p>La dinámica como estructura primaria: el arco quieto-fuerte-quieto es una de las herramientas formales más efectivas de cualquier música. Aprender a construir ese arco conscientemente, en lugar de tocar a volumen constante, transforma cómo cualquier pieza es recibida. La pregunta no es "qué notas toco" sino "cuándo llega el momento más fuerte y qué lo prepara".</p>
+
+  <p>La textura como composición: superponer múltiples partes de guitarra con diferentes timbres, registros y patrones rítmicos crea densidad orquestal desde un solo tipo de instrumento. No hace falta una orquesta para conseguir ese efecto. Hace falta saber qué poner en cada capa y cuándo añadir cada una.</p>
+
+  <p>El rechazo de la obligación: el post-rock quitó la obligación de la letra, del verso y del estribillo, y demostró que la música instrumental puede ser tan emocionalmente específica como cualquier canción. Este principio tiene consecuencias más amplias: ninguna convención de ningún género es obligatoria. Se puede rechazar cualquier expectativa si lo que la reemplaza tiene su propia lógica interna.</p>
+
+  <div class="ch-theory-link">
+    <div class="ch-theory-icon">◎</div>
+    <div>
+      <span class="ch-theory-label">Concepto relacionado · Teoría</span>
+      <p class="ch-theory-text">Las escalas modales (dórico, frigio, lidio) son el vocabulario armónico del post-rock, que rara vez usa progresiones funcionales. La sección de Escalas y Modos los explica en detalle.</p>
+      <a href="/teoria/escalas" class="ch-theory-btn">Ver Escalas y Modos →</a>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="ch-nav">
+  <a href="/recursos/generos/ambient-drone" class="ch-nav-back">
+    <span class="ch-nav-dir">← Anterior</span>
+    <span class="ch-nav-name">Ambient y Drone</span>
+    <span class="ch-nav-desc">El sonido como espacio</span>
+  </a>
+  <a href="/recursos/generos/cumbia" class="ch-nav-next">
+    <span class="ch-nav-dir">Siguiente →</span>
+    <span class="ch-nav-name">Cumbia</span>
+    <span class="ch-nav-desc">El viaje de un ritmo continental</span>
+  </a>
+</div>
+
+<script>
+(function () {
+  var _synth = null;
+
+  function _midiNote(m) {
+    var names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    return names[m % 12] + (Math.floor(m / 12) - 1);
+  }
+
+  async function _initAudio() {
+    if (_synth) return;
+    await Tone.start();
+    var comp   = new Tone.Compressor(-18, 4).toDestination();
+    var reverb = new Tone.Freeverb({ roomSize: 0.22, dampening: 4200, wet: 0.12 }).connect(comp);
+    _synth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'triangle' },
+      envelope:   { attack: 0.006, decay: 0.35, sustain: 0.12, release: 1.4 }
+    }).connect(reverb);
+  }
+
+  async function playNote(midi) {
+    try {
+      await _initAudio();
+      _synth.triggerAttackRelease(_midiNote(midi), '8n');
+    } catch(e) {}
+  }
+
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-midi]');
+    if (!el) return;
+    var midi = parseInt(el.getAttribute('data-midi'), 10);
+    if (!isNaN(midi)) playNote(midi);
+  });
+})();
+</script>
+
+<footer class="tm-footer-legal">
+  <div class="tm-f-copy">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div class="tm-f-links">
+    <a href="/privacidad">Aviso de Privacidad</a>
+    <a href="/terminos">Términos y Condiciones</a>
+    <a href="/cookies">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

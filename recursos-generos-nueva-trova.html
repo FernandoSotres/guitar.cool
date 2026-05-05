@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Nueva Trova Latinoamericana — Géneros y Tradiciones</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:    #f4ece0; --paper2: #f2ece3; --paper3: #e8e0d4;
+  --paper4:   #c8b99f; --paper5: #cec4b0;
+  --copper:   #a85a1e; --copper-lt: #c47a36; --copper-dk: #7a3e10;
+  --ink:      #1c1410; --ink2: #2e2418; --ink3: #4a3c2c;
+  --ink4:     #8a7a64; --ink5: #8a7a66;
+  --serif: 'Marcellus', Georgia, serif;
+  --sans:  'Inter', system-ui, sans-serif;
+  --mono:  'JetBrains Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+
+nav { position: sticky; top: 0; z-index: 100; background: rgba(244,236,224,.94); backdrop-filter: blur(12px); border-bottom: 1px solid var(--paper4); padding: 0 48px; display: flex; align-items: center; height: 60px; gap: 0; }
+.nav-logo { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--ink); margin-right: 36px; letter-spacing: -.01em; text-decoration: none; }
+.nav-logo span { font-family: var(--mono); font-size: 0.52em; font-weight: 400; color: var(--ink4); letter-spacing: 0; margin-left: 2px; }
+.nav-link { padding: 0 16px; height: 56px; display: flex; align-items: center; font-size: 13px; font-weight: 500; color: var(--ink4); text-decoration: none; border-bottom: 2px solid transparent; transition: color .2s, border-color .2s; }
+.nav-link:hover { color: var(--ink2); }
+.nav-link.active { color: var(--copper); border-bottom-color: var(--copper); }
+.nav-cta { margin-left: auto; background: var(--copper); color: #fff; font-size: 12px; font-weight: 600; padding: 7px 18px; border-radius: 6px; text-decoration: none; transition: background .2s; }
+.nav-cta:hover { background: var(--copper-dk); }
+
+.ch-hero { background: #0d0804; padding: 80px 48px 90px; position: relative; overflow: hidden; }
+.ch-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 50% at 50% 120%, rgba(100,60,20,.4) 0%, transparent 70%); pointer-events: none; }
+.ch-breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(250,246,240,.35); margin-bottom: 40px; }
+.ch-breadcrumb a { color: var(--copper-lt); text-decoration: none; transition: opacity .2s; }
+.ch-breadcrumb a:hover { opacity: .8; }
+.ch-breadcrumb span { color: rgba(250,246,240,.2); }
+.ch-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.ch-num { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .1em; color: var(--copper-lt); border: 1px solid rgba(192,120,48,.3); padding: 4px 10px; border-radius: 4px; }
+.ch-era { font-size: 12px; color: rgba(250,246,240,.35); font-style: italic; }
+.ch-title { font-family: var(--serif); font-size: clamp(52px, 7vw, 92px); font-weight: 700; line-height: .9; letter-spacing: -.025em; color: var(--paper); max-width: 760px; margin-bottom: 12px; }
+.ch-title em { font-style: italic; color: var(--copper-lt); }
+.ch-subtitle { font-family: var(--serif); font-size: clamp(18px, 2vw, 24px); font-style: italic; color: rgba(250,246,240,.42); margin-bottom: 36px; }
+.ch-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.ch-tag { font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; background: rgba(250,246,240,.07); color: rgba(250,246,240,.45); border: 1px solid rgba(250,246,240,.1); }
+
+.ch-body { max-width: 720px; margin: 0 auto; padding: 80px 48px 0; }
+.ch-section { margin-bottom: 72px; }
+.ch-section-label { font-size: 10px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--copper); margin-bottom: 14px; display: block; }
+.ch-h2 { font-family: var(--serif); font-size: clamp(28px, 3.5vw, 40px); font-weight: 700; line-height: 1.06; letter-spacing: -.02em; color: var(--ink); margin-bottom: 24px; }
+.ch-h2 em { font-style: italic; color: var(--copper); }
+.ch-body p { font-size: 16px; color: var(--ink3); line-height: 1.85; margin-bottom: 22px; }
+.ch-body p:last-child { margin-bottom: 0; }
+.ch-body strong { font-weight: 600; color: var(--ink2); }
+
+.ch-pullquote { border-left: 3px solid var(--copper); padding: 16px 24px; background: var(--paper2); border-radius: 0 8px 8px 0; margin: 36px 0; }
+.ch-pullquote p { font-family: var(--serif); font-size: 21px !important; font-style: italic; color: var(--ink2); line-height: 1.55; margin: 0 !important; }
+
+.ch-section-photo { float: right; width: 42%; margin: 6px 0 22px 30px; border-radius: 10px; overflow: hidden; shape-outside: border-box; }
+.ch-section-photo img { width: 100%; height: 210px; object-fit: cover; object-position: center; display: block; }
+.ch-section::after { content: ''; display: table; clear: both; }
+@media (max-width: 600px) { .ch-section-photo { float: none; width: 100%; margin: 0 0 22px 0; } }
+
+.ch-visual-wrap { max-width: 860px; margin: 0 auto; padding: 0 48px 72px; }
+.ch-visual { background: var(--paper2); border: 1px solid var(--paper3); border-radius: 14px; overflow: hidden; }
+.ch-visual-header { padding: 13px 20px; border-bottom: 1px solid var(--paper3); display: flex; align-items: center; justify-content: space-between; }
+.ch-visual-title { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--ink5); }
+.ch-audio-hint { font-size: 11px; color: var(--copper); font-weight: 500; font-style: italic; letter-spacing: .02em; }
+.ch-visual-body { padding: 28px 24px; overflow-x: auto; }
+.ch-visual-caption { padding: 12px 24px 16px; border-top: 1px solid var(--paper3); font-size: 12px; color: var(--ink5); font-style: italic; line-height: 1.5; }
+
+.ch-theory-link { background: #13100c; border-radius: 12px; padding: 28px 32px; margin: 36px 0; display: flex; align-items: flex-start; gap: 20px; }
+.ch-theory-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+.ch-theory-label { font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--copper-lt); margin-bottom: 6px; display: block; }
+.ch-theory-text { font-size: 14px; color: rgba(250,246,240,.55); line-height: 1.7; margin-bottom: 12px; }
+.ch-theory-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--copper-lt); text-decoration: none; border-bottom: 1px solid rgba(192,120,48,.35); padding-bottom: 1px; transition: border-color .2s; }
+.ch-theory-btn:hover { border-color: var(--copper-lt); }
+
+.ch-nav { max-width: 860px; margin: 0 auto; padding: 0 48px 80px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.ch-nav-back, .ch-nav-next { display: flex; flex-direction: column; gap: 4px; text-decoration: none; padding: 20px 24px; border-radius: 12px; border: 1px solid var(--paper4); transition: border-color .2s, box-shadow .2s; max-width: 48%; }
+.ch-nav-back:hover, .ch-nav-next:hover { border-color: var(--copper); box-shadow: 0 4px 16px rgba(160,92,32,.1); }
+.ch-nav-next { align-items: flex-end; }
+.ch-nav-dir { font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--copper); }
+.ch-nav-name { font-family: var(--serif); font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.2; }
+.ch-nav-desc { font-size: 12px; color: var(--ink5); }
+
+@media (max-width: 768px) {
+  nav { padding: 0 16px; overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; scrollbar-width: none; }
+  nav::-webkit-scrollbar { display: none; }
+  nav > * { flex-shrink: 0; }
+  .ch-hero { padding: 60px 20px 72px; }
+  .ch-body { padding: 56px 20px 0; }
+  .ch-visual-wrap { padding: 0 20px 56px; }
+  .ch-nav { padding: 0 20px 60px; flex-direction: column; }
+  .ch-nav-back, .ch-nav-next { max-width: 100%; width: 100%; }
+  .ch-nav-next { align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link active">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<section class="ch-hero">
+  <div class="ch-breadcrumb">
+    <a href="/recursos">Recursos</a>
+    <span>·</span>
+    <a href="/recursos/generos">Géneros y Tradiciones</a>
+    <span>·</span>
+    <span style="color:rgba(250,246,240,.5)">Nueva Trova</span>
+  </div>
+  <div class="ch-meta">
+    <span class="ch-num">17 · Latinoamérica</span>
+    <span class="ch-era">1960 – 1990</span>
+  </div>
+  <h1 class="ch-title">Nueva Trova <em>Latinoamericana</em></h1>
+  <p class="ch-subtitle">La canción comprometida</p>
+  <div class="ch-tags">
+    <span class="ch-tag">Acordes extendidos</span>
+    <span class="ch-tag">Folclore</span>
+    <span class="ch-tag">Canción de autor</span>
+    <span class="ch-tag">Silvio Rodríguez</span>
+    <span class="ch-tag">Víctor Jara</span>
+  </div>
+</section>
+
+<!-- ── SECCIÓN 1 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Punto de partida</span>
+  <h2 class="ch-h2">La guitarra<br><em>como arma política.</em></h2>
+
+  <p>La Nueva Trova surgió en Cuba, Chile, Argentina, Uruguay y a lo largo de Latinoamérica durante los años 60 y 70, sintetizando música folclórica, armonía del jazz y letras de compromiso político. Silvio Rodríguez y Pablo Milanés en Cuba, Violeta Parra y Víctor Jara en Chile, Mercedes Sosa en Argentina: cada uno desarrolló un lenguaje propio pero compartieron una premisa común.</p>
+
+  <p>La propuesta central era que la canción popular podía ser artísticamente compleja, emocionalmente honesta y políticamente directa al mismo tiempo, sin que ninguna de esas cualidades cancelara a las otras. Era una respuesta tanto al entretenimiento comercial superficial como a la música de vanguardia que había perdido todo contacto con el oyente común.</p>
+
+  <p>Víctor Jara fue asesinado por la dictadura militar chilena en 1973. Su música sobrevivió. Este hecho no es un detalle biográfico: define con precisión el tipo de apuesta que la Nueva Trova hacía, la convicción de que una canción puede importarle a alguien lo suficiente como para que sea peligrosa.</p>
+</div>
+</div>
+
+<!-- ── SECCIÓN 2 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">La poesía de la canción</span>
+  <h2 class="ch-h2">No es letra,<br><em>es poesía que se canta.</em></h2>
+
+  <p>La ambición lírica de la Nueva Trova la separa de la mayoría de la música popular: las canciones de Silvio Rodríguez referencian a García Lorca, Borges y Neruda no como afectación sino como lenguaje musical natural, el mismo vocabulario en el que el compositor piensa y vive. Esto no era un gesto intelectual sino una consecuencia de que los trovadores venían de entornos donde la literatura y la música coexistían sin jerarquía.</p>
+
+  <p>"Gracias a la vida" de Violeta Parra, una de las canciones en español más versionadas de la historia, funciona simultáneamente como balada folclórica sencilla y como meditación filosófica sobre la gratitud después de una catástrofe personal. Parra la escribió después de un intento de suicidio. El oyente casual escucha una canción hermosa; el oyente atento escucha algo mucho más oscuro y más valiente.</p>
+
+  <p>La tradición sostiene que una gran canción debe funcionar en dos niveles a la vez: en el del oyente que la pone de fondo y en el del oyente que se detiene a escuchar cada palabra. La Nueva Trova fue quizás el único movimiento de música popular del siglo XX que cumplió esa condición sistemáticamente.</p>
+
+  <div class="ch-pullquote">
+    <p>La palabra "trova" viene del provenzal trobar, el arte de los trovadores medievales: poetas que componían y cantaban sus propios textos. La Nueva Trova reclamó esa herencia conscientemente, oponiendo la canción de autor a la industria de canciones intercambiables.</p>
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 3 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">La armonía de autor</span>
+  <h2 class="ch-h2">Folclore más jazz:<br><em>un idioma propio</em></h2>
+
+  <p>Los guitarristas de la Nueva Trova usaban voicings de acordes extendidos, <strong>séptimas mayores</strong>, <strong>novenas menores</strong>, <strong>acordes sus4</strong>, tomados prestados del jazz, pero en un contexto de música folclórica. La síntesis no era decorativa: esos colores armónicos ampliaban el rango emocional de la canción sin que la guitarra dejara de sonar como guitarra acústica, cercana e íntima.</p>
+
+  <p>El estilo de acompañamiento combina patrones de <strong>arpeggio</strong> de la tradición española con progresiones armónicas lo suficientemente sofisticadas como para no desentonar en la bossa nova o el jazz. La influencia brasileña fue directa: varios trovadores estudiaron o visitaron Brasil y absorbieron la lección de João Gilberto sobre cómo la guitarra puede ser base rítmica, armonía y contrapunto al mismo tiempo.</p>
+
+  <p>Los arreglos de guitarra de Silvio Rodríguez son especialmente notables por usar el registro completo del instrumento: el bajo en el pulgar, la armonía en los dedos medios y una línea de contrapunto en las cuerdas agudas, todo funcionando a la vez. Es una sola guitarra que suena como si fueran tres voces en conversación.</p>
+</div>
+</div>
+
+<!-- VISUAL: Progresión armónica de Nueva Trova -->
+<div class="ch-visual-wrap">
+<div class="ch-visual">
+  <div class="ch-visual-header">
+    <span class="ch-visual-title">Progresión de Nueva Trova — Am7 · Dm9 · G7sus4 · Cmaj7</span>
+    <span class="ch-audio-hint">♪ toca cada acorde</span>
+  </div>
+  <div class="ch-visual-body">
+    <svg viewBox="0 0 760 280" width="100%" style="display:block;min-width:460px;max-width:760px">
+      <rect width="760" height="280" fill="#f2ece3" rx="8"/>
+
+      <!-- Column labels -->
+      <text x="100" y="26" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#7a3e10" text-anchor="middle">Am7</text>
+      <text x="280" y="26" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#7a3e10" text-anchor="middle">Dm9</text>
+      <text x="460" y="26" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#c07020" text-anchor="middle">G7sus4</text>
+      <text x="640" y="26" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#a85a1e" text-anchor="middle">Cmaj7</text>
+
+      <!-- Am7 notes: A(45) E(52) G(55) C(60) -->
+      <!-- deep copper column -->
+      <circle cx="100" cy="58"  r="18" fill="#8c4018" opacity=".92"/>
+      <circle cx="100" cy="102" r="18" fill="#9e4c1e" opacity=".85"/>
+      <circle cx="100" cy="146" r="18" fill="#b05a22" opacity=".78"/>
+      <circle cx="100" cy="190" r="18" fill="#c46830" opacity=".72"/>
+      <text x="100" cy="58"  y="58"  font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">A</text>
+      <text x="100" cy="102" y="102" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">E</text>
+      <text x="100" cy="146" y="146" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">G</text>
+      <text x="100" cy="190" y="190" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">C</text>
+      <text x="100" y="224" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" text-anchor="middle" font-style="italic">tónica menor</text>
+
+      <!-- Dm9 notes: D(38) A(45) F(53) C(57) -->
+      <!-- muted copper column -->
+      <circle cx="280" cy="58"  r="18" fill="#7a4830" opacity=".88"/>
+      <circle cx="280" cy="102" r="18" fill="#8c5438" opacity=".82"/>
+      <circle cx="280" cy="146" r="18" fill="#9e6040" opacity=".76"/>
+      <circle cx="280" cy="190" r="18" fill="#b06c4c" opacity=".70"/>
+      <text x="280" y="58"  font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">D</text>
+      <text x="280" y="102" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">A</text>
+      <text x="280" y="146" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">F</text>
+      <text x="280" y="190" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">C</text>
+      <text x="280" y="224" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" text-anchor="middle" font-style="italic">subdominante</text>
+
+      <!-- G7sus4 notes: G(43) D(50) C(55) F(62) -->
+      <!-- amber tension column -->
+      <circle cx="460" cy="58"  r="18" fill="#c47820" opacity=".92"/>
+      <circle cx="460" cy="102" r="18" fill="#d08428" opacity=".85"/>
+      <circle cx="460" cy="146" r="18" fill="#dc9030" opacity=".78"/>
+      <circle cx="460" cy="190" r="18" fill="#e89c3c" opacity=".72"/>
+      <text x="460" y="58"  font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">G</text>
+      <text x="460" y="102" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">D</text>
+      <text x="460" y="146" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">C</text>
+      <text x="460" y="190" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">F</text>
+      <text x="460" y="224" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" text-anchor="middle" font-style="italic">tensión suspendida</text>
+
+      <!-- Cmaj7 notes: C(48) E(52) G(55) B(59) E(64) -->
+      <!-- warm light resolution column -->
+      <circle cx="640" cy="46"  r="16" fill="#e8a838" opacity=".85"/>
+      <circle cx="640" cy="86"  r="18" fill="#d49430" opacity=".88"/>
+      <circle cx="640" cy="130" r="18" fill="#c48028" opacity=".84"/>
+      <circle cx="640" cy="174" r="18" fill="#b46c20" opacity=".80"/>
+      <circle cx="640" cy="218" r="16" fill="#a45a18" opacity=".76"/>
+      <text x="640" y="46"  font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">E</text>
+      <text x="640" y="86"  font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">B</text>
+      <text x="640" y="130" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">G</text>
+      <text x="640" y="174" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">E</text>
+      <text x="640" y="218" font-family="JetBrains Mono,monospace" font-size="11" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">C</text>
+      <text x="640" y="250" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" text-anchor="middle" font-style="italic">resolución</text>
+
+      <!-- Arrow connectors -->
+      <path d="M 126,124 L 254,124" fill="none" stroke="#c8b99f" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-prog)"/>
+      <path d="M 306,124 L 434,124" fill="none" stroke="#c8b99f" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-prog)"/>
+      <path d="M 486,124 L 614,124" fill="none" stroke="#c8b99f" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-prog)"/>
+      <defs>
+        <marker id="arr-prog" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+          <path d="M0,0 L7,3.5 L0,7 Z" fill="#c8b99f"/>
+        </marker>
+      </defs>
+
+      <!-- Click zones — each column plays the root note -->
+      <rect data-midi="45" x="62"  y="38" width="76" height="196" fill="transparent" style="cursor:pointer" rx="20"/>
+      <rect data-midi="38" x="242" y="38" width="76" height="196" fill="transparent" style="cursor:pointer" rx="20"/>
+      <rect data-midi="43" x="422" y="38" width="76" height="196" fill="transparent" style="cursor:pointer" rx="20"/>
+      <rect data-midi="48" x="602" y="28" width="76" height="210" fill="transparent" style="cursor:pointer" rx="20"/>
+    </svg>
+  </div>
+  <div class="ch-visual-caption">
+    Progresión característica de la Nueva Trova: Am7 (tónica menor), Dm9 (subdominante con novena), G7sus4 (dominante con cuarta suspendida, la tensión no resuelve todavía), Cmaj7 (relativa mayor con séptima mayor). El Cmaj7 en lugar de un C simple es la firma del estilo: esa nota que "no termina de llegar" carga el peso emocional de la frase.
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 4 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">La guitarra criolla</span>
+  <h2 class="ch-h2">Un instrumento<br><em>que viene de España pero habló latinoamericano</em></h2>
+
+  <p>La <strong>guitarra criolla</strong>, o <strong>guitarra española de acero</strong> en algunos contextos regionales, es la guitarra acústica en su forma folclórica latinoamericana. Se distingue de la <strong>guitarra flamenca</strong> (madera de ciprés, acción más baja, ataque percusivo) y de la <strong>guitarra clásica</strong> (cuerdas de nylon, postura formal, sonido más redondo y menos brillante). En la Nueva Trova, la guitarra suena a madera viva, a resonancia de caja grande, con la textura de las cuerdas de acero.</p>
+
+  <p>En las grabaciones de la época la guitarra se amplificaba ligeramente o se registraba de cerca para capturar todo el rango dinámico: desde el <strong>fingerpicking</strong> casi susurrado hasta los acordes rasgueados con toda la energía del cuerpo. Esta proximidad del micrófono hace audible cada detalle, cada pequeña tensión de cuerda, cada respiración antes de una frase. El oyente está a treinta centímetros del instrumento.</p>
+
+  <p>La técnica combina la posición clásica de la mano derecha con el <strong>flatpicking</strong> folclórico y el rasgueado. No hay una ortodoxia técnica en la Nueva Trova: cada guitarrista adaptó lo que necesitaba para que la canción funcionara. Lo que sí es constante es la subordinación de la técnica a la expresión, la guitarra al servicio de la letra.</p>
+
+  <div class="ch-pullquote">
+    <p>Violeta Parra aprendió a tocar guitarra de oído, de tradición oral, sin método. Esa guitarra autodidacta, con sus limitaciones y su libertad, es exactamente lo que necesitaban sus canciones. La técnica perfecta habría sido el instrumento equivocado.</p>
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 5 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Lo que puedes llevarte</span>
+  <h2 class="ch-h2">Tres ideas<br><em>de la canción comprometida</em></h2>
+
+  <p>Letra y armonía en diálogo: la armonía de una canción no es el fondo sobre el que canta la letra sino un elemento expresivo igual. Cuando Silvio Rodríguez resuelve una frase en un <strong>maj7</strong> en lugar de un acorde mayor, esa nota que "no termina de llegar" carga un significado emocional que la letra sola no podría transmitir. La armonía opina sobre el texto.</p>
+
+  <p>Acordes extendidos en contexto acústico: los acordes <strong>maj7</strong>, <strong>min9</strong> y <strong>sus4</strong> no son vocabulario exclusivo del jazz. Funcionan en cualquier contexto íntimo y acústico, y le dan a una progresión folclórica una profundidad armónica que el oyente siente aunque no pueda nombrar. Toca una progresión conocida sustituyendo cada acorde mayor por un maj7 y cada menor por un min7: la textura cambia completamente.</p>
+
+  <p>La convicción como práctica interpretativa: las interpretaciones más fuertes de esta tradición no vienen de la acrobacia vocal sino del compromiso total con el contenido de las palabras. Víctor Jara cantaba con una guitarra pequeña y una voz sin adornos. Lo que se escucha en sus grabaciones no es técnica: es alguien que cree en cada sílaba que pronuncia.</p>
+
+  <div class="ch-theory-link">
+    <div class="ch-theory-icon">◎</div>
+    <div>
+      <span class="ch-theory-label">Concepto relacionado · Teoría</span>
+      <p class="ch-theory-text">Los acordes extendidos (séptimas, novenas, onceavas) son el vocabulario armónico del jazz y de la bossa nova, y desde ahí llegaron a la nueva trova. La sección de Armonía los explica.</p>
+      <a href="/teoria/armonia" class="ch-theory-btn">Ver Armonía y Acordes →</a>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="ch-nav">
+  <a href="/recursos/generos/celta" class="ch-nav-back">
+    <span class="ch-nav-dir">← Anterior</span>
+    <span class="ch-nav-name">Música Celta e Irlandesa</span>
+    <span class="ch-nav-desc">Las escalas del norte atlántico</span>
+  </a>
+  <a href="/recursos/generos/ambient-drone" class="ch-nav-next">
+    <span class="ch-nav-dir">Siguiente →</span>
+    <span class="ch-nav-name">Ambient y Drone</span>
+    <span class="ch-nav-desc">El sonido como espacio</span>
+  </a>
+</div>
+
+<script>
+(function () {
+  var _synth = null;
+
+  function _midiNote(m) {
+    var names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    return names[m % 12] + (Math.floor(m / 12) - 1);
+  }
+
+  async function _initAudio() {
+    if (_synth) return;
+    await Tone.start();
+    var comp   = new Tone.Compressor(-18, 4).toDestination();
+    var reverb = new Tone.Freeverb({ roomSize: 0.22, dampening: 4200, wet: 0.12 }).connect(comp);
+    _synth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'triangle' },
+      envelope:   { attack: 0.006, decay: 0.35, sustain: 0.12, release: 1.4 }
+    }).connect(reverb);
+  }
+
+  async function playNote(midi) {
+    try {
+      await _initAudio();
+      _synth.triggerAttackRelease(_midiNote(midi), '8n');
+    } catch(e) {}
+  }
+
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-midi]');
+    if (!el) return;
+    var midi = parseInt(el.getAttribute('data-midi'), 10);
+    if (!isNaN(midi)) playNote(midi);
+  });
+})();
+</script>
+
+<footer class="tm-footer-legal">
+  <div class="tm-f-copy">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div class="tm-f-links">
+    <a href="/privacidad">Aviso de Privacidad</a>
+    <a href="/terminos">Términos y Condiciones</a>
+    <a href="/cookies">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Bossa Nova — Géneros y Tradiciones Musicales</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:    #f4ece0; --paper2: #f2ece3; --paper3: #e8e0d4;
+  --paper4:   #c8b99f; --paper5: #cec4b0;
+  --copper:   #a85a1e; --copper-lt: #c47a36; --copper-dk: #7a3e10;
+  --ink:      #1c1410; --ink2: #2e2418; --ink3: #4a3c2c;
+  --ink4:     #8a7a64; --ink5: #8a7a66;
+  --serif: 'Marcellus', Georgia, serif;
+  --sans:  'Inter', system-ui, sans-serif;
+  --mono:  'JetBrains Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+
+nav { position: sticky; top: 0; z-index: 100; background: rgba(244,236,224,.94); backdrop-filter: blur(12px); border-bottom: 1px solid var(--paper4); padding: 0 48px; display: flex; align-items: center; height: 60px; gap: 0; }
+.nav-logo { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--ink); margin-right: 36px; letter-spacing: -.01em; text-decoration: none; }
+.nav-logo span { font-family: var(--mono); font-size: 0.52em; font-weight: 400; color: var(--ink4); letter-spacing: 0; margin-left: 2px; }
+.nav-link { padding: 0 16px; height: 56px; display: flex; align-items: center; font-size: 13px; font-weight: 500; color: var(--ink4); text-decoration: none; border-bottom: 2px solid transparent; transition: color .2s, border-color .2s; }
+.nav-link:hover { color: var(--ink2); }
+.nav-link.active { color: var(--copper); border-bottom-color: var(--copper); }
+.nav-cta { margin-left: auto; background: var(--copper); color: #fff; font-size: 12px; font-weight: 600; padding: 7px 18px; border-radius: 6px; text-decoration: none; transition: background .2s; }
+.nav-cta:hover { background: var(--copper-dk); }
+
+.ch-hero { background: #0d0804; padding: 80px 48px 90px; position: relative; overflow: hidden; }
+.ch-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 50% at 50% 120%, rgba(100,60,20,.4) 0%, transparent 70%); pointer-events: none; }
+.ch-breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(250,246,240,.35); margin-bottom: 40px; }
+.ch-breadcrumb a { color: var(--copper-lt); text-decoration: none; transition: opacity .2s; }
+.ch-breadcrumb a:hover { opacity: .8; }
+.ch-breadcrumb span { color: rgba(250,246,240,.2); }
+.ch-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.ch-num { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .1em; color: var(--copper-lt); border: 1px solid rgba(192,120,48,.3); padding: 4px 10px; border-radius: 4px; }
+.ch-era { font-size: 12px; color: rgba(250,246,240,.35); font-style: italic; }
+.ch-title { font-family: var(--serif); font-size: clamp(52px, 7vw, 92px); font-weight: 700; line-height: .9; letter-spacing: -.025em; color: var(--paper); max-width: 760px; margin-bottom: 12px; }
+.ch-title em { font-style: italic; color: var(--copper-lt); }
+.ch-subtitle { font-family: var(--serif); font-size: clamp(18px, 2vw, 24px); font-style: italic; color: rgba(250,246,240,.42); margin-bottom: 36px; }
+.ch-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.ch-tag { font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; background: rgba(250,246,240,.07); color: rgba(250,246,240,.45); border: 1px solid rgba(250,246,240,.1); }
+
+.ch-body { max-width: 720px; margin: 0 auto; padding: 80px 48px 0; }
+.ch-section { margin-bottom: 72px; }
+.ch-section-label { font-size: 10px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--copper); margin-bottom: 14px; display: block; }
+.ch-h2 { font-family: var(--serif); font-size: clamp(28px, 3.5vw, 40px); font-weight: 700; line-height: 1.06; letter-spacing: -.02em; color: var(--ink); margin-bottom: 24px; }
+.ch-h2 em { font-style: italic; color: var(--copper); }
+.ch-body p { font-size: 16px; color: var(--ink3); line-height: 1.85; margin-bottom: 22px; }
+.ch-body p:last-child { margin-bottom: 0; }
+.ch-body strong { font-weight: 600; color: var(--ink2); }
+
+.ch-pullquote { border-left: 3px solid var(--copper); padding: 16px 24px; background: var(--paper2); border-radius: 0 8px 8px 0; margin: 36px 0; }
+.ch-pullquote p { font-family: var(--serif); font-size: 21px !important; font-style: italic; color: var(--ink2); line-height: 1.55; margin: 0 !important; }
+
+.ch-section-photo { float: right; width: 42%; margin: 6px 0 22px 30px; border-radius: 10px; overflow: hidden; shape-outside: border-box; }
+.ch-section-photo img { width: 100%; height: 210px; object-fit: cover; object-position: center; display: block; }
+.ch-section::after { content: ''; display: table; clear: both; }
+@media (max-width: 600px) { .ch-section-photo { float: none; width: 100%; margin: 0 0 22px 0; } }
+
+.ch-visual-wrap { max-width: 860px; margin: 0 auto; padding: 0 48px 72px; }
+.ch-visual { background: var(--paper2); border: 1px solid var(--paper3); border-radius: 14px; overflow: hidden; }
+.ch-visual-header { padding: 13px 20px; border-bottom: 1px solid var(--paper3); display: flex; align-items: center; justify-content: space-between; }
+.ch-visual-title { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--ink5); }
+.ch-audio-hint { font-size: 11px; color: var(--copper); font-weight: 500; font-style: italic; letter-spacing: .02em; }
+.ch-visual-body { padding: 28px 24px; overflow-x: auto; }
+.ch-visual-caption { padding: 12px 24px 16px; border-top: 1px solid var(--paper3); font-size: 12px; color: var(--ink5); font-style: italic; line-height: 1.5; }
+
+.ch-theory-link { background: #13100c; border-radius: 12px; padding: 28px 32px; margin: 36px 0; display: flex; align-items: flex-start; gap: 20px; }
+.ch-theory-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+.ch-theory-label { font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--copper-lt); margin-bottom: 6px; display: block; }
+.ch-theory-text { font-size: 14px; color: rgba(250,246,240,.55); line-height: 1.7; margin-bottom: 12px; }
+.ch-theory-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--copper-lt); text-decoration: none; border-bottom: 1px solid rgba(192,120,48,.35); padding-bottom: 1px; transition: border-color .2s; }
+.ch-theory-btn:hover { border-color: var(--copper-lt); }
+
+.ch-nav { max-width: 860px; margin: 0 auto; padding: 0 48px 80px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.ch-nav-back, .ch-nav-next { display: flex; flex-direction: column; gap: 4px; text-decoration: none; padding: 20px 24px; border-radius: 12px; border: 1px solid var(--paper4); transition: border-color .2s, box-shadow .2s; max-width: 48%; }
+.ch-nav-back:hover, .ch-nav-next:hover { border-color: var(--copper); box-shadow: 0 4px 16px rgba(160,92,32,.1); }
+.ch-nav-next { align-items: flex-end; }
+.ch-nav-dir { font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--copper); }
+.ch-nav-name { font-family: var(--serif); font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.2; }
+.ch-nav-desc { font-size: 12px; color: var(--ink5); }
+
+@media (max-width: 768px) {
+  nav { padding: 0 16px; overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; scrollbar-width: none; }
+  nav::-webkit-scrollbar { display: none; }
+  nav > * { flex-shrink: 0; }
+  .ch-hero { padding: 60px 20px 72px; }
+  .ch-body { padding: 56px 20px 0; }
+  .ch-visual-wrap { padding: 0 20px 56px; }
+  .ch-nav { padding: 0 20px 60px; flex-direction: column; }
+  .ch-nav-back, .ch-nav-next { max-width: 100%; width: 100%; }
+  .ch-nav-next { align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link active">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<section class="ch-hero">
+  <div class="ch-breadcrumb">
+    <a href="/recursos">Recursos</a>
+    <span>·</span>
+    <a href="/recursos/generos">Géneros y Tradiciones</a>
+    <span>·</span>
+    <span style="color:rgba(250,246,240,.5)">Bossa Nova</span>
+  </div>
+  <div class="ch-meta">
+    <span class="ch-num">02 · Brasil</span>
+    <span class="ch-era">1958 – presente</span>
+  </div>
+  <h1 class="ch-title"><em>Bossa Nova</em></h1>
+  <p class="ch-subtitle">El silencio dentro del groove</p>
+  <div class="ch-tags">
+    <span class="ch-tag">Acordes extendidos</span>
+    <span class="ch-tag">Síncopa</span>
+    <span class="ch-tag">Jazz brasileño</span>
+    <span class="ch-tag">Voz y guitarra</span>
+    <span class="ch-tag">João Gilberto</span>
+  </div>
+</section>
+
+<!-- ── SECCIÓN 1 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Punto de partida</span>
+  <h2 class="ch-h2">Una samba<br><em>reducida al hueso.</em></h2>
+
+  <p>La bossa nova apareció en Río de Janeiro entre 1958 y 1960 como una reducción radical de la samba. La samba de los años 40 y 50 era música de carnaval y de escuela: percusión colectiva, voces amplificadas, un sonido diseñado para llenar las calles. João Gilberto llegó con lo opuesto: una guitarra clásica tocada en voz baja, una voz que casi hablaba, y una armonía que debía algo más al jazz norteamericano de la Costa Oeste que al choro carioca.</p>
+
+  <p>El contexto social importa. La bossa nova es música de la clase media alta de Río, del barrio de Ipanema y de los apartamentos con aire acondicionado de Copacabana. No es música de calle ni de comunidad: es música de sala, íntima, pensada para ser escuchada de cerca. Esa intimidad no es un accidente estético; es la condición que la hizo posible. El apartamento como sala de concierto determinó la dinámica, el tempo y la textura.</p>
+
+  <p>João Gilberto grabó "Chega de Saudade" en 1958 con Jobim en la producción. La canción tiene samba en el ADN rítmico, pero la armonía usa acordes que ningún sambista había tocado antes: <strong>maj7</strong>, novenas, trezavas. El resultado no sonaba ni a jazz ni a samba. Sonaba a algo nuevo que ahora todos reconocemos al primer compás.</p>
+</div>
+</div>
+
+<!-- ── SECCIÓN 2 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Los acordes</span>
+  <h2 class="ch-h2">Jazz brasileño:<br><em>tensión que no resuelve</em></h2>
+
+  <p>La armonía de la bossa nova toma del jazz sus acordes extendidos: <strong>maj7</strong>, <strong>dom9</strong>, <strong>13</strong>, acordes alterados con la quinta bemol o la novena sostenida. Pero el comportamiento de esa armonía es distinto al del jazz norteamericano. En el bebop, la tensión existe para resolverse: un acorde dominante con tensiones pide un tónico con urgencia. En la bossa nova, la tensión se queda. Los acordes con notas "disonantes" funcionan como puntos de reposo, no como puntos de impulso hacia otro acorde.</p>
+
+  <p>Jobim llamaba a esto "dissonância" en un sentido que no tiene traducción directa: la disonancia como color, no como conflicto. Un <strong>Cmaj7</strong> en bossa nova no quiere ir a ningún lado. Un <strong>F#7(#11)</strong> puede ser el acorde de llegada de una frase, no el punto de partida. Esto cambia fundamentalmente la forma en que el músico piensa las progresiones: no como movimiento hacia una meta, sino como paisaje armónico que se habita.</p>
+
+  <p>Las progresiones típicas de Jobim mezclan acordes de tonalidades alejadas con una naturalidad que en el jazz clásico requeriría preparación y resolución cuidadosa. El movimiento por terceras (de Cmaj7 a Abmaj7, por ejemplo) o las modulaciones repentinas que regresan sin anuncio son rasgos que vienen de una lógica armónica propia, no de la cadencia americana.</p>
+
+  <div class="ch-pullquote">
+    <p>En la bossa nova, la disonancia no es un problema que se resuelve. Es el color que se busca. El acorde "tenso" es el destino, no el camino.</p>
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 3 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">El ritmo</span>
+  <h2 class="ch-h2">La síncopa<br><em>que no se siente como síncopa</em></h2>
+
+  <p>El patrón rítmico de la guitarra bossa nova es una de las construcciones más engañosas de la música popular. Técnicamente es una superposición de agrupaciones de 3+3+2 sobre un compás de 2/4 (o 4/4 lento), que produce una síncopa continua donde los golpes de guitarra caen entre los tiempos fuertes del compás. Escrito en papel parece complejo. Tocado por João Gilberto suena como si el tiempo hubiera encontrado la posición más cómoda posible.</p>
+
+  <p>El truco está en que la mano derecha de João Gilberto no pulsaba las cuerdas de forma convencional: combinaba golpes del pulgar en las notas del bajo con un movimiento de los dedos que producía tanto las notas de la armonía como el ritmo. El pulgar marca los tiempos bajos mientras los dedos dibujan el patrón sincopado por encima. La separación entre la línea de bajo y el patrón rítmico armónico hace que la guitarra suene como si fueran dos músicos tocando al mismo tiempo.</p>
+
+  <p>La voz de João Gilberto añade una tercera capa: su fraseo vocal no coincide con el patrón de guitarra. Entra antes o después del tiempo esperado, se queda en una nota mientras la armonía cambia debajo, o corta una frase donde el oyente no lo anticipa. Esa divergencia entre voz y guitarra es el corazón del groove bossa nova: dos ritmos distintos que se necesitan mutuamente para crear algo que ninguno crea solo.</p>
+</div>
+</div>
+
+<!-- VISUAL: Célula rítmica de la bossa nova -->
+<div class="ch-visual-wrap">
+<div class="ch-visual">
+  <div class="ch-visual-header">
+    <span class="ch-visual-title">Patrón rítmico de la bossa nova — 8 subdivisiones</span>
+    <span class="ch-audio-hint">♪ toca cada posición</span>
+  </div>
+  <div class="ch-visual-body">
+    <svg viewBox="0 0 760 230" width="100%" style="display:block;min-width:460px;max-width:760px">
+      <rect width="760" height="230" fill="#f2ece3" rx="8"/>
+
+      <!-- 8 beat positions, spaced evenly -->
+      <!-- Guitar hits on positions: 1, 3, 5, 6, 8 (1-indexed) of the 3+3+2 pattern -->
+      <!-- Rests on: 2, 4, 7 -->
+
+      <!-- Beat labels row at top -->
+      <text x="55"  y="28" font-family="JetBrains Mono,monospace" font-size="10" fill="#8a7a66" text-anchor="middle">1</text>
+      <text x="145" y="28" font-family="JetBrains Mono,monospace" font-size="10" fill="#8a7a66" text-anchor="middle">2</text>
+      <text x="235" y="28" font-family="JetBrains Mono,monospace" font-size="10" fill="#8a7a66" text-anchor="middle">3</text>
+      <text x="325" y="28" font-family="JetBrains Mono,monospace" font-size="10" fill="#8a7a66" text-anchor="middle">4</text>
+      <text x="415" y="28" font-family="JetBrains Mono,monospace" font-size="10" fill="#8a7a66" text-anchor="middle">5</text>
+      <text x="505" y="28" font-family="JetBrains Mono,monospace" font-size="10" fill="#8a7a66" text-anchor="middle">6</text>
+      <text x="595" y="28" font-family="JetBrains Mono,monospace" font-size="10" fill="#8a7a66" text-anchor="middle">7</text>
+      <text x="685" y="28" font-family="JetBrains Mono,monospace" font-size="10" fill="#8a7a66" text-anchor="middle">8</text>
+
+      <!-- Grouping brackets: 3+3+2 -->
+      <path d="M 18,38 L 18,44 L 282,44 L 282,38" fill="none" stroke="#a85a1e" stroke-width="1.5"/>
+      <text x="150" y="56" font-family="Inter,sans-serif" font-size="10" fill="#a85a1e" text-anchor="middle">3</text>
+      <path d="M 192,38 L 192,44 L 372,44 L 372,38" fill="none" stroke="#a85a1e" stroke-width="1.5" opacity="0"/>
+      <path d="M 282,38 L 282,44 L 552,44 L 552,38" fill="none" stroke="#a85a1e" stroke-width="1.5"/>
+      <text x="417" y="56" font-family="Inter,sans-serif" font-size="10" fill="#a85a1e" text-anchor="middle">3</text>
+      <path d="M 552,38 L 552,44 L 742,44 L 742,38" fill="none" stroke="#a85a1e" stroke-width="1.5"/>
+      <text x="647" y="56" font-family="Inter,sans-serif" font-size="10" fill="#a85a1e" text-anchor="middle">2</text>
+
+      <!-- Guitar hit blocks -->
+      <!-- Position 1: HIT (copper) -->
+      <rect x="18"  y="68" width="74" height="70" rx="7" fill="#c47a36" opacity=".9"/>
+      <text x="55"  y="103" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">↓</text>
+
+      <!-- Position 2: REST -->
+      <rect x="108" y="68" width="74" height="70" rx="7" fill="#e8ddd0" stroke="#c8b99f" stroke-width="1"/>
+      <text x="145" y="103" font-family="JetBrains Mono,monospace" font-size="12" fill="#c8b99f" text-anchor="middle" dominant-baseline="middle">—</text>
+
+      <!-- Position 3: HIT -->
+      <rect x="198" y="68" width="74" height="70" rx="7" fill="#c47a36" opacity=".9"/>
+      <text x="235" y="103" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">↓</text>
+
+      <!-- Position 4: REST -->
+      <rect x="288" y="68" width="74" height="70" rx="7" fill="#e8ddd0" stroke="#c8b99f" stroke-width="1"/>
+      <text x="325" y="103" font-family="JetBrains Mono,monospace" font-size="12" fill="#c8b99f" text-anchor="middle" dominant-baseline="middle">—</text>
+
+      <!-- Position 5: HIT -->
+      <rect x="378" y="68" width="74" height="70" rx="7" fill="#c47a36" opacity=".9"/>
+      <text x="415" y="103" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">↓</text>
+
+      <!-- Position 6: HIT -->
+      <rect x="468" y="68" width="74" height="70" rx="7" fill="#a85a1e" opacity=".95"/>
+      <text x="505" y="103" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">↑</text>
+
+      <!-- Position 7: REST -->
+      <rect x="558" y="68" width="74" height="70" rx="7" fill="#e8ddd0" stroke="#c8b99f" stroke-width="1"/>
+      <text x="595" y="103" font-family="JetBrains Mono,monospace" font-size="12" fill="#c8b99f" text-anchor="middle" dominant-baseline="middle">—</text>
+
+      <!-- Position 8: HIT -->
+      <rect x="648" y="68" width="74" height="70" rx="7" fill="#c47a36" opacity=".9"/>
+      <text x="685" y="103" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">↓</text>
+
+      <!-- Bass note row (pulgar) -->
+      <text x="18" y="158" font-family="Inter,sans-serif" font-size="10" font-weight="600" fill="#6a5a46">bajo</text>
+      <!-- Bass hits: 1 and 5 -->
+      <circle cx="55"  cy="172" r="12" fill="#1c1410" opacity=".7"/>
+      <circle cx="145" cy="172" r="8"  fill="#e8ddd0" stroke="#c8b99f" stroke-width="1"/>
+      <circle cx="235" cy="172" r="8"  fill="#e8ddd0" stroke="#c8b99f" stroke-width="1"/>
+      <circle cx="325" cy="172" r="8"  fill="#e8ddd0" stroke="#c8b99f" stroke-width="1"/>
+      <circle cx="415" cy="172" r="12" fill="#1c1410" opacity=".55"/>
+      <circle cx="505" cy="172" r="8"  fill="#e8ddd0" stroke="#c8b99f" stroke-width="1"/>
+      <circle cx="595" cy="172" r="8"  fill="#e8ddd0" stroke="#c8b99f" stroke-width="1"/>
+      <circle cx="685" cy="172" r="8"  fill="#e8ddd0" stroke="#c8b99f" stroke-width="1"/>
+
+      <!-- Legend -->
+      <rect x="18"  y="200" width="12" height="12" rx="2" fill="#c47a36"/>
+      <text x="36"  y="206" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" dominant-baseline="middle">golpe de guitarra</text>
+      <rect x="180" y="200" width="12" height="12" rx="2" fill="#e8ddd0" stroke="#c8b99f" stroke-width="1"/>
+      <text x="198" y="206" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" dominant-baseline="middle">silencio</text>
+      <circle cx="348" cy="206" r="6" fill="#1c1410" opacity=".7"/>
+      <text x="360" y="206" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" dominant-baseline="middle">nota de bajo (pulgar)</text>
+
+      <!-- Click zones -->
+      <rect data-midi="60" x="18"  y="60" width="74" height="85" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="64" x="108" y="60" width="74" height="85" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="67" x="198" y="60" width="74" height="85" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="71" x="288" y="60" width="74" height="85" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="74" x="378" y="60" width="74" height="85" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="60" x="468" y="60" width="74" height="85" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="64" x="558" y="60" width="74" height="85" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="67" x="648" y="60" width="74" height="85" fill="transparent" style="cursor:pointer"/>
+    </svg>
+  </div>
+  <div class="ch-visual-caption">
+    El patrón bossa nova en 8 subdivisiones: los golpes de guitarra caen en 1, 3, 5, 6 y 8, creando una agrupación implícita de 3+3+2. Las posiciones 2, 4 y 7 son silencios. El pulgar del bajo ancla los tiempos 1 y 5. Cada posición reproduce una nota del acorde de Cmaj9 (C–E–G–B–D).
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 4 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">La guitarra bossa</span>
+  <h2 class="ch-h2">El instrumento<br><em>más difícil de tocar en silencio</em></h2>
+
+  <p>La guitarra bossa nova usa técnica de guitarra clásica aplicada a música popular: uñas largas, posición formal, sin púa. El pulgar (<strong>p</strong>) toca las cuerdas 6, 5 y 4 para las notas del bajo; los dedos índice (<strong>i</strong>), medio (<strong>m</strong>) y anular (<strong>a</strong>) cubren el resto de las cuerdas para el patrón armónico. Esta separación de funciones entre pulgar y dedos es lo que permite que una sola guitarra suene como bajo más guitarra simultáneamente.</p>
+
+  <p>La dificultad específica de la bossa nova no está en la velocidad ni en la complejidad mecánica. Está en la dinámica. La música está diseñada para tocarse suave, en un rango dinámico que en el piano clásico llamaríamos pp o p. Tocar con precisión rítmica y claridad armónica en ese volumen requiere un control de la mano derecha que es diferente al que desarrolla la guitarra rock o el flamenco. Cualquier exceso de fuerza destruye la textura.</p>
+
+  <p>La relación entre voz y guitarra en la bossa nova es de independencia coordinada: la voz va ligeramente detrás del tiempo en algunos momentos, ligeramente adelante en otros, creando una tensión rítmica imperceptible pero constante. João Gilberto describía esto como "la voz y la guitarra conversando". Esa conversación requiere que el acompañante sepa exactamente dónde está el tiempo para poder alejarse de él con precisión.</p>
+
+  <div class="ch-pullquote">
+    <p>Tocar bossa nova suave no es tocar sin energía. Es concentrar la misma energía en un espacio más pequeño. La intimidad es la técnica.</p>
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 5 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Lo que puedes llevarte</span>
+  <h2 class="ch-h2">Tres ideas<br><em>que cambian tu sonido</em></h2>
+
+  <p>Los acordes extendidos de la bossa nova tienen digitaciones específicas para guitarra que vale la pena aprender como formas, no como fórmulas. Un <strong>Cmaj7</strong> con la tercera en el bajo, un <strong>Dm9</strong> sin quinta, un <strong>G13</strong> con la séptima en el bajo: estas son posiciones de mano que añaden color inmediato a cualquier género que toques. El vocabulario de tensiones (novena, oncena, trezava) no es privativo del jazz ni de la bossa nova; aparece en R&B, en pop sofisticado, en música de cine.</p>
+
+  <p>El concepto de color armónico sobre función armónica es uno de los aportes más transferibles de esta tradición. En lugar de pensar "este acorde resuelve a aquel", se puede pensar "este acorde tiene este color, y ese color es el que quiero aquí". Esa forma de escuchar cambia las decisiones de arreglo: los cambios de acorde ya no tienen que justificarse funcionalmente si el movimiento tiene coherencia de color.</p>
+
+  <p>El rango dinámico como lenguaje musical es algo que la bossa nova enseña con más claridad que casi cualquier otra tradición popular. Tocar suave con precisión, dejar espacio en el groove, no llenar cada silencio disponible: estas son decisiones expresivas, no limitaciones técnicas. El músico que controla el volumen controla la atmósfera de la sala entera.</p>
+
+  <div class="ch-theory-link">
+    <div class="ch-theory-icon">◎</div>
+    <div>
+      <span class="ch-theory-label">Concepto relacionado · Teoría</span>
+      <p class="ch-theory-text">El sistema de acordes extendidos — las séptimas, novenas y trezavas — se construye sobre la serie de armónicos y los grados de la escala. La sección de Armonía los explica todos.</p>
+      <a href="/teoria/armonia" class="ch-theory-btn">Ver Armonía y Acordes →</a>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="ch-nav">
+  <a href="/recursos/generos/flamenco" class="ch-nav-back">
+    <span class="ch-nav-dir">← Anterior</span>
+    <span class="ch-nav-name">Flamenco</span>
+    <span class="ch-nav-desc">El duende y los palos</span>
+  </a>
+  <a href="/recursos/generos/metal-progresivo" class="ch-nav-next">
+    <span class="ch-nav-dir">Siguiente →</span>
+    <span class="ch-nav-name">Metal Progresivo</span>
+    <span class="ch-nav-desc">La complejidad como lenguaje</span>
+  </a>
+</div>
+
+<script>
+(function () {
+  var _synth = null;
+
+  function _midiNote(m) {
+    var names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    return names[m % 12] + (Math.floor(m / 12) - 1);
+  }
+
+  async function _initAudio() {
+    if (_synth) return;
+    await Tone.start();
+    var comp   = new Tone.Compressor(-18, 4).toDestination();
+    var reverb = new Tone.Freeverb({ roomSize: 0.22, dampening: 4200, wet: 0.12 }).connect(comp);
+    _synth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'triangle' },
+      envelope:   { attack: 0.006, decay: 0.35, sustain: 0.12, release: 1.4 }
+    }).connect(reverb);
+  }
+
+  async function playNote(midi) {
+    try {
+      await _initAudio();
+      _synth.triggerAttackRelease(_midiNote(midi), '8n');
+    } catch(e) {}
+  }
+
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-midi]');
+    if (!el) return;
+    var midi = parseInt(el.getAttribute('data-midi'), 10);
+    if (!isNaN(midi)) playNote(midi);
+  });
+})();
+</script>
+
+<footer class="tm-footer-legal">
+  <div class="tm-f-copy">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div class="tm-f-links">
+    <a href="/privacidad">Aviso de Privacidad</a>
+    <a href="/terminos">Términos y Condiciones</a>
+    <a href="/cookies">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

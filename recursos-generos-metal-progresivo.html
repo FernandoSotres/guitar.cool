@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Metal Progresivo — Géneros y Tradiciones Musicales</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:    #f4ece0; --paper2: #f2ece3; --paper3: #e8e0d4;
+  --paper4:   #c8b99f; --paper5: #cec4b0;
+  --copper:   #a85a1e; --copper-lt: #c47a36; --copper-dk: #7a3e10;
+  --ink:      #1c1410; --ink2: #2e2418; --ink3: #4a3c2c;
+  --ink4:     #8a7a64; --ink5: #8a7a66;
+  --serif: 'Marcellus', Georgia, serif;
+  --sans:  'Inter', system-ui, sans-serif;
+  --mono:  'JetBrains Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+
+nav { position: sticky; top: 0; z-index: 100; background: rgba(244,236,224,.94); backdrop-filter: blur(12px); border-bottom: 1px solid var(--paper4); padding: 0 48px; display: flex; align-items: center; height: 60px; gap: 0; }
+.nav-logo { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--ink); margin-right: 36px; letter-spacing: -.01em; text-decoration: none; }
+.nav-logo span { font-family: var(--mono); font-size: 0.52em; font-weight: 400; color: var(--ink4); letter-spacing: 0; margin-left: 2px; }
+.nav-link { padding: 0 16px; height: 56px; display: flex; align-items: center; font-size: 13px; font-weight: 500; color: var(--ink4); text-decoration: none; border-bottom: 2px solid transparent; transition: color .2s, border-color .2s; }
+.nav-link:hover { color: var(--ink2); }
+.nav-link.active { color: var(--copper); border-bottom-color: var(--copper); }
+.nav-cta { margin-left: auto; background: var(--copper); color: #fff; font-size: 12px; font-weight: 600; padding: 7px 18px; border-radius: 6px; text-decoration: none; transition: background .2s; }
+.nav-cta:hover { background: var(--copper-dk); }
+
+.ch-hero { background: #0d0804; padding: 80px 48px 90px; position: relative; overflow: hidden; }
+.ch-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 50% at 50% 120%, rgba(100,60,20,.4) 0%, transparent 70%); pointer-events: none; }
+.ch-breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(250,246,240,.35); margin-bottom: 40px; }
+.ch-breadcrumb a { color: var(--copper-lt); text-decoration: none; transition: opacity .2s; }
+.ch-breadcrumb a:hover { opacity: .8; }
+.ch-breadcrumb span { color: rgba(250,246,240,.2); }
+.ch-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.ch-num { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .1em; color: var(--copper-lt); border: 1px solid rgba(192,120,48,.3); padding: 4px 10px; border-radius: 4px; }
+.ch-era { font-size: 12px; color: rgba(250,246,240,.35); font-style: italic; }
+.ch-title { font-family: var(--serif); font-size: clamp(52px, 7vw, 92px); font-weight: 700; line-height: .9; letter-spacing: -.025em; color: var(--paper); max-width: 760px; margin-bottom: 12px; }
+.ch-title em { font-style: italic; color: var(--copper-lt); }
+.ch-subtitle { font-family: var(--serif); font-size: clamp(18px, 2vw, 24px); font-style: italic; color: rgba(250,246,240,.42); margin-bottom: 36px; }
+.ch-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.ch-tag { font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; background: rgba(250,246,240,.07); color: rgba(250,246,240,.45); border: 1px solid rgba(250,246,240,.1); }
+
+.ch-body { max-width: 720px; margin: 0 auto; padding: 80px 48px 0; }
+.ch-section { margin-bottom: 72px; }
+.ch-section-label { font-size: 10px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--copper); margin-bottom: 14px; display: block; }
+.ch-h2 { font-family: var(--serif); font-size: clamp(28px, 3.5vw, 40px); font-weight: 700; line-height: 1.06; letter-spacing: -.02em; color: var(--ink); margin-bottom: 24px; }
+.ch-h2 em { font-style: italic; color: var(--copper); }
+.ch-body p { font-size: 16px; color: var(--ink3); line-height: 1.85; margin-bottom: 22px; }
+.ch-body p:last-child { margin-bottom: 0; }
+.ch-body strong { font-weight: 600; color: var(--ink2); }
+
+.ch-pullquote { border-left: 3px solid var(--copper); padding: 16px 24px; background: var(--paper2); border-radius: 0 8px 8px 0; margin: 36px 0; }
+.ch-pullquote p { font-family: var(--serif); font-size: 21px !important; font-style: italic; color: var(--ink2); line-height: 1.55; margin: 0 !important; }
+
+.ch-section-photo { float: right; width: 42%; margin: 6px 0 22px 30px; border-radius: 10px; overflow: hidden; shape-outside: border-box; }
+.ch-section-photo img { width: 100%; height: 210px; object-fit: cover; object-position: center; display: block; }
+.ch-section::after { content: ''; display: table; clear: both; }
+@media (max-width: 600px) { .ch-section-photo { float: none; width: 100%; margin: 0 0 22px 0; } }
+
+.ch-visual-wrap { max-width: 860px; margin: 0 auto; padding: 0 48px 72px; }
+.ch-visual { background: var(--paper2); border: 1px solid var(--paper3); border-radius: 14px; overflow: hidden; }
+.ch-visual-header { padding: 13px 20px; border-bottom: 1px solid var(--paper3); display: flex; align-items: center; justify-content: space-between; }
+.ch-visual-title { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--ink5); }
+.ch-audio-hint { font-size: 11px; color: var(--copper); font-weight: 500; font-style: italic; letter-spacing: .02em; }
+.ch-visual-body { padding: 28px 24px; overflow-x: auto; }
+.ch-visual-caption { padding: 12px 24px 16px; border-top: 1px solid var(--paper3); font-size: 12px; color: var(--ink5); font-style: italic; line-height: 1.5; }
+
+.ch-theory-link { background: #13100c; border-radius: 12px; padding: 28px 32px; margin: 36px 0; display: flex; align-items: flex-start; gap: 20px; }
+.ch-theory-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+.ch-theory-label { font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--copper-lt); margin-bottom: 6px; display: block; }
+.ch-theory-text { font-size: 14px; color: rgba(250,246,240,.55); line-height: 1.7; margin-bottom: 12px; }
+.ch-theory-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--copper-lt); text-decoration: none; border-bottom: 1px solid rgba(192,120,48,.35); padding-bottom: 1px; transition: border-color .2s; }
+.ch-theory-btn:hover { border-color: var(--copper-lt); }
+
+.ch-nav { max-width: 860px; margin: 0 auto; padding: 0 48px 80px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.ch-nav-back, .ch-nav-next { display: flex; flex-direction: column; gap: 4px; text-decoration: none; padding: 20px 24px; border-radius: 12px; border: 1px solid var(--paper4); transition: border-color .2s, box-shadow .2s; max-width: 48%; }
+.ch-nav-back:hover, .ch-nav-next:hover { border-color: var(--copper); box-shadow: 0 4px 16px rgba(160,92,32,.1); }
+.ch-nav-next { align-items: flex-end; }
+.ch-nav-dir { font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--copper); }
+.ch-nav-name { font-family: var(--serif); font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.2; }
+.ch-nav-desc { font-size: 12px; color: var(--ink5); }
+
+@media (max-width: 768px) {
+  nav { padding: 0 16px; overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; scrollbar-width: none; }
+  nav::-webkit-scrollbar { display: none; }
+  nav > * { flex-shrink: 0; }
+  .ch-hero { padding: 60px 20px 72px; }
+  .ch-body { padding: 56px 20px 0; }
+  .ch-visual-wrap { padding: 0 20px 56px; }
+  .ch-nav { padding: 0 20px 60px; flex-direction: column; }
+  .ch-nav-back, .ch-nav-next { max-width: 100%; width: 100%; }
+  .ch-nav-next { align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link active">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<section class="ch-hero">
+  <div class="ch-breadcrumb">
+    <a href="/recursos">Recursos</a>
+    <span>·</span>
+    <a href="/recursos/generos">Géneros y Tradiciones</a>
+    <span>·</span>
+    <span style="color:rgba(250,246,240,.5)">Metal Progresivo</span>
+  </div>
+  <div class="ch-meta">
+    <span class="ch-num">03 · Global</span>
+    <span class="ch-era">1990 – presente</span>
+  </div>
+  <h1 class="ch-title">Metal <em>Progresivo</em></h1>
+  <p class="ch-subtitle">La complejidad como lenguaje</p>
+  <div class="ch-tags">
+    <span class="ch-tag">Poliritmia</span>
+    <span class="ch-tag">Compases asimétricos</span>
+    <span class="ch-tag">Modos oscuros</span>
+    <span class="ch-tag">Djent</span>
+    <span class="ch-tag">Dream Theater</span>
+  </div>
+</section>
+
+<!-- ── SECCIÓN 1 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Punto de partida</span>
+  <h2 class="ch-h2">Rock que aprendió<br><em>a contar hasta siete.</em></h2>
+
+  <p>El metal progresivo nació en la intersección del heavy metal y el rock progresivo de los años 70. Yes y King Crimson habían demostrado que el rock podía soportar compases irregulares, armonías modales y estructuras de canción que no seguían el verso-coro-verso. Bandas como Dream Theater, Tool y Fates Warning tomaron esa herencia y la conectaron con la energía y la distorsión del metal de los 80. El resultado fue un género donde la técnica instrumental avanzada coexistía con el peso sonoro de la guitarra eléctrica amplificada al máximo.</p>
+
+  <p>La postura filosófica del metal progresivo distingue a sus practicantes más serios de los que solo acumulan dificultad. John Petrucci (Dream Theater) y Maynard James Keenan (Tool) hablan de la complejidad como vehículo expresivo, no como exhibición. Un riff en 7/8 no vale más que uno en 4/4 por ser más difícil de contar: vale más si lo que expresa no podría expresarse de otra manera. Esa distinción es la que separa el metal progresivo del metal técnico de competición.</p>
+
+  <p>A finales de los 90 y en los 2000, el movimiento <strong>Djent</strong> (asociado a Meshuggah y luego a Periphery, Tesseract) llevó la poliritmia y los compases asimétricos al extremo, con guitarras de 7 y 8 cuerdas afinadas muy graves y riffs construidos sobre ciclos rítmicos que se resuelven cada 16, 32 o 64 tiempos. El resultado es música que se siente físicamente densa incluso en grabación.</p>
+</div>
+</div>
+
+<!-- ── SECCIÓN 2 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Los compases</span>
+  <h2 class="ch-h2">7/8, 5/4, 13/16:<br><em>el tiempo fuera de la cuadrícula</em></h2>
+
+  <p>Un compás de 7/8 no es un 4/4 al que le falta un tiempo. Es una unidad rítmica con su propia lógica interna: los siete tiempos se agrupan en 2+2+3 o en 3+2+2 o en 2+3+2, y esa agrupación determina dónde cae el acento fuerte. La experiencia física de tocar en 7/8 es diferente a tocar en 4/4 porque el cuerpo no puede encontrar un patrón de dos tiempos que calce perfectamente: siempre hay un tiempo "extra" que rompe la simetría. Después de unos meses, ese desequilibrio deja de sentirse como error y empieza a sentirse como groove.</p>
+
+  <p>Meshuggah lleva esto más lejos con la poliritmia: la batería toca en 4/4 mientras las guitarras tocan riffs que se repiten en ciclos de 23, 32 o 17 tiempos. Los dos metros corren en paralelo y solo coinciden en el punto de inicio después de varios compases. Para el oyente no entrenado suena como caos controlado. Para el músico que lo ejecuta, los dos metros conviven en la memoria corporal simultáneamente, como dos conversaciones paralelas que se siguen sin mezclarse.</p>
+
+  <p>El movimiento Djent utilizó guitarras de 7 y 8 cuerdas afinadas una cuarta o más por debajo del estándar para crear riffs de registro extremadamente grave. La cuerda adicional no es un capricho: en los compases asimétricos, los saltos entre registros muy separados subrayan la asimetría rítmica y crean una sensación de masa sonora que las guitarras de 6 cuerdas no pueden replicar.</p>
+
+  <div class="ch-pullquote">
+    <p>El 7/8 se siente raro durante dos semanas. Después te pregunta por qué alguna vez pensaste que el 4/4 era la única forma natural de mover el cuerpo.</p>
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 3 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Los modos</span>
+  <h2 class="ch-h2">Frigio, dórico, lidio:<br><em>color sin melodía pop</em></h2>
+
+  <p>El metal progresivo usa armonía modal en lugar de armonía tonal tradicional. En armonía tonal, las progresiones se mueven con lógica de dominante a tónica, creando expectativa y resolución. En armonía modal, un riff puede quedarse en un único centro tonal durante 16 compases y obtener todo su color de la escala que usa, no del movimiento entre acordes. El <strong>modo lidio</strong> (escala mayor con la cuarta aumentada) tiene un brillo casi cinematográfico que Joe Satriani usó para crear las melodías más reconocibles de su catálogo. Dream Theater lo usa en las partes "épicas" de sus composiciones largas.</p>
+
+  <p>El <strong>modo frigio</strong> y su variante con la tercera mayor (el mismo que usa el flamenco, llamado frigio dominante) es el modo de la oscuridad y la agresión en el metal. La segunda menor, ese semitono que separa la tónica de la primera nota por encima, crea una tensión que no resuelve: el modo suena a amenaza sin detonación. Metallica lo usó en "Wherever I May Roam"; Dream Theater en pasajes instrumentales que evitan cualquier calidez armónica.</p>
+
+  <p>John Petrucci describe su proceso compositivo como "pensar en el modo que quiero antes de pensar en la nota que toco". Esto es diferente a pensar en escala de forma mecánica (subir y bajar las notas de la escala). El modo es una paleta emocional: el guitarrista elige frigio porque quiere oscuridad, lidio porque quiere apertura, <strong>dórico</strong> porque quiere el equilibrio entre lo minor y lo épico que ese modo tiene. Las notas individuales vienen después, al servicio del color elegido.</p>
+</div>
+</div>
+
+<!-- VISUAL: 4/4 vs 7/8 como cuadrículas de tiempo -->
+<div class="ch-visual-wrap">
+<div class="ch-visual">
+  <div class="ch-visual-header">
+    <span class="ch-visual-title">4/4 vs 7/8 — comparación de cuadrículas de tiempo</span>
+    <span class="ch-audio-hint">♪ toca cada tiempo</span>
+  </div>
+  <div class="ch-visual-body">
+    <svg viewBox="0 0 760 260" width="100%" style="display:block;min-width:460px;max-width:760px">
+      <rect width="760" height="260" fill="#f2ece3" rx="8"/>
+
+      <!-- Row label: 4/4 -->
+      <text x="20" y="75" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#6a5a46" dominant-baseline="middle">4/4</text>
+
+      <!-- 4/4: four equal boxes -->
+      <rect x="70"  y="48" width="148" height="52" rx="6" fill="#c8b99f" opacity=".7"/>
+      <rect x="224" y="48" width="148" height="52" rx="6" fill="#c8b99f" opacity=".7"/>
+      <rect x="378" y="48" width="148" height="52" rx="6" fill="#c8b99f" opacity=".7"/>
+      <rect x="532" y="48" width="148" height="52" rx="6" fill="#c8b99f" opacity=".7"/>
+
+      <text x="144" y="75" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="#4a3c2c" text-anchor="middle" dominant-baseline="middle">1</text>
+      <text x="298" y="75" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="#4a3c2c" text-anchor="middle" dominant-baseline="middle">2</text>
+      <text x="452" y="75" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="#4a3c2c" text-anchor="middle" dominant-baseline="middle">3</text>
+      <text x="606" y="75" font-family="JetBrains Mono,monospace" font-size="14" font-weight="700" fill="#4a3c2c" text-anchor="middle" dominant-baseline="middle">4</text>
+
+      <text x="144" y="113" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" text-anchor="middle">cuarto</text>
+      <text x="298" y="113" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" text-anchor="middle">cuarto</text>
+      <text x="452" y="113" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" text-anchor="middle">cuarto</text>
+      <text x="606" y="113" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" text-anchor="middle">cuarto</text>
+
+      <!-- Row label: 7/8 -->
+      <text x="20" y="175" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#6a5a46" dominant-baseline="middle">7/8</text>
+
+      <!-- 7/8 grouped as 3+2+2: boxes sized 192 + 128 + 128 -->
+      <!-- Group 1 (3 eighths): width proportional to 3/7 * (760-70) = 295 approx, use 210 -->
+      <rect x="70"  y="148" width="210" height="52" rx="6" fill="#a85a1e" opacity=".75"/>
+      <!-- Group 2 (2 eighths): width 140 -->
+      <rect x="286" y="148" width="140" height="52" rx="6" fill="#c47a36" opacity=".8"/>
+      <!-- Group 3 (2 eighths): width 140 -->
+      <rect x="432" y="148" width="140" height="52" rx="6" fill="#c47a36" opacity=".8"/>
+
+      <!-- Beat numbers inside 7/8 -->
+      <text x="105" y="175" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">1</text>
+      <text x="175" y="175" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">2</text>
+      <text x="245" y="175" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">3</text>
+      <text x="356" y="175" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">4</text>
+      <text x="426" y="175" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">5</text>
+      <text x="502" y="175" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">6</text>
+      <text x="572" y="175" font-family="JetBrains Mono,monospace" font-size="12" font-weight="700" fill="#fff" text-anchor="middle" dominant-baseline="middle">7</text>
+
+      <!-- Group labels under 7/8 -->
+      <text x="175"  y="213" font-family="Inter,sans-serif" font-size="10" fill="#a85a1e" text-anchor="middle" font-style="italic">grupo de 3</text>
+      <text x="356"  y="213" font-family="Inter,sans-serif" font-size="10" fill="#c47a36" text-anchor="middle" font-style="italic">grupo de 2</text>
+      <text x="502"  y="213" font-family="Inter,sans-serif" font-size="10" fill="#c47a36" text-anchor="middle" font-style="italic">grupo de 2</text>
+
+      <!-- Legend -->
+      <rect x="20"  y="236" width="12" height="12" rx="2" fill="#c8b99f"/>
+      <text x="38"  y="242" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" dominant-baseline="middle">tiempo simétrico (4/4)</text>
+      <rect x="230" y="236" width="12" height="12" rx="2" fill="#a85a1e" opacity=".75"/>
+      <text x="248" y="242" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" dominant-baseline="middle">grupo de 3 (7/8)</text>
+      <rect x="420" y="236" width="12" height="12" rx="2" fill="#c47a36" opacity=".8"/>
+      <text x="438" y="242" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" dominant-baseline="middle">grupo de 2 (7/8)</text>
+
+      <!-- Click zones: 4/4 row plays E phrygian -->
+      <rect data-midi="52" x="70"  y="44" width="148" height="60" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="53" x="224" y="44" width="148" height="60" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="55" x="378" y="44" width="148" height="60" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="57" x="532" y="44" width="148" height="60" fill="transparent" style="cursor:pointer"/>
+      <!-- Click zones: 7/8 row -->
+      <rect data-midi="59" x="70"  y="144" width="70"  height="60" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="60" x="140" y="144" width="70"  height="60" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="62" x="210" y="144" width="76"  height="60" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="52" x="286" y="144" width="70"  height="60" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="53" x="356" y="144" width="76"  height="60" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="55" x="432" y="144" width="70"  height="60" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="57" x="502" y="144" width="70"  height="60" fill="transparent" style="cursor:pointer"/>
+    </svg>
+  </div>
+  <div class="ch-visual-caption">
+    Arriba: 4/4, cuatro tiempos iguales, simetría perfecta. Abajo: 7/8 con agrupación 3+2+2. El grupo de 3 tiempos (más ancho) crea una asimetría que el cuerpo percibe como "cojera" hasta que se internaliza como groove. Los clics reproducen notas de la escala de Mi frigio: E–F–G–A–B–C–D.
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 4 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">La guitarra de metal prog</span>
+  <h2 class="ch-h2">Técnica como<br><em>arquitectura sonora</em></h2>
+
+  <p>Las guitarras de 7 y 8 cuerdas añaden una o dos cuerdas en el registro grave, generalmente afinadas en Si o Fa. En el contexto del metal progresivo, esas cuerdas no son un adorno: son la base de riffs que usan el contraste extremo entre registros grave y agudo como herramienta compositiva. Un riff que salta de la cuerda grave (Si2 o Fa2) a las cuerdas agudas en el mismo compás crea una tensión de registro que las guitarras de 6 cuerdas no pueden replicar sin sacrificar el timbre del extremo grave.</p>
+
+  <p>El <strong>tapping</strong> con dos manos, popularizado por Eddie Van Halen en el rock pero desarrollado técnicamente por guitarristas como Tosin Abasi (Animals as Leaders), permite tocar voicings de acordes que serían físicamente imposibles con una sola mano. La mano izquierda fija las notas del bajo mientras la derecha agrega la melodía o las notas superiores del acorde mediante golpes directos sobre el mástil. El resultado son texturas que combinan línea de bajo, armonía y melodía en un solo instrumento.</p>
+
+  <p>La producción de estudio en el metal progresivo funciona como herramienta compositiva adicional. Dream Theater y Tool usan el proceso de mezcla y el diseño de sonido para añadir capas de información que no existen en la partitura. La compresión del bombo de batería, la saturación específica de ciertos frecuencias del riff, el uso de la reverb como marcador de espacio: cada decisión de producción contribuye a la arquitectura sonora total de la pieza.</p>
+
+  <div class="ch-pullquote">
+    <p>El dominio técnico en el metal progresivo no es la meta: es el punto de partida. La pregunta interesante empieza cuando ya no tienes que pensar en los dedos.</p>
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 5 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Lo que puedes llevarte</span>
+  <h2 class="ch-h2">Tres conceptos<br><em>que amplían el vocabulario rítmico</em></h2>
+
+  <p>Los compases irregulares son extraños durante las primeras semanas de práctica y luego se vuelven parte del cuerpo. El proceso de aprendizaje tiene una ruptura clara: hay un momento en que el 7/8 deja de sentirse como 4/4 más un tiempo extra y empieza a sentirse como su propia cosa, con su propio groove y su propia forma de respirar. Ese momento no llega sin repetición deliberada, pero llega para todos los que persisten.</p>
+
+  <p>El pensamiento modal es una forma de escuchar diferente al pensamiento tonal. Cada modo tiene un carácter emocional específico que puedes aprender como color antes de aprenderlo como escala. El <strong>modo lidio</strong> suena a espacio abierto y ligero. El <strong>frigio</strong> suena a gravedad y amenaza. El <strong>dórico</strong> tiene algo de melancólico y épico simultáneamente. Estudiarlos como paletas emocionales en lugar de como listas de notas cambia la forma en que los usas al componer o al improvisar.</p>
+
+  <p>Los riffs de Meshuggah suenan a caos en la primera escucha. Con suficiente atención, la inevitabilidad del metro se vuelve audible: hay un punto de llegada al que el ciclo rítmico regresa, y cuando lo encuentras, el riff entero se reorganiza. Ese proceso de "encontrar la forma" en música aparentemente irregular es uno de los entrenamientos auditivos más efectivos disponibles para cualquier músico.</p>
+
+  <div class="ch-theory-link">
+    <div class="ch-theory-icon">◎</div>
+    <div>
+      <span class="ch-theory-label">Concepto relacionado · Teoría</span>
+      <p class="ch-theory-text">Los modos de la escala mayor — dórico, frigio, lidio y los demás — son el vocabulario armónico central del rock, el jazz y el metal. La sección de Escalas los cubre todos.</p>
+      <a href="/teoria/escalas" class="ch-theory-btn">Ver Escalas y Modos →</a>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="ch-nav">
+  <a href="/recursos/generos/bossa-nova" class="ch-nav-back">
+    <span class="ch-nav-dir">← Anterior</span>
+    <span class="ch-nav-name">Bossa Nova</span>
+    <span class="ch-nav-desc">El silencio dentro del groove</span>
+  </a>
+  <a href="/recursos/generos/raga" class="ch-nav-next">
+    <span class="ch-nav-dir">Siguiente →</span>
+    <span class="ch-nav-name">Raga</span>
+    <span class="ch-nav-desc">El tiempo como forma sagrada</span>
+  </a>
+</div>
+
+<script>
+(function () {
+  var _synth = null;
+
+  function _midiNote(m) {
+    var names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    return names[m % 12] + (Math.floor(m / 12) - 1);
+  }
+
+  async function _initAudio() {
+    if (_synth) return;
+    await Tone.start();
+    var comp   = new Tone.Compressor(-18, 4).toDestination();
+    var reverb = new Tone.Freeverb({ roomSize: 0.22, dampening: 4200, wet: 0.12 }).connect(comp);
+    _synth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'triangle' },
+      envelope:   { attack: 0.006, decay: 0.35, sustain: 0.12, release: 1.4 }
+    }).connect(reverb);
+  }
+
+  async function playNote(midi) {
+    try {
+      await _initAudio();
+      _synth.triggerAttackRelease(_midiNote(midi), '8n');
+    } catch(e) {}
+  }
+
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-midi]');
+    if (!el) return;
+    var midi = parseInt(el.getAttribute('data-midi'), 10);
+    if (!isNaN(midi)) playNote(midi);
+  });
+})();
+</script>
+
+<footer class="tm-footer-legal">
+  <div class="tm-f-copy">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div class="tm-f-links">
+    <a href="/privacidad">Aviso de Privacidad</a>
+    <a href="/terminos">Términos y Condiciones</a>
+    <a href="/cookies">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

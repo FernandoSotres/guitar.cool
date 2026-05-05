@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Blues del Delta — Géneros y Tradiciones</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:    #f4ece0; --paper2: #f2ece3; --paper3: #e8e0d4;
+  --paper4:   #c8b99f; --paper5: #cec4b0;
+  --copper:   #a85a1e; --copper-lt: #c47a36; --copper-dk: #7a3e10;
+  --ink:      #1c1410; --ink2: #2e2418; --ink3: #4a3c2c;
+  --ink4:     #8a7a64; --ink5: #8a7a66;
+  --serif: 'Marcellus', Georgia, serif;
+  --sans:  'Inter', system-ui, sans-serif;
+  --mono:  'JetBrains Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+
+nav { position: sticky; top: 0; z-index: 100; background: rgba(244,236,224,.94); backdrop-filter: blur(12px); border-bottom: 1px solid var(--paper4); padding: 0 48px; display: flex; align-items: center; height: 60px; gap: 0; }
+.nav-logo { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--ink); margin-right: 36px; letter-spacing: -.01em; text-decoration: none; }
+.nav-logo span { font-family: var(--mono); font-size: 0.52em; font-weight: 400; color: var(--ink4); letter-spacing: 0; margin-left: 2px; }
+.nav-link { padding: 0 16px; height: 56px; display: flex; align-items: center; font-size: 13px; font-weight: 500; color: var(--ink4); text-decoration: none; border-bottom: 2px solid transparent; transition: color .2s, border-color .2s; }
+.nav-link:hover { color: var(--ink2); }
+.nav-link.active { color: var(--copper); border-bottom-color: var(--copper); }
+.nav-cta { margin-left: auto; background: var(--copper); color: #fff; font-size: 12px; font-weight: 600; padding: 7px 18px; border-radius: 6px; text-decoration: none; transition: background .2s; }
+.nav-cta:hover { background: var(--copper-dk); }
+
+.ch-hero { background: #0d0804; padding: 80px 48px 90px; position: relative; overflow: hidden; }
+.ch-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 50% at 50% 120%, rgba(100,60,20,.4) 0%, transparent 70%); pointer-events: none; }
+.ch-breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: rgba(250,246,240,.35); margin-bottom: 40px; }
+.ch-breadcrumb a { color: var(--copper-lt); text-decoration: none; transition: opacity .2s; }
+.ch-breadcrumb a:hover { opacity: .8; }
+.ch-breadcrumb span { color: rgba(250,246,240,.2); }
+.ch-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.ch-num { font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: .1em; color: var(--copper-lt); border: 1px solid rgba(192,120,48,.3); padding: 4px 10px; border-radius: 4px; }
+.ch-era { font-size: 12px; color: rgba(250,246,240,.35); font-style: italic; }
+.ch-title { font-family: var(--serif); font-size: clamp(52px, 7vw, 92px); font-weight: 700; line-height: .9; letter-spacing: -.025em; color: var(--paper); max-width: 760px; margin-bottom: 12px; }
+.ch-title em { font-style: italic; color: var(--copper-lt); }
+.ch-subtitle { font-family: var(--serif); font-size: clamp(18px, 2vw, 24px); font-style: italic; color: rgba(250,246,240,.42); margin-bottom: 36px; }
+.ch-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.ch-tag { font-size: 10px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; background: rgba(250,246,240,.07); color: rgba(250,246,240,.45); border: 1px solid rgba(250,246,240,.1); }
+
+.ch-body { max-width: 720px; margin: 0 auto; padding: 80px 48px 0; }
+.ch-section { margin-bottom: 72px; }
+.ch-section-label { font-size: 10px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--copper); margin-bottom: 14px; display: block; }
+.ch-h2 { font-family: var(--serif); font-size: clamp(28px, 3.5vw, 40px); font-weight: 700; line-height: 1.06; letter-spacing: -.02em; color: var(--ink); margin-bottom: 24px; }
+.ch-h2 em { font-style: italic; color: var(--copper); }
+.ch-body p { font-size: 16px; color: var(--ink3); line-height: 1.85; margin-bottom: 22px; }
+.ch-body p:last-child { margin-bottom: 0; }
+.ch-body strong { font-weight: 600; color: var(--ink2); }
+
+.ch-pullquote { border-left: 3px solid var(--copper); padding: 16px 24px; background: var(--paper2); border-radius: 0 8px 8px 0; margin: 36px 0; }
+.ch-pullquote p { font-family: var(--serif); font-size: 21px !important; font-style: italic; color: var(--ink2); line-height: 1.55; margin: 0 !important; }
+
+.ch-section-photo { float: right; width: 42%; margin: 6px 0 22px 30px; border-radius: 10px; overflow: hidden; shape-outside: border-box; }
+.ch-section-photo img { width: 100%; height: 210px; object-fit: cover; object-position: center; display: block; }
+.ch-section::after { content: ''; display: table; clear: both; }
+@media (max-width: 600px) { .ch-section-photo { float: none; width: 100%; margin: 0 0 22px 0; } }
+
+.ch-visual-wrap { max-width: 860px; margin: 0 auto; padding: 0 48px 72px; }
+.ch-visual { background: var(--paper2); border: 1px solid var(--paper3); border-radius: 14px; overflow: hidden; }
+.ch-visual-header { padding: 13px 20px; border-bottom: 1px solid var(--paper3); display: flex; align-items: center; justify-content: space-between; }
+.ch-visual-title { font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--ink5); }
+.ch-audio-hint { font-size: 11px; color: var(--copper); font-weight: 500; font-style: italic; letter-spacing: .02em; }
+.ch-visual-body { padding: 28px 24px; overflow-x: auto; }
+.ch-visual-caption { padding: 12px 24px 16px; border-top: 1px solid var(--paper3); font-size: 12px; color: var(--ink5); font-style: italic; line-height: 1.5; }
+
+.ch-theory-link { background: #13100c; border-radius: 12px; padding: 28px 32px; margin: 36px 0; display: flex; align-items: flex-start; gap: 20px; }
+.ch-theory-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+.ch-theory-label { font-size: 10px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--copper-lt); margin-bottom: 6px; display: block; }
+.ch-theory-text { font-size: 14px; color: rgba(250,246,240,.55); line-height: 1.7; margin-bottom: 12px; }
+.ch-theory-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--copper-lt); text-decoration: none; border-bottom: 1px solid rgba(192,120,48,.35); padding-bottom: 1px; transition: border-color .2s; }
+.ch-theory-btn:hover { border-color: var(--copper-lt); }
+
+.ch-nav { max-width: 860px; margin: 0 auto; padding: 0 48px 80px; display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+.ch-nav-back, .ch-nav-next { display: flex; flex-direction: column; gap: 4px; text-decoration: none; padding: 20px 24px; border-radius: 12px; border: 1px solid var(--paper4); transition: border-color .2s, box-shadow .2s; max-width: 48%; }
+.ch-nav-back:hover, .ch-nav-next:hover { border-color: var(--copper); box-shadow: 0 4px 16px rgba(160,92,32,.1); }
+.ch-nav-next { align-items: flex-end; }
+.ch-nav-dir { font-size: 10px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--copper); }
+.ch-nav-name { font-family: var(--serif); font-size: 16px; font-weight: 700; color: var(--ink); line-height: 1.2; }
+.ch-nav-desc { font-size: 12px; color: var(--ink5); }
+
+@media (max-width: 768px) {
+  nav { padding: 0 16px; overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; scrollbar-width: none; }
+  nav::-webkit-scrollbar { display: none; }
+  nav > * { flex-shrink: 0; }
+  .ch-hero { padding: 60px 20px 72px; }
+  .ch-body { padding: 56px 20px 0; }
+  .ch-visual-wrap { padding: 0 20px 56px; }
+  .ch-nav { padding: 0 20px 60px; flex-direction: column; }
+  .ch-nav-back, .ch-nav-next { max-width: 100%; width: 100%; }
+  .ch-nav-next { align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link active">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<section class="ch-hero">
+  <div class="ch-breadcrumb">
+    <a href="/recursos">Recursos</a>
+    <span>·</span>
+    <a href="/recursos/generos">Géneros y Tradiciones</a>
+    <span>·</span>
+    <span style="color:rgba(250,246,240,.5)">Blues del Delta</span>
+  </div>
+  <div class="ch-meta">
+    <span class="ch-num">08 · EE.UU.</span>
+    <span class="ch-era">1900 – 1940</span>
+  </div>
+  <h1 class="ch-title">Blues <em>del Delta</em></h1>
+  <p class="ch-subtitle">La guitarra antes de los amplificadores</p>
+  <div class="ch-tags">
+    <span class="ch-tag">Slide</span>
+    <span class="ch-tag">Open tuning</span>
+    <span class="ch-tag">Blue notes</span>
+    <span class="ch-tag">Robert Johnson</span>
+    <span class="ch-tag">Call and response</span>
+  </div>
+</section>
+
+<!-- ── SECCIÓN 1 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Punto de partida</span>
+  <h2 class="ch-h2">Una tradición<br><em>que inventó el siglo XX.</em></h2>
+
+  <p>El blues del Delta emergió en la región del Misisipi en las primeras décadas del siglo XX y fue grabado por primera vez en los años veinte. <strong>Robert Johnson</strong>, <strong>Charlie Patton</strong>, <strong>Son House</strong> y <strong>Skip James</strong> son los nombres que el registro histórico conserva con más claridad, aunque la tradición era colectiva y anterior a cualquier grabación. El contexto social es inseparable de la música: comunidades afroamericanas en el sur rural, posesclavitud, que transformaron los cantos de trabajo y los field hollers en una tradición secular de guitarra.</p>
+
+  <p>La importancia histórica del blues del Delta es difícil de exagerar. Cada forma musical americana significativa después de 1920, el jazz, el rock, el country, el R&amp;B, el hip-hop, tiene una línea directa de conexión con él. No como influencia difusa, sino como fuente concreta: los productores de rock de los años cincuenta sabían exactamente qué discos de blues estaban convirtiendo en hits para nuevas audiencias. La genealogía es documentable.</p>
+
+  <p>Llegar al blues del Delta con formación musical previa requiere un ajuste de expectativas. La afinación puede ser ligeramente irregular por diseño o por condición de los instrumentos. Las estructuras rítmicas son flexibles de maneras que la notación convencional no captura bien. Lo que suena "impreciso" a un oído entrenado en la música clásica puede ser la articulación de una frase con exactamente la cantidad de tiempo que necesita, ni más.</p>
+</div>
+</div>
+
+<!-- ── SECCIÓN 2 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">La estructura</span>
+  <h2 class="ch-h2">Doce compases<br><em>que contienen todo</em></h2>
+
+  <p>El blues de 12 compases es una estructura armónica tan fundamental que millones de músicos la conocen sin haberla aprendido formalmente. La secuencia de tres acordes (I–IV–V) sobre 12 compases crea un arco narrativo autónomo: enunciado (I), respuesta (IV), tensión (V) y resolución (I). Esta estructura funciona como un contrato tácito entre músicos: cualquiera que llegue a una jam y sepa los tres acordes puede participar de inmediato, sin ensayo.</p>
+
+  <p>Los blusistas del Delta clásico doblaban esas reglas constantemente. Las grabaciones de Robert Johnson usan cambios de acorde inesperados, acordes de paso y variaciones estructurales que demuestran que la forma siempre fue más flexible que lo que los libros de texto sugieren. En "Cross Road Blues", Johnson comprime y expande el ciclo según la frase vocal, tratando la estructura como un marco elástico, no como una cuadrícula rígida.</p>
+
+  <p>La versión más común para guitarristas solistas del Delta incluye un turnaround, los dos últimos compases del ciclo, como espacio de transición entre uno y el siguiente. El turnaround es donde la guitarra tiene más libertad: una bajada cromática, un lick de llamada, una figura percusiva sobre las cuerdas graves. Es el espacio de identidad personal dentro de un formulario compartido.</p>
+
+  <div class="ch-pullquote">
+    <p>El blues de 12 compases es el único sistema armónico en la música popular que funciona como lenguaje sin necesitar presentación. Dos músicos que no se conocen pueden tocar horas sobre él.</p>
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 3 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Las blue notes</span>
+  <h2 class="ch-h2">Las notas que no deberían<br><em>existir en el piano</em></h2>
+
+  <p>Las <strong>blue notes</strong> son los grados tercero, quinto y séptimo de la escala mayor, ligeramente bajados, de manera microtonal: notas que caen entre las teclas del piano. Los cantantes y guitarristas las producen de forma natural; los pianistas las aproximan tocando la versión bemol y la natural en sucesión rápida o simultáneamente. La tensión entre el contexto armónico mayor y el vocabulario melódico de blue notes, parcialmente menor, es la fuente del sonido característico del blues.</p>
+
+  <p>En la guitarra, las blue notes se producen principalmente mediante <strong>string bends</strong>: empujar la cuerda lateralmente hacia el borde del mástil para elevar su afinación a medio camino entre dos notas. Un bend de la tercera menor hasta la tercera mayor, deteniéndose exactamente a mitad de ese recorrido, produce la blue note. El control de esa posición intermedia, la capacidad de llegar ahí con certeza y sostenerse, es una habilidad técnica específica que distingue a los guitarristas de blues con experiencia.</p>
+
+  <p>La simultaneidad de mayor y menor que producen las blue notes en contexto no es una inconsistencia teórica: es una característica que la música europea tardó siglos en sistematizar y que el blues usaba intuitivamente desde sus orígenes. El acorde I mayor tocado debajo de una melodía que usa la tercera menor crea una tensión que nunca resuelve del todo, que permanece vibrando. Esa tensión irresolvible es, en un sentido muy concreto, el blues.</p>
+</div>
+</div>
+
+<!-- VISUAL: Teclado de piano con blue notes -->
+<div class="ch-visual-wrap">
+<div class="ch-visual">
+  <div class="ch-visual-header">
+    <span class="ch-visual-title">Blue notes en Do — notas entre las teclas</span>
+    <span class="ch-audio-hint">♪ toca cada nota</span>
+  </div>
+  <div class="ch-visual-body">
+    <svg viewBox="0 0 760 260" width="100%" style="display:block;min-width:460px;max-width:760px">
+      <rect width="760" height="260" fill="#f2ece3" rx="8"/>
+
+      <!-- Piano keyboard: C to C (one octave) -->
+      <!-- White keys: C D E F G A B C = 8 keys -->
+      <!-- White key width = 80px, height = 140px, starting x=40 -->
+      <!-- C=40, D=120, E=200, F=280, G=360, A=440, B=520, C8=600 -->
+
+      <!-- White key backgrounds -->
+      <rect x="40"  y="50" width="78" height="140" rx="4" fill="#fff" stroke="#c8b99f" stroke-width="1.5"/>
+      <rect x="120" y="50" width="78" height="140" rx="4" fill="#fff" stroke="#c8b99f" stroke-width="1.5"/>
+      <rect x="200" y="50" width="78" height="140" rx="4" fill="#fff" stroke="#c8b99f" stroke-width="1.5"/>
+      <rect x="280" y="50" width="78" height="140" rx="4" fill="#fff" stroke="#c8b99f" stroke-width="1.5"/>
+      <rect x="360" y="50" width="78" height="140" rx="4" fill="#fff" stroke="#c8b99f" stroke-width="1.5"/>
+      <rect x="440" y="50" width="78" height="140" rx="4" fill="#fff" stroke="#c8b99f" stroke-width="1.5"/>
+      <rect x="520" y="50" width="78" height="140" rx="4" fill="#fff" stroke="#c8b99f" stroke-width="1.5"/>
+      <rect x="600" y="50" width="78" height="140" rx="4" fill="#fff" stroke="#c8b99f" stroke-width="1.5"/>
+
+      <!-- Black keys: C#=D#=between C-D (x~104), D#=between D-E (x~184), F#=between F-G (x~344), G#=between G-A (x~424), A#=between A-B (x~504) -->
+      <!-- Eb (blue 3rd): between D and E — highlight as blue note in red -->
+      <!-- Gb (blue 5th): between F# and G — highlight as blue note in red -->
+      <!-- Bb (blue 7th): between A# — highlight as blue note in red -->
+
+      <!-- Standard black keys (not blue notes) -->
+      <rect x="102" y="50" width="46" height="88" rx="3" fill="#2a2010"/>
+      <!-- Eb = blue note: between D and E -->
+      <rect x="182" y="50" width="46" height="88" rx="3" fill="#c04030"/>
+      <!-- F# standard -->
+      <rect x="342" y="50" width="46" height="88" rx="3" fill="#2a2010"/>
+      <!-- Gb = blue note: between F# and G -->
+      <rect x="422" y="50" width="46" height="88" rx="3" fill="#c04030"/>
+      <!-- Bb = blue note: between A and B -->
+      <rect x="502" y="50" width="46" height="88" rx="3" fill="#c04030"/>
+
+      <!-- Note labels on white keys -->
+      <text x="79"  y="175" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#4a3c2c" text-anchor="middle">C</text>
+      <text x="159" y="175" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#4a3c2c" text-anchor="middle">D</text>
+      <text x="239" y="175" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#4a3c2c" text-anchor="middle">E</text>
+      <text x="319" y="175" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#4a3c2c" text-anchor="middle">F</text>
+      <text x="399" y="175" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#4a3c2c" text-anchor="middle">G</text>
+      <text x="479" y="175" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#4a3c2c" text-anchor="middle">A</text>
+      <text x="559" y="175" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#4a3c2c" text-anchor="middle">B</text>
+      <text x="639" y="175" font-family="JetBrains Mono,monospace" font-size="13" font-weight="700" fill="#4a3c2c" text-anchor="middle">C</text>
+
+      <!-- Labels on black keys -->
+      <text x="125" y="100" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#c8b99f" text-anchor="middle">C#</text>
+      <text x="205" y="88" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">Eb</text>
+      <text x="205" y="100" font-family="JetBrains Mono,monospace" font-size="9"  fill="#ffddcc" text-anchor="middle">b3</text>
+      <text x="365" y="100" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#c8b99f" text-anchor="middle">F#</text>
+      <text x="445" y="88" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">Gb</text>
+      <text x="445" y="100" font-family="JetBrains Mono,monospace" font-size="9"  fill="#ffddcc" text-anchor="middle">b5</text>
+      <text x="525" y="88" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700" fill="#fff" text-anchor="middle">Bb</text>
+      <text x="525" y="100" font-family="JetBrains Mono,monospace" font-size="9"  fill="#ffddcc" text-anchor="middle">b7</text>
+
+      <!-- Interval labels below keyboard -->
+      <text x="79"  y="208" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" text-anchor="middle">tónica</text>
+      <text x="159" y="208" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" text-anchor="middle">2ª</text>
+      <text x="205" y="215" font-family="Inter,sans-serif" font-size="10" fill="#c04030" font-weight="600" text-anchor="middle">blue 3ª</text>
+      <text x="239" y="208" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" text-anchor="middle">3ª M</text>
+      <text x="319" y="208" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" text-anchor="middle">4ª J</text>
+      <text x="445" y="215" font-family="Inter,sans-serif" font-size="10" fill="#c04030" font-weight="600" text-anchor="middle">blue 5ª</text>
+      <text x="399" y="208" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" text-anchor="middle">5ª J</text>
+      <text x="479" y="208" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" text-anchor="middle">6ª M</text>
+      <text x="525" y="215" font-family="Inter,sans-serif" font-size="10" fill="#c04030" font-weight="600" text-anchor="middle">blue 7ª</text>
+      <text x="559" y="208" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" text-anchor="middle">7ª M</text>
+      <text x="639" y="208" font-family="Inter,sans-serif" font-size="10" fill="#8a7a66" text-anchor="middle">octava</text>
+
+      <!-- Legend -->
+      <rect x="30" y="236" width="10" height="10" rx="2" fill="#c04030"/>
+      <text x="46" y="241" font-family="Inter,sans-serif" font-size="11" fill="#6a5a46" dominant-baseline="middle">blue note (tercera, quinta, séptima bemol)</text>
+      <rect x="370" y="236" width="10" height="10" rx="2" fill="#2a2010"/>
+      <text x="386" y="241" font-family="Inter,sans-serif" font-size="11" fill="#6a5a46" dominant-baseline="middle">semitono estándar</text>
+
+      <!-- Click zones: white keys -->
+      <rect data-midi="60" x="40"  y="50" width="78" height="140" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="62" x="120" y="50" width="78" height="140" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="64" x="200" y="50" width="78" height="140" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="65" x="280" y="50" width="78" height="140" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="67" x="360" y="50" width="78" height="140" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="69" x="440" y="50" width="78" height="140" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="71" x="520" y="50" width="78" height="140" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="72" x="600" y="50" width="78" height="140" fill="transparent" style="cursor:pointer"/>
+
+      <!-- Click zones: black keys -->
+      <rect data-midi="61" x="102" y="50" width="46" height="88" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="63" x="182" y="50" width="46" height="88" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="66" x="342" y="50" width="46" height="88" fill="transparent" style="cursor:pointer"/>
+      <rect data-midi="70" x="502" y="50" width="46" height="88" fill="transparent" style="cursor:pointer"/>
+      <!-- Gb -->
+      <rect data-midi="66" x="422" y="50" width="46" height="88" fill="transparent" style="cursor:pointer"/>
+    </svg>
+  </div>
+  <div class="ch-visual-caption">
+    El teclado de una octava en Do con las blue notes marcadas en rojo: Eb (tercera menor, la "blue 3rd"), Gb (quinta disminuida, la "blue 5th") y Bb (séptima menor, la "blue 7th"). En el piano estas notas existen como teclas; en la guitarra, los blusistas las producen con bends que detienen el movimiento de la cuerda a mitad de camino entre dos notas.
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 4 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">La guitarra slide</span>
+  <h2 class="ch-h2">El vidrio<br><em>que canta como una voz</em></h2>
+
+  <p>La guitarra <strong>slide</strong> utiliza un cuello de botella de vidrio o un tubo metálico sobre un dedo de la mano izquierda para deslizarse por las cuerdas y producir cambios de afinación continuos que imitan el glissando de la voz humana. Requiere <strong>afinaciones abiertas</strong>: afinar la guitarra de manera que tocar todas las cuerdas al aire produzca un acorde completo (Sol mayor en open G, Re mayor en open D, Mi mayor en open E). Con la guitarra en open tuning, barrar el slide sobre todas las cuerdas en cualquier traste produce el mismo acorde en ese grado.</p>
+
+  <p>La técnica exige una relación completamente diferente con el instrumento. La mano izquierda sostiene el slide justo encima de los trastes, sin presionar hacia el mástil, flotando a la altura de los trastes metálicos. La mano derecha pulsa o rasguea mientras la izquierda se desliza, y los dedos detrás del slide amortiguan las cuerdas para evitar resonancias no deseadas. La dificultad técnica no está en llegar a las notas sino en llegar a la nota exacta y salir de ella limpiamente.</p>
+
+  <p>Son House en "Death Letter Blues" y Skip James en "I'm So Glad" son grabaciones que muestran la técnica en su forma más directa: la guitarra no acompaña a la voz, actúa en diálogo con ella, respondiendo frases con frases, llenando los silencios vocales con comentarios instrumentales. Ese modelo de <strong>call and response</strong>, la estructura pregunta-silencio-respuesta, viene de los field hollers y organiza la relación entre voz e instrumento en todo el blues.</p>
+
+  <div class="ch-pullquote">
+    <p>El slide no toca notas. El slide toca el espacio entre las notas, el camino de un lugar a otro, que es exactamente donde vive la emoción de la voz humana.</p>
+  </div>
+</div>
+</div>
+
+<!-- ── SECCIÓN 5 ── -->
+<div class="ch-body">
+<div class="ch-section">
+  <span class="ch-section-label">Lo que puedes llevarte</span>
+  <h2 class="ch-h2">Tres raíces<br><em>de todo lo que vino después</em></h2>
+
+  <p>El blues de 12 compases como laboratorio armónico: una vez que conoces la forma perfectamente, puedes tocar con virtualmente cualquier otro músico que también la conozca. Es el lenguaje común más universal de la música popular, el equivalente musical de una frase de cortesía que todos entienden. Practicarla no es aprender una cosa específica: es hacerse fluido en el idioma base del que derivan los demás.</p>
+
+  <p>El call and response: el modelo de fraseo vocal del blues (enunciado, silencio, respuesta) es el ADN del solo de jazz, del funk, del gospel y del flow del hip-hop. Aplicarlo en la guitarra significa dejar espacio después de cada frase, no rellenar cada hueco, y construir la respuesta a partir de lo que la primera frase dejó sin resolver. Esa estructura de pregunta y respuesta también funciona entre el guitarrista y el conjunto.</p>
+
+  <p>Las microtonal expresivas: añadir <strong>string bends</strong> que lleguen a las blue notes (tercera y séptima menor) a cualquier frase melódica añade peso emocional inmediato. No hace falta tocar blues para que ese gesto funcione: aparece en rock, jazz, country, R&amp;B. Es un recurso de expresión universal que el blues formalizó y el resto de la música adoptó.</p>
+
+  <div class="ch-theory-link">
+    <div class="ch-theory-icon">◎</div>
+    <div>
+      <span class="ch-theory-label">Concepto relacionado · Teoría</span>
+      <p class="ch-theory-text">Las blue notes son las notas alteradas de la escala mayor: la tercera, quinta y séptima bemoles. La sección de Escalas explica todas las escalas de blues y sus aplicaciones.</p>
+      <a href="/teoria/escalas" class="ch-theory-btn">Ver Escalas y Modos →</a>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="ch-nav">
+  <a href="/recursos/generos/funk" class="ch-nav-back">
+    <span class="ch-nav-dir">← Anterior</span>
+    <span class="ch-nav-name">Funk</span>
+    <span class="ch-nav-desc">El groove como argumento</span>
+  </a>
+  <a href="/recursos/generos/maqam" class="ch-nav-next">
+    <span class="ch-nav-dir">Siguiente →</span>
+    <span class="ch-nav-name">Maqam</span>
+    <span class="ch-nav-desc">Los tonos entre los tonos</span>
+  </a>
+</div>
+
+<script>
+(function () {
+  var _synth = null;
+
+  function _midiNote(m) {
+    var names = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+    return names[m % 12] + (Math.floor(m / 12) - 1);
+  }
+
+  async function _initAudio() {
+    if (_synth) return;
+    await Tone.start();
+    var comp   = new Tone.Compressor(-18, 4).toDestination();
+    var reverb = new Tone.Freeverb({ roomSize: 0.22, dampening: 4200, wet: 0.12 }).connect(comp);
+    _synth = new Tone.PolySynth(Tone.Synth, {
+      oscillator: { type: 'triangle' },
+      envelope:   { attack: 0.006, decay: 0.35, sustain: 0.12, release: 1.4 }
+    }).connect(reverb);
+  }
+
+  async function playNote(midi) {
+    try {
+      await _initAudio();
+      _synth.triggerAttackRelease(_midiNote(midi), '8n');
+    } catch(e) {}
+  }
+
+  document.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-midi]');
+    if (!el) return;
+    var midi = parseInt(el.getAttribute('data-midi'), 10);
+    if (!isNaN(midi)) playNote(midi);
+  });
+})();
+</script>
+
+<footer class="tm-footer-legal">
+  <div class="tm-f-copy">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div class="tm-f-links">
+    <a href="/privacidad">Aviso de Privacidad</a>
+    <a href="/terminos">Términos y Condiciones</a>
+    <a href="/cookies">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>
