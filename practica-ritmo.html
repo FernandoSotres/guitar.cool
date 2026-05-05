@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Práctica · Ritmo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<style>
+:root {
+  --paper:#f4ece0;--paper2:#ebe1d2;--paper3:#ddd1bd;--paper4:#c8b99f;--paper5:#b8a890;
+  --copper:#a85a1e;--copper-lt:#c47a36;--copper-dk:#7a3e10;
+  --ink:#1c1410;--ink2:#2e2418;--ink3:#5a4a38;--ink4:#8a7a64;--ink5:#a09080;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --green:#2a9d6e;--red:#c0392b;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;overflow-x:hidden;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{font-family:var(--mono);font-size:.52em;font-weight:400;color:var(--ink4);letter-spacing:0;margin-left:2px;}
+.nav-link{padding:0 16px;height:60px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+.breadcrumb{background:var(--paper2);border-bottom:1px solid var(--paper4);padding:0 48px;height:40px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink5);}
+.breadcrumb a{color:var(--ink5);text-decoration:none;}
+.breadcrumb a:hover{color:var(--copper);}
+.breadcrumb .sep{opacity:.45;}
+.breadcrumb .cur{color:var(--ink3);font-weight:500;}
+
+.ex-wrap{display:grid;grid-template-columns:252px 1fr;min-height:calc(100vh - 96px);}
+
+/* SIDEBAR */
+.ex-sidebar{background:var(--paper2);border-right:1px solid var(--paper4);padding:28px 20px;overflow-y:auto;}
+.ex-sidebar-sec{margin-bottom:28px;}
+.ex-sec-title{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:12px;display:block;}
+.ex-sec-sub{font-size:11px;color:var(--ink5);margin-bottom:12px;line-height:1.5;}
+
+.mode-btns{display:flex;flex-direction:column;gap:6px;}
+.mode-btn{padding:9px 12px;border-radius:7px;border:1px solid var(--paper4);background:var(--paper3);font-size:12px;font-weight:500;color:var(--ink4);cursor:pointer;font-family:var(--sans);text-align:left;transition:all .14s;}
+.mode-btn.on{background:var(--ink2);color:var(--paper);border-color:var(--ink2);}
+.mode-btn:hover:not(.on){border-color:var(--copper);color:var(--copper);}
+.mode-btn-sub{font-size:10px;font-weight:400;opacity:.65;margin-top:2px;}
+
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.stat-box{background:var(--paper);border:1px solid var(--paper4);border-radius:8px;padding:12px 8px;text-align:center;}
+.stat-val{font-family:var(--mono);font-size:24px;font-weight:600;color:var(--ink);line-height:1;}
+.stat-lbl{font-size:9px;color:var(--ink5);margin-top:4px;letter-spacing:.08em;text-transform:uppercase;}
+.reset-btn{width:100%;margin-top:10px;padding:8px;border:1px solid var(--paper4);background:transparent;border-radius:7px;font-size:11px;color:var(--ink5);cursor:pointer;font-family:var(--sans);transition:all .15s;}
+.reset-btn:hover{border-color:var(--red);color:var(--red);}
+
+.info-box{background:var(--paper);border:1px solid var(--paper4);border-radius:8px;padding:14px 12px;}
+.info-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.info-row:last-child{margin-bottom:0;}
+.info-lbl{font-size:10px;color:var(--ink5);text-transform:uppercase;letter-spacing:.1em;}
+.info-val{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--ink);}
+.info-val.highlight{color:var(--copper);}
+
+/* MAIN */
+.ex-main{padding:28px 36px;display:flex;flex-direction:column;gap:18px;}
+
+.ex-start{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 40px;gap:20px;flex:1;}
+.ex-start-title{font-family:var(--serif);font-size:clamp(40px,5vw,64px);font-weight:700;color:var(--ink);letter-spacing:-.025em;line-height:1.0;}
+.ex-start-title em{font-style:italic;color:var(--copper);}
+.ex-start-sub{font-size:15px;color:var(--ink4);max-width:440px;line-height:1.75;}
+.ex-start-hint{font-size:13px;color:var(--ink5);max-width:400px;line-height:1.6;}
+.ex-start-btn{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:14px;font-weight:600;padding:14px 32px;border-radius:10px;border:none;cursor:pointer;font-family:var(--sans);transition:background .2s;margin-top:8px;}
+.ex-start-btn:hover{background:var(--copper-dk);}
+
+/* QUESTION CARD */
+.ex-question{background:#13100c;border-radius:14px;padding:22px 32px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-shrink:0;}
+.ex-q-left{}
+.ex-q-label{font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:rgba(250,246,240,.3);margin-bottom:5px;}
+.ex-q-main{font-family:var(--serif);font-size:clamp(22px,2.5vw,34px);font-weight:700;color:var(--paper);line-height:1.15;letter-spacing:-.02em;margin-bottom:6px;}
+.ex-q-sub{font-family:var(--mono);font-size:12px;color:var(--copper-lt);letter-spacing:.04em;}
+.ex-q-divider{width:1px;height:60px;background:rgba(250,246,240,.08);flex-shrink:0;}
+.ex-q-right{text-align:center;min-width:80px;}
+.ex-bars-label{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(250,246,240,.28);margin-bottom:4px;}
+.ex-bars-val{font-family:var(--mono);font-size:28px;font-weight:700;color:var(--copper-lt);line-height:1;}
+
+/* PLAYING INDICATOR */
+.playing-indicator{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:13px;color:var(--copper-lt);}
+.beat-dot{width:9px;height:9px;border-radius:50%;background:rgba(196,122,54,.25);display:inline-block;transition:background .08s,transform .08s;}
+.beat-dot.active{background:var(--copper-lt);transform:scale(1.35);}
+
+/* IDENTIFY OPTIONS (time signatures) */
+.sig-options{display:flex;gap:10px;flex-shrink:0;flex-wrap:wrap;}
+.sig-btn{padding:14px 28px;border-radius:10px;border:1px solid var(--paper4);background:var(--paper2);font-family:var(--mono);font-size:22px;font-weight:700;color:var(--ink3);cursor:pointer;text-align:center;transition:all .14s;min-width:80px;}
+.sig-btn:hover:not(:disabled){border-color:var(--copper);color:var(--copper);}
+.sig-btn.correct{background:rgba(42,157,110,.12);border-color:var(--green);color:var(--green);}
+.sig-btn.wrong{background:rgba(192,57,43,.08);border-color:var(--red);color:var(--red);}
+.sig-btn:disabled{cursor:default;}
+
+/* FEEDBACK */
+.ex-feedback{min-height:44px;padding:11px 18px;border-radius:9px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:10px;transition:opacity .18s;flex-shrink:0;}
+.ex-feedback.hidden{opacity:0;pointer-events:none;background:transparent;border:1px solid transparent;}
+.ex-feedback.correct{background:rgba(42,157,110,.1);color:var(--green);border:1px solid rgba(42,157,110,.22);opacity:1;}
+.ex-feedback.wrong{background:rgba(192,57,43,.08);color:var(--red);border:1px solid rgba(192,57,43,.18);opacity:1;}
+.fb-icon{font-size:18px;line-height:1;}
+
+/* CONTROLS */
+.ex-controls{display:flex;gap:10px;align-items:center;flex-shrink:0;flex-wrap:wrap;}
+.ex-btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:var(--sans);transition:all .16s;}
+.ex-btn-listen{background:rgba(160,92,32,.1);color:var(--copper);border:1px solid rgba(160,92,32,.22);}
+.ex-btn-listen:hover{background:rgba(160,92,32,.18);}
+.ex-btn-next{background:var(--copper);color:#fff;}
+.ex-btn-next:hover{background:var(--copper-dk);}
+.ex-btn-reset{background:rgba(255,255,255,.0);color:var(--ink5);border:1px solid var(--paper4);}
+.ex-btn-reset:hover{border-color:var(--red);color:var(--red);}
+
+/* STREAK */
+.ex-streak{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:5px;}
+.ex-streak-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink5);}
+.ex-streak-bar{display:flex;gap:3px;}
+.ex-streak-dot{width:7px;height:7px;border-radius:50%;background:var(--paper4);transition:background .2s,transform .15s;}
+.ex-streak-dot.on{background:var(--copper);transform:scale(1.2);}
+
+/* BAR BUILDER */
+.bar-container{background:#13100c;border-radius:14px;padding:20px 24px;flex-shrink:0;}
+.bar-title{font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:rgba(250,246,240,.3);margin-bottom:14px;}
+.bar-track{display:flex;height:72px;border-radius:8px;overflow:hidden;border:2px solid rgba(250,246,240,.1);position:relative;transition:border-color .22s;}
+.bar-track.success{border-color:var(--green);box-shadow:0 0 0 1px rgba(42,157,110,.18);}
+.bar-track.overflow{border-color:var(--red);}
+.bar-track.empty-hint{border-style:dashed;}
+.note-cell{display:flex;align-items:center;justify-content:center;border-right:1px solid rgba(250,246,240,.08);flex-shrink:0;position:relative;transition:background .15s;}
+.note-cell:last-child{border-right:none;}
+.note-cell-symbol{font-size:22px;line-height:1;color:rgba(20,10,6,.75);user-select:none;}
+.bar-empty{flex:1;background:rgba(250,246,240,.025);}
+.bar-progress{margin-top:10px;display:flex;align-items:center;gap:12px;}
+.bar-progress-bg{flex:1;height:4px;background:rgba(250,246,240,.1);border-radius:2px;overflow:hidden;}
+.bar-progress-fill{height:100%;background:var(--copper);border-radius:2px;transition:width .2s;}
+.bar-progress-text{font-family:var(--mono);font-size:11px;color:rgba(250,246,240,.4);white-space:nowrap;}
+.bar-success-msg{margin-top:12px;font-size:13px;font-weight:600;color:var(--green);display:none;}
+.bar-success-msg.visible{display:block;}
+
+/* NOTE PALETTE */
+.palette-wrap{flex-shrink:0;}
+.palette-title{font-size:10px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--ink5);margin-bottom:12px;}
+.palette-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.pal-btn{padding:10px 14px;border-radius:9px;border:1px solid var(--paper4);background:var(--paper2);cursor:pointer;font-family:var(--sans);text-align:center;transition:all .14s;min-width:80px;}
+.pal-btn:hover:not(:disabled){border-color:var(--copper);background:rgba(168,90,30,.07);}
+.pal-btn:disabled{opacity:.38;cursor:not-allowed;}
+.pal-btn-symbol{font-size:24px;line-height:1.1;color:var(--copper);font-family:var(--mono);}
+.pal-btn-name{font-size:10px;font-weight:600;color:var(--ink3);margin-top:3px;letter-spacing:.04em;}
+.pal-btn-dur{font-size:9px;color:var(--ink5);margin-top:1px;}
+
+.pal-backspace{padding:10px 14px;border-radius:9px;border:1px solid var(--paper4);background:transparent;cursor:pointer;font-family:var(--sans);font-size:12px;font-weight:600;color:var(--ink5);transition:all .14s;}
+.pal-backspace:hover:not(:disabled){border-color:var(--red);color:var(--red);}
+.pal-backspace:disabled{opacity:.38;cursor:not-allowed;}
+
+/* SHAKE */
+@keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}
+.shake{animation:shake .3s ease;}
+
+@media(max-width:900px){
+  nav{padding:0 16px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav>*{flex-shrink:0;}
+  .breadcrumb{padding:0 20px;}
+  .ex-wrap{grid-template-columns:1fr;}
+  .ex-sidebar{border-right:none;border-bottom:1px solid var(--paper4);}
+  .ex-main{padding:20px 16px;}
+  .ex-question{flex-wrap:wrap;}
+  .ex-q-divider{display:none;}
+  .sig-options{gap:8px;}
+  .sig-btn{padding:12px 18px;font-size:18px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link active">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Herramientas →</a>
+</nav>
+
+<div class="breadcrumb">
+  <a href="/">Inicio</a>
+  <span class="sep">·</span>
+  <a href="/practica">Práctica</a>
+  <span class="sep">·</span>
+  <span class="cur">Ritmo</span>
+</div>
+
+<div class="ex-wrap">
+
+  <!-- SIDEBAR -->
+  <aside class="ex-sidebar">
+
+    <div class="ex-sidebar-sec">
+      <span class="ex-sec-title">Modo</span>
+      <div class="mode-btns">
+        <button class="mode-btn on" id="mode-btn-1" onclick="setMode(1)">
+          Identificar el compás
+          <div class="mode-btn-sub">Escucha el patrón y di qué compás es</div>
+        </button>
+        <button class="mode-btn" id="mode-btn-2" onclick="setMode(2)">
+          Construir un compás
+          <div class="mode-btn-sub">Llena cuatro tiempos con figuras rítmicas</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Sidebar: mode 1 stats -->
+    <div class="ex-sidebar-sec" id="sidebar-stats-1">
+      <span class="ex-sec-title">Estadísticas</span>
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-val" id="s1-correct">0</div><div class="stat-lbl">Correctas</div></div>
+        <div class="stat-box"><div class="stat-val" id="s1-total">0</div><div class="stat-lbl">Total</div></div>
+        <div class="stat-box"><div class="stat-val" id="s1-streak">0</div><div class="stat-lbl">Racha</div></div>
+        <div class="stat-box"><div class="stat-val" id="s1-maxstreak">0</div><div class="stat-lbl">Racha máx</div></div>
+      </div>
+      <button class="reset-btn" onclick="resetS1Stats()">Reiniciar estadísticas</button>
+    </div>
+
+    <!-- Sidebar: mode 2 info -->
+    <div class="ex-sidebar-sec" id="sidebar-info-2" style="display:none;">
+      <span class="ex-sec-title">Info</span>
+      <div class="info-box">
+        <div class="info-row">
+          <span class="info-lbl">Compás objetivo</span>
+          <span class="info-val highlight">4/4</span>
+        </div>
+        <div class="info-row">
+          <span class="info-lbl">Tiempos</span>
+          <span class="info-val highlight">4</span>
+        </div>
+        <div class="info-row">
+          <span class="info-lbl">Restante</span>
+          <span class="info-val" id="sidebar-remaining">4</span>
+        </div>
+      </div>
+      <button class="reset-btn" onclick="resetBar()">Limpiar compás</button>
+    </div>
+
+  </aside>
+
+  <!-- MAIN -->
+  <main class="ex-main">
+
+    <!-- START SCREEN -->
+    <div class="ex-start" id="start-screen">
+      <div class="ex-start-title" id="start-title">Identifica<br><em>el compás</em></div>
+      <p class="ex-start-sub" id="start-sub">Escucha el patrón rítmico y elige qué compás es: 4/4, 3/4 o 6/8.</p>
+      <p class="ex-start-hint" id="start-hint">Presta atención al acento del primer tiempo y a cuántos pulsos hay en cada compás.</p>
+      <button class="ex-start-btn" onclick="startExercise()">Comenzar ejercicio →</button>
+    </div>
+
+    <!-- EXERCISE MODE 1: Identificar el compás -->
+    <div id="exercise-1" style="display:none;flex-direction:column;gap:18px;">
+
+      <div class="ex-question">
+        <div class="ex-q-left">
+          <div class="ex-q-label">Ejercicio</div>
+          <div class="ex-q-main" id="q1-main">Escuchando...</div>
+          <div class="ex-q-sub" id="q1-sub">4 compases</div>
+        </div>
+        <div class="ex-q-divider"></div>
+        <div class="ex-q-right">
+          <div class="ex-bars-label">Compases</div>
+          <div class="ex-bars-val">4</div>
+        </div>
+      </div>
+
+      <!-- Beat dots indicator -->
+      <div style="background:#13100c;border-radius:10px;padding:16px 24px;display:flex;align-items:center;gap:14px;" id="beat-indicator-wrap">
+        <span style="font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(250,246,240,.28);white-space:nowrap;">Pulso</span>
+        <div class="playing-indicator" id="beat-dots-row"></div>
+      </div>
+
+      <!-- Answer buttons -->
+      <div class="sig-options" id="sig-options" style="display:none;"></div>
+
+      <!-- Feedback -->
+      <div class="ex-feedback hidden" id="feedback-1">
+        <span class="fb-icon" id="fb1-icon"></span>
+        <span id="fb1-text"></span>
+      </div>
+
+      <!-- Controls -->
+      <div class="ex-controls">
+        <button class="ex-btn ex-btn-listen" id="btn-replay" onclick="replayPattern()" style="display:none;">&#9654; Escuchar de nuevo</button>
+        <button class="ex-btn ex-btn-next" id="btn-next-1" onclick="newQuestion1()" style="display:none;">Siguiente →</button>
+        <div class="ex-streak">
+          <span class="ex-streak-label" id="s1-streak-label">Racha: 0</span>
+          <div class="ex-streak-bar" id="s1-streak-bar"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- EXERCISE MODE 2: Construir un compás -->
+    <div id="exercise-2" style="display:none;flex-direction:column;gap:18px;">
+
+      <div class="ex-question">
+        <div class="ex-q-left">
+          <div class="ex-q-label">Construye un compás</div>
+          <div class="ex-q-main">4/4 · cuatro tiempos</div>
+          <div class="ex-q-sub" id="q2-sub">Selecciona figuras de la paleta</div>
+        </div>
+        <div class="ex-q-divider"></div>
+        <div class="ex-q-right">
+          <div class="ex-bars-label">Tiempos</div>
+          <div class="ex-bars-val" id="q2-beats-val">0/4</div>
+        </div>
+      </div>
+
+      <!-- Bar display -->
+      <div class="bar-container">
+        <div class="bar-title">Compás actual</div>
+        <div class="bar-track empty-hint" id="bar-track">
+          <div class="bar-empty"></div>
+        </div>
+        <div class="bar-progress">
+          <div class="bar-progress-bg"><div class="bar-progress-fill" id="bar-fill" style="width:0%"></div></div>
+          <div class="bar-progress-text" id="bar-prog-text">0 / 4 tiempos</div>
+        </div>
+        <div class="bar-success-msg" id="bar-success-msg">&#10003; Compás completo</div>
+      </div>
+
+      <!-- Note palette -->
+      <div class="palette-wrap">
+        <div class="palette-title">Paleta de figuras</div>
+        <div class="palette-grid" id="palette-grid"></div>
+      </div>
+
+      <!-- Feedback (overflow) -->
+      <div class="ex-feedback hidden" id="feedback-2">
+        <span class="fb-icon" id="fb2-icon"></span>
+        <span id="fb2-text"></span>
+      </div>
+
+      <!-- Controls -->
+      <div class="ex-controls">
+        <button class="ex-btn ex-btn-listen" id="btn-play-bar" onclick="playBar()" style="display:none;">&#9654; Reproducir</button>
+        <button class="ex-btn ex-btn-reset" onclick="resetBar()">&#8592; Borrar todo</button>
+        <button class="ex-btn ex-btn-next" id="btn-new-bar" onclick="newBar()" style="display:none;">Nuevo compás →</button>
+      </div>
+
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ── Audio ──────────────────────────────────────────────────────────────
+let metAccent = null, metTick = null;
+
+async function initAudio() {
+  await Tone.start();
+  if (!metAccent) {
+    metAccent = new Tone.Synth({
+      oscillator: { type: 'triangle' },
+      envelope: { attack: 0.001, decay: 0.15, sustain: 0, release: 0.05 }
+    }).toDestination();
+    metAccent.volume.value = -4;
+    metTick = new Tone.Synth({
+      oscillator: { type: 'triangle' },
+      envelope: { attack: 0.001, decay: 0.08, sustain: 0, release: 0.03 }
+    }).toDestination();
+    metTick.volume.value = -14;
+  }
+}
+
+// ── EXERCISE 1 DATA ────────────────────────────────────────────────────
+const SIGS = [
+  { id: '4/4', beats: 4, div: '4n', strongOn: [0] },
+  { id: '3/4', beats: 3, div: '4n', strongOn: [0] },
+  { id: '6/8', beats: 6, div: '8n', strongOn: [0, 3] }
+];
+
+let metSeq = null;
+let currentSig = null;
+
+// ── EXERCISE 1 STATE ───────────────────────────────────────────────────
+const S1 = {
+  correct: 0, total: 0,
+  streak: 0, maxStreak: 0,
+  phase: 'idle' // 'idle' | 'playing' | 'waiting' | 'answered'
+};
+
+// ── EXERCISE 2 DATA ────────────────────────────────────────────────────
+const NOTE_VALUES = [
+  { id: 'W', name: 'Redonda',     beats: 4,    symbol: '𝅝', label: '4 tiempos' },
+  { id: 'H', name: 'Blanca',      beats: 2,    symbol: '𝅗', label: '2 tiempos' },
+  { id: 'Q', name: 'Negra',       beats: 1,    symbol: '♩',        label: '1 tiempo' },
+  { id: 'E', name: 'Corchea',     beats: 0.5,  symbol: '♪',        label: '½ tiempo' },
+  { id: 'S', name: 'Semicorchea', beats: 0.25, symbol: '♬',        label: '¼ tiempo' },
+];
+
+// ── EXERCISE 2 STATE ───────────────────────────────────────────────────
+const S2 = {
+  bar: [],
+  phase: 'building' // 'building' | 'success'
+};
+
+// ── MODE ───────────────────────────────────────────────────────────────
+let mode = 1;
+
+function setMode(m) {
+  mode = m;
+  document.getElementById('mode-btn-1').classList.toggle('on', m === 1);
+  document.getElementById('mode-btn-2').classList.toggle('on', m === 2);
+  document.getElementById('sidebar-stats-1').style.display = m === 1 ? '' : 'none';
+  document.getElementById('sidebar-info-2').style.display = m === 2 ? '' : 'none';
+
+  // Reset both exercises on switch
+  stopPattern();
+  S1.phase = 'idle';
+  S2.bar = [];
+  S2.phase = 'building';
+
+  if (m === 1) {
+    updateStartScreen(1);
+  } else {
+    updateStartScreen(2);
+  }
+
+  showStartScreen();
+}
+
+function updateStartScreen(m) {
+  const title = document.getElementById('start-title');
+  const sub   = document.getElementById('start-sub');
+  const hint  = document.getElementById('start-hint');
+  if (m === 1) {
+    title.innerHTML = 'Identifica<br><em>el compás</em>';
+    sub.textContent  = 'Escucha el patrón rítmico y elige qué compás es: 4/4, 3/4 o 6/8.';
+    hint.textContent = 'Presta atención al acento del primer tiempo y a cuántos pulsos hay en cada compás.';
+  } else {
+    title.innerHTML = 'Construye<br><em>un compás</em>';
+    sub.textContent  = 'Selecciona figuras rítmicas para llenar cuatro tiempos exactos.';
+    hint.textContent = 'Puedes combinar cualquier figura: redondas, blancas, negras, corcheas y semicorcheas.';
+  }
+}
+
+function showStartScreen() {
+  document.getElementById('start-screen').style.display = '';
+  document.getElementById('exercise-1').style.display = 'none';
+  document.getElementById('exercise-2').style.display = 'none';
+}
+
+function startExercise() {
+  document.getElementById('start-screen').style.display = 'none';
+  if (mode === 1) {
+    const el = document.getElementById('exercise-1');
+    el.style.display = 'flex';
+    el.style.flexDirection = 'column';
+    newQuestion1();
+  } else {
+    const el = document.getElementById('exercise-2');
+    el.style.display = 'flex';
+    el.style.flexDirection = 'column';
+    S2.bar = [];
+    S2.phase = 'building';
+    buildPalette();
+    renderQ2();
+  }
+}
+
+// ── EXERCISE 1: PATTERN PLAYBACK ───────────────────────────────────────
+async function playPattern(sig, onDone) {
+  await initAudio();
+  if (metSeq) { metSeq.dispose(); Tone.getTransport().stop(); Tone.getTransport().cancel(); }
+
+  Tone.getTransport().bpm.value = 80;
+  const totalBeats = sig.beats * 4; // 4 bars
+  let playedBeats = 0;
+  let currentBeat = -1;
+
+  const beatArr = Array.from({ length: sig.beats }, (_, i) => i);
+
+  metSeq = new Tone.Sequence((time, beat) => {
+    const isStrong = sig.strongOn.includes(beat);
+    if (isStrong) {
+      metAccent.triggerAttackRelease('C5', '32n', time);
+    } else {
+      metTick.triggerAttackRelease('G3', '32n', time);
+    }
+    currentBeat = beat;
+    playedBeats++;
+
+    Tone.getDraw().schedule(() => {
+      pulseBeatDot(beat, sig.beats);
+    }, time);
+
+    if (playedBeats >= totalBeats) {
+      Tone.getDraw().schedule(() => {
+        stopPattern();
+        if (onDone) onDone();
+      }, time);
+    }
+  }, beatArr, sig.div);
+
+  metSeq.start(0);
+  Tone.getTransport().start();
+}
+
+function stopPattern() {
+  if (metSeq) { metSeq.dispose(); metSeq = null; }
+  Tone.getTransport().stop();
+  Tone.getTransport().cancel();
+  clearBeatDots();
+}
+
+// ── EXERCISE 1: BEAT DOTS ──────────────────────────────────────────────
+let beatDotTimeouts = [];
+
+function buildBeatDots(count) {
+  const row = document.getElementById('beat-dots-row');
+  row.innerHTML = '';
+  for (let i = 0; i < count; i++) {
+    const d = document.createElement('div');
+    d.className = 'beat-dot';
+    d.id = 'bdot-' + i;
+    row.appendChild(d);
+  }
+}
+
+function pulseBeatDot(beat, total) {
+  clearBeatDots();
+  const dot = document.getElementById('bdot-' + beat);
+  if (dot) {
+    dot.classList.add('active');
+    const t = setTimeout(() => dot.classList.remove('active'), 180);
+    beatDotTimeouts.push(t);
+  }
+}
+
+function clearBeatDots() {
+  beatDotTimeouts.forEach(clearTimeout);
+  beatDotTimeouts = [];
+  const dots = document.querySelectorAll('.beat-dot');
+  dots.forEach(d => d.classList.remove('active'));
+}
+
+// ── EXERCISE 1: QUESTION FLOW ──────────────────────────────────────────
+function newQuestion1() {
+  stopPattern();
+  currentSig = SIGS[Math.floor(Math.random() * SIGS.length)];
+  S1.phase = 'playing';
+  renderQ1();
+  playPattern(currentSig, () => {
+    S1.phase = 'waiting';
+    renderQ1();
+  });
+}
+
+function replayPattern() {
+  if (S1.phase === 'waiting' || S1.phase === 'answered') {
+    S1.phase = 'playing';
+    renderQ1();
+    playPattern(currentSig, () => {
+      S1.phase = S1.phase === 'playing' ? 'waiting' : S1.phase;
+      renderQ1();
+    });
+  }
+}
+
+function submitAnswer1(id, btn, allBtns) {
+  if (S1.phase !== 'waiting') return;
+  S1.phase = 'answered';
+  S1.total++;
+  const correct = id === currentSig.id;
+  if (correct) {
+    S1.correct++;
+    S1.streak++;
+    if (S1.streak > S1.maxStreak) S1.maxStreak = S1.streak;
+  } else {
+    S1.streak = 0;
+  }
+  // Mark buttons
+  allBtns.forEach(b => {
+    b.disabled = true;
+    if (b.dataset.sig === currentSig.id) b.classList.add('correct');
+    else if (b === btn && !correct) b.classList.add('wrong');
+  });
+  if (correct) {
+    showFeedback1(true, 'Correcto. Era ' + currentSig.id + '.');
+  } else {
+    showFeedback1(false, 'Incorrecto. Era ' + currentSig.id + ', no ' + id + '.');
+  }
+  updateS1Stats();
+  renderQ1();
+}
+
+function renderQ1() {
+  const qMain    = document.getElementById('q1-main');
+  const qSub     = document.getElementById('q1-sub');
+  const sigOpts  = document.getElementById('sig-options');
+  const btnReplay = document.getElementById('btn-replay');
+  const btnNext  = document.getElementById('btn-next-1');
+
+  if (S1.phase === 'playing') {
+    qMain.textContent = '♪ Escuchando...';
+    qSub.textContent  = '4 compases · 80 BPM';
+    sigOpts.style.display = 'none';
+    btnReplay.style.display = 'none';
+    btnNext.style.display   = 'none';
+    hideFeedback1();
+    buildBeatDots(currentSig ? currentSig.beats : 4);
+  } else if (S1.phase === 'waiting') {
+    qMain.textContent = 'Que compas escuchas?';
+    qSub.textContent  = 'Elige una opcion';
+    buildBeatDots(currentSig ? currentSig.beats : 4);
+    // Build answer buttons
+    sigOpts.innerHTML = '';
+    sigOpts.style.display = 'flex';
+    SIGS.forEach(sig => {
+      const btn = document.createElement('button');
+      btn.className = 'sig-btn';
+      btn.textContent = sig.id;
+      btn.dataset.sig = sig.id;
+      const allBtns = [];
+      btn.onclick = () => submitAnswer1(sig.id, btn, Array.from(sigOpts.children));
+      sigOpts.appendChild(btn);
+    });
+    btnReplay.style.display = '';
+    btnNext.style.display   = 'none';
+  } else if (S1.phase === 'answered') {
+    qMain.textContent = 'Respondido';
+    qSub.textContent  = currentSig.id + ' · ' + currentSig.beats + ' pulsos';
+    btnReplay.style.display = '';
+    btnNext.style.display   = '';
+  }
+}
+
+function hideFeedback1() {
+  document.getElementById('feedback-1').className = 'ex-feedback hidden';
+}
+function showFeedback1(ok, text) {
+  const fb = document.getElementById('feedback-1');
+  fb.className = 'ex-feedback ' + (ok ? 'correct' : 'wrong');
+  document.getElementById('fb1-icon').textContent = ok ? '✓' : '✗';
+  document.getElementById('fb1-text').textContent = text;
+}
+
+function updateS1Stats() {
+  document.getElementById('s1-correct').textContent   = S1.correct;
+  document.getElementById('s1-total').textContent     = S1.total;
+  document.getElementById('s1-streak').textContent    = S1.streak;
+  document.getElementById('s1-maxstreak').textContent = S1.maxStreak;
+  updateS1Streak();
+}
+
+function updateS1Streak() {
+  document.getElementById('s1-streak-label').textContent = 'Racha: ' + S1.streak;
+  const bar = document.getElementById('s1-streak-bar');
+  bar.innerHTML = '';
+  const filled = S1.streak === 0 ? 0 : (S1.streak % 10 || 10);
+  for (let i = 0; i < 10; i++) {
+    const d = document.createElement('div');
+    d.className = 'ex-streak-dot' + (i < filled ? ' on' : '');
+    bar.appendChild(d);
+  }
+}
+
+function resetS1Stats() {
+  S1.correct = 0; S1.total = 0; S1.streak = 0; S1.maxStreak = 0;
+  updateS1Stats();
+}
+
+// ── EXERCISE 2: HELPERS ────────────────────────────────────────────────
+function barTotal() {
+  return S2.bar.reduce((s, id) => {
+    const n = NOTE_VALUES.find(n => n.id === id);
+    return s + (n ? n.beats : 0);
+  }, 0);
+}
+function remaining() { return 4 - barTotal(); }
+
+// ── EXERCISE 2: PALETTE ────────────────────────────────────────────────
+function buildPalette() {
+  const grid = document.getElementById('palette-grid');
+  grid.innerHTML = '';
+  NOTE_VALUES.forEach(note => {
+    const btn = document.createElement('button');
+    btn.className = 'pal-btn';
+    btn.id = 'pal-' + note.id;
+    btn.innerHTML =
+      '<div class="pal-btn-symbol">' + note.symbol + '</div>' +
+      '<div class="pal-btn-name">' + note.name + '</div>' +
+      '<div class="pal-btn-dur">' + note.label + '</div>';
+    btn.onclick = () => addNote(note.id);
+    grid.appendChild(btn);
+  });
+
+  // Backspace button
+  const back = document.createElement('button');
+  back.className = 'pal-backspace';
+  back.id = 'pal-back';
+  back.textContent = '← Borrar ultima';
+  back.onclick = removeLastNote;
+  grid.appendChild(back);
+}
+
+function updatePalette() {
+  const rem = remaining();
+  NOTE_VALUES.forEach(note => {
+    const btn = document.getElementById('pal-' + note.id);
+    if (btn) btn.disabled = (note.beats > rem + 0.001) || S2.phase === 'success';
+  });
+  const back = document.getElementById('pal-back');
+  if (back) back.disabled = S2.bar.length === 0 || S2.phase === 'success';
+}
+
+// ── EXERCISE 2: ACTIONS ────────────────────────────────────────────────
+function addNote(id) {
+  if (S2.phase !== 'building') return;
+  const note = NOTE_VALUES.find(n => n.id === id);
+  if (!note) return;
+  if (barTotal() + note.beats > 4 + 0.001) {
+    showOverflow();
+    return;
+  }
+  S2.bar.push(id);
+  if (Math.abs(barTotal() - 4) < 0.001) {
+    S2.phase = 'success';
+    playBar();
+  }
+  renderQ2();
+}
+
+function removeLastNote() {
+  if (!S2.bar.length || S2.phase === 'success') return;
+  S2.bar.pop();
+  S2.phase = 'building';
+  hideFeedback2();
+  renderQ2();
+}
+
+function resetBar() {
+  stopPattern();
+  S2.bar = [];
+  S2.phase = 'building';
+  hideFeedback2();
+  renderQ2();
+}
+
+function newBar() {
+  stopPattern();
+  S2.bar = [];
+  S2.phase = 'building';
+  hideFeedback2();
+  renderQ2();
+}
+
+function showOverflow() {
+  const track = document.getElementById('bar-track');
+  track.classList.add('shake', 'overflow');
+  showFeedback2(false, 'No cabe. Ese valor supera los 4 tiempos disponibles.');
+  setTimeout(() => { track.classList.remove('shake', 'overflow'); }, 400);
+}
+
+function hideFeedback2() {
+  document.getElementById('feedback-2').className = 'ex-feedback hidden';
+}
+function showFeedback2(ok, text) {
+  const fb = document.getElementById('feedback-2');
+  fb.className = 'ex-feedback ' + (ok ? 'correct' : 'wrong');
+  document.getElementById('fb2-icon').textContent = ok ? '✓' : '✗';
+  document.getElementById('fb2-text').textContent = text;
+}
+
+// ── EXERCISE 2: RENDER ─────────────────────────────────────────────────
+function renderQ2() {
+  const total = barTotal();
+  const rem   = remaining();
+  const track = document.getElementById('bar-track');
+  const fillEl = document.getElementById('bar-fill');
+  const progText = document.getElementById('bar-prog-text');
+  const successMsg = document.getElementById('bar-success-msg');
+  const beatsVal = document.getElementById('q2-beats-val');
+  const qSub = document.getElementById('q2-sub');
+  const btnPlay = document.getElementById('btn-play-bar');
+  const btnNew  = document.getElementById('btn-new-bar');
+
+  // Update question card
+  const totalStr = Number.isInteger(total) ? String(total) : total.toFixed(2).replace(/\.?0+$/, '');
+  beatsVal.textContent = totalStr + '/4';
+  qSub.textContent = rem > 0.001
+    ? 'Faltan ' + (Number.isInteger(rem) ? rem : rem.toFixed(2).replace(/\.?0+$/, '')) + ' tiempo' + (rem !== 1 ? 's' : '')
+    : 'Compas completo';
+
+  // Progress bar
+  const pct = Math.min(total / 4 * 100, 100);
+  fillEl.style.width = pct + '%';
+  const totalStr2 = Number.isInteger(total) ? String(total) : total.toFixed(2).replace(/\.?0+$/, '');
+  progText.textContent = totalStr2 + ' / 4 tiempos';
+
+  // Track classes
+  track.classList.remove('empty-hint', 'success', 'overflow', 'shake');
+  if (S2.bar.length === 0) track.classList.add('empty-hint');
+  if (S2.phase === 'success') track.classList.add('success');
+
+  // Build track cells
+  track.innerHTML = '';
+  S2.bar.forEach((id, idx) => {
+    const note = NOTE_VALUES.find(n => n.id === id);
+    if (!note) return;
+    const pct = (note.beats / 4) * 100;
+    const cell = document.createElement('div');
+    cell.className = 'note-cell';
+    cell.style.width = pct + '%';
+    // Color by note type
+    const colors = { W: '#8a3c0e', H: '#a04a18', Q: '#b86030', E: '#c87840', S: '#d08850' };
+    cell.style.background = colors[id] || 'var(--copper)';
+    const sym = document.createElement('span');
+    sym.className = 'note-cell-symbol';
+    sym.textContent = note.symbol;
+    cell.appendChild(sym);
+    track.appendChild(cell);
+  });
+
+  // Empty remainder
+  if (S2.bar.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'bar-empty';
+    track.appendChild(empty);
+  } else if (rem > 0.001 && S2.phase !== 'success') {
+    const empty = document.createElement('div');
+    empty.className = 'bar-empty';
+    empty.style.flex = '1';
+    track.appendChild(empty);
+  }
+
+  // Success message
+  if (S2.phase === 'success') {
+    successMsg.classList.add('visible');
+    showFeedback2(true, 'Compas completo. Suma exactamente 4 tiempos.');
+    btnPlay.style.display = '';
+    btnNew.style.display  = '';
+  } else {
+    successMsg.classList.remove('visible');
+    btnPlay.style.display = S2.bar.length > 0 ? '' : 'none';
+    btnNew.style.display  = 'none';
+  }
+
+  // Palette
+  updatePalette();
+
+  // Sidebar remaining
+  const remEl = document.getElementById('sidebar-remaining');
+  if (remEl) {
+    const remStr = Number.isInteger(rem) ? String(rem) : rem.toFixed(2).replace(/\.?0+$/, '');
+    remEl.textContent = remStr;
+  }
+}
+
+// ── EXERCISE 2: PLAYBACK ───────────────────────────────────────────────
+async function playBar() {
+  await initAudio();
+  const now = Tone.now() + 0.05;
+  const beatDuration = 60 / 80; // seconds per beat at 80 BPM
+  let t = now;
+  S2.bar.forEach(id => {
+    const note = NOTE_VALUES.find(n => n.id === id);
+    if (!note) return;
+    metAccent.triggerAttackRelease('C4', Math.min(note.beats * beatDuration * 0.9, 1.5), t);
+    t += note.beats * beatDuration;
+  });
+}
+
+// ── INIT ───────────────────────────────────────────────────────────────
+updateStartScreen(1);
+updateS1Stats();
+</script>
+
+<footer class="tm-footer-legal">
+  <div class="tm-f-copy">&copy; 2026 tremolo.mx &middot; Todos los derechos reservados</div>
+  <div class="tm-f-links">
+    <a href="/privacidad">Aviso de Privacidad</a>
+    <a href="/terminos">Terminos y Condiciones</a>
+    <a href="/cookies">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>

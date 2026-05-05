@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo.mx · Ritmo — Pulso, Tempo y Compás</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<style>
+:root{
+  --paper:#f4ece0;--paper2:#ebe1d2;--paper3:#ddd1bd;--paper4:#c8b99f;--paper5:#b8a890;
+  --copper:#a85a1e;--copper-lt:#c47a36;--copper-dk:#7a3e10;
+  --ink:#1c1410;--ink2:#2e2418;--ink3:#5a4a38;--ink4:#8a7a64;--ink5:#a09080;
+  --tonic:#a05c20;--subdom:#5a7abf;--dominant:#7a4abf;--relative:#4a7c59;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{font-family:var(--mono);font-size:.52em;font-weight:400;color:var(--ink4);letter-spacing:0;margin-left:2px;}
+.nav-link{padding:0 16px;height:60px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+.nav-cta{margin-left:auto;background:var(--copper);color:#fff;font-size:12px;font-weight:600;padding:7px 18px;border-radius:6px;text-decoration:none;transition:background .2s;}
+.nav-cta:hover{background:var(--copper-dk);}
+
+.th-progress{position:fixed;top:56px;left:0;right:0;height:2px;background:rgba(160,92,32,.12);z-index:99;}
+.th-progress-bar{height:100%;background:var(--copper);width:0%;transition:width .08s linear;}
+
+.th-breadcrumb{background:var(--paper2);border-bottom:1px solid var(--paper4);padding:0 48px;height:40px;display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink5);}
+.th-breadcrumb a{color:var(--ink5);text-decoration:none;}
+.th-breadcrumb a:hover{color:var(--copper);}
+.th-breadcrumb .sep{opacity:.5;}
+.th-breadcrumb .current{color:var(--ink3);font-weight:500;}
+
+.th-hero{background:#13100c;padding:110px 48px 90px;text-align:center;overflow:hidden;}
+.th-chapter{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:28px;display:flex;align-items:center;justify-content:center;gap:14px;}
+.th-chapter::before,.th-chapter::after{content:'';display:block;height:1px;width:48px;background:var(--copper-lt);opacity:.35;}
+.th-title{font-family:var(--serif);font-size:clamp(54px,7.5vw,92px);font-weight:700;line-height:.92;letter-spacing:-.025em;color:var(--paper);margin-bottom:28px;}
+.th-title em{font-style:italic;color:var(--copper-lt);}
+.th-lead{font-family:var(--serif);font-size:clamp(17px,2vw,22px);font-style:italic;color:rgba(250,246,240,.58);max-width:580px;margin:0 auto 44px;line-height:1.65;}
+.th-scroll-hint{font-size:11px;color:rgba(250,246,240,.22);letter-spacing:.14em;text-transform:uppercase;}
+
+.th-section{padding:88px 48px;}
+.th-section.dark{background:#13100c;}
+.th-inner{max-width:1080px;margin:0 auto;}
+.th-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;display:block;}
+.th-section.dark .th-label{color:var(--copper-lt);}
+.th-h2{font-family:var(--serif);font-size:clamp(34px,4.5vw,56px);font-weight:700;line-height:1.02;letter-spacing:-.025em;color:var(--ink);margin-bottom:22px;}
+.th-section.dark .th-h2{color:var(--paper);}
+.th-body{font-size:15px;color:var(--ink3);line-height:1.85;max-width:640px;}
+.th-body+.th-body{margin-top:14px;}
+.th-section.dark .th-body{color:rgba(250,246,240,.58);}
+.th-body strong{color:var(--ink2);font-weight:600;}
+.th-section.dark .th-body strong{color:rgba(244,236,224,.92);}
+.th-split{display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start;}
+.th-callout{border-left:3px solid var(--copper);border-radius:0 8px 8px 0;padding:16px 20px;margin:28px 0;background:rgba(160,92,32,.07);}
+.th-section.dark .th-callout{background:rgba(255,255,255,.05);border-left-color:var(--copper-lt);}
+.th-callout-label{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--copper);margin-bottom:7px;}
+.th-section.dark .th-callout-label{color:var(--copper-lt);}
+.th-callout p{font-size:14px;color:var(--ink3);line-height:1.65;}
+.th-section.dark .th-callout p{color:rgba(250,246,240,.58);}
+
+/* ── METRONOME ── */
+.metro-section{padding:88px 48px;background:var(--paper2);}
+.metro-card{background:#1a1410;border-radius:20px;padding:48px;max-width:800px;margin:0 auto;}
+.metro-title{font-family:var(--serif);font-size:20px;font-weight:700;color:var(--paper);margin-bottom:32px;text-align:center;letter-spacing:-.01em;}
+.metro-sig-pills{display:flex;gap:10px;justify-content:center;margin-bottom:32px;}
+.metro-sig-pill{font-family:var(--mono);font-size:14px;font-weight:600;padding:9px 24px;border-radius:24px;border:2px solid rgba(255,255,255,.12);background:transparent;color:rgba(250,246,240,.45);cursor:pointer;transition:all .18s;}
+.metro-sig-pill:hover{border-color:var(--copper-lt);color:rgba(250,246,240,.8);}
+.metro-sig-pill.active{background:var(--copper);border-color:var(--copper-dk);color:#fff;}
+.metro-bpm-row{display:flex;align-items:center;gap:18px;justify-content:center;margin-bottom:36px;}
+.metro-bpm-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:rgba(250,246,240,.3);}
+.metro-bpm-val{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--copper-lt);min-width:48px;text-align:right;}
+.metro-slider{-webkit-appearance:none;appearance:none;width:220px;height:4px;border-radius:2px;background:rgba(255,255,255,.12);outline:none;cursor:pointer;}
+.metro-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--copper-lt);cursor:pointer;box-shadow:0 0 0 3px rgba(196,122,54,.2);}
+.metro-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--copper-lt);cursor:pointer;border:none;}
+.metro-beats-row{display:flex;gap:14px;justify-content:center;margin-bottom:28px;flex-wrap:wrap;}
+.metro-beat{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.12);transition:transform .1s,box-shadow .1s,background .1s,border-color .1s;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:600;color:rgba(250,246,240,.3);}
+.metro-beat.accent{width:54px;height:54px;font-size:13px;background:rgba(168,90,30,.15);border-color:rgba(196,122,54,.35);color:var(--copper-lt);}
+.metro-beat.sub-accent{background:rgba(168,90,30,.07);border-color:rgba(196,122,54,.2);color:rgba(196,122,54,.6);}
+.metro-beat.active{transform:scale(1.18);box-shadow:0 0 22px rgba(196,122,54,.45);background:rgba(196,122,54,.28);border-color:var(--copper-lt);color:#fff;}
+.metro-beat.accent.active{transform:scale(1.22);box-shadow:0 0 32px rgba(196,122,54,.6);background:rgba(196,122,54,.45);}
+.metro-play-btn{display:block;margin:0 auto 24px;background:var(--copper);color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;padding:13px 48px;border-radius:10px;border:none;cursor:pointer;transition:background .18s,transform .1s;}
+.metro-play-btn:hover{background:var(--copper-lt);transform:translateY(-1px);}
+.metro-play-btn:active{transform:translateY(0);}
+.metro-desc{text-align:center;font-size:13px;color:rgba(250,246,240,.38);line-height:1.6;font-style:italic;}
+
+/* ── NEXT ── */
+.th-next{background:var(--ink);padding:88px 48px;text-align:center;}
+.th-next-label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--ink5);margin-bottom:18px;display:block;}
+.th-next-title{font-family:var(--serif);font-size:clamp(36px,5vw,56px);font-weight:700;color:var(--paper);margin-bottom:10px;letter-spacing:-.02em;}
+.th-next-sub{font-size:14px;color:var(--ink4);margin-bottom:36px;max-width:420px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.th-next-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+.th-next-btn{display:inline-flex;align-items:center;gap:8px;background:var(--copper);color:#fff;font-size:13px;font-weight:600;padding:13px 28px;border-radius:8px;text-decoration:none;transition:background .2s;}
+.th-next-btn:hover{background:var(--copper-dk);}
+.th-next-btn.sec{background:transparent;color:rgba(250,246,240,.5);border:1px solid rgba(255,255,255,.12);}
+.th-next-btn.sec:hover{color:var(--paper);border-color:rgba(255,255,255,.3);}
+.th-next-btn.disabled{background:transparent;color:rgba(250,246,240,.22);border:1px solid rgba(255,255,255,.07);cursor:default;pointer-events:none;}
+
+/* ── CHAPTER NAV ── */
+.chapter-nav{display:flex;gap:0;border-top:1px solid rgba(255,255,255,.06);margin-top:64px;}
+.chapter-nav-item{flex:1;padding:28px 24px;display:flex;flex-direction:column;gap:6px;text-decoration:none;transition:background .18s;}
+.chapter-nav-item:hover{background:rgba(255,255,255,.03);}
+.chapter-nav-item.prev{border-right:1px solid rgba(255,255,255,.06);}
+.chapter-nav-item.disabled{cursor:default;pointer-events:none;opacity:.35;}
+.chapter-nav-dir{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:rgba(250,246,240,.25);}
+.chapter-nav-cap{font-size:11px;color:rgba(250,246,240,.25);}
+.chapter-nav-title{font-family:var(--serif);font-size:18px;font-weight:700;color:var(--paper);}
+
+@media(max-width:768px){
+  nav{padding:0 16px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:none;}
+  nav::-webkit-scrollbar{display:none;}
+  nav>*{flex-shrink:0;}
+  .th-breadcrumb{padding:0 20px;}
+  .th-hero{padding:80px 20px 64px;}
+  .th-section{padding:64px 20px;}
+  .th-split{grid-template-columns:1fr;gap:40px;}
+  .metro-section{padding:64px 20px;}
+  .metro-card{padding:28px 18px;}
+  .th-next{padding:64px 20px;}
+  .chapter-nav{flex-direction:column;}
+  .chapter-nav-item.prev{border-right:none;border-bottom:1px solid rgba(255,255,255,.06);}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link active">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<div class="th-progress"><div class="th-progress-bar" id="prog-bar"></div></div>
+
+<div class="th-breadcrumb">
+  <a href="/teoria">Teoría</a>
+  <span class="sep">›</span>
+  <span class="current">Ritmo (Pulso, Tempo y Compás)</span>
+</div>
+
+<!-- HERO -->
+<section class="th-hero">
+  <div class="th-chapter">08 · Ritmo</div>
+  <h1 class="th-title">Pulso, Tempo<br><em>y Compás</em></h1>
+  <p class="th-lead">El pulso es la base invisible. El compás es la forma. El ritmo es lo que pasa entre los dos.</p>
+  <div class="th-scroll-hint">↓ leer</div>
+</section>
+
+<!-- SECCIÓN 1: El fundamento -->
+<section class="th-section">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">El fundamento</span>
+        <h2 class="th-h2">Pulso, ritmo <em>y la diferencia entre los dos</em></h2>
+        <p class="th-body">El pulso es el latido constante e invisible que subyace a toda la música. Cuando golpeas el pie al ritmo de una canción, estás siguiendo el pulso, no el ritmo. El ritmo es el patrón real de eventos sonoros: algunos coinciden con el pulso, otros caen entre ellos. Entender esta distinción es el primer paso para leer, sentir y crear música de forma deliberada.</p>
+        <p class="th-body">Una manera de sentirlo: aplaude un tiempo constante mientras cantas "Las Mañanitas." El aplauso es el pulso. La melodía tiene notas largas, notas cortas, síncopes — ese es el ritmo. El pulso permanece constante; el ritmo baila alrededor de él. La mayoría de los músicos que creen no tener "sentido del ritmo" tienen en realidad un problema con el pulso: aceleran o desaceleran sin darse cuenta.</p>
+        <p class="th-body">Toda música tiene al menos un pulso implícito, incluso la música que suena libre y sin medir (como un taqsim flamenco o una pieza de piano en rubato). Cuando un intérprete "estira" o "apresura" el tiempo, lo hace en referencia a un pulso que siente internamente pero elige no seguir con exactitud. Sin un pulso sentido, no hay tempo que estirar.</p>
+        <div class="th-callout">
+          <div class="th-callout-label">Definición clave</div>
+          <p>Pulso vs. ritmo: el pulso es el reloj. El ritmo es lo que dices con ese reloj.</p>
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--paper2);border:1px solid var(--paper3);border-radius:14px;padding:28px 24px;">
+          <p style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:20px;">Pulso vs. ritmo</p>
+          <div style="margin-bottom:24px;">
+            <p style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink5);margin-bottom:10px;">Pulso (constante)</p>
+            <div style="display:flex;gap:8px;">
+              <div style="flex:1;height:36px;background:rgba(160,92,32,.18);border:2px solid rgba(160,92,32,.35);border-radius:6px;"></div>
+              <div style="flex:1;height:36px;background:rgba(160,92,32,.18);border:2px solid rgba(160,92,32,.35);border-radius:6px;"></div>
+              <div style="flex:1;height:36px;background:rgba(160,92,32,.18);border:2px solid rgba(160,92,32,.35);border-radius:6px;"></div>
+              <div style="flex:1;height:36px;background:rgba(160,92,32,.18);border:2px solid rgba(160,92,32,.35);border-radius:6px;"></div>
+            </div>
+          </div>
+          <div>
+            <p style="font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink5);margin-bottom:10px;">Ritmo (libre)</p>
+            <div style="display:flex;gap:0;height:36px;align-items:stretch;">
+              <div style="flex:2;background:rgba(90,122,191,.18);border:2px solid rgba(90,122,191,.3);border-radius:6px 0 0 6px;"></div>
+              <div style="flex:.5;background:rgba(90,122,191,.25);border-top:2px solid rgba(90,122,191,.3);border-bottom:2px solid rgba(90,122,191,.3);margin:0 2px;"></div>
+              <div style="flex:1;background:rgba(90,122,191,.18);border:2px solid rgba(90,122,191,.3);margin:0 2px;border-radius:4px;"></div>
+              <div style="flex:.5;background:rgba(90,122,191,.3);border:2px solid rgba(90,122,191,.4);border-radius:4px;margin:0 2px;"></div>
+              <div style="flex:1.5;background:rgba(90,122,191,.18);border:2px solid rgba(90,122,191,.3);border-radius:0 6px 6px 0;"></div>
+            </div>
+          </div>
+          <p style="font-size:12px;color:var(--ink5);margin-top:16px;font-style:italic;line-height:1.6;">El pulso divide el tiempo en partes iguales. El ritmo decide qué poner en cada parte.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 2: Tempo -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">La velocidad</span>
+        <h2 class="th-h2">Tempo: <em>cuánto dura un pulso</em></h2>
+        <p class="th-body">El tempo es la velocidad del pulso, medida en pulsos por minuto (BPM). Un tempo de 60 BPM significa un pulso por segundo — el ritmo de un latido cardíaco lento. A 120 BPM hay dos pulsos por segundo. A 200 BPM la música avanza tan rápido que el oído a veces agrupa los pulsos en unidades más grandes para encontrar un pulso cómodo que seguir.</p>
+        <p class="th-body">Antes del metrónomo (inventado en 1815 por Johann Nepomuk Mälzel), el tempo se indicaba con palabras italianas: <strong>Largo</strong> (muy lento, ~50 BPM), <strong>Adagio</strong> (lento, ~70), <strong>Andante</strong> (paso de caminata, ~90), <strong>Moderato</strong> (~110), <strong>Allegro</strong> (rápido, ~140), <strong>Presto</strong> (muy rápido, ~180). Estas palabras describían carácter y sensación, no velocidad exacta — un Allegro de Beethoven y un Allegro de Mozart podían ser tempos muy distintos. Las partituras modernas suelen incluir tanto la palabra como el número de BPM.</p>
+        <p class="th-body">Para los músicos en proceso de aprendizaje, el metrónomo es una herramienta para identificar problemas de tempo, no para tocar con él en una actuación. Practicar con metrónomo revela con precisión dónde uno acelera (típicamente al inicio de las frases) y dónde retarda (típicamente en los pasajes difíciles). El objetivo no es tocar como una máquina sino conocer las propias tendencias para poder controlarlas.</p>
+        <div class="th-callout">
+          <div class="th-callout-label">Práctica</div>
+          <p>Una regla práctica: si con el metrónomo no te suena bien, sin metrónomo tampoco.</p>
+        </div>
+      </div>
+      <div>
+        <div style="border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:28px 24px;background:rgba(255,255,255,.03);">
+          <p style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:20px;">Términos de tempo</p>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:center;gap:14px;padding:10px 14px;background:rgba(255,255,255,.04);border-radius:8px;">
+              <div style="font-family:var(--serif);font-size:15px;color:var(--paper);min-width:88px;">Largo</div>
+              <div style="flex:1;height:4px;background:rgba(255,255,255,.07);border-radius:2px;"><div style="height:100%;width:25%;background:var(--copper-lt);border-radius:2px;"></div></div>
+              <div style="font-family:var(--mono);font-size:11px;color:rgba(250,246,240,.3);min-width:60px;text-align:right;">~50 BPM</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:10px 14px;background:rgba(255,255,255,.04);border-radius:8px;">
+              <div style="font-family:var(--serif);font-size:15px;color:var(--paper);min-width:88px;">Adagio</div>
+              <div style="flex:1;height:4px;background:rgba(255,255,255,.07);border-radius:2px;"><div style="height:100%;width:35%;background:var(--copper-lt);border-radius:2px;"></div></div>
+              <div style="font-family:var(--mono);font-size:11px;color:rgba(250,246,240,.3);min-width:60px;text-align:right;">~70 BPM</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:10px 14px;background:rgba(255,255,255,.04);border-radius:8px;">
+              <div style="font-family:var(--serif);font-size:15px;color:var(--paper);min-width:88px;">Andante</div>
+              <div style="flex:1;height:4px;background:rgba(255,255,255,.07);border-radius:2px;"><div style="height:100%;width:45%;background:var(--copper-lt);border-radius:2px;"></div></div>
+              <div style="font-family:var(--mono);font-size:11px;color:rgba(250,246,240,.3);min-width:60px;text-align:right;">~90 BPM</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:10px 14px;background:rgba(255,255,255,.04);border-radius:8px;">
+              <div style="font-family:var(--serif);font-size:15px;color:var(--paper);min-width:88px;">Moderato</div>
+              <div style="flex:1;height:4px;background:rgba(255,255,255,.07);border-radius:2px;"><div style="height:100%;width:55%;background:var(--copper-lt);border-radius:2px;"></div></div>
+              <div style="font-family:var(--mono);font-size:11px;color:rgba(250,246,240,.3);min-width:60px;text-align:right;">~110 BPM</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:10px 14px;background:rgba(255,255,255,.04);border-radius:8px;">
+              <div style="font-family:var(--serif);font-size:15px;color:var(--paper);min-width:88px;">Allegro</div>
+              <div style="flex:1;height:4px;background:rgba(255,255,255,.07);border-radius:2px;"><div style="height:100%;width:70%;background:var(--copper-lt);border-radius:2px;"></div></div>
+              <div style="font-family:var(--mono);font-size:11px;color:rgba(250,246,240,.3);min-width:60px;text-align:right;">~140 BPM</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:10px 14px;background:rgba(255,255,255,.04);border-radius:8px;">
+              <div style="font-family:var(--serif);font-size:15px;color:var(--paper);min-width:88px;">Presto</div>
+              <div style="flex:1;height:4px;background:rgba(255,255,255,.07);border-radius:2px;"><div style="height:100%;width:90%;background:var(--copper-lt);border-radius:2px;"></div></div>
+              <div style="font-family:var(--mono);font-size:11px;color:rgba(250,246,240,.3);min-width:60px;text-align:right;">~180 BPM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 3: El compás -->
+<section class="th-section">
+  <div class="th-inner">
+    <span class="th-label">La organización</span>
+    <h2 class="th-h2">El compás: <em>por qué la música se divide en grupos</em></h2>
+    <p class="th-body">Una indicación de compás agrupa los pulsos en unidades regulares llamadas compases. El agrupamiento no es arbitrario: determina dónde caen los tiempos naturalmente acentuados. En 4/4, los tiempos 1 y 3 son fuertes, siendo el 1 el más fuerte. En 3/4, solo el tiempo 1 es fuerte. En 6/8, los tiempos 1 y 4 son fuertes. Este patrón de tiempos fuertes y débiles se llama <strong>métrica</strong>, y es lo que hace que un vals suene diferente a una marcha incluso al mismo tempo.</p>
+    <p class="th-body">La indicación de compás se escribe como una fracción al inicio de una pieza. El número de arriba indica cuántos tiempos hay en cada compás. El número de abajo indica qué figura de nota recibe un tiempo: 4 equivale a una <strong>negra</strong>, 8 a una <strong>corchea</strong>, 2 a una <strong>blanca</strong>. Así, 4/4 es "cuatro negras por compás," 3/4 es "tres negras por compás," y 6/8 es "seis corcheas por compás."</p>
+    <p class="th-body">La distinción fundamental en las indicaciones de compás es entre <strong>métrica simple</strong> y <strong>métrica compuesta</strong>. En métrica simple (4/4, 3/4, 2/4), cada tiempo se divide de forma natural en dos partes iguales. En métrica compuesta (6/8, 9/8, 12/8), cada tiempo se divide en tres partes iguales. Por eso 6/8 suena diferente a 3/4 aunque ambos tengan seis corcheas por compás: en 6/8 se sienten 2 tiempos grandes, cada uno formado por 3 corcheas; en 3/4 se sienten 3 tiempos, cada uno formado por 2 corcheas.</p>
+  </div>
+</section>
+
+<!-- SECCIÓN INTERACTIVA: Metrónomo -->
+<section class="metro-section">
+  <div style="max-width:1080px;margin:0 auto;">
+    <span class="th-label" style="display:block;text-align:center;margin-bottom:32px;">Interactivo</span>
+    <div class="metro-card">
+      <div class="metro-title">Metrónomo interactivo — escucha y siente el compás</div>
+      <div class="metro-sig-pills">
+        <button class="metro-sig-pill active" data-sig="44">4/4</button>
+        <button class="metro-sig-pill" data-sig="34">3/4</button>
+        <button class="metro-sig-pill" data-sig="68">6/8</button>
+      </div>
+      <div class="metro-bpm-row">
+        <span class="metro-bpm-label">BPM</span>
+        <input type="range" class="metro-slider" id="metro-slider" min="40" max="160" value="80">
+        <span class="metro-bpm-val" id="metro-bpm-val">80</span>
+      </div>
+      <div class="metro-beats-row" id="metro-beats"></div>
+      <button class="metro-play-btn" id="metro-play-btn">Iniciar</button>
+      <p class="metro-desc" id="metro-desc"></p>
+    </div>
+  </div>
+</section>
+
+<!-- SECCIÓN 4: 4/4, 3/4 y 6/8 -->
+<section class="th-section dark">
+  <div class="th-inner">
+    <span class="th-label">Los compases más comunes</span>
+    <h2 class="th-h2">4/4, 3/4 y 6/8: <em>tres formas de sentir el tiempo</em></h2>
+    <p class="th-body"><strong>4/4</strong> es la indicación de compás más común en la música popular occidental, llamada a menudo "tiempo común." Cuatro tiempos por compás, con una negra en cada tiempo. El patrón de énfasis 1-2-3-4 (fuerte-débil-medio-débil) está tan arraigado en el oído occidental que funciona como expectativa predeterminada. El rock, el pop, el jazz y la mayor parte de la música clásica de los siglos XVIII y XIX están en 4/4.</p>
+    <p class="th-body"><strong>3/4</strong> agrupa los tiempos de tres en tres, creando la característica sensación "uno-dos-tres, uno-dos-tres" del vals. El único tiempo fuerte por compás le da al 3/4 una cualidad fluida y circular que el 4/4 no tiene. También aparece en baladas, minuetos, y en el son jarocho y varias formas latinoamericanas.</p>
+    <p class="th-body"><strong>6/8</strong> es un compás compuesto: seis corcheas por compás, sentidas como dos tiempos grandes de tres corcheas cada uno. A tempos lentos suena como seis pulsos distintos; a tempos más rápidos suena como un dos balanceante. Es la indicación de compás de la jiga irlandesa, la tarantela y muchos pasodobles. La confusión entre 6/8 y 3/4 es una de las más comunes en teoría musical: ambos tienen seis corcheas, pero 6/8 dice "UNO-dos-tres-CUATRO-cinco-seis" y 3/4 dice "UNO-dos-TRES-cuatro-UNO-dos."</p>
+  </div>
+</section>
+
+<!-- SECCIÓN 5: La subdivisión -->
+<section class="th-section">
+  <div class="th-inner">
+    <div class="th-split">
+      <div>
+        <span class="th-label">Dentro del pulso</span>
+        <h2 class="th-h2">La subdivisión: <em>las notas entre los tiempos</em></h2>
+        <p class="th-body">Cada tiempo se subdivide en unidades más pequeñas. En 4/4, un tiempo de negra se divide en dos corcheas, cuatro semicorcheas, u ocho fusas. La capacidad de sentir estas subdivisiones sin perder el pulso mayor es la base de la precisión rítmica. Los bateristas practican subdivisiones constantemente porque su instrumento hace explícitas todas las relaciones de tiempo; los instrumentistas melódicos frecuentemente descuidan esto.</p>
+        <p class="th-body">El vocabulario rítmico estándar: una <strong>redonda</strong> dura 4 tiempos; una <strong>blanca</strong> dura 2; una <strong>negra</strong> dura 1; una <strong>corchea</strong> dura medio tiempo; una <strong>semicorchea</strong> dura un cuarto de tiempo. Cualquier compás debe sumar exactamente el número de tiempos indicado por la indicación de compás.</p>
+        <p class="th-body">Los puntillos y las ligaduras alargan las notas. Una <strong>nota con puntillo</strong> dura 1.5 veces su duración normal (una negra con puntillo = 1.5 tiempos). Una <strong>ligadura</strong> une dos notas de la misma altura en una sola nota sostenida. La <strong>síncopa</strong> ocurre cuando una nota comienza en un tiempo débil o en una subdivisión y se liga sobre un tiempo fuerte: el ataque está donde el oído no lo espera. Esta es la técnica central del funk, el reggae y la mayoría de los ritmos latinos.</p>
+        <div class="th-callout">
+          <div class="th-callout-label">Ejercicio</div>
+          <p>Para practicar la subdivisión: cuenta 1-e-y-a, 2-e-y-a, 3-e-y-a, 4-e-y-a mientras tocas. Cada sílaba es una semicorchea.</p>
+        </div>
+      </div>
+      <div>
+        <div style="background:var(--paper2);border:1px solid var(--paper3);border-radius:14px;padding:28px 24px;">
+          <p style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--copper);margin-bottom:20px;">Árbol de subdivisiones (4/4)</p>
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div>
+              <p style="font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink5);margin-bottom:7px;">Redonda (4 tiempos)</p>
+              <div style="height:32px;background:rgba(160,92,32,.14);border:2px solid rgba(160,92,32,.3);border-radius:6px;"></div>
+            </div>
+            <div>
+              <p style="font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink5);margin-bottom:7px;">Blancas (2 tiempos c/u)</p>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+                <div style="height:28px;background:rgba(160,92,32,.1);border:2px solid rgba(160,92,32,.22);border-radius:6px;"></div>
+                <div style="height:28px;background:rgba(160,92,32,.1);border:2px solid rgba(160,92,32,.22);border-radius:6px;"></div>
+              </div>
+            </div>
+            <div>
+              <p style="font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink5);margin-bottom:7px;">Negras (1 tiempo c/u)</p>
+              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;">
+                <div style="height:24px;background:rgba(160,92,32,.1);border:2px solid rgba(160,92,32,.2);border-radius:5px;"></div>
+                <div style="height:24px;background:rgba(160,92,32,.1);border:2px solid rgba(160,92,32,.2);border-radius:5px;"></div>
+                <div style="height:24px;background:rgba(160,92,32,.1);border:2px solid rgba(160,92,32,.2);border-radius:5px;"></div>
+                <div style="height:24px;background:rgba(160,92,32,.1);border:2px solid rgba(160,92,32,.2);border-radius:5px;"></div>
+              </div>
+            </div>
+            <div>
+              <p style="font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink5);margin-bottom:7px;">Corcheas (½ tiempo c/u)</p>
+              <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:3px;">
+                <div style="height:20px;background:rgba(90,122,191,.1);border:1.5px solid rgba(90,122,191,.2);border-radius:4px;"></div>
+                <div style="height:20px;background:rgba(90,122,191,.1);border:1.5px solid rgba(90,122,191,.2);border-radius:4px;"></div>
+                <div style="height:20px;background:rgba(90,122,191,.1);border:1.5px solid rgba(90,122,191,.2);border-radius:4px;"></div>
+                <div style="height:20px;background:rgba(90,122,191,.1);border:1.5px solid rgba(90,122,191,.2);border-radius:4px;"></div>
+                <div style="height:20px;background:rgba(90,122,191,.1);border:1.5px solid rgba(90,122,191,.2);border-radius:4px;"></div>
+                <div style="height:20px;background:rgba(90,122,191,.1);border:1.5px solid rgba(90,122,191,.2);border-radius:4px;"></div>
+                <div style="height:20px;background:rgba(90,122,191,.1);border:1.5px solid rgba(90,122,191,.2);border-radius:4px;"></div>
+                <div style="height:20px;background:rgba(90,122,191,.1);border:1.5px solid rgba(90,122,191,.2);border-radius:4px;"></div>
+              </div>
+            </div>
+            <div>
+              <p style="font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink5);margin-bottom:7px;">Semicorcheas (¼ tiempo)</p>
+              <div style="display:grid;grid-template-columns:repeat(16,1fr);gap:2px;">
+                <div style="height:16px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:3px;"></div>
+                <div style="height:16px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:3px;"></div>
+                <div style="height:16px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:3px;"></div>
+                <div style="height:16px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:3px;"></div>
+                <div style="height:16px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:3px;"></div>
+                <div style="height:16px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:3px;"></div>
+                <div style="height:16px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:3px;"></div>
+                <div style="height:16px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:3px;"></div>
+                <div style="height:16px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:3px;"></div>
+                <div style="height:16px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:3px;"></div>
+                <div style="height:16px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:3px;"></div>
+                <div style="height:16px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:3px;"></div>
+                <div style="height:16px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:3px;"></div>
+                <div style="height:16px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:3px;"></div>
+                <div style="height:16px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:3px;"></div>
+                <div style="height:16px;background:rgba(122,74,191,.1);border:1px solid rgba(122,74,191,.2);border-radius:3px;"></div>
+              </div>
+            </div>
+          </div>
+          <p style="font-size:12px;color:var(--ink5);margin-top:16px;font-style:italic;line-height:1.6;">Cada nivel es el doble de rápido que el anterior. La redonda es 16 veces más larga que la semicorchea.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER / NEXT -->
+<section class="th-next">
+  <span class="th-next-label">Navegar capítulos</span>
+  <h2 class="th-next-title">Sigue explorando</h2>
+  <p class="th-next-sub">El ritmo y el compás son la estructura del tiempo. Ahora lleva esa comprensión a la práctica.</p>
+  <div class="th-next-btns">
+    <a href="/practica/ritmo" class="th-next-btn">Practicar Ritmo →</a>
+    <a href="/teoria/circulo" class="th-next-btn sec">← Círculo de Quintas</a>
+    <span class="th-next-btn disabled">Próximamente</span>
+  </div>
+  <div class="chapter-nav">
+    <a href="/teoria/circulo" class="chapter-nav-item prev">
+      <span class="chapter-nav-dir">← Anterior</span>
+      <span class="chapter-nav-cap">Cap. 07</span>
+      <span class="chapter-nav-title">Círculo de Quintas</span>
+    </a>
+    <div class="chapter-nav-item disabled">
+      <span class="chapter-nav-dir">Siguiente →</span>
+      <span class="chapter-nav-cap">Cap. 09</span>
+      <span class="chapter-nav-title">Próximamente</span>
+    </div>
+  </div>
+</section>
+
+<script>
+// ── Progress bar ──────────────────────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('prog-bar').style.width = (h > 0 ? Math.round(window.scrollY / h * 100) : 0) + '%';
+});
+
+// ── Metronome ─────────────────────────────────────────────────────────────────
+const TIME_SIGS = {
+  '44': { beats: 4, div: '4n', label: '4 tiempos por compás · negra = 1 tiempo · acento en 1 y 3' },
+  '34': { beats: 3, div: '4n', label: '3 tiempos por compás · negra = 1 tiempo · acento en 1' },
+  '68': { beats: 6, div: '8n', label: '6 tiempos por compás · corchea = 1 tiempo · 2 grupos de 3 · acento en 1 y 4' },
+};
+
+let currentSig = '44';
+let isPlaying = false;
+let seq = null;
+
+function buildBeatCircles(sig) {
+  const row = document.getElementById('metro-beats');
+  row.innerHTML = '';
+  const ts = TIME_SIGS[sig];
+  for (let i = 0; i < ts.beats; i++) {
+    const el = document.createElement('div');
+    el.className = 'metro-beat';
+    // accent logic
+    if (i === 0) {
+      el.classList.add('accent');
+    } else if (sig === '68' && i === 3) {
+      el.classList.add('sub-accent');
+    }
+    el.textContent = i + 1;
+    el.id = 'beat-' + i;
+    row.appendChild(el);
+  }
+  document.getElementById('metro-desc').textContent = ts.label;
+}
+
+function animateBeat(beat, total) {
+  for (let i = 0; i < total; i++) {
+    const el = document.getElementById('beat-' + i);
+    if (el) el.classList.toggle('active', i === beat);
+  }
+}
+
+async function startMetronome(sigKey, bpm) {
+  await Tone.start();
+  if (seq) { seq.dispose(); Tone.getTransport().stop(); Tone.getTransport().cancel(); }
+
+  Tone.getTransport().bpm.value = bpm;
+
+  const accent = new Tone.Synth({
+    oscillator: { type: 'triangle' },
+    envelope: { attack: 0.001, decay: 0.12, sustain: 0, release: 0.05 }
+  }).toDestination();
+  const tick = new Tone.Synth({
+    oscillator: { type: 'triangle' },
+    envelope: { attack: 0.001, decay: 0.08, sustain: 0, release: 0.04 }
+  }).toDestination();
+  accent.volume.value = -6;
+  tick.volume.value = -12;
+
+  const timeSig = TIME_SIGS[sigKey];
+  const beatArr = Array.from({ length: timeSig.beats }, (_, i) => i);
+
+  seq = new Tone.Sequence((time, beat) => {
+    if (beat === 0 || (sigKey === '68' && beat === 3)) {
+      accent.triggerAttackRelease('C5', '32n', time);
+    } else {
+      tick.triggerAttackRelease('G3', '32n', time);
+    }
+    Tone.getDraw().schedule(() => {
+      animateBeat(beat, timeSig.beats);
+    }, time);
+  }, beatArr, timeSig.div);
+
+  seq.start(0);
+  Tone.getTransport().start();
+}
+
+function stopMetronome() {
+  if (seq) { seq.dispose(); seq = null; }
+  Tone.getTransport().stop();
+  Tone.getTransport().cancel();
+  document.querySelectorAll('.metro-beat').forEach(el => el.classList.remove('active'));
+}
+
+// Sig pills
+document.querySelectorAll('.metro-sig-pill').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.metro-sig-pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentSig = btn.dataset.sig;
+    buildBeatCircles(currentSig);
+    if (isPlaying) {
+      const bpm = parseInt(document.getElementById('metro-slider').value);
+      startMetronome(currentSig, bpm);
+    }
+  });
+});
+
+// BPM slider
+document.getElementById('metro-slider').addEventListener('input', e => {
+  const bpm = parseInt(e.target.value);
+  document.getElementById('metro-bpm-val').textContent = bpm;
+  if (isPlaying) {
+    Tone.getTransport().bpm.value = bpm;
+  }
+});
+
+// Play/stop
+document.getElementById('metro-play-btn').addEventListener('click', async () => {
+  isPlaying = !isPlaying;
+  const btn = document.getElementById('metro-play-btn');
+  if (isPlaying) {
+    const bpm = parseInt(document.getElementById('metro-slider').value);
+    await startMetronome(currentSig, bpm);
+    btn.textContent = 'Detener';
+    btn.style.background = 'var(--copper-dk)';
+  } else {
+    stopMetronome();
+    btn.textContent = 'Iniciar';
+    btn.style.background = '';
+  }
+});
+
+// Init
+buildBeatCircles(currentSig);
+</script>
+
+<footer class="tm-footer-legal" style="background:var(--ink2);border-top:1px solid rgba(255,255,255,.06);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+  <div class="tm-f-copy" style="font-size:12px;color:var(--ink5);">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div class="tm-f-links" style="display:flex;gap:20px;">
+    <a href="/privacidad" style="font-size:12px;color:var(--ink5);text-decoration:none;">Aviso de Privacidad</a>
+    <a href="/terminos" style="font-size:12px;color:var(--ink5);text-decoration:none;">Términos y Condiciones</a>
+    <a href="/cookies" style="font-size:12px;color:var(--ink5);text-decoration:none;">Cookies</a>
+  </div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/auth.js"></script>
+</body>
+</html>
