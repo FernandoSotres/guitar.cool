@@ -567,12 +567,16 @@ function newBuildQuestion() {
   S.rootPc = (OPEN[S.rootStr] + S.rootFret) % 12;
   const chordNotes = new Set(ch.intervals.map(i => (S.rootPc + i) % 12));
 
-  S.targetPositions = [];
+  // One note per string: take the first chord tone in range per string only
+  S.targetPositions = [{s: S.rootStr, f: S.rootFret}]; // root always first
   for (let s = 0; s < 6; s++) {
+    if (s === S.rootStr) continue;
     for (let f = S.fretStart; f <= S.fretEnd; f++) {
       if (f < 0 || f > 12) continue;
-      const midi = OPEN[s] + f;
-      if (chordNotes.has(midi % 12)) S.targetPositions.push({s, f});
+      if (chordNotes.has((OPEN[s] + f) % 12)) {
+        S.targetPositions.push({s, f});
+        break; // one note per string, no overlaps
+      }
     }
   }
   S.foundPositions = [{s: S.rootStr, f: S.rootFret}];
@@ -580,21 +584,22 @@ function newBuildQuestion() {
 
   document.getElementById('q-label').textContent = 'Construye el acorde en el diapasón';
   document.getElementById('q-chord-name').textContent = ch.name;
-  document.getElementById('q-chord-sub').textContent = `Zona: trastes ${S.fretStart} · ${S.fretEnd}`;
+  document.getElementById('q-chord-sub').textContent = `${S.targetPositions.length} notas · una por cuerda`;
   document.getElementById('q-root-note').textContent = NOTE_NAMES[S.rootPc];
   document.getElementById('root-wrap').style.display = '';
-  document.getElementById('fb-hint').textContent = 'Haz clic en todas las notas del acorde en la zona indicada';
+  document.getElementById('fb-hint').textContent = 'Haz clic en una nota del acorde por cuerda (la raíz ya está marcada)';
   document.getElementById('reveal-btn').style.display = '';
   document.getElementById('id-options').style.display = 'none';
   document.getElementById('progress-wrap').style.display = '';
 
   if (S.view==='piano') {
-    const r = PK_S + Math.floor(Math.random()*12);
+    // Use same root pitch class as guitar, anchored to C3 octave of the piano
+    const r = PK_S + S.rootPc;
     S.piano={rootMidi:r, targetMidis:[], foundMidis:[r], wrongMidis:new Set()};
     const chNotes=new Set(S.chordIntervals.map(i=>(r%12+i)%12));
     for(let m=r;m<=r+11&&m<=PK_E;m++) if(chNotes.has(m%12)) S.piano.targetMidis.push(m);
-    document.getElementById('q-root-note').textContent = NOTE_NAMES[r%12];
-    document.getElementById('q-chord-sub').textContent = 'En el piano';
+    // root note text already set above (same rootPc)
+    document.getElementById('q-chord-sub').textContent = `${S.piano.targetMidis.length} notas · una sola vez cada una`;
   }
 
   updateProgress();
@@ -697,11 +702,16 @@ function newIdentifyQuestion() {
   S.fretEnd = S.rootFret + 3;
 
   const chordNotes = new Set(ch.intervals.map(i => (S.rootPc + i) % 12));
-  S.targetPositions = [];
+  // One note per string: first chord tone in range per string only
+  S.targetPositions = [{s: S.rootStr, f: S.rootFret}]; // root first
   for (let s = 0; s < 6; s++) {
+    if (s === S.rootStr) continue;
     for (let f = S.fretStart; f <= S.fretEnd; f++) {
       if (f < 0 || f > 12) continue;
-      if (chordNotes.has((OPEN[s] + f) % 12)) S.targetPositions.push({s, f});
+      if (chordNotes.has((OPEN[s] + f) % 12)) {
+        S.targetPositions.push({s, f});
+        break; // one note per string
+      }
     }
   }
   S.foundPositions = [...S.targetPositions];
@@ -712,7 +722,7 @@ function newIdentifyQuestion() {
 
   document.getElementById('q-label').textContent = 'Nombra el acorde marcado';
   document.getElementById('q-chord-name').textContent = NOTE_NAMES[S.rootPc] + ' · ?';
-  document.getElementById('q-chord-sub').textContent = `${ch.intervals.length} notas en el diapasón`;
+  document.getElementById('q-chord-sub').textContent = `${S.targetPositions.length} notas · una por cuerda`;
   document.getElementById('q-root-note').textContent = NOTE_NAMES[S.rootPc];
   document.getElementById('root-wrap').style.display = '';
   document.getElementById('fb-hint').textContent = 'Elige el tipo de acorde';
@@ -731,12 +741,14 @@ function newIdentifyQuestion() {
   });
 
   if (S.view==='piano') {
-    const r = PK_S + Math.floor(Math.random()*12);
+    // Same root note as guitar view, anchored to C3 octave
+    const r = PK_S + S.rootPc;
     S.piano={rootMidi:r, targetMidis:[], foundMidis:[]};
     const chNotes=new Set(S.chordIntervals.map(i=>(r%12+i)%12));
     for(let m=r;m<=r+11&&m<=PK_E;m++) if(chNotes.has(m%12)) S.piano.targetMidis.push(m);
     S.piano.foundMidis=[...S.piano.targetMidis];
-    document.getElementById('q-root-note').textContent = NOTE_NAMES[r%12];
+    // root note text already matches (same rootPc)
+    document.getElementById('q-chord-sub').textContent = `${S.piano.targetMidis.length} notas · una vez cada una`;
   }
 
   draw();
