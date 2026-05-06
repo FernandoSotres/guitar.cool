@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tremolo · notas</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --bg:#0d0b08; --s1:#131008; --s2:#1c1710; --s3:#252018;
+  --border:#2e2820; --border2:#3a3028;
+  --accent:#d68838; --accent2:#7c5cbf;
+  --text:#f0e8dc; --text2:#8a7a64; --text3:#5a4a38;
+  --green:#3a8a50; --red:#a84030; --yellow:#8a7a20;
+  --mono:'JetBrains Mono',monospace;
+  --sans:'Inter',system-ui,sans-serif;
+  --serif:'Marcellus',Georgia,serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);}
+
+/* ── LOCK SCREEN ── */
+#lock{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:20px;}
+#lock.hidden{display:none;}
+.lock-logo{font-family:var(--serif);font-size:28px;color:var(--accent);letter-spacing:-.02em;}
+.lock-logo span{font-family:var(--mono);font-size:.48em;color:var(--text2);}
+.lock-form{display:flex;flex-direction:column;gap:10px;width:280px;}
+.lock-form input{background:var(--s2);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:10px 14px;font-size:14px;font-family:var(--mono);outline:none;letter-spacing:.06em;}
+.lock-form input:focus{border-color:var(--accent);}
+.lock-form button{background:var(--accent);color:#13100c;border:none;border-radius:6px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);letter-spacing:.04em;}
+.lock-form button:hover{background:#e8a050;}
+.lock-err{font-size:12px;color:#e06060;font-family:var(--mono);text-align:center;min-height:16px;}
+
+/* ── LAYOUT ── */
+#app{display:none;flex-direction:column;height:100vh;}
+#app.visible{display:flex;}
+header{background:var(--s1);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.h-logo{font-family:var(--serif);font-size:17px;color:var(--accent);letter-spacing:-.01em;}
+.h-logo span{font-family:var(--mono);font-size:.5em;color:var(--text2);}
+.h-badge{font-size:10px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--text2);background:var(--s3);border:1px solid var(--border2);padding:2px 8px;border-radius:3px;}
+.h-count{margin-left:auto;font-size:11px;color:var(--text3);font-family:var(--mono);}
+.h-lock-btn{font-size:11px;color:var(--text3);background:transparent;border:none;cursor:pointer;padding:4px 8px;border-radius:4px;font-family:var(--sans);}
+.h-lock-btn:hover{color:var(--text2);}
+
+.main{display:flex;flex:1;overflow:hidden;}
+
+/* ── SIDEBAR (form) ── */
+.sidebar{width:320px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;padding:16px;}
+.form-title{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--text2);margin-bottom:12px;}
+.form-group{margin-bottom:12px;}
+.form-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:5px;display:block;}
+textarea{width:100%;background:var(--s2);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:10px 12px;font-size:13px;font-family:var(--sans);line-height:1.55;resize:vertical;min-height:140px;outline:none;}
+textarea:focus{border-color:var(--accent);}
+textarea::placeholder{color:var(--text3);}
+select.f-sel{width:100%;background:var(--s2);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:8px 10px;font-size:12px;outline:none;cursor:pointer;}
+select.f-sel:focus{border-color:var(--accent);}
+.tag-grid{display:flex;flex-wrap:wrap;gap:5px;}
+.tag-pill{font-size:10px;padding:3px 9px;border-radius:10px;border:1px solid var(--border2);background:var(--s3);color:var(--text2);cursor:pointer;font-family:var(--mono);}
+.tag-pill.active{background:rgba(124,92,191,.18);border-color:var(--accent2);color:var(--accent2);}
+.submit-btn{width:100%;background:var(--accent);color:#13100c;border:none;border-radius:6px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--sans);letter-spacing:.04em;margin-top:4px;transition:background .2s;}
+.submit-btn:hover{background:#e8a050;}
+.submit-btn:disabled{background:var(--s3);color:var(--text3);cursor:default;}
+.form-msg{font-size:11px;font-family:var(--mono);min-height:16px;margin-top:8px;text-align:center;}
+.form-msg.ok{color:var(--green);}
+.form-msg.err{color:#e06060;}
+
+/* ── NOTES PANEL ── */
+.notes-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.filters{background:var(--s1);border-bottom:1px solid var(--border);padding:8px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0;}
+.filter-label{font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;}
+.f-chip{font-size:11px;padding:3px 10px;border-radius:10px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-family:var(--mono);}
+.f-chip.active{background:var(--s3);border-color:var(--accent);color:var(--accent);}
+.search-box{margin-left:auto;background:var(--s2);border:1px solid var(--border2);color:var(--text);border-radius:5px;padding:4px 10px;font-size:12px;font-family:var(--sans);outline:none;width:180px;}
+.search-box:focus{border-color:var(--accent);}
+.search-box::placeholder{color:var(--text3);}
+.notes-list{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text3);font-size:13px;}
+.empty-state .em-icon{font-size:32px;margin-bottom:12px;}
+
+/* ── NOTE CARD ── */
+.note-card{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;transition:border-color .2s;position:relative;}
+.note-card:hover{border-color:var(--border2);}
+.note-card.status-revisado{opacity:.55;}
+.nc-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.nc-cat{font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;padding:2px 7px;border-radius:3px;}
+.cat-feature{background:rgba(56,160,216,.15);color:#38a0d8;}
+.cat-ui{background:rgba(124,92,191,.15);color:#9070d8;}
+.cat-contenido{background:rgba(72,200,72,.15);color:#48c878;}
+.cat-bug{background:rgba(200,60,60,.15);color:#e06060;}
+.cat-prompt{background:rgba(214,136,56,.18);color:#d68838;}
+.cat-otro{background:rgba(90,74,56,.25);color:#8a7a64;}
+.nc-date{font-size:10px;font-family:var(--mono);color:var(--text3);margin-left:auto;}
+.nc-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;}
+.nc-tag{font-size:9px;font-family:var(--mono);color:var(--text3);background:var(--s3);border:1px solid var(--border);padding:1px 6px;border-radius:8px;}
+.nc-content{font-size:13px;line-height:1.6;color:var(--text);white-space:pre-wrap;word-break:break-word;}
+.nc-actions{display:flex;gap:6px;margin-top:10px;border-top:1px solid var(--border);padding-top:8px;}
+.nc-btn{font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-family:var(--mono);transition:all .15s;}
+.nc-btn:hover{border-color:var(--text2);color:var(--text);}
+.nc-btn.danger:hover{border-color:#e06060;color:#e06060;}
+.nc-btn.success{border-color:var(--green);color:var(--green);}
+.nc-btn.done{background:rgba(58,138,80,.12);border-color:var(--green);color:var(--green);}
+.status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.dot-pendiente{background:#e8a838;}
+.dot-proceso{background:#38a0d8;}
+.dot-revisado{background:var(--green);}
+.dot-descartado{background:var(--text3);}
+
+/* ── SETUP NOTICE ── */
+#setup-notice{background:rgba(168,64,48,.12);border:1px solid rgba(168,64,48,.4);border-radius:8px;padding:14px;margin-bottom:16px;font-size:12px;line-height:1.7;display:none;}
+#setup-notice code{font-family:var(--mono);font-size:11px;background:var(--s3);padding:1px 5px;border-radius:3px;}
+#setup-notice a{color:var(--accent);text-decoration:underline;}
+
+/* ── SCROLL ── */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+
+@media(max-width:768px){
+  .main{flex-direction:column;}
+  .sidebar{width:100%;border-right:none;border-bottom:1px solid var(--border);max-height:50vh;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOCK SCREEN -->
+<div id="lock">
+  <div class="lock-logo">trémo<span>lo.mx</span></div>
+  <form class="lock-form" onsubmit="tryUnlock(event)">
+    <input type="password" id="pwd-input" placeholder="contraseña" autofocus autocomplete="current-password">
+    <button type="submit">Entrar</button>
+    <div class="lock-err" id="lock-err"></div>
+  </form>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header>
+    <div class="h-logo">trémo<span>.mx</span></div>
+    <div class="h-badge">Notas internas</div>
+    <span class="h-count" id="h-count">— notas</span>
+    <button class="h-lock-btn" onclick="lockApp()">cerrar sesión</button>
+  </header>
+
+  <div class="main">
+    <!-- FORM SIDEBAR -->
+    <div class="sidebar">
+      <div class="form-title">Nueva nota</div>
+
+      <div id="setup-notice">
+        ⚠️ <strong>Primera vez:</strong> crea la tabla en Supabase antes de guardar.<br>
+        Ve a <a href="https://supabase.com/dashboard" target="_blank">supabase.com/dashboard</a> → SQL Editor → pega y ejecuta:<br><br>
+        <code>create table if not exists fer_notas (
+  id uuid default gen_random_uuid() primary key,
+  created_at timestamptz default now(),
+  content text not null,
+  categoria text default 'prompt',
+  tags text[] default '{}',
+  status text default 'pendiente'
+);
+alter table fer_notas enable row level security;
+create policy "anon_all" on fer_notas for all
+  using (true) with check (true);</code>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Nota / Prompt / Idea</label>
+        <textarea id="f-content" placeholder="Escribe aquí la idea, el prompt de mejora, el bug o la observación…"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Categoría</label>
+        <select class="f-sel" id="f-cat">
+          <option value="prompt">💬 Prompt IA</option>
+          <option value="feature">✨ Feature</option>
+          <option value="ui">🎨 UI / UX</option>
+          <option value="contenido">📝 Contenido</option>
+          <option value="bug">🐛 Bug</option>
+          <option value="otro">· Otro</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Etiquetas</label>
+        <div class="tag-grid" id="tag-grid">
+          <div class="tag-pill" data-tag="piano">piano</div>
+          <div class="tag-pill" data-tag="guitarra">guitarra</div>
+          <div class="tag-pill" data-tag="teoría">teoría</div>
+          <div class="tag-pill" data-tag="práctica">práctica</div>
+          <div class="tag-pill" data-tag="seo">seo</div>
+          <div class="tag-pill" data-tag="generos">géneros</div>
+          <div class="tag-pill" data-tag="audio">audio</div>
+          <div class="tag-pill" data-tag="urgente">urgente</div>
+        </div>
+      </div>
+
+      <button class="submit-btn" id="submit-btn" onclick="saveNote()">Guardar nota</button>
+      <div class="form-msg" id="form-msg"></div>
+    </div>
+
+    <!-- NOTES PANEL -->
+    <div class="notes-panel">
+      <div class="filters">
+        <span class="filter-label">Estado</span>
+        <button class="f-chip active" data-filter="all" onclick="setFilter('all',this)">Todas</button>
+        <button class="f-chip" data-filter="pendiente" onclick="setFilter('pendiente',this)">Pendiente</button>
+        <button class="f-chip" data-filter="proceso" onclick="setFilter('proceso',this)">En proceso</button>
+        <button class="f-chip" data-filter="revisado" onclick="setFilter('revisado',this)">Revisado</button>
+        <button class="f-chip" data-filter="descartado" onclick="setFilter('descartado',this)">Descartado</button>
+        <input type="search" class="search-box" placeholder="Buscar…" oninput="setSearch(this.value)">
+      </div>
+      <div class="notes-list" id="notes-list">
+        <div class="empty-state"><div class="em-icon">📋</div>Cargando…</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const SUPA_URL = 'https://osgbjknlajdxlbfeueqc.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zZ2Jqa25sYWpkeGxiZmV1ZXFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NjcyMTYsImV4cCI6MjA5MzQ0MzIxNn0.6cDM7Xpf7ZkdwH88uBPPP3xH0GZGqXiEJBdnK7pSDW4';
+const TABLE   = 'fer_notas';
+const PWD_HASH = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918'; // sha256("admin") — CAMBIA ESTO
+
+const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+async function sha256(msg){
+  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+async function tryUnlock(e){
+  e.preventDefault();
+  const pwd = document.getElementById('pwd-input').value;
+  const hash = await sha256(pwd);
+  if(hash === PWD_HASH){
+    sessionStorage.setItem('fer_auth','1');
+    showApp();
+  } else {
+    document.getElementById('lock-err').textContent = 'Contraseña incorrecta';
+    document.getElementById('pwd-input').value='';
+    document.getElementById('pwd-input').focus();
+  }
+}
+
+function lockApp(){
+  sessionStorage.removeItem('fer_auth');
+  document.getElementById('app').classList.remove('visible');
+  document.getElementById('lock').classList.remove('hidden');
+  document.getElementById('pwd-input').focus();
+}
+
+function showApp(){
+  document.getElementById('lock').classList.add('hidden');
+  document.getElementById('app').classList.add('visible');
+  loadNotes();
+}
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let allNotes = [];
+let activeFilter = 'all';
+let searchQuery  = '';
+let activeTags   = new Set();
+
+// ── TAGS ──────────────────────────────────────────────────────────────────────
+document.querySelectorAll('.tag-pill').forEach(pill=>{
+  pill.addEventListener('click',()=>{
+    const tag = pill.dataset.tag;
+    if(activeTags.has(tag)){activeTags.delete(tag);pill.classList.remove('active');}
+    else{activeTags.add(tag);pill.classList.add('active');}
+  });
+});
+
+// ── LOAD NOTES ────────────────────────────────────────────────────────────────
+async function loadNotes(){
+  const list = document.getElementById('notes-list');
+  list.innerHTML = '<div class="empty-state"><div class="em-icon">⏳</div>Cargando…</div>';
+
+  const {data, error} = await sb
+    .from(TABLE)
+    .select('*')
+    .order('created_at', {ascending: false});
+
+  if(error){
+    if(error.code === '42P01'){ // table doesn't exist
+      document.getElementById('setup-notice').style.display = 'block';
+      list.innerHTML = '<div class="empty-state"><div class="em-icon">⚙️</div>La tabla aún no existe.<br>Sigue las instrucciones en el panel izquierdo.</div>';
+    } else {
+      list.innerHTML = `<div class="empty-state"><div class="em-icon">⚠️</div>Error: ${error.message}</div>`;
+    }
+    return;
+  }
+  allNotes = data || [];
+  renderNotes();
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+const CAT_LABELS = {prompt:'💬 Prompt IA', feature:'✨ Feature', ui:'🎨 UI/UX', contenido:'📝 Contenido', bug:'🐛 Bug', otro:'· Otro'};
+const STATUS_NEXT = {pendiente:'proceso', proceso:'revisado', revisado:'descartado', descartado:'pendiente'};
+const STATUS_LABEL = {pendiente:'⬤ Pendiente', proceso:'⬤ En proceso', revisado:'⬤ Revisado', descartado:'⬤ Descartado'};
+
+function fmtDate(iso){
+  const d=new Date(iso);
+  return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}) + ' ' + d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+}
+
+function renderNotes(){
+  const list = document.getElementById('notes-list');
+  let notes = allNotes;
+
+  if(activeFilter !== 'all') notes = notes.filter(n=>n.status===activeFilter);
+  if(searchQuery) {
+    const q=searchQuery.toLowerCase();
+    notes = notes.filter(n=>n.content.toLowerCase().includes(q) || (n.tags||[]).some(t=>t.includes(q)));
+  }
+
+  document.getElementById('h-count').textContent = `${allNotes.length} nota${allNotes.length!==1?'s':''}`;
+
+  if(!notes.length){
+    list.innerHTML='<div class="empty-state"><div class="em-icon">📭</div>Sin notas aquí todavía.</div>';
+    return;
+  }
+
+  list.innerHTML = notes.map(n=>{
+    const tags=(n.tags||[]).map(t=>`<span class="nc-tag">${t}</span>`).join('');
+    const catClass='cat-'+(n.categoria||'otro');
+    const catLabel=CAT_LABELS[n.categoria]||n.categoria;
+    const status=n.status||'pendiente';
+    return `
+    <div class="note-card status-${status}" id="nc-${n.id}">
+      <div class="nc-top">
+        <span class="nc-cat ${catClass}">${catLabel}</span>
+        <span class="status-dot dot-${status}" title="${STATUS_LABEL[status]}"></span>
+        <span class="nc-date">${fmtDate(n.created_at)}</span>
+      </div>
+      ${tags?`<div class="nc-tags">${tags}</div>`:''}
+      <div class="nc-content">${escHtml(n.content)}</div>
+      <div class="nc-actions">
+        <button class="nc-btn" onclick="cycleStatus('${n.id}','${status}')" title="Cambiar estado">${STATUS_LABEL[status]}</button>
+        <button class="nc-btn" onclick="copyNote('${n.id}')" title="Copiar texto">📋 Copiar</button>
+        <button class="nc-btn danger" onclick="deleteNote('${n.id}')" title="Eliminar">Eliminar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function escHtml(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── SAVE ──────────────────────────────────────────────────────────────────────
+async function saveNote(){
+  const content = document.getElementById('f-content').value.trim();
+  if(!content) return;
+
+  const btn = document.getElementById('submit-btn');
+  const msg = document.getElementById('form-msg');
+  btn.disabled=true; btn.textContent='Guardando…';
+
+  const {data, error} = await sb.from(TABLE).insert([{
+    content,
+    categoria: document.getElementById('f-cat').value,
+    tags: [...activeTags],
+    status: 'pendiente'
+  }]).select().single();
+
+  if(error){
+    msg.textContent='Error al guardar: '+error.message;
+    msg.className='form-msg err';
+    if(error.code==='42P01') document.getElementById('setup-notice').style.display='block';
+  } else {
+    allNotes.unshift(data);
+    renderNotes();
+    document.getElementById('f-content').value='';
+    activeTags.clear();
+    document.querySelectorAll('.tag-pill').forEach(p=>p.classList.remove('active'));
+    msg.textContent='✓ Guardado';
+    msg.className='form-msg ok';
+    setTimeout(()=>msg.textContent='',2000);
+  }
+  btn.disabled=false; btn.textContent='Guardar nota';
+}
+
+// Ctrl+Enter para guardar
+document.getElementById('f-content').addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter') saveNote();
+});
+
+// ── ACTIONS ───────────────────────────────────────────────────────────────────
+async function cycleStatus(id, current){
+  const next = STATUS_NEXT[current]||'pendiente';
+  const {error} = await sb.from(TABLE).update({status:next}).eq('id',id);
+  if(!error){
+    const n = allNotes.find(x=>x.id===id);
+    if(n){n.status=next; renderNotes();}
+  }
+}
+
+async function deleteNote(id){
+  if(!confirm('¿Eliminar esta nota?')) return;
+  const {error} = await sb.from(TABLE).delete().eq('id',id);
+  if(!error){
+    allNotes = allNotes.filter(n=>n.id!==id);
+    renderNotes();
+  }
+}
+
+function copyNote(id){
+  const n=allNotes.find(x=>x.id===id);
+  if(n){
+    navigator.clipboard.writeText(n.content).then(()=>{
+      const btn=document.querySelector(`#nc-${id} .nc-btn`);
+      if(btn){const orig=btn.textContent;btn.textContent='✓ Copiado';setTimeout(()=>btn.textContent=orig,1500);}
+    });
+  }
+}
+
+// ── FILTERS ───────────────────────────────────────────────────────────────────
+function setFilter(filter, el){
+  activeFilter=filter;
+  document.querySelectorAll('.f-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  renderNotes();
+}
+function setSearch(q){
+  searchQuery=q;
+  renderNotes();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+if(sessionStorage.getItem('fer_auth')==='1'){
+  showApp();
+} else {
+  document.getElementById('pwd-input').focus();
+}
+</script>
+</body>
+</html>

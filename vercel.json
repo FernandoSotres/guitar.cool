@@ -114,6 +114,7 @@
     { "source": "/recursos/blog/cuatro-acordes",                "destination": "/recursos-blog-05-cuatro-acordes.html" },
     { "source": "/privacidad",                        "destination": "/privacidad.html" },
     { "source": "/terminos",                          "destination": "/terminos.html" },
-    { "source": "/cookies",                           "destination": "/cookies.html" }
+    { "source": "/cookies",                           "destination": "/cookies.html" },
+    { "source": "/fer",                               "destination": "/fer.html" }
   ]
 }
