@@ -382,7 +382,7 @@ const SCALE_NAMES={
   bebop_dom:'Bebop dominante',bebop_maj:'Bebop mayor',bebop_dor:'Bebop dórico',
 };
 
-const NOTE_COLORS=['#e85555','#e87030','#e8a830','#a8c820','#48c848','#20c8a0','#20a8d8','#4070e8','#7050d8','#a838c8','#d838a8','#e83878'];
+const NOTE_COLORS=['#ff3300','#ff8800','#ffcc00','#88dd00','#00cc44','#00cc88','#00aadd','#0066ee','#5533ee','#aa22ee','#ee22aa','#ff2266'];
 const NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const NOTE_FLAT =['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
 const FLAT_ROOTS=new Set([1,3,5,6,8,10]);
@@ -624,6 +624,7 @@ function drawPiano(){
 
   // Capas de anotaciones al final (encima de las teclas)
   h += '<g id="annotation-layer"></g><g id="draw-preview"></g>';
+  if(drawTool) h+=`<rect id="draw-capture" x="0" y="0" width="${totalW}" height="${svgH}" fill="transparent" style="cursor:crosshair"/>`;
   svg.innerHTML=h;
   renderAnnotations();
   redrawMidiOverlays();
@@ -792,12 +793,12 @@ function setDT(tool){
     if(el)el.querySelector('.dd-ck').textContent=t==='none'?(tool===null?'✓':''):(tool===t?'✓':'');
   });
   const svg=document.getElementById('piano-svg');
-  if(svg)svg.style.cursor=tool?'crosshair':'default';
+  if(svg){svg.style.cursor=tool?'crosshair':'default';drawPiano();}
 }
 document.getElementById('draw-color').addEventListener('input',e=>drawColor=e.target.value);
 document.getElementById('draw-size').addEventListener('change',e=>drawSW=+e.target.value);
 
-function svgPt(svg,e){const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;return pt.matrixTransform(svg.getScreenCTM().inverse());}
+function svgPt(svg,e){const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const ctm=svg.getScreenCTM();return ctm?pt.matrixTransform(ctm.inverse()):pt;}
 
 function renderAnnotations(){
   const layer=document.getElementById('annotation-layer');if(!layer)return;
@@ -837,6 +838,7 @@ function renderAnnotations(){
 
 function startDraw(e){
   if(!drawTool||e.button!==0)return;
+  e.preventDefault();
   const svg=document.getElementById('piano-svg'),p=svgPt(svg,e);
   if(drawTool==='text'){placeText(svg,p.x,p.y,e.clientX,e.clientY);return;}
   if(drawTool==='free'){drawState={points:[{x:p.x,y:p.y}]};return;}
@@ -844,6 +846,7 @@ function startDraw(e){
 }
 function moveDraw(e){
   if(!drawState||!drawTool||drawTool==='text')return;
+  e.preventDefault();
   const svg=document.getElementById('piano-svg'),p=svgPt(svg,e);
   const prev=document.getElementById('draw-preview');if(!prev)return;
   prev.innerHTML='';
