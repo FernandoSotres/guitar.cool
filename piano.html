@@ -171,7 +171,7 @@ select.full:hover { border-color:var(--accent2); }
 <body>
 
 <header>
-  <a href="/" style="text-decoration:none"><div class="logo">tr<svg width="10" height="10" viewBox="0 0 22 22" style="display:inline-block;vertical-align:middle;margin:0 1px 2px 1px"><path d="M2 11 Q 5.5 4, 9 11 T 16 11 T 20 11" stroke="var(--accent)" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>molo<span>.mx</span></div></a>
+  <a href="/" style="text-decoration:none"><div class="logo">tr<svg width="12" height="9" viewBox="0 0 24 16" style="display:inline-block;vertical-align:middle;margin:0 1px 2px 1px"><path d="M1 8 C5 1,9 1,12 8 C15 15,19 15,23 8" stroke="var(--accent)" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>molo<span>.mx</span></div></a>
   <span class="logo-sub">Piano</span>
   <span class="h-label">Octavas</span>
   <select class="hsel" id="oct-sel" onchange="drawPiano()">
@@ -180,7 +180,7 @@ select.full:hover { border-color:var(--accent2); }
     <option value="4">4</option>
   </select>
   <a href="/herramientas" class="home-link">← Herramientas</a>
-  <a href="/herramientas/guitarra" class="home-link" style="border-color:var(--accent);color:var(--accent)">♫ Guitarra</a>
+  <a href="/herramientas/guitarra" class="home-link">♫ Guitarra ↗</a>
   <button id="play-btn" onclick="playCurrentMode()" style="margin-left:auto;display:flex;align-items:center;gap:4px;padding:4px 12px;border-radius:5px;border:1px solid var(--accent);background:var(--surface2);color:var(--accent);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--sans);letter-spacing:.04em;transition:background .2s">▶ Reproducir</button>
   <button class="theme-toggle" id="theme-toggle-btn" onclick="toggleTheme()">
     <span class="theme-toggle-dot"></span>
@@ -544,9 +544,9 @@ function drawPiano(){
   svg.style.transform='';
   svg.style.transformOrigin='';
 
-  const wDef=isDark?'#cdc5b8':'#f8f3ec';
-  const bDef=isDark?'#141210':'#1a1410';
-  const wStroke=isDark?'#9a9080':'#c0b8a8';
+  const wDef=isDark?'rgba(165,152,136,0.78)':'rgba(198,185,168,0.82)';
+  const bDef=isDark?'rgba(22,17,13,0.86)':'rgba(26,20,15,0.90)';
+  const wStroke=isDark?'rgba(90,80,70,0.45)':'rgba(140,128,110,0.50)';
   const rootFill=isDark?'#c8874a':'#a05c20';
   const noteFill=isDark?'#7c5cbf':'#6040a0';
   const dimText=isDark?'#7a6a5e':'#a09080';
