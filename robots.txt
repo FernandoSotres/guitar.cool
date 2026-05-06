@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Design experiments — not for indexing
+Disallow: /diseno-b-audaz
+Disallow: /diseno-c-clara
+Disallow: /diseno-propuesta
+Disallow: /estilo-review
+
+# Sitemap
+Sitemap: https://tremolo.mx/sitemap.xml
