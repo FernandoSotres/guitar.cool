@@ -423,6 +423,7 @@ const SCALE_NAMES={
   bebop_dom:'Bebop dominante',bebop_maj:'Bebop mayor',bebop_dor:'Bebop dórico',
 };
 
+const NOTE_COLORS=['#e85555','#e87030','#e8a830','#a8c820','#48c848','#20c8a0','#20a8d8','#4070e8','#7050d8','#a838c8','#d838a8','#e83878'];
 const NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const NOTE_FLAT =['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
 const FLAT_ROOTS=new Set([1,3,5,6,8,10]);
@@ -609,7 +610,7 @@ let currentTuning=null; // override open/names when not null
 // ── STATE ─────────────────────────────────────────────────────────────────────
 let mode='scale', instrumentKey='guitar';
 let orientation='h', zoom=1.8;
-let selectedNoteRoot=9, selectedInterval=7;
+let selectedNoteRoots=new Set([9]), selectedInterval=7;
 let chordType='min', customIntervals=null;
 let voicings=[], voicingIdx=0, vMode='iso';
 let iBuilderOpen=false, iBuilderSelected=new Set([0,3,7]);
@@ -916,6 +917,8 @@ function setMode(m){
     const p=document.getElementById('panel-'+x);if(p)p.style.display=(x===m)?'':'none';
   });
   document.getElementById('voicing-bar').style.display=m==='chord'?'':'none';
+  const kp=document.querySelector('.panel:has(#key-sel)');
+  if(kp)kp.style.display=(m==='note')?'none':'';
   update();
 }
 
@@ -949,11 +952,14 @@ function update(){
     const name=ct?ct.name:(customIntervals?'Custom':'?');
     document.getElementById('info-bar').innerHTML=`<span class="info-tag">${labels[root]} ${name}</span> ${intervals.map(i=>labels[(root+i)%12]).join(' – ')} &nbsp;|&nbsp; ${voicings.length} posiciones`;
   }else{
+    const _firstRoot=[...selectedNoteRoots][0];
     const noteIvs=[0,selectedInterval].filter((v,i,a)=>a.indexOf(v)===i);
-    const labels=buildSpelling(noteIvs,selectedNoteRoot);
-    _dp={type:'note',rootNote:selectedNoteRoot,intervalSemi:selectedInterval,labels};
+    const labels=buildSpelling(noteIvs,_firstRoot);
+    _dp={type:'note',roots:selectedNoteRoots,rootNote:_firstRoot,intervalSemi:selectedInterval,labels};
     const iv=NOTE_INTERVALS.find(x=>x.semi===selectedInterval);
-    document.getElementById('info-bar').innerHTML=`<span class="info-tag">${labels[selectedNoteRoot]}</span> Raíz &nbsp;|&nbsp; <span class="info-tag" style="background:#2a0a38;color:#b855d8">${labels[(selectedNoteRoot+selectedInterval)%12]}</span> ${iv?iv.label:''}`;
+    const noteTags=[...selectedNoteRoots].map(r=>`<span class="info-tag" style="background:${NOTE_COLORS[r]}28;color:${NOTE_COLORS[r]};border:1px solid ${NOTE_COLORS[r]}55">${NOTE_NAMES[r]}</span>`).join(' ');
+    const ivTags2=selectedInterval>0?[...selectedNoteRoots].map(r=>`<span class="info-tag" style="background:${NOTE_COLORS[r]}18;color:${NOTE_COLORS[r]}bb">${NOTE_NAMES[(r+selectedInterval)%12]}</span>`).join(' '):'';
+    document.getElementById('info-bar').innerHTML=noteTags+(ivTags2?` &nbsp;+${iv?iv.label:''}&nbsp; `+ivTags2:'');
   }
   drawFretboard();
 }
@@ -1051,17 +1057,22 @@ function drawFretboard(){
       }
     }
   }else if(_dp.type==='note'){
-    const rn=_dp.rootNote,semi=_dp.intervalSemi,iNote=(rn+semi)%12,lbl=_dp.labels||{};
+    const roots=_dp.roots||new Set([_dp.rootNote]);
+    const semi=_dp.intervalSemi;
     for(let s=0;s<NS;s++){
       const idx=si(s),y=oy+s*SH;
       for(let f=0;f<=FRETS;f++){
         const midi=OPEN[idx]+f;const note=midi%12;
         let col=null,r=9;
-        if(note===rn){col='#e8a838';r=11;}else if(note===iNote&&semi!==0){col='#b855d8';r=10;}
+        if(roots.has(note)){col=NOTE_COLORS[note];r=11;}
+        else if(semi>0){
+          let src=null;roots.forEach(rt=>{if((note-rt+12)%12===semi)src=rt;});
+          if(src!==null){col=NOTE_COLORS[src]+'cc';r=10;}
+        }
         if(!col)continue;
         const x=fnx(f);
         h+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${col}" opacity=".92" filter="url(#fb-nshadow)" style="cursor:pointer" onclick="noteClick(${midi})"/>`;
-        h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="${r===11?11:10}" font-weight="700" font-family="Inter,sans-serif" style="pointer-events:none">${lbl[note]||NOTE_NAMES[note]}</text>`;
+        h+=`<text x="${x}" y="${y+4}"${T(x,y+4)} text-anchor="middle" fill="#fff" font-size="${r===11?11:10}" font-weight="700" font-family="Inter,sans-serif" style="pointer-events:none">${NOTE_NAMES[note]}</text>`;
       }
     }
   }
@@ -1078,8 +1089,19 @@ function buildNoteUI(){
   const ng=document.getElementById('note-grid');ng.innerHTML='';
   NOTE_NAMES.forEach((n,i)=>{
     const btn=document.createElement('button');
-    btn.className='note-btn'+(i===selectedNoteRoot?' active':'');btn.textContent=n;
-    btn.onclick=()=>{selectedNoteRoot=i;document.querySelectorAll('.note-btn').forEach((b,j)=>b.classList.toggle('active',j===i));update();};
+    const act=selectedNoteRoots.has(i);
+    btn.className='note-btn'+(act?' active':'');
+    btn.textContent=n;
+    if(act){btn.style.borderColor=NOTE_COLORS[i];btn.style.background=NOTE_COLORS[i]+'28';btn.style.color=NOTE_COLORS[i];}
+    btn.onclick=()=>{
+      if(selectedNoteRoots.has(i)){if(selectedNoteRoots.size>1)selectedNoteRoots.delete(i);}
+      else selectedNoteRoots.add(i);
+      document.querySelectorAll('.note-btn').forEach((b,j)=>{
+        const a=selectedNoteRoots.has(j);b.classList.toggle('active',a);
+        if(a){b.style.borderColor=NOTE_COLORS[j];b.style.background=NOTE_COLORS[j]+'28';b.style.color=NOTE_COLORS[j];}
+        else{b.style.borderColor='';b.style.background='';b.style.color='';}
+      });update();
+    };
     ng.appendChild(btn);
   });
   const ig=document.getElementById('itvl2-grid');ig.innerHTML='';
