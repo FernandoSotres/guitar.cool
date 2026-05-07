@@ -610,9 +610,7 @@ function drawPiano(){
       // White key — always default pastel color
       h+=`<rect x="${x}" y="6" width="${WW}" height="${WH}" rx="7" fill="${wDef}" stroke="${wStroke}" stroke-width="1" style="cursor:pointer" onclick="noteClick(${pc},${START_OCT}+${oct})"/>`;
       h+=`<rect x="${x+1}" y="7" width="${WW-2}" height="${WH-2}" rx="6" fill="url(#wk-g)" style="pointer-events:none"/>`;
-      // Octave label on C keys (bottom)
-      if(pc===0){const octNum=oct+START_OCT;h+=`<text x="${x+WW/2}" y="${WH-4}" text-anchor="middle" font-size="9" fill="${octLabelFill}" font-family="JetBrains Mono,monospace" style="pointer-events:none">C${octNum}</text>`;}
-      // Colored dot with note name for active/root
+      // Colored dot with note name for active/root (C-label only when pressed)
       if(isActive||isRoot){
         const dotCol=mode==='chord'?(isRoot?rootFill:noteFill):NOTE_COLORS[mode==='scale'?(isRoot?root:pc):pc];
         const dotX=x+WW/2, dotY=WH-24;
@@ -1223,9 +1221,11 @@ function updateMidiInfo(){
     if(document.getElementById('keymap-overlay').style.display!=='none') renderKeyMap();
     return;
   }
+  // Interval names (from lowest pressed note to each other)
+  const IV_NAMES=['Unísono','2ª m','2ª M','3ª m','3ª M','4ª J','Tritono','5ª J','6ª m','6ª M','7ª m','7ª M','8ª'];
   // Note badges
   let html=pcs.map(pc=>`<span class="info-tag" style="background:${NOTE_COLORS[pc]}22;color:${NOTE_COLORS[pc]};border:1px solid ${NOTE_COLORS[pc]}55">${NOTE_NAMES[pc]}</span>`).join(' ');
-  // Chord
+  // Chord detection
   const chord=detectChordFromPCs(pcs);
   if(chord){
     html+=` &nbsp;→&nbsp; <span class="info-tag" style="background:${NOTE_COLORS[chord.root]}28;color:${NOTE_COLORS[chord.root]};font-weight:600">${NOTE_NAMES[chord.root]} ${chord.type.name}</span>`;
@@ -1240,13 +1240,21 @@ function updateMidiInfo(){
         const ROMANS=['I','II','III','IV','V','VI','VII'];
         const isMin=chord.typeId&&(chord.typeId.startsWith('min')||['dim','dim7','m7b5','mMaj7'].includes(chord.typeId));
         const deg=isMin?ROMANS[degIdx].toLowerCase():ROMANS[degIdx];
-        // Quality suffix
-        const sfx={maj:'',min:'',aug:'+','dim':'°','maj7':'Δ7','min7':'m7','7':'7','dim7':'°7','m7b5':'ø','7':'7'}[chord.typeId]||'';
+        const sfx={maj:'',min:'',aug:'+','dim':'°','maj7':'Δ7','min7':'m7','7':'7','dim7':'°7','m7b5':'ø'}[chord.typeId]||'';
         html+=` <span class="info-tag" style="font-family:var(--serif);font-size:14px;padding:2px 9px">${deg}${sfx}</span>`;
       }
     }
   } else if(pcs.length>=2){
-    html+=` <span style="font-size:11px;color:var(--text2)"> — acorde no reconocido</span>`;
+    html+=` <span style="font-size:11px;color:var(--text2)"> — no reconocido</span>`;
+  }
+  // Intervals from lowest note to each higher note
+  if(pcs.length>=2){
+    const base=pcs[0];
+    const ivParts=pcs.slice(1).map(pc=>{
+      const semi=(pc-base+12)%12;
+      return IV_NAMES[semi]||`+${semi}st`;
+    });
+    html+=`<br><span style="font-size:11px;color:var(--text2);letter-spacing:.01em">${ivParts.join(' &nbsp;·&nbsp; ')}</span>`;
   }
   infoText.innerHTML=html;
   if(document.getElementById('keymap-overlay').style.display!=='none') renderKeyMap();
