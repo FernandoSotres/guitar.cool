@@ -557,6 +557,15 @@ function drawPiano(){
   const root=getKey();
   const activeNotes=getActiveNotes();
   const OCTS=getOctaves();
+  // MIDI mode: derive scale dots from midi-key-sel / midi-scale-sel
+  let midiRoot=-1, midiScaleNotes=null;
+  if(mode==='midi'){
+    midiRoot=parseInt((document.getElementById('midi-key-sel')||{value:'-1'}).value);
+    if(midiRoot>=0){
+      const msk=(document.getElementById('midi-scale-sel')||{value:'major'}).value;
+      midiScaleNotes=new Set((SCALES[msk]||SCALES['major']).map(i=>(midiRoot+i)%12));
+    }
+  }
   const isDark=document.documentElement.getAttribute('data-theme')==='dark';
 
   const totalW=OCTS*OCTAVE_W+WW+GAP; // +1 extra C at the end
@@ -596,7 +605,8 @@ function drawPiano(){
   </defs>`;
 
   // Build active note set for enharmonic conflict detection
-  const _aSet=new Set(activeNotes);
+  // In MIDI mode with a key selected, use the scale for enharmonic spelling
+  const _aSet=mode==='midi'&&midiScaleNotes?midiScaleNotes:new Set(activeNotes);
 
   // ── White keys ──
   for(let oct=0;oct<=OCTS;oct++){
@@ -610,10 +620,20 @@ function drawPiano(){
       // White key — always default pastel color
       h+=`<rect x="${x}" y="6" width="${WW}" height="${WH}" rx="7" fill="${wDef}" stroke="${wStroke}" stroke-width="1" style="cursor:pointer" onclick="noteClick(${pc},${START_OCT}+${oct})"/>`;
       h+=`<rect x="${x+1}" y="7" width="${WW-2}" height="${WH-2}" rx="6" fill="url(#wk-g)" style="pointer-events:none"/>`;
-      // Colored dot with note name for active/root (C-label only when pressed)
-      if(isActive||isRoot){
+      // Colored dot with note name (C-label only when pressed)
+      const dotX=x+WW/2, dotY=WH-24;
+      if(mode==='midi'){
+        const isMR=midiRoot>=0&&pc===midiRoot;
+        const isSN=midiScaleNotes&&midiScaleNotes.has(pc);
+        if(isActive){
+          h+=`<circle cx="${dotX}" cy="${dotY}" r="13" fill="${NOTE_COLORS[pc]}" style="pointer-events:none"/>`;
+          h+=`<text x="${dotX}" y="${dotY+4}" text-anchor="middle" font-size="9" fill="#fff" font-weight="700" font-family="Inter,sans-serif" style="pointer-events:none">${nn(pc,midiRoot>=0?midiRoot:pc,_aSet)}</text>`;
+        } else if(isMR||isSN){
+          h+=`<circle cx="${dotX}" cy="${dotY}" r="13" fill="${NOTE_COLORS[isMR?midiRoot:pc]}" opacity="0.45" style="pointer-events:none"/>`;
+          h+=`<text x="${dotX}" y="${dotY+4}" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.9)" font-weight="600" font-family="Inter,sans-serif" style="pointer-events:none">${nn(pc,midiRoot,_aSet)}</text>`;
+        }
+      } else if(isActive||isRoot){
         const dotCol=mode==='chord'?(isRoot?rootFill:noteFill):NOTE_COLORS[mode==='scale'?(isRoot?root:pc):pc];
-        const dotX=x+WW/2, dotY=WH-24;
         h+=`<circle cx="${dotX}" cy="${dotY}" r="13" fill="${dotCol}" style="pointer-events:none"/>`;
         h+=`<text x="${dotX}" y="${dotY+4}" text-anchor="middle" font-size="9" fill="#fff" font-weight="700" font-family="Inter,sans-serif" style="pointer-events:none">${nn(pc,root,_aSet)}</text>`;
       }
@@ -632,9 +652,19 @@ function drawPiano(){
       h+=`<rect x="${x}" y="6" width="${BW}" height="${BH}" rx="5" fill="${bDef}" filter="url(#bk-sh)" style="cursor:pointer" onclick="noteClick(${pc},${START_OCT}+${oct})"/>`;
       h+=`<rect x="${x+2}" y="7" width="${BW-4}" height="${BH-4}" rx="4" fill="url(#bk-g)" style="pointer-events:none"/>`;
       // Colored dot for active/root black keys
-      if(isRootB||isActiveB){
+      const dotX=x+BW/2, dotY=BH-11;
+      if(mode==='midi'){
+        const isMRB=midiRoot>=0&&pc===midiRoot;
+        const isSNB=midiScaleNotes&&midiScaleNotes.has(pc);
+        if(isActiveB){
+          h+=`<circle cx="${dotX}" cy="${dotY}" r="9" fill="${NOTE_COLORS[pc]}" style="pointer-events:none"/>`;
+          h+=`<text x="${dotX}" y="${dotY+3}" text-anchor="middle" font-size="7" fill="#fff" font-weight="700" font-family="Inter,sans-serif" style="pointer-events:none">${nn(pc,midiRoot>=0?midiRoot:pc,_aSet)}</text>`;
+        } else if(isMRB||isSNB){
+          h+=`<circle cx="${dotX}" cy="${dotY}" r="9" fill="${NOTE_COLORS[isMRB?midiRoot:pc]}" opacity="0.45" style="pointer-events:none"/>`;
+          h+=`<text x="${dotX}" y="${dotY+3}" text-anchor="middle" font-size="7" fill="rgba(255,255,255,0.9)" font-weight="600" font-family="Inter,sans-serif" style="pointer-events:none">${nn(pc,midiRoot,_aSet)}</text>`;
+        }
+      } else if(isRootB||isActiveB){
         const dotColB=mode==='chord'?(isRootB?(isDark?'#d89050':'#c06820'):(isDark?'#9070d8':'#7050c0')):NOTE_COLORS[mode==='scale'?(isRootB?root:pc):pc];
-        const dotX=x+BW/2, dotY=BH-11;
         h+=`<circle cx="${dotX}" cy="${dotY}" r="9" fill="${dotColB}" style="pointer-events:none"/>`;
         h+=`<text x="${dotX}" y="${dotY+3}" text-anchor="middle" font-size="7" fill="#fff" font-weight="700" font-family="Inter,sans-serif" style="pointer-events:none">${nn(pc,root,_aSet)}</text>`;
       }
