@@ -171,7 +171,7 @@ select.full:hover { border-color:var(--accent2); }
 <body>
 
 <header>
-  <a href="/" style="text-decoration:none"><div class="logo">tr<svg width="10" height="10" viewBox="0 0 22 22" style="display:inline-block;vertical-align:middle;margin:0 1px 2px 1px"><path d="M2 11 Q 5.5 4, 9 11 T 16 11 T 20 11" stroke="var(--accent)" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>molo<span>.mx</span></div></a>
+  <a href="/" style="text-decoration:none"><div class="logo">tr<span style="color:var(--accent);font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></div></a>
   <span class="logo-sub">Piano</span>
   <span class="h-label">Octavas</span>
   <select class="hsel" id="oct-sel" onchange="drawPiano()">
@@ -607,23 +607,17 @@ function drawPiano(){
       const x=oct*OCTAVE_W+wIdx*STEP;
       const isRoot=pc===root;
       const isActive=activeNotes.has(pc);
-      let fill=wDef;
-      if(mode==='note'){
-        if(selectedNoteRoots.has(pc)) fill=NOTE_COLORS[pc];
-        else if(isActive){fill=NOTE_COLORS[pc];}
-      } else if(mode==='midi'){ if(isActive) fill=NOTE_COLORS[pc]; } else if(mode==='scale'){ fill=isRoot?NOTE_COLORS[root]:isActive?NOTE_COLORS[pc]:wDef; } else { fill=isRoot?rootFill:isActive?noteFill:wDef; }
-      const keyStroke=wStroke;
-
-      h+=`<rect x="${x}" y="6" width="${WW}" height="${WH}" rx="7" fill="${fill}" stroke="${keyStroke}" stroke-width="1" style="cursor:pointer" onclick="noteClick(${pc},${START_OCT}+${oct})"/>`;h+=`<rect x="${x+1}" y="7" width="${WW-2}" height="${WH-2}" rx="6" fill="url(#wk-g)" style="pointer-events:none"/>`;
-
-      // Octave label on C keys
-      if(pc===0){
-        const octNum=oct+START_OCT;
-        h+=`<text x="${x+WW/2}" y="${WH-10}" text-anchor="middle" font-size="11" fill="${isActive||isRoot?'rgba(255,255,255,.75)':octLabelFill}" font-family="JetBrains Mono,monospace" style="pointer-events:none">C${octNum}</text>`;
-      }
-      // Note name on active white keys
-      if((isActive||isRoot)&&pc!==0){
-        h+=`<text x="${x+WW/2}" y="${WH-10}" text-anchor="middle" font-size="11" fill="rgba(255,255,255,.85)" font-family="JetBrains Mono,monospace" style="pointer-events:none">${nn(pc,root,_aSet)}</text>`;
+      // White key — always default pastel color
+      h+=`<rect x="${x}" y="6" width="${WW}" height="${WH}" rx="7" fill="${wDef}" stroke="${wStroke}" stroke-width="1" style="cursor:pointer" onclick="noteClick(${pc},${START_OCT}+${oct})"/>`;
+      h+=`<rect x="${x+1}" y="7" width="${WW-2}" height="${WH-2}" rx="6" fill="url(#wk-g)" style="pointer-events:none"/>`;
+      // Octave label on C keys (bottom)
+      if(pc===0){const octNum=oct+START_OCT;h+=`<text x="${x+WW/2}" y="${WH-4}" text-anchor="middle" font-size="9" fill="${octLabelFill}" font-family="JetBrains Mono,monospace" style="pointer-events:none">C${octNum}</text>`;}
+      // Colored dot with note name for active/root
+      if(isActive||isRoot){
+        const dotCol=mode==='chord'?(isRoot?rootFill:noteFill):NOTE_COLORS[mode==='scale'?(isRoot?root:pc):pc];
+        const dotX=x+WW/2, dotY=WH-24;
+        h+=`<circle cx="${dotX}" cy="${dotY}" r="13" fill="${dotCol}" style="pointer-events:none"/>`;
+        h+=`<text x="${dotX}" y="${dotY+4}" text-anchor="middle" font-size="9" fill="#fff" font-weight="700" font-family="Inter,sans-serif" style="pointer-events:none">${nn(pc,root,_aSet)}</text>`;
       }
       wIdx++;
     }
@@ -636,16 +630,15 @@ function drawPiano(){
       const x=oct*OCTAVE_W+offset;
       const isRootB=pc===root;
       const isActiveB=activeNotes.has(pc);
-      let fillB=bDef;
-      if(mode==='note'){
-        if(selectedNoteRoots.has(pc)) fillB=NOTE_COLORS[pc];
-        else if(isActiveB){fillB=NOTE_COLORS[pc];}
-      } else if(mode==='midi'){ if(isActiveB) fillB=NOTE_COLORS[pc]; } else if(mode==='scale'){ fillB=isRootB?NOTE_COLORS[root]:isActiveB?NOTE_COLORS[pc]:bDef; } else { fillB=isRootB?(isDark?'#d89050':'#c06820'):isActiveB?(isDark?'#9070d8':'#7050c0'):bDef; }
-
-      h+=`<rect x="${x}" y="6" width="${BW}" height="${BH}" rx="5" fill="${fillB}" filter="url(#bk-sh)" style="cursor:pointer" onclick="noteClick(${pc},${START_OCT}+${oct})"/>`;h+=`<rect x="${x+2}" y="7" width="${BW-4}" height="${BH-4}" rx="4" fill="url(#bk-g)" style="pointer-events:none"/>`;
-
+      // Black key — always default dark color
+      h+=`<rect x="${x}" y="6" width="${BW}" height="${BH}" rx="5" fill="${bDef}" filter="url(#bk-sh)" style="cursor:pointer" onclick="noteClick(${pc},${START_OCT}+${oct})"/>`;
+      h+=`<rect x="${x+2}" y="7" width="${BW-4}" height="${BH-4}" rx="4" fill="url(#bk-g)" style="pointer-events:none"/>`;
+      // Colored dot for active/root black keys
       if(isRootB||isActiveB){
-        h+=`<text x="${x+BW/2}" y="${BH-1}" text-anchor="middle" font-size="8" fill="#fff" font-weight="600" font-family="JetBrains Mono,monospace" style="pointer-events:none">${nn(pc,root,_aSet)}</text>`;
+        const dotColB=mode==='chord'?(isRootB?(isDark?'#d89050':'#c06820'):(isDark?'#9070d8':'#7050c0')):NOTE_COLORS[mode==='scale'?(isRootB?root:pc):pc];
+        const dotX=x+BW/2, dotY=BH-11;
+        h+=`<circle cx="${dotX}" cy="${dotY}" r="9" fill="${dotColB}" style="pointer-events:none"/>`;
+        h+=`<text x="${dotX}" y="${dotY+3}" text-anchor="middle" font-size="7" fill="#fff" font-weight="700" font-family="Inter,sans-serif" style="pointer-events:none">${nn(pc,root,_aSet)}</text>`;
       }
     }
   }
@@ -1202,7 +1195,8 @@ async function playCurrentMode(){
   </div>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/auth.js">
+<script src="/auth.js"></script>
+<script>
 // ── MIDI MODE ─────────────────────────────────────────────────────────────────
 
 // Chord detection: try every pitch class as root, match intervals to CHORD_TYPES
