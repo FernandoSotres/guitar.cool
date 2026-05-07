@@ -123,7 +123,9 @@ select.full:hover { border-color:var(--accent2); }
 /* Piano area */
 .piano-area { flex:1; display:flex; flex-direction:column; align-items:center; overflow:hidden; background:var(--bg); }
 .keys-scroll { flex:1; width:100%; overflow:auto; display:flex; align-items:center; justify-content:center; padding:40px 24px 24px; }
-#piano-svg { display:block; flex-shrink:0; }
+#piano-svg { display:block; flex-shrink:0; pointer-events:all; }
+/* When a draw tool is active, key rects pass events through so the draw-capture intercepts them */
+#piano-svg.drawing rect:not(#draw-capture) { pointer-events:none !important; }
 
 .info-bar { background:var(--surface); border-top:1px solid var(--hl); padding:5px 14px; font-size:12px; color:var(--text2); flex-shrink:0; min-height:28px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; width:100%; }
 .midi-badge { font-size:11px; font-family:'JetBrains Mono',monospace; padding:2px 8px; border-radius:10px; border:1px solid var(--hl); background:var(--bg); color:var(--text2); transition:all .3s; white-space:nowrap; }
@@ -673,7 +675,7 @@ function drawPiano(){
 
   // Capas de anotaciones al final (encima de las teclas)
   h += '<g id="annotation-layer"></g><g id="draw-preview"></g>';
-  if(drawTool) h+=`<rect id="draw-capture" x="0" y="0" width="${totalW}" height="${svgH}" fill="transparent" style="cursor:crosshair"/>`;
+  if(drawTool) h+=`<rect id="draw-capture" x="0" y="0" width="${totalW}" height="${svgH}" fill="transparent" pointer-events="all" style="cursor:crosshair"/>`;
   svg.innerHTML=h;
   renderAnnotations();
   if(mode!=='midi') redrawMidiOverlays();
@@ -847,7 +849,11 @@ function setDT(tool){
     if(el)el.querySelector('.dd-ck').textContent=t==='none'?(tool===null?'✓':''):(tool===t?'✓':'');
   });
   const svg=document.getElementById('piano-svg');
-  if(svg){svg.style.cursor=tool?'crosshair':'default';drawPiano();}
+  if(svg){
+    svg.style.cursor=tool?'crosshair':'default';
+    svg.classList.toggle('drawing', !!tool);
+    drawPiano();
+  }
 }
 document.getElementById('draw-color').addEventListener('input',e=>drawColor=e.target.value);
 document.getElementById('draw-size').addEventListener('change',e=>drawSW=+e.target.value);
@@ -938,7 +944,6 @@ function endDrawAt(clientX,clientY){
   document.getElementById('draw-preview').innerHTML='';drawState=null;
 }
 function endDraw(e){endDrawAt(e.clientX,e.clientY);}
-document.addEventListener('mouseup',e=>{if(drawState)endDrawAt(e.clientX,e.clientY);});
 
 function placeText(svg,svgX,svgY,clientX,clientY){
   const inp=document.createElement('input');inp.type='text';
@@ -975,13 +980,11 @@ buildNoteGrids();
 update();
 initMIDI();
 
-// Conectar eventos de dibujo al SVG del piano (el elemento persiste entre redraws)
-(()=>{
-  const svg=document.getElementById('piano-svg');
-  svg.addEventListener('mousedown', startDraw);
-  svg.addEventListener('mousemove', moveDraw);
-  svg.addEventListener('mouseup',   endDraw);
-})();
+// Eventos de dibujo: mousedown en el SVG, move/up en document para no perder el trazo
+// si el cursor sale del SVG mientras arrastra.
+document.getElementById('piano-svg').addEventListener('mousedown', startDraw);
+document.addEventListener('mousemove', moveDraw);
+document.addEventListener('mouseup', e=>{if(drawState)endDrawAt(e.clientX,e.clientY);});
 
 // ── Pre-load audio samples (wrapped so JS errors here never block the UI) ─────
 (()=>{
@@ -1013,6 +1016,7 @@ initMIDI();
 })();
 
 async function noteClick(pc,oct){
+  if(drawTool) return; // no tocar notas mientras se dibuja
   try{
     await Tone.start();
     const note=_gn(pc,oct);
