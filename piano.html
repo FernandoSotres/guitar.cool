@@ -173,7 +173,7 @@ select.full:hover { border-color:var(--accent2); }
 <body>
 
 <header>
-  <a href="/" style="text-decoration:none"><div class="logo">tr<span style="color:var(--accent);font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></div></a>
+  <a href="/" style="text-decoration:none"><div class="logo">tr<span style="color:var(--accent);font-family:inherit;font-size:1em;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></div></a>
   <span class="logo-sub">Piano</span>
   <span class="h-label">Octavas</span>
   <select class="hsel" id="oct-sel" onchange="drawPiano()">
@@ -620,7 +620,7 @@ function drawPiano(){
       const isRoot=pc===root;
       const isActive=activeNotes.has(pc);
       // White key — always default pastel color
-      h+=`<rect x="${x}" y="6" width="${WW}" height="${WH}" rx="7" fill="${wDef}" stroke="${wStroke}" stroke-width="1" style="cursor:pointer" onclick="noteClick(${pc},${START_OCT}+${oct})"/>`;
+      h+=`<rect x="${x}" y="6" width="${WW}" height="${WH}" rx="7" fill="${wDef}" stroke="${wStroke}" stroke-width="1" style="cursor:${drawTool?'crosshair':'pointer'};${drawTool?'pointer-events:none;':''}" onclick="noteClick(${pc},${START_OCT}+${oct})"/>`;
       h+=`<rect x="${x+1}" y="7" width="${WW-2}" height="${WH-2}" rx="6" fill="url(#wk-g)" style="pointer-events:none"/>`;
       // Colored dot with note name (C-label only when pressed)
       const dotX=x+WW/2, dotY=WH-24;
@@ -651,7 +651,7 @@ function drawPiano(){
       const isRootB=pc===root;
       const isActiveB=activeNotes.has(pc);
       // Black key — always default dark color
-      h+=`<rect x="${x}" y="6" width="${BW}" height="${BH}" rx="5" fill="${bDef}" filter="url(#bk-sh)" style="cursor:pointer" onclick="noteClick(${pc},${START_OCT}+${oct})"/>`;
+      h+=`<rect x="${x}" y="6" width="${BW}" height="${BH}" rx="5" fill="${bDef}" filter="url(#bk-sh)" style="cursor:${drawTool?'crosshair':'pointer'};${drawTool?'pointer-events:none;':''}" onclick="noteClick(${pc},${START_OCT}+${oct})"/>`;
       h+=`<rect x="${x+2}" y="7" width="${BW-4}" height="${BH-4}" rx="4" fill="url(#bk-g)" style="pointer-events:none"/>`;
       // Colored dot for active/root black keys
       const dotX=x+BW/2, dotY=BH-11;

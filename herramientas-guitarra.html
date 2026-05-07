@@ -185,7 +185,7 @@ select.full:hover { border-color:var(--accent2); }
 <body>
 
 <header>
-  <a href="/" style="text-decoration:none"><div class="logo">tr<span style="color:var(--accent);font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></div></a>
+  <a href="/" style="text-decoration:none"><div class="logo">tr<span style="color:var(--accent);font-family:inherit;font-size:1em;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></div></a>
   <span class="logo-sub">Herramientas</span>
   <span class="h-label">Instrumento</span>
   <select class="hsel" id="instrument-sel" onchange="setInstrument(this.value)">
@@ -196,8 +196,6 @@ select.full:hover { border-color:var(--accent2); }
     <option value="violin">Violín</option>
     <option value="banjo">Banjo</option>
   </select>
-  <a href="/herramientas" class="dtbtn" style="text-decoration:none">← Herramientas</a>
-  <a href="/recursos" class="dtbtn" style="text-decoration:none">Recursos</a>
   <a href="/herramientas/piano" class="dtbtn" style="text-decoration:none">Piano →</a>
   <span class="h-label">Afinación</span>
   <select class="hsel" id="tuning-sel" onchange="setTuning(this.value)" style="max-width:160px"></select>
