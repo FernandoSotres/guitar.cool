@@ -219,10 +219,11 @@ select.full:hover { border-color:var(--accent2); }
 
     <div class="panel">
       <div class="panel-title">Modo</div>
-      <div class="seg">
+      <div class="seg" style="flex-wrap:wrap">
         <button class="seg-btn active" id="m-scale" onclick="setMode('scale')">Escala</button>
         <button class="seg-btn" id="m-chord" onclick="setMode('chord')">Acorde</button>
         <button class="seg-btn" id="m-note"  onclick="setMode('note')">Nota</button>
+        <button class="seg-btn" id="m-midi"  onclick="setMode('midi')">MIDI</button>
       </div>
     </div>
 
@@ -323,6 +324,31 @@ select.full:hover { border-color:var(--accent2); }
       <div class="note-grid" id="note-grid"></div>
       <div class="panel-title" style="margin-top:4px">Intervalo</div>
       <div class="itvl2-grid" id="itvl2-grid"></div>
+
+    <div class="panel" id="panel-midi" style="display:none">
+      <div class="panel-title">Tonalidad (opcional)</div>
+      <select class="full" id="midi-key-sel" onchange="update()">
+        <option value="-1" selected>Libre</option>
+        <option value="0">C</option><option value="1">C# / D♭</option>
+        <option value="2">D</option><option value="3">D# / E♭</option>
+        <option value="4">E</option><option value="5">F</option>
+        <option value="6">F# / G♭</option><option value="7">G</option>
+        <option value="8">G# / A♭</option><option value="9">A</option>
+        <option value="10">A# / B♭</option><option value="11">B</option>
+      </select>
+      <div class="panel-title" style="margin-top:5px">Escala de referencia</div>
+      <select class="full" id="midi-scale-sel" onchange="update()" style="font-size:11px">
+        <option value="major">Mayor</option>
+        <option value="minor">Menor natural</option>
+        <option value="hminor">Menor armónica</option>
+        <option value="dorian">Dórico</option>
+        <option value="phrygian">Frigio</option>
+        <option value="mixolydian">Mixolidio</option>
+        <option value="lydian">Lidio</option>
+        <option value="penta_maj">Pentatónica mayor</option>
+        <option value="penta_min">Pentatónica menor</option>
+      </select>
+      <button onclick="toggleKeyMap()" class="dtbtn" style="width:100%;justify-content:center;margin-top:7px;font-size:11px">⌨ Mapa de teclas</button>
     </div>
 
   </div>
@@ -509,6 +535,7 @@ function toggleTheme(){
 
 // ── ACTIVE NOTES ──────────────────────────────────────────────────────────────
 function getActiveNotes(){
+  if(mode==='midi') return new Set([...midiActivePCs]);
   const root=getKey();
   if(mode==='scale'){
     const sk=document.getElementById('scale-sel').value;
@@ -583,7 +610,7 @@ function drawPiano(){
       if(mode==='note'){
         if(selectedNoteRoots.has(pc)) fill=NOTE_COLORS[pc];
         else if(isActive){fill=NOTE_COLORS[pc];}
-      } else if(mode==='scale'){ fill=isRoot?NOTE_COLORS[root]:isActive?NOTE_COLORS[pc]:wDef; } else { fill=isRoot?rootFill:isActive?noteFill:wDef; }
+      } else if(mode==='midi'){ if(isActive) fill=NOTE_COLORS[pc]; } else if(mode==='scale'){ fill=isRoot?NOTE_COLORS[root]:isActive?NOTE_COLORS[pc]:wDef; } else { fill=isRoot?rootFill:isActive?noteFill:wDef; }
       const keyStroke=wStroke;
 
       h+=`<rect x="${x}" y="6" width="${WW}" height="${WH}" rx="7" fill="${fill}" stroke="${keyStroke}" stroke-width="1" style="cursor:pointer" onclick="noteClick(${pc},${START_OCT}+${oct})"/>`;h+=`<rect x="${x+1}" y="7" width="${WW-2}" height="${WH-2}" rx="6" fill="url(#wk-g)" style="pointer-events:none"/>`;
@@ -612,7 +639,7 @@ function drawPiano(){
       if(mode==='note'){
         if(selectedNoteRoots.has(pc)) fillB=NOTE_COLORS[pc];
         else if(isActiveB){fillB=NOTE_COLORS[pc];}
-      } else if(mode==='scale'){ fillB=isRootB?NOTE_COLORS[root]:isActiveB?NOTE_COLORS[pc]:bDef; } else { fillB=isRootB?(isDark?'#d89050':'#c06820'):isActiveB?(isDark?'#9070d8':'#7050c0'):bDef; }
+      } else if(mode==='midi'){ if(isActiveB) fillB=NOTE_COLORS[pc]; } else if(mode==='scale'){ fillB=isRootB?NOTE_COLORS[root]:isActiveB?NOTE_COLORS[pc]:bDef; } else { fillB=isRootB?(isDark?'#d89050':'#c06820'):isActiveB?(isDark?'#9070d8':'#7050c0'):bDef; }
 
       h+=`<rect x="${x}" y="6" width="${BW}" height="${BH}" rx="5" fill="${fillB}" filter="url(#bk-sh)" style="cursor:pointer" onclick="noteClick(${pc},${START_OCT}+${oct})"/>`;h+=`<rect x="${x+2}" y="7" width="${BW-4}" height="${BH-4}" rx="4" fill="url(#bk-g)" style="pointer-events:none"/>`;
 
@@ -627,7 +654,7 @@ function drawPiano(){
   if(drawTool) h+=`<rect id="draw-capture" x="0" y="0" width="${totalW}" height="${svgH}" fill="transparent" style="cursor:crosshair"/>`;
   svg.innerHTML=h;
   renderAnnotations();
-  redrawMidiOverlays();
+  if(mode!=='midi') redrawMidiOverlays();
 }
 
 // ── UPDATE ────────────────────────────────────────────────────────────────────
@@ -657,6 +684,8 @@ function update(){
     const name=ct?ct.name:(customIntervals?'Custom':'?');
     const _cnSet=new Set(intervals.map(i=>(root+i)%12));
     infoText.innerHTML=`<span class="info-tag">${nn(root,root,_cnSet)} ${name}</span> ${intervals.map(i=>nn((root+i)%12,root,_cnSet)).join(' – ')}`;
+  } else if(mode==='midi'){
+    updateMidiInfo();
   } else {
     const iv=NOTE_INTERVALS.find(x=>x.semi===selectedInterval);
     const tags=[...selectedNoteRoots].map(r=>`<span class="info-tag" style="background:${NOTE_COLORS[r]}28;color:${NOTE_COLORS[r]};border:1px solid ${NOTE_COLORS[r]}55">${NOTE_NAMES[r]}</span>`).join(' ');
@@ -669,12 +698,14 @@ function update(){
 // ── MODE ──────────────────────────────────────────────────────────────────────
 function setMode(m){
   mode=m;
-  ['scale','chord','note'].forEach(x=>{
+  ['scale','chord','note','midi'].forEach(x=>{
     document.getElementById('m-'+x).classList.toggle('active',x===m);
     const p=document.getElementById('panel-'+x);if(p)p.style.display=(x===m)?'':'none';
   });
   const kp=document.querySelector('.panel:has(#key-sel)');
-  if(kp)kp.style.display=(m==='note')?'none':'';
+  if(kp)kp.style.display=(m==='note'||m==='midi')?'none':'';
+  if(m==='midi'){midiActivePCs.clear();midiPCCount.clear();kbPressed.clear();}
+  else{const km=document.getElementById('keymap-overlay');if(km)km.style.display='none';}
   update();
 }
 
@@ -768,6 +799,7 @@ function buildNoteGrids(){
 
 // ── INDICADORES (sistema de anotaciones) ─────────────────────────────────────
 let drawTool=null, drawColor='#ffdd44', drawSW=3, drawState=null, annotations=[];
+let midiActivePCs=new Set(), midiPCCount=new Map(), kbOctave=4, kbPressed=new Map();
 
 function toggleDD(id){
   const el=document.getElementById(id),was=el.classList.contains('open');
@@ -1057,30 +1089,40 @@ function _addMidiRect(m){
 
 async function midiNoteOn(m, vel){
   if(vel===0){ midiNoteOff(m); return; }
-  if(!_sampler||!_samplerReady) return;
-  try {
+  var pc=m%12;
+  midiPCCount.set(pc,(midiPCCount.get(pc)||0)+1);
+  midiActivePCs.add(pc);
+  try{
     await Tone.start();
-    _sampler.triggerAttack(_midiGn(m));
-  } catch(e){}
-  // Visual overlay
-  var svg=document.getElementById('piano-svg');
-  if(svg){
-    var existing=svg.querySelector('.midi-press[data-midi-note="'+m+'"]');
-    if(existing) existing.remove();
-    _addMidiRect(m);
+    if(_sampler&&_samplerReady) _sampler.triggerAttack(_midiGn(m));
+    else if(_synth) _synth.triggerAttackRelease(_midiGn(m),'0.5');
+  }catch(e){}
+  if(mode==='midi'){ drawPiano(); update(); }
+  else {
+    var svg=document.getElementById('piano-svg');
+    if(svg){
+      var existing=svg.querySelector('.midi-press[data-midi-note="'+m+'"]');
+      if(existing) existing.remove();
+      _addMidiRect(m);
+    }
   }
 }
 
 function midiNoteOff(m){
-  if(_sampler&&_samplerReady){
-    try{ _sampler.triggerRelease(_midiGn(m)); }catch(e){}
+  var pc=m%12;
+  var cnt=(midiPCCount.get(pc)||1)-1;
+  if(cnt<=0){midiPCCount.delete(pc);midiActivePCs.delete(pc);}
+  else midiPCCount.set(pc,cnt);
+  if(_sampler&&_samplerReady){ try{_sampler.triggerRelease(_midiGn(m));}catch(e){} }
+  if(mode==='midi'){ drawPiano(); update(); }
+  else {
+    var svg=document.getElementById('piano-svg');
+    if(svg){
+      var el=svg.querySelector('.midi-press[data-midi-note="'+m+'"]');
+      if(el) el.remove();
+    }
+    midiPressedKeys.delete(m);
   }
-  var svg=document.getElementById('piano-svg');
-  if(svg){
-    var el=svg.querySelector('.midi-press[data-midi-note="'+m+'"]');
-    if(el) el.remove();
-  }
-  midiPressedKeys.delete(m);
 }
 
 function handleMIDIMessage(ev){
@@ -1159,6 +1201,170 @@ async function playCurrentMode(){
   </div>
 </footer>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/auth.js"></script>
+<script src="/auth.js">
+// ── MIDI MODE ─────────────────────────────────────────────────────────────────
+
+// Chord detection: try every pitch class as root, match intervals to CHORD_TYPES
+function detectChordFromPCs(pcs){
+  const arr=[...new Set(pcs)].sort((a,b)=>a-b);
+  if(arr.length<2) return null;
+  for(const root of arr){
+    const ivs=arr.map(pc=>(pc-root+12)%12).sort((a,b)=>a-b);
+    const key=ivs.join(',');
+    for(const [id,ct] of Object.entries(CHORD_TYPES)){
+      const norm=[...new Set(ct.intervals.map(i=>i%12))].sort((a,b)=>a-b);
+      if(key===norm.join(',')) return {root,typeId:id,type:ct};
+    }
+  }
+  return null;
+}
+
+// Roman numerals + quality logic
+function updateMidiInfo(){
+  const infoText=document.getElementById('info-text');
+  const pcs=[...midiActivePCs].sort((a,b)=>a-b);
+  if(pcs.length===0){
+    infoText.innerHTML='<span style="color:var(--text2)">Toca notas con el controlador MIDI o el teclado (A–L, W–P). &nbsp;<kbd style="background:var(--surface2);border:1px solid var(--hl);border-radius:3px;padding:1px 4px;font-size:10px">Z</kbd>/<kbd style="background:var(--surface2);border:1px solid var(--hl);border-radius:3px;padding:1px 4px;font-size:10px">X</kbd> cambian octava.</span>';
+    if(document.getElementById('keymap-overlay').style.display!=='none') renderKeyMap();
+    return;
+  }
+  // Note badges
+  let html=pcs.map(pc=>`<span class="info-tag" style="background:${NOTE_COLORS[pc]}22;color:${NOTE_COLORS[pc]};border:1px solid ${NOTE_COLORS[pc]}55">${NOTE_NAMES[pc]}</span>`).join(' ');
+  // Chord
+  const chord=detectChordFromPCs(pcs);
+  if(chord){
+    html+=` &nbsp;→&nbsp; <span class="info-tag" style="background:${NOTE_COLORS[chord.root]}28;color:${NOTE_COLORS[chord.root]};font-weight:600">${NOTE_NAMES[chord.root]} ${chord.type.name}</span>`;
+    // Degree
+    const mKey=parseInt((document.getElementById('midi-key-sel')||{value:'-1'}).value);
+    if(mKey>=0){
+      const mScale=(document.getElementById('midi-scale-sel')||{value:'major'}).value;
+      const scale=SCALES[mScale]||SCALES['major'];
+      const interval=(chord.root-mKey+12)%12;
+      const degIdx=scale.indexOf(interval);
+      if(degIdx>=0){
+        const ROMANS=['I','II','III','IV','V','VI','VII'];
+        const isMin=chord.typeId&&(chord.typeId.startsWith('min')||['dim','dim7','m7b5','mMaj7'].includes(chord.typeId));
+        const deg=isMin?ROMANS[degIdx].toLowerCase():ROMANS[degIdx];
+        // Quality suffix
+        const sfx={maj:'',min:'',aug:'+','dim':'°','maj7':'Δ7','min7':'m7','7':'7','dim7':'°7','m7b5':'ø','7':'7'}[chord.typeId]||'';
+        html+=` <span class="info-tag" style="font-family:var(--serif);font-size:14px;padding:2px 9px">${deg}${sfx}</span>`;
+      }
+    }
+  } else if(pcs.length>=2){
+    html+=` <span style="font-size:11px;color:var(--text2)"> — acorde no reconocido</span>`;
+  }
+  infoText.innerHTML=html;
+  if(document.getElementById('keymap-overlay').style.display!=='none') renderKeyMap();
+}
+
+// ── Key map overlay ───────────────────────────────────────────────────────────
+function toggleKeyMap(){
+  const el=document.getElementById('keymap-overlay');
+  const hidden=el.style.display==='none';
+  el.style.display=hidden?'':'none';
+  if(hidden) renderKeyMap();
+}
+
+function renderKeyMap(){
+  const wrap=document.getElementById('keymap-svg-container');
+  if(!wrap) return;
+  const KW=24,KH=52,BW=14,BH=32,GAP=1,STEP=KW+GAP;
+  const wKeys=[
+    {k:'A',pc:0,n:'C'},{k:'S',pc:2,n:'D'},{k:'D',pc:4,n:'E'},
+    {k:'F',pc:5,n:'F'},{k:'G',pc:7,n:'G'},{k:'H',pc:9,n:'A'},
+    {k:'J',pc:11,n:'B'},{k:'K',pc:0,n:'C'},{k:'L',pc:2,n:'D'},{k:';',pc:4,n:'E'}
+  ];
+  const bKeys=[
+    {k:'W',pc:1,n:'C#',wi:0},{k:'E',pc:3,n:'D#',wi:1},
+    {k:'T',pc:6,n:'F#',wi:3},{k:'Y',pc:8,n:'G#',wi:4},{k:'U',pc:10,n:'A#',wi:5},
+    {k:'O',pc:1,n:'C#',wi:7},{k:'P',pc:3,n:'D#',wi:8}
+  ];
+  const TW=10*STEP, TH=KH+6;
+  const dk=document.documentElement.getAttribute('data-theme')==='dark';
+  let s=`<svg width="${TW}" height="${TH}" viewBox="0 0 ${TW} ${TH}" xmlns="http://www.w3.org/2000/svg">`;
+  // White keys
+  wKeys.forEach((wk,i)=>{
+    const x=i*STEP, pr=midiActivePCs.has(wk.pc);
+    const fill=pr?NOTE_COLORS[wk.pc]:(dk?'rgba(165,152,136,0.85)':'rgba(200,188,170,0.85)');
+    const tc=pr?'#fff':(dk?'rgba(35,28,20,0.82)':'rgba(55,45,35,0.82)');
+    s+=`<rect x="${x}" y="2" width="${KW}" height="${KH}" rx="3" fill="${fill}" stroke="rgba(80,70,60,0.35)" stroke-width="1"/>`;
+    s+=`<text x="${x+KW/2}" y="${KH-18}" text-anchor="middle" font-size="9.5" font-weight="700" fill="${tc}" font-family="JetBrains Mono,monospace">${wk.k}</text>`;
+    s+=`<text x="${x+KW/2}" y="${KH-6}" text-anchor="middle" font-size="7.5" fill="${pr?'rgba(255,255,255,0.85)':tc}" font-family="Inter,sans-serif">${wk.n}</text>`;
+  });
+  // Black keys
+  bKeys.forEach(bk=>{
+    const x=bk.wi*STEP+KW-BW/2+1, pr=midiActivePCs.has(bk.pc);
+    const fill=pr?NOTE_COLORS[bk.pc]:(dk?'rgba(20,16,12,0.92)':'rgba(26,20,15,0.93)');
+    const tc=pr?'#fff':'rgba(210,195,175,0.9)';
+    s+=`<rect x="${x}" y="2" width="${BW}" height="${BH}" rx="2" fill="${fill}" stroke="rgba(0,0,0,0.22)" stroke-width="0.5"/>`;
+    s+=`<text x="${x+BW/2}" y="${BH-12}" text-anchor="middle" font-size="8" font-weight="700" fill="${tc}" font-family="JetBrains Mono,monospace">${bk.k}</text>`;
+    s+=`<text x="${x+BW/2}" y="${BH-3}" text-anchor="middle" font-size="6.5" fill="${pr?'rgba(255,255,255,0.7)':'rgba(175,160,140,0.7)'}" font-family="Inter,sans-serif">${bk.n}</text>`;
+  });
+  s+='</svg>';
+  wrap.innerHTML=s;
+  const ol=document.getElementById('km-oct-label');
+  if(ol) ol.textContent='Oct. base: '+kbOctave;
+}
+
+// ── Computer keyboard → MIDI ─────────────────────────────────────────────────
+const KB_NOTE_MAP={
+  'a':[0,0],'w':[1,0],'s':[2,0],'e':[3,0],'d':[4,0],
+  'f':[5,0],'t':[6,0],'g':[7,0],'y':[8,0],'h':[9,0],
+  'u':[10,0],'j':[11,0],'k':[0,1],'o':[1,1],'l':[2,1],
+  'p':[3,1],';':[4,1]
+};
+
+document.addEventListener('keydown',ev=>{
+  if(mode!=='midi') return;
+  if(ev.target.tagName==='INPUT'||ev.target.tagName==='SELECT'||ev.target.tagName==='TEXTAREA') return;
+  if(ev.repeat) return;
+  const k=ev.key===';'?';':ev.key.toLowerCase();
+  if(k==='z'){ kbOctave=Math.max(1,kbOctave-1); if(document.getElementById('keymap-overlay').style.display!=='none') renderKeyMap(); return; }
+  if(k==='x'){ kbOctave=Math.min(7,kbOctave+1); if(document.getElementById('keymap-overlay').style.display!=='none') renderKeyMap(); return; }
+  const map=KB_NOTE_MAP[k]; if(!map) return;
+  ev.preventDefault();
+  if(kbPressed.has(k)) return; // already held
+  const oct=kbOctave+map[1], pc=map[0];
+  const midiNum=(oct+1)*12+pc;
+  kbPressed.set(k,midiNum);
+  midiPCCount.set(pc,(midiPCCount.get(pc)||0)+1);
+  midiActivePCs.add(pc);
+  (async()=>{
+    try{
+      await Tone.start();
+      if(_sampler&&_samplerReady) _sampler.triggerAttack(_gn(pc,oct));
+      else if(_synth) _synth.triggerAttackRelease(_gn(pc,oct),'0.55');
+    }catch(ex){}
+  })();
+  drawPiano(); update();
+});
+
+document.addEventListener('keyup',ev=>{
+  if(mode!=='midi') return;
+  if(ev.target.tagName==='INPUT'||ev.target.tagName==='SELECT'||ev.target.tagName==='TEXTAREA') return;
+  const k=ev.key===';'?';':ev.key.toLowerCase();
+  const midiNum=kbPressed.get(k); if(midiNum===undefined) return;
+  kbPressed.delete(k);
+  const pc=midiNum%12, oct=Math.floor(midiNum/12)-1;
+  const cnt=(midiPCCount.get(pc)||1)-1;
+  if(cnt<=0){midiPCCount.delete(pc);midiActivePCs.delete(pc);}
+  else midiPCCount.set(pc,cnt);
+  try{ if(_sampler&&_samplerReady) _sampler.triggerRelease(_gn(pc,oct)); }catch(ex){}
+  drawPiano(); update();
+});
+
+</script>
+
+<div id="keymap-overlay" style="display:none;position:fixed;bottom:52px;right:16px;background:var(--surface);border:1px solid var(--hl);border-radius:10px;padding:10px 14px 12px;z-index:300;box-shadow:0 6px 36px rgba(0,0,0,.6)">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+    <span style="font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.1em">Teclado de computadora</span>
+    <button onclick="toggleKeyMap()" style="background:none;border:none;color:var(--text2);cursor:pointer;font-size:18px;line-height:1;padding:0 4px;margin-left:12px">×</button>
+  </div>
+  <div id="keymap-svg-container"></div>
+  <div style="margin-top:7px;font-size:10px;color:var(--text2);display:flex;justify-content:space-between;gap:20px">
+    <span><kbd style="background:var(--surface2);border:1px solid var(--hl);border-radius:3px;padding:1px 5px">Z</kbd> oct −  &nbsp; <kbd style="background:var(--surface2);border:1px solid var(--hl);border-radius:3px;padding:1px 5px">X</kbd> oct +</span>
+    <span id="km-oct-label" style="color:var(--accent)">Oct. base: 4</span>
+  </div>
+</div>
 </body>
 </html>
