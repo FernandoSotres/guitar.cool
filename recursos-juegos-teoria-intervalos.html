@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Identifica el Intervalo: dos notas suenan, adivina el intervalo musical que las separa. Entrena tu oído con intervalos melódicos y armónicos. tremolo.mx.">
+<link rel="canonical" href="https://tremolo.mx/recursos/juegos/teoria/intervalos">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="tremolo.mx">
+<meta property="og:locale" content="es_MX">
+<meta property="og:url" content="https://tremolo.mx/recursos/juegos/teoria/intervalos">
+<meta property="og:title" content="Identifica el Intervalo — Juego de Entrenamiento Auditivo | tremolo.mx">
+<meta property="og:description" content="Dos notas suenan. ¿Cuál es el intervalo? Modos melódico, armónico y alternado. Entrena tu oído musical jugando.">
+<meta property="og:image" content="https://tremolo.mx/img/og-tremolo.jpg">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"tremolo.mx","item":"https://tremolo.mx"},{"@type":"ListItem","position":2,"name":"Recursos","item":"https://tremolo.mx/recursos"},{"@type":"ListItem","position":3,"name":"Juegos","item":"https://tremolo.mx/recursos/juegos"},{"@type":"ListItem","position":4,"name":"Teoría","item":"https://tremolo.mx/recursos/juegos/teoria"},{"@type":"ListItem","position":5,"name":"Identifica el Intervalo","item":"https://tremolo.mx/recursos/juegos/teoria/intervalos"}]}</script>
+<title>Identifica el Intervalo | tremolo.mx</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+<style>
+:root {
+  --paper:#f4ece0; --paper2:#f2ece3; --paper3:#e8e0d4;
+  --paper4:#c8b99f; --paper5:#cec4b0;
+  --copper:#a85a1e; --copper-lt:#c47a36; --copper-dk:#7a3e10;
+  --ink:#1c1410; --ink2:#2e2418; --ink3:#4a3c2c;
+  --ink4:#8a7a64; --ink5:#8a7a66;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--paper); color:var(--ink); font-family:var(--sans); font-size:15px; line-height:1.6; min-height:100vh; display:flex; flex-direction:column; }
+
+/* NAV */
+nav { position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;gap:0;flex-shrink:0; }
+.nav-logo { font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none; }
+.nav-logo span { font-family:var(--mono);font-size:0.52em;font-weight:400;color:var(--ink4);letter-spacing:0;margin-left:2px; }
+.nav-link { padding:0 16px;height:56px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s; }
+.nav-link:hover { color:var(--ink2); }
+.nav-link.active { color:var(--copper);border-bottom-color:var(--copper); }
+
+/* BREADCRUMB */
+.breadcrumb { padding:14px 48px; font-size:12px; color:var(--ink5); font-family:var(--mono); border-bottom:1px solid var(--paper3); background:var(--paper2); }
+.breadcrumb a { color:var(--ink4); text-decoration:none; }
+.breadcrumb a:hover { color:var(--copper); }
+.breadcrumb span { margin:0 6px; }
+
+/* SCREENS */
+.screen { display:none; flex:1; }
+.screen.active { display:flex; }
+
+/* ── INTRO ── */
+#screen-intro { flex-direction:column; align-items:center; justify-content:center; padding:48px 24px 64px; text-align:center; }
+.intro-icon { font-size:52px; margin-bottom:20px; line-height:1; }
+.intro-title { font-family:var(--serif); font-size:clamp(32px,5.5vw,56px); color:var(--ink); letter-spacing:-.02em; margin-bottom:10px; }
+.intro-sub { font-size:15px; color:var(--ink4); max-width:460px; line-height:1.7; margin-bottom:32px; }
+
+.intro-config { display:flex; flex-direction:column; align-items:center; gap:20px; margin-bottom:36px; }
+.config-group { background:var(--paper2); border:1px solid var(--paper4); border-radius:12px; padding:20px 28px; width:100%; max-width:480px; text-align:left; }
+.config-group-title { font-family:var(--mono); font-size:10px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--ink5); margin-bottom:12px; }
+.radio-grid { display:flex; flex-direction:column; gap:8px; }
+.radio-option { display:flex; align-items:center; gap:10px; cursor:pointer; }
+.radio-option input[type=radio] { accent-color:var(--copper); width:16px; height:16px; cursor:pointer; }
+.radio-option-label { font-size:14px; color:var(--ink3); }
+.radio-option input:checked ~ .radio-option-label { color:var(--ink); font-weight:500; }
+.radio-row { display:flex; gap:24px; flex-wrap:wrap; }
+
+.btn-start {
+  background:var(--copper); color:#fff; border:none;
+  font-size:16px; font-weight:600; padding:16px 52px; border-radius:40px;
+  cursor:pointer; transition:background .2s,transform .15s,box-shadow .2s;
+  font-family:var(--sans); letter-spacing:.01em;
+  box-shadow:0 4px 16px rgba(168,90,30,.25);
+}
+.btn-start:hover { background:var(--copper-dk); transform:translateY(-2px); box-shadow:0 6px 24px rgba(168,90,30,.35); }
+.btn-start:active { transform:translateY(0); }
+
+/* ── GAME ── */
+#screen-game { flex-direction:column; padding:0; background:var(--paper); }
+.game-header { display:flex; align-items:center; justify-content:space-between; padding:12px 32px; background:var(--paper2); border-bottom:1px solid var(--paper3); flex-shrink:0; flex-wrap:wrap; gap:8px; }
+.game-stat { display:flex; flex-direction:column; align-items:center; }
+.game-stat-label { font-size:10px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--ink5); font-family:var(--mono); }
+.game-stat-value { font-family:var(--serif); font-size:22px; color:var(--ink); line-height:1.1; }
+.game-mode-badge { background:var(--paper3); border:1px solid var(--paper4); border-radius:20px; padding:5px 14px; font-size:12px; font-weight:600; color:var(--ink4); font-family:var(--mono); letter-spacing:.04em; }
+.game-mode-badge.melodic { background:#1c1810; color:#c8b59a; border-color:#3a2a1a; }
+.game-mode-badge.harmonic { background:#101c18; color:#9ac8b0; border-color:#1a3a2a; }
+
+/* PLAY AREA */
+.play-area-wrap { flex:1; display:flex; flex-direction:column; align-items:center; padding:20px 32px 16px; }
+.timer-bar-wrap { width:100%; max-width:660px; height:4px; background:var(--paper3); border-radius:2px; margin-bottom:16px; overflow:hidden; }
+.timer-bar { height:100%; background:var(--copper); border-radius:2px; width:100%; }
+
+/* DARK BOX — central display */
+.dark-box {
+  width:100%; max-width:660px; min-height:220px;
+  background:#1a1410; border-radius:12px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:28px 32px; gap:0; position:relative; overflow:hidden;
+}
+
+/* Note circles row */
+.notes-row {
+  display:flex; align-items:center; justify-content:center;
+  gap:0; margin-bottom:0; position:relative;
+}
+.note-circle {
+  width:72px; height:72px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--serif); font-size:26px; font-weight:400; color:#fff;
+  position:relative; z-index:2; flex-shrink:0;
+  transition:transform .3s;
+}
+.note-circle.root { background:#a85a1e; box-shadow:0 0 0 3px rgba(168,90,30,.3); }
+.note-circle.top  { background:#3a6a5a; box-shadow:0 0 0 3px rgba(58,106,90,.3); }
+
+/* Connector between circles */
+.notes-connector {
+  width:80px; height:2px; background:rgba(255,255,255,.15);
+  position:relative; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+}
+.connector-arrow {
+  position:absolute; width:100%; height:100%;
+  display:flex; align-items:center; justify-content:center;
+}
+/* Melodic animated arrow */
+.arrow-line {
+  width:60px; height:2px; background:rgba(255,255,255,.4);
+  position:relative;
+}
+.arrow-head {
+  width:0; height:0;
+  border-top:5px solid transparent;
+  border-bottom:5px solid transparent;
+  border-left:8px solid rgba(255,255,255,.4);
+  position:absolute; right:-8px; top:50%; transform:translateY(-50%);
+}
+/* Animated dot for melodic */
+@keyframes travelDot {
+  0%   { left:0;   opacity:1; }
+  80%  { left:100%; opacity:1; }
+  100% { left:100%; opacity:0; }
+}
+.travel-dot {
+  width:8px; height:8px; border-radius:50%; background:var(--copper-lt);
+  position:absolute; top:50%; transform:translateY(-50%);
+  animation:travelDot .6s ease-in-out infinite;
+}
+
+/* Semitone hint */
+.semitone-hint {
+  font-family:var(--mono); font-size:12px; color:rgba(255,255,255,.4);
+  letter-spacing:.05em; margin-top:16px;
+}
+
+/* Interval reveal (shown after answer) */
+.interval-reveal {
+  font-family:var(--serif); font-size:36px; color:#fff;
+  margin-top:12px; opacity:0; transition:opacity .2s;
+  text-align:center;
+}
+.interval-reveal.visible { opacity:1; }
+
+/* Feedback flash on dark-box */
+.box-feedback {
+  position:absolute; inset:0; border-radius:12px; opacity:0; pointer-events:none;
+  transition:opacity .1s;
+}
+.box-feedback.correct-flash { background:rgba(42,157,92,.22); opacity:1; }
+.box-feedback.wrong-flash   { background:rgba(192,57,43,.22); opacity:1; }
+
+/* Listen again button */
+.btn-listen {
+  margin-top:16px; background:transparent; border:1px solid var(--paper4);
+  color:var(--ink4); font-family:var(--sans); font-size:13px; font-weight:500;
+  padding:8px 20px; border-radius:20px; cursor:pointer;
+  transition:border-color .2s, color .2s, background .2s;
+  display:flex; align-items:center; gap:6px;
+}
+.btn-listen:hover { border-color:var(--copper); color:var(--copper); background:rgba(168,90,30,.05); }
+.btn-listen:disabled { opacity:.4; cursor:not-allowed; }
+
+/* ANSWER GRID */
+.answer-area { width:100%; max-width:660px; margin-top:16px; display:grid; gap:8px; }
+.answer-area.grid-basic    { grid-template-columns:repeat(2,1fr); }
+.answer-area.grid-complete { grid-template-columns:repeat(4,1fr); }
+
+.btn-answer {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  height:52px; border-radius:10px;
+  background:var(--paper3); border:1.5px solid var(--paper4); color:var(--ink);
+  cursor:pointer; transition:background .15s,border-color .15s,color .15s,transform .1s;
+  font-family:var(--serif); font-size:17px; font-weight:400;
+  padding:0 12px; user-select:none; position:relative; gap:2px;
+}
+.btn-answer .ans-abbr {
+  font-family:var(--mono); font-size:9px; font-weight:500;
+  color:var(--ink5); letter-spacing:.05em;
+}
+.btn-answer .ans-key {
+  position:absolute; top:5px; right:8px;
+  font-family:var(--mono); font-size:9px; color:var(--ink5); opacity:.6;
+}
+.btn-answer:hover:not(:disabled) { border-color:var(--copper); color:var(--copper); transform:translateY(-2px); }
+.btn-answer:active:not(:disabled) { transform:translateY(0); }
+.btn-answer.correct { background:#2a9d5c !important; border-color:#2a9d5c !important; color:#fff !important; }
+.btn-answer.correct .ans-abbr, .btn-answer.correct .ans-key { color:rgba(255,255,255,.65); }
+.btn-answer.wrong   { background:#c0392b !important; border-color:#c0392b !important; color:#fff !important; }
+.btn-answer.wrong   .ans-abbr, .btn-answer.wrong .ans-key { color:rgba(255,255,255,.65); }
+.btn-answer:disabled { cursor:not-allowed; opacity:.7; transform:none !important; }
+
+@keyframes missedPulse { 0%,100%{transform:scale(1)} 25%{transform:scale(1.04)} 75%{transform:scale(.97)} }
+.btn-answer.missed-pulse { animation:missedPulse .45s ease; }
+
+/* ── END SCREEN ── */
+#screen-end { flex-direction:column; align-items:center; justify-content:flex-start; padding:48px 24px 64px; overflow-y:auto; }
+.end-title { font-family:var(--serif); font-size:clamp(30px,5vw,50px); color:var(--ink); letter-spacing:-.02em; margin-bottom:6px; text-align:center; }
+.end-score-big { font-family:var(--serif); font-size:clamp(52px,9vw,88px); color:var(--copper); line-height:1; letter-spacing:-.04em; margin-bottom:4px; }
+.end-score-label { font-size:11px; color:var(--ink5); font-family:var(--mono); letter-spacing:.1em; text-transform:uppercase; margin-bottom:28px; }
+.end-stats { display:flex; gap:28px; margin-bottom:36px; flex-wrap:wrap; justify-content:center; }
+.end-stat { text-align:center; }
+.end-stat-value { font-family:var(--serif); font-size:30px; color:var(--ink); }
+.end-stat-label { font-size:10px; color:var(--ink5); font-family:var(--mono); letter-spacing:.1em; text-transform:uppercase; }
+
+.breakdown { width:100%; max-width:660px; border:1px solid var(--paper4); border-radius:10px; overflow:hidden; margin-bottom:36px; }
+.breakdown-header, .breakdown-row { display:grid; grid-template-columns:38px 1fr 1fr 1fr 72px; align-items:center; padding:9px 14px; gap:8px; }
+.breakdown-header { background:var(--paper3); font-size:10px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--ink5); font-family:var(--mono); }
+.breakdown-row { font-size:13px; color:var(--ink4); background:var(--paper2); border-top:1px solid var(--paper3); }
+.breakdown-row:nth-child(even) { background:var(--paper); }
+.bd-notes { font-family:var(--mono); font-size:12px; color:var(--ink3); }
+.bd-interval { font-family:var(--serif); font-size:15px; color:var(--ink); }
+.bd-mode { font-family:var(--mono); font-size:10px; color:var(--ink5); letter-spacing:.04em; }
+.bd-result { font-size:11px; font-weight:600; font-family:var(--mono); }
+.bd-result.correct { color:#2a9d5c; }
+.bd-result.wrong   { color:#c0392b; }
+.bd-result.missed  { color:var(--ink5); }
+.bd-time { font-family:var(--mono); font-size:11px; color:var(--ink5); text-align:right; }
+
+.btn-again {
+  background:var(--copper); color:#fff; border:none;
+  font-size:16px; font-weight:600; padding:16px 48px; border-radius:40px;
+  cursor:pointer; transition:background .2s,transform .15s,box-shadow .2s;
+  font-family:var(--sans); letter-spacing:.01em;
+  box-shadow:0 4px 16px rgba(168,90,30,.25);
+}
+.btn-again:hover { background:var(--copper-dk); transform:translateY(-2px); box-shadow:0 6px 24px rgba(168,90,30,.35); }
+
+/* FOOTER */
+footer { flex-shrink:0; }
+
+@media (max-width:640px) {
+  nav { padding:0 16px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:none; }
+  nav::-webkit-scrollbar { display:none; }
+  nav > * { flex-shrink:0; }
+  .breadcrumb { padding:12px 16px; font-size:11px; }
+  .game-header { padding:8px 16px; }
+  .play-area-wrap { padding:14px 16px 12px; }
+  .dark-box { min-height:180px; padding:20px 16px; }
+  .note-circle { width:56px; height:56px; font-size:20px; }
+  .notes-connector { width:50px; }
+  .answer-area.grid-basic    { grid-template-columns:repeat(2,1fr); }
+  .answer-area.grid-complete { grid-template-columns:repeat(3,1fr); }
+  .btn-answer { height:46px; font-size:15px; }
+  .breakdown-header, .breakdown-row { grid-template-columns:28px 1fr 1fr 60px 50px; padding:7px 10px; font-size:11px; }
+  .bd-mode { display:none; }
+  #screen-intro { padding:28px 16px 48px; }
+  .config-group { padding:16px 18px; }
+  .radio-row { flex-direction:column; gap:8px; }
+  .end-stats { gap:16px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link active">Recursos</a>
+</nav>
+
+<div class="breadcrumb">
+  <a href="/recursos">Recursos</a>
+  <span>›</span>
+  <a href="/recursos/juegos">Juegos</a>
+  <span>›</span>
+  <a href="/recursos/juegos/teoria">Teoría</a>
+  <span>›</span>
+  <span>Identifica el Intervalo</span>
+</div>
+
+<!-- ─── INTRO SCREEN ─── -->
+<div id="screen-intro" class="screen active">
+  <div class="intro-icon">♩</div>
+  <h1 class="intro-title">Identifica el Intervalo</h1>
+  <p class="intro-sub">Dos notas suenan. ¿Cuál es el intervalo que las separa?</p>
+
+  <div class="intro-config">
+    <div class="config-group">
+      <div class="config-group-title">Modo de reproducción</div>
+      <div class="radio-row">
+        <label class="radio-option">
+          <input type="radio" name="mode" value="melodic">
+          <span class="radio-option-label">♩ Melódico <span style="font-size:12px;color:var(--ink5)">(notas separadas)</span></span>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="mode" value="harmonic">
+          <span class="radio-option-label">♬ Armónico <span style="font-size:12px;color:var(--ink5)">(notas juntas)</span></span>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="mode" value="alternating" checked>
+          <span class="radio-option-label">↺ Alternado <span style="font-size:12px;color:var(--ink5)">(por defecto)</span></span>
+        </label>
+      </div>
+    </div>
+    <div class="config-group">
+      <div class="config-group-title">Dificultad</div>
+      <div class="radio-grid">
+        <label class="radio-option">
+          <input type="radio" name="difficulty" value="basic" checked>
+          <span class="radio-option-label">Básico <span style="font-size:12px;color:var(--ink5)">(8 intervalos — 2ª m a 8ª)</span></span>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="difficulty" value="complete">
+          <span class="radio-option-label">Completo <span style="font-size:12px;color:var(--ink5)">(12 intervalos — unísono a 8ª)</span></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-start" id="btn-start">Comenzar</button>
+</div>
+
+<!-- ─── GAME SCREEN ─── -->
+<div id="screen-game" class="screen">
+  <div class="game-header">
+    <div class="game-stat">
+      <span class="game-stat-label">Ronda</span>
+      <span class="game-stat-value" id="stat-round">1/10</span>
+    </div>
+    <div class="game-stat">
+      <span class="game-stat-label">Puntos</span>
+      <span class="game-stat-value" id="stat-score">0</span>
+    </div>
+    <div class="game-mode-badge" id="mode-badge">♩ Melódico</div>
+    <div class="game-stat">
+      <span class="game-stat-label">Racha</span>
+      <span class="game-stat-value" id="stat-streak">0</span>
+    </div>
+  </div>
+
+  <div class="play-area-wrap">
+    <div class="timer-bar-wrap">
+      <div class="timer-bar" id="timer-bar"></div>
+    </div>
+
+    <!-- DARK BOX -->
+    <div class="dark-box" id="dark-box">
+      <div class="box-feedback" id="box-feedback"></div>
+
+      <div class="notes-row" id="notes-row">
+        <div class="note-circle root" id="note-root">C</div>
+        <div class="notes-connector" id="notes-connector">
+          <div class="connector-arrow" id="connector-arrow"></div>
+        </div>
+        <div class="note-circle top" id="note-top">G</div>
+      </div>
+
+      <div class="semitone-hint" id="semitone-hint">↕ 7 semitonos</div>
+      <div class="interval-reveal" id="interval-reveal"></div>
+    </div>
+
+    <button class="btn-listen" id="btn-listen">
+      <span style="font-size:16px">🔉</span> Escuchar de nuevo
+    </button>
+
+    <div class="answer-area grid-basic" id="answer-area">
+      <!-- injected by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ─── END SCREEN ─── -->
+<div id="screen-end" class="screen">
+  <h2 class="end-title">Juego terminado</h2>
+  <div class="end-score-big" id="end-score">0</div>
+  <div class="end-score-label">puntos de 1500 posibles</div>
+  <div class="end-stats">
+    <div class="end-stat">
+      <div class="end-stat-value" id="end-correct">0/10</div>
+      <div class="end-stat-label">Aciertos</div>
+    </div>
+    <div class="end-stat">
+      <div class="end-stat-value" id="end-streak">0</div>
+      <div class="end-stat-label">Mejor racha</div>
+    </div>
+    <div class="end-stat">
+      <div class="end-stat-value" id="end-avg">—</div>
+      <div class="end-stat-label">Tiempo prom.</div>
+    </div>
+  </div>
+  <div class="breakdown" id="breakdown">
+    <div class="breakdown-header">
+      <div>#</div>
+      <div>Notas</div>
+      <div>Intervalo</div>
+      <div>Modo</div>
+      <div style="text-align:right">Tiempo</div>
+    </div>
+  </div>
+  <button class="btn-again" id="btn-again">Jugar de nuevo</button>
+</div>
+
+<footer style="border-top:1px solid var(--paper4);padding:24px 48px;text-align:center;font-size:12px;color:var(--ink5);">
+  © 2026 tremolo.mx · <a href="/privacidad" style="color:var(--ink4)">Privacidad</a> · <a href="/terminos" style="color:var(--ink4)">Términos</a>
+</footer>
+
+<script>
+/* ─────────────────────────────────────────────────────
+   DATA
+───────────────────────────────────────────────────── */
+const INTERVALS_BASIC = [
+  { semitones:1,  name:'2ª menor',  abbr:'2m', key:'1' },
+  { semitones:2,  name:'2ª mayor',  abbr:'2M', key:'2' },
+  { semitones:3,  name:'3ª menor',  abbr:'3m', key:'3' },
+  { semitones:4,  name:'3ª mayor',  abbr:'3M', key:'4' },
+  { semitones:5,  name:'4ª justa',  abbr:'4J', key:'5' },
+  { semitones:6,  name:'Tritono',   abbr:'TT', key:'6' },
+  { semitones:7,  name:'5ª justa',  abbr:'5J', key:'7' },
+  { semitones:9,  name:'6ª mayor',  abbr:'6M', key:'8' },
+  { semitones:12, name:'8ª',        abbr:'8ª', key:'9' },
+];
+
+const INTERVALS_FULL = [
+  { semitones:0,  name:'Unísono',   abbr:'1', key:'1' },
+  { semitones:1,  name:'2ª menor',  abbr:'2m', key:'2' },
+  { semitones:2,  name:'2ª mayor',  abbr:'2M', key:'3' },
+  { semitones:3,  name:'3ª menor',  abbr:'3m', key:'4' },
+  { semitones:4,  name:'3ª mayor',  abbr:'3M', key:'5' },
+  { semitones:5,  name:'4ª justa',  abbr:'4J', key:'6' },
+  { semitones:6,  name:'Tritono',   abbr:'TT', key:'7' },
+  { semitones:7,  name:'5ª justa',  abbr:'5J', key:'8' },
+  { semitones:8,  name:'6ª menor',  abbr:'6m', key:'9' },
+  { semitones:9,  name:'6ª mayor',  abbr:'6M', key:'q' },
+  { semitones:10, name:'7ª menor',  abbr:'7m', key:'w' },
+  { semitones:11, name:'7ª mayor',  abbr:'7M', key:'e' },
+  { semitones:12, name:'8ª',        abbr:'8ª', key:'r' },
+];
+
+const NOTE_SHARP = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+
+const ROUND_COUNT  = 10;
+const TIMER_MS     = 5000;
+
+/* ─────────────────────────────────────────────────────
+   AUDIO
+───────────────────────────────────────────────────── */
+let synth = null;
+let audioReady = false;
+
+async function initAudio() {
+  await Tone.start();
+  if (synth) { try { synth.dispose(); } catch(e){} }
+  synth = new Tone.PolySynth(Tone.Synth, {
+    oscillator: { type: 'triangle' },
+    envelope: { attack: 0.05, decay: 0.3, sustain: 0.6, release: 1.5 },
+    volume: -8
+  }).toDestination();
+  audioReady = true;
+}
+
+function noteToTone(pc, octave) {
+  return NOTE_SHARP[pc % 12] + octave;
+}
+
+function playMelodic(rootPC, semitones) {
+  if (!audioReady || !synth) return;
+  try {
+    const topPC = (rootPC + semitones) % 12;
+    const topOct = (semitones >= 12) ? 5 : 4;
+    const root = noteToTone(rootPC, 4);
+    const top  = noteToTone(topPC, topOct);
+    synth.triggerAttackRelease(root, '4n');
+    setTimeout(() => {
+      try { synth.triggerAttackRelease(top, '4n'); } catch(e){}
+    }, 600);
+  } catch(e) { console.warn('playMelodic', e); }
+}
+
+function playHarmonic(rootPC, semitones) {
+  if (!audioReady || !synth) return;
+  try {
+    const topPC = (rootPC + semitones) % 12;
+    const topOct = (semitones >= 12) ? 5 : 4;
+    const root = noteToTone(rootPC, 4);
+    const top  = noteToTone(topPC, topOct);
+    if (semitones === 0) {
+      synth.triggerAttackRelease(root, '2n');
+    } else {
+      synth.triggerAttackRelease([root, top], '2n');
+    }
+  } catch(e) { console.warn('playHarmonic', e); }
+}
+
+function playInterval(rootPC, semitones, isMelodic) {
+  if (isMelodic) playMelodic(rootPC, semitones);
+  else           playHarmonic(rootPC, semitones);
+}
+
+/* ─────────────────────────────────────────────────────
+   GAME STATE
+───────────────────────────────────────────────────── */
+let cfg = {
+  mode:       'alternating', // 'melodic' | 'harmonic' | 'alternating'
+  difficulty: 'basic',       // 'basic' | 'complete'
+};
+
+let state = {
+  intervals:        [],
+  round:            0,
+  score:            0,
+  streak:           0,
+  bestStreak:       0,
+  results:          [],
+  answered:         false,
+  roundStartTime:   0,
+  animFrame:        null,
+  timerStart:       0,
+  autoMissTimer:    null,
+  currentInterval:  null, // { semitones, name, abbr, ... }
+  currentRootPC:    0,
+  isMelodic:        true,
+};
+
+/* ─────────────────────────────────────────────────────
+   DOM REFS
+───────────────────────────────────────────────────── */
+const screens = {
+  intro: document.getElementById('screen-intro'),
+  game:  document.getElementById('screen-game'),
+  end:   document.getElementById('screen-end'),
+};
+
+const $ = id => document.getElementById(id);
+
+function showScreen(name) {
+  Object.values(screens).forEach(s => s.classList.remove('active'));
+  screens[name].classList.add('active');
+}
+
+/* ─────────────────────────────────────────────────────
+   BUILD ANSWER BUTTONS
+───────────────────────────────────────────────────── */
+let answerButtons = []; // { el, intervalIndex }
+
+function buildAnswerButtons(intervalList) {
+  const area = $('answer-area');
+  area.innerHTML = '';
+  answerButtons = [];
+
+  // Set grid class
+  area.className = 'answer-area ' + (cfg.difficulty === 'basic' ? 'grid-basic' : 'grid-complete');
+
+  intervalList.forEach((iv, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'btn-answer';
+    btn.innerHTML = `
+      <span>${iv.name}</span>
+      <span class="ans-abbr">${iv.abbr}</span>
+      <span class="ans-key">${iv.key.toUpperCase()}</span>
+    `;
+    btn.addEventListener('click', () => handleAnswer(i));
+    area.appendChild(btn);
+    answerButtons.push({ el: btn, intervalIndex: i });
+  });
+}
+
+/* ─────────────────────────────────────────────────────
+   CONNECTOR / DISPLAY
+───────────────────────────────────────────────────── */
+function buildConnector(isMelodic) {
+  const conn = $('connector-arrow');
+  if (isMelodic) {
+    conn.innerHTML = `
+      <div class="arrow-line">
+        <div class="arrow-head"></div>
+        <div class="travel-dot"></div>
+      </div>`;
+  } else {
+    // Harmonic: double-headed static line
+    conn.innerHTML = `
+      <svg width="70" height="20" viewBox="0 0 70 20" style="overflow:visible">
+        <line x1="8" y1="10" x2="62" y2="10" stroke="rgba(255,255,255,0.35)" stroke-width="1.5"/>
+        <polygon points="4,10 12,6 12,14" fill="rgba(255,255,255,0.35)"/>
+        <polygon points="66,10 58,6 58,14" fill="rgba(255,255,255,0.35)"/>
+      </svg>`;
+  }
+}
+
+function updateDisplay(rootPC, semitones, isMelodic) {
+  const rootName = NOTE_SHARP[rootPC];
+  const topPC    = (rootPC + semitones) % 12;
+  const topName  = NOTE_SHARP[topPC];
+
+  $('note-root').textContent = rootName;
+  $('note-top').textContent  = topName;
+
+  const hint = semitones === 1
+    ? '↕ 1 semitono'
+    : `↕ ${semitones} semitonos`;
+  $('semitone-hint').textContent = hint;
+
+  buildConnector(isMelodic);
+
+  $('interval-reveal').textContent = '';
+  $('interval-reveal').classList.remove('visible');
+
+  // Clear feedback flash
+  const fb = $('box-feedback');
+  fb.className = 'box-feedback';
+}
+
+/* ─────────────────────────────────────────────────────
+   TIMER BAR
+───────────────────────────────────────────────────── */
+function startTimerBar() {
+  const bar = $('timer-bar');
+  const t0  = performance.now();
+
+  function tick() {
+    if (state.answered) return;
+    const elapsed = performance.now() - t0;
+    const pct = Math.max(0, 1 - elapsed / TIMER_MS);
+    bar.style.width = (pct * 100) + '%';
+    bar.style.background = pct > 0.5
+      ? 'var(--copper)'
+      : pct > 0.2
+        ? '#b8672a'
+        : '#c0392b';
+    if (pct > 0) state.animFrame = requestAnimationFrame(tick);
+  }
+  state.animFrame = requestAnimationFrame(tick);
+}
+
+function freezeTimerBar() {
+  cancelAnimationFrame(state.animFrame);
+}
+
+/* ─────────────────────────────────────────────────────
+   MODE BADGE
+───────────────────────────────────────────────────── */
+function updateModeBadge(isMelodic) {
+  const badge = $('mode-badge');
+  if (isMelodic) {
+    badge.textContent = '♩ Melódico';
+    badge.className = 'game-mode-badge melodic';
+  } else {
+    badge.textContent = '♬ Armónico';
+    badge.className = 'game-mode-badge harmonic';
+  }
+}
+
+/* ─────────────────────────────────────────────────────
+   GAME LOOP
+───────────────────────────────────────────────────── */
+function startGame() {
+  state.round      = 0;
+  state.score      = 0;
+  state.streak     = 0;
+  state.bestStreak = 0;
+  state.results    = [];
+
+  $('stat-score').textContent  = '0';
+  $('stat-streak').textContent = '0';
+
+  state.intervals = cfg.difficulty === 'basic' ? INTERVALS_BASIC : INTERVALS_FULL;
+  buildAnswerButtons(state.intervals);
+
+  showScreen('game');
+  startRound();
+}
+
+function pickRoundMode() {
+  if (cfg.mode === 'melodic')    return true;
+  if (cfg.mode === 'harmonic')   return false;
+  // alternating: odd rounds melodic, even harmonic (1-based)
+  return (state.round % 2 === 0);
+}
+
+function pickInterval() {
+  // Pick random interval from the current set
+  return state.intervals[Math.floor(Math.random() * state.intervals.length)];
+}
+
+function startRound() {
+  state.answered       = false;
+  clearTimeout(state.autoMissTimer);
+  cancelAnimationFrame(state.animFrame);
+
+  const roundNum = state.round + 1;
+  state.isMelodic = pickRoundMode();
+
+  // Pick random root (C=0 to B=11) and interval
+  state.currentRootPC   = Math.floor(Math.random() * 12);
+  state.currentInterval = pickInterval();
+
+  // Update header
+  $('stat-round').textContent  = `${roundNum}/10`;
+  updateModeBadge(state.isMelodic);
+
+  // Reset answer buttons
+  answerButtons.forEach(({ el }) => {
+    el.classList.remove('correct','wrong','missed-pulse');
+    el.disabled = false;
+  });
+
+  // Update dark box display
+  updateDisplay(state.currentRootPC, state.currentInterval.semitones, state.isMelodic);
+
+  // Enable listen button
+  const btnListen = $('btn-listen');
+  btnListen.disabled = false;
+
+  // Reset timer bar
+  $('timer-bar').style.width = '100%';
+  $('timer-bar').style.background = 'var(--copper)';
+
+  // Play audio
+  playInterval(state.currentRootPC, state.currentInterval.semitones, state.isMelodic);
+
+  // Start timer
+  state.roundStartTime = performance.now();
+  startTimerBar();
+
+  // Auto-miss
+  state.autoMissTimer = setTimeout(() => {
+    if (!state.answered) handleMiss();
+  }, TIMER_MS);
+}
+
+/* ─────────────────────────────────────────────────────
+   HANDLE ANSWER
+───────────────────────────────────────────────────── */
+function handleAnswer(clickedIdx) {
+  if (state.answered) return;
+  state.answered = true;
+  clearTimeout(state.autoMissTimer);
+  freezeTimerBar();
+
+  const answerTime = (performance.now() - state.roundStartTime) / 1000;
+  const correct    = (clickedIdx === state.intervals.indexOf(state.currentInterval));
+
+  let pts = 0;
+  if (correct) {
+    if      (answerTime < 2) pts = 150;
+    else if (answerTime < 4) pts = 120;
+    else                     pts = 100;
+    state.score  += pts;
+    state.streak += 1;
+    state.bestStreak = Math.max(state.bestStreak, state.streak);
+  } else {
+    state.streak = 0;
+  }
+
+  $('stat-score').textContent  = state.score;
+  $('stat-streak').textContent = state.streak;
+
+  // Flash on dark box
+  const fb = $('box-feedback');
+  fb.className = 'box-feedback ' + (correct ? 'correct-flash' : 'wrong-flash');
+  setTimeout(() => { fb.className = 'box-feedback'; }, 300);
+
+  // Reveal interval name
+  const reveal = $('interval-reveal');
+  reveal.textContent = state.currentInterval.name;
+  reveal.classList.add('visible');
+
+  // Highlight buttons
+  const correctIdx = state.intervals.indexOf(state.currentInterval);
+  answerButtons.forEach(({ el }, i) => {
+    el.disabled = true;
+    if (i === correctIdx) el.classList.add('correct');
+    else if (i === clickedIdx && !correct) el.classList.add('wrong');
+  });
+
+  // Disable listen during feedback
+  $('btn-listen').disabled = true;
+
+  // Record
+  state.results.push({
+    round:        state.round + 1,
+    rootName:     NOTE_SHARP[state.currentRootPC],
+    topName:      NOTE_SHARP[(state.currentRootPC + state.currentInterval.semitones) % 12],
+    intervalName: state.currentInterval.name,
+    isMelodic:    state.isMelodic,
+    result:       correct ? 'correct' : 'wrong',
+    pts,
+    time: answerTime,
+  });
+
+  setTimeout(() => advance(), 800);
+}
+
+function handleMiss() {
+  state.answered = true;
+  clearTimeout(state.autoMissTimer);
+  freezeTimerBar();
+  state.streak = 0;
+  $('stat-streak').textContent = '0';
+  $('timer-bar').style.width   = '0%';
+
+  // Reveal
+  const reveal = $('interval-reveal');
+  reveal.textContent = state.currentInterval.name;
+  reveal.classList.add('visible');
+
+  const correctIdx = state.intervals.indexOf(state.currentInterval);
+  answerButtons.forEach(({ el }, i) => {
+    el.disabled = true;
+    el.classList.add('missed-pulse');
+  });
+  setTimeout(() => {
+    answerButtons[correctIdx].el.classList.add('correct');
+  }, 150);
+
+  $('btn-listen').disabled = true;
+
+  state.results.push({
+    round:        state.round + 1,
+    rootName:     NOTE_SHARP[state.currentRootPC],
+    topName:      NOTE_SHARP[(state.currentRootPC + state.currentInterval.semitones) % 12],
+    intervalName: state.currentInterval.name,
+    isMelodic:    state.isMelodic,
+    result:       'missed',
+    pts:          0,
+    time:         null,
+  });
+
+  setTimeout(() => advance(), 800);
+}
+
+function advance() {
+  state.round++;
+  if (state.round < ROUND_COUNT) {
+    startRound();
+  } else {
+    endGame();
+  }
+}
+
+/* ─────────────────────────────────────────────────────
+   END GAME
+───────────────────────────────────────────────────── */
+function endGame() {
+  showScreen('end');
+
+  $('end-score').textContent = state.score;
+
+  const correctCount = state.results.filter(r => r.result === 'correct').length;
+  $('end-correct').textContent = `${correctCount}/10`;
+  $('end-streak').textContent  = state.bestStreak;
+
+  const times = state.results.filter(r => r.time !== null).map(r => r.time);
+  if (times.length > 0) {
+    const avg = (times.reduce((a,b) => a+b, 0) / times.length).toFixed(1);
+    $('end-avg').textContent = avg + 's';
+  } else {
+    $('end-avg').textContent = '—';
+  }
+
+  // Rebuild breakdown table
+  const bd = $('breakdown');
+  bd.querySelectorAll('.breakdown-row').forEach(r => r.remove());
+
+  state.results.forEach(r => {
+    const row = document.createElement('div');
+    row.className = 'breakdown-row';
+
+    let resultLabel = '', resultClass = '';
+    if (r.result === 'correct')    { resultLabel = '✓ Correcto';   resultClass = 'correct'; }
+    else if (r.result === 'wrong') { resultLabel = '✗ Incorrecto'; resultClass = 'wrong';   }
+    else                           { resultLabel = '— Tiempo';     resultClass = 'missed';  }
+
+    const modeLabel = r.isMelodic ? 'Mel.' : 'Arm.';
+    const timeStr   = r.time !== null ? r.time.toFixed(2) + 's' : '—';
+    const notesStr  = r.rootName + '–' + r.topName;
+
+    row.innerHTML = `
+      <div style="font-family:var(--mono);font-size:11px;color:var(--ink5)">${r.round}</div>
+      <div class="bd-notes">${notesStr}</div>
+      <div class="bd-interval">${r.intervalName}</div>
+      <div class="bd-mode">${modeLabel}</div>
+      <div class="bd-time">${timeStr}</div>
+    `;
+    bd.appendChild(row);
+  });
+}
+
+/* ─────────────────────────────────────────────────────
+   EVENTS
+───────────────────────────────────────────────────── */
+$('btn-start').addEventListener('click', async () => {
+  // Read config
+  const modeEl = document.querySelector('input[name=mode]:checked');
+  const diffEl = document.querySelector('input[name=difficulty]:checked');
+  cfg.mode       = modeEl ? modeEl.value : 'alternating';
+  cfg.difficulty = diffEl ? diffEl.value : 'basic';
+
+  await initAudio();
+  startGame();
+});
+
+$('btn-again').addEventListener('click', () => {
+  showScreen('intro');
+});
+
+$('btn-listen').addEventListener('click', () => {
+  if (!state.answered) {
+    playInterval(state.currentRootPC, state.currentInterval.semitones, state.isMelodic);
+  }
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  if (!screens.game.classList.contains('active') || state.answered) return;
+  const key = e.key.toLowerCase();
+  const list = state.intervals;
+  const idx = list.findIndex(iv => iv.key === key);
+  if (idx !== -1) handleAnswer(idx);
+});
+</script>
+</body>
+</html>

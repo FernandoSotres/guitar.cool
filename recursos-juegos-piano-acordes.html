@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Construye el Acorde · tremolo.mx</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+<style>
+:root {
+  --paper:#f4ece0; --paper2:#f2ece3; --paper3:#e8e0d4;
+  --paper4:#c8b99f; --paper5:#cec4b0;
+  --copper:#a85a1e; --copper-lt:#c47a36; --copper-dk:#7a3e10;
+  --ink:#1c1410; --ink2:#2e2418; --ink3:#4a3c2c;
+  --ink4:#8a7a64; --ink5:#8a7a66;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);min-height:100vh;display:flex;flex-direction:column;}
+nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{font-family:var(--mono);font-size:0.52em;font-weight:400;color:var(--ink4);letter-spacing:0;margin-left:2px;}
+.nav-link{padding:0 16px;height:56px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+
+main{flex:1;display:flex;flex-direction:column;align-items:center;padding:40px 24px 60px;}
+h1{font-family:var(--serif);font-size:2rem;color:var(--ink);margin-bottom:6px;text-align:center;}
+.subtitle{color:var(--ink4);font-size:0.9rem;margin-bottom:32px;text-align:center;}
+
+.game-card{background:var(--paper2);border:1px solid var(--paper4);border-radius:16px;padding:32px;width:100%;max-width:720px;display:flex;flex-direction:column;align-items:center;gap:20px;}
+
+.screen{display:none;flex-direction:column;align-items:center;gap:20px;width:100%;}
+.screen.active{display:flex;}
+
+.btn-primary{background:var(--copper);color:#fff;border:none;padding:14px 36px;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;font-family:var(--sans);transition:background .15s;}
+.btn-primary:hover{background:var(--copper-lt);}
+.btn-secondary{background:transparent;color:var(--copper);border:2px solid var(--copper);padding:10px 28px;border-radius:8px;font-size:0.9rem;font-weight:500;cursor:pointer;font-family:var(--sans);transition:all .15s;}
+.btn-secondary:hover{background:var(--copper);color:#fff;}
+
+.rules-box{background:var(--paper3);border-radius:10px;padding:20px 24px;font-size:0.85rem;color:var(--ink3);line-height:1.7;width:100%;}
+.rules-box h3{font-family:var(--serif);font-size:1rem;margin-bottom:8px;color:var(--ink);}
+
+.round-info{display:flex;justify-content:space-between;align-items:center;width:100%;font-size:0.85rem;color:var(--ink4);}
+.round-info span{font-weight:600;color:var(--ink);}
+.score-display{font-family:var(--mono);font-size:1.1rem;color:var(--copper);}
+
+/* Chord card */
+.chord-card{background:var(--paper3);border:2px solid var(--paper4);border-radius:14px;padding:24px 40px;display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;animation:pulse-border 2s ease-in-out infinite;}
+@keyframes pulse-border{
+  0%,100%{border-color:var(--paper4);}
+  50%{border-color:var(--copper-lt);}
+}
+.chord-name{font-family:var(--mono);font-size:3.2rem;font-weight:500;color:var(--ink);letter-spacing:.03em;}
+.chord-type-label{font-size:0.8rem;color:var(--ink4);text-transform:uppercase;letter-spacing:.06em;}
+.chord-timer{font-family:var(--mono);font-size:1.4rem;color:var(--copper-lt);}
+
+/* Progress dots */
+.chord-dots{display:flex;gap:10px;}
+.chord-dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--paper4);background:var(--paper3);display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-family:var(--mono);color:var(--ink4);transition:all .25s;}
+.chord-dot.hit{background:#2a9d5c;border-color:#2a9d5c;color:#fff;}
+
+/* Piano */
+.piano-wrap{position:relative;overflow-x:auto;max-width:100%;padding-bottom:4px;}
+.piano-wrap svg{display:block;margin:0 auto;}
+
+/* Feedback */
+.feedback-text{font-size:0.9rem;font-weight:500;min-height:22px;text-align:center;}
+.feedback-text.correct{color:#1a7a52;}
+.feedback-text.wrong{color:#c0392b;}
+.feedback-text.info{color:var(--ink4);}
+
+/* End screen */
+.end-title{font-family:var(--serif);font-size:1.8rem;color:var(--ink);}
+.final-score{font-family:var(--mono);font-size:3rem;color:var(--copper);font-weight:700;}
+.stats-row{display:flex;gap:32px;flex-wrap:wrap;justify-content:center;}
+.stat-box{background:var(--paper3);border-radius:10px;padding:14px 24px;text-align:center;}
+.stat-val{font-family:var(--mono);font-size:1.5rem;color:var(--ink);}
+.stat-lbl{font-size:0.75rem;color:var(--ink4);margin-top:2px;}
+table{width:100%;border-collapse:collapse;font-size:0.82rem;}
+th{text-align:left;color:var(--ink4);font-weight:500;padding:6px 10px;border-bottom:1px solid var(--paper4);}
+td{padding:6px 10px;border-bottom:1px solid var(--paper3);}
+td.pts{color:var(--copper);font-family:var(--mono);font-weight:600;}
+.round-breakdown{width:100%;max-height:260px;overflow-y:auto;}
+
+footer{border-top:1px solid var(--paper4);padding:24px 48px;text-align:center;font-size:12px;color:var(--ink5);}
+footer a{color:var(--ink4);text-decoration:none;}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link active">Recursos</a>
+</nav>
+
+<main>
+  <h1>Construye el Acorde</h1>
+  <p class="subtitle">Escucha el acorde y pulsa todas sus notas en el piano · 10 rondas</p>
+
+  <div class="game-card">
+
+    <!-- START SCREEN -->
+    <div id="screen-start" class="screen active">
+      <div class="rules-box">
+        <h3>¿Cómo jugar?</h3>
+        <p>Se muestra el nombre de un acorde (por ejemplo, <strong>Dm</strong> o <strong>G7</strong>) y suena automáticamente. Pulsa <em>todas</em> las notas del acorde en el piano en cualquier orden.</p>
+        <br>
+        <p>· Las notas correctas se iluminan en verde.<br>
+           · Las notas incorrectas parpadean en rojo (sin penalización de puntos, pero cuestan tiempo).<br>
+           · Completa el acorde lo más rápido posible para ganar bonus de tiempo.</p>
+        <br>
+        <p>Tipos de acordes: Mayor, menor, disminuido, Dom. 7ª, Mayor 7ª, Menor 7ª</p>
+      </div>
+      <button class="btn-primary" onclick="startGame()">Comenzar juego</button>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="screen-game" class="screen">
+      <div class="round-info">
+        <div>Ronda <span id="round-num">1</span>/10</div>
+        <div class="score-display" id="score-display">0 pts</div>
+      </div>
+
+      <div class="chord-card" id="chord-card">
+        <div class="chord-name" id="chord-name">—</div>
+        <div class="chord-type-label" id="chord-type-label">—</div>
+        <div class="chord-timer" id="chord-timer">0.0s</div>
+      </div>
+
+      <div class="chord-dots" id="chord-dots"></div>
+
+      <div class="piano-wrap">
+        <svg id="piano-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+
+      <div class="feedback-text info" id="feedback-text">Pulsa las notas del acorde en cualquier orden</div>
+    </div>
+
+    <!-- END SCREEN -->
+    <div id="screen-end" class="screen">
+      <div class="end-title">¡Juego terminado!</div>
+      <div class="final-score" id="final-score">0</div>
+      <p style="color:var(--ink4);font-size:0.85rem;">puntos totales</p>
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-val" id="stat-avg-wrong">0</div><div class="stat-lbl">Promedio errores</div></div>
+        <div class="stat-box"><div class="stat-val" id="stat-best-time">—</div><div class="stat-lbl">Mejor tiempo</div></div>
+        <div class="stat-box"><div class="stat-val" id="stat-rounds">10</div><div class="stat-lbl">Rondas</div></div>
+      </div>
+      <div class="round-breakdown">
+        <table>
+          <thead><tr><th>#</th><th>Acorde</th><th>Tiempo</th><th>Errores</th><th>Pts</th></tr></thead>
+          <tbody id="breakdown-body"></tbody>
+        </table>
+      </div>
+      <div style="display:flex;gap:12px;">
+        <button class="btn-primary" onclick="startGame()">Jugar de nuevo</button>
+        <button class="btn-secondary" onclick="showStart()">Menú</button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>© 2026 tremolo.mx · <a href="/privacidad">Privacidad</a> · <a href="/terminos">Términos</a></footer>
+
+<script>
+// ─── Constants ───────────────────────────────────────────────────────────────
+const NOTE_SHARP = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const WHITE_PCS  = [0,2,4,5,7,9,11];
+const BLACK_OFFSETS_REL = {1:0.6, 3:1.6, 6:3.6, 8:4.6, 10:5.6};
+const WW=34, WH=110, BW=20, BH=68, GAP=1, STEP=WW+GAP;
+const OCTS = 2;
+const N_WHITES = 7*OCTS + 1;
+const TOTAL_W = N_WHITES * STEP;
+
+const CHORD_TYPES = {
+  'M':  { suffix:'',    intervals:[0,4,7],    name:'Mayor' },
+  'm':  { suffix:'m',   intervals:[0,3,7],    name:'Menor' },
+  '°':  { suffix:'°',   intervals:[0,3,6],    name:'Disminuido' },
+  '7':  { suffix:'7',   intervals:[0,4,7,10], name:'Dom. 7ª' },
+  'Δ7': { suffix:'Δ7',  intervals:[0,4,7,11], name:'Mayor 7ª' },
+  'm7': { suffix:'m7',  intervals:[0,3,7,10], name:'Menor 7ª' },
+};
+const ROOTS = [0,2,4,5,7,9,11]; // C D E F G A B
+
+// ─── Audio ───────────────────────────────────────────────────────────────────
+let synth = null;
+function ensureSynth() {
+  if (!synth) {
+    synth = new Tone.PolySynth(Tone.Synth, {
+      oscillator:{type:'triangle'},
+      envelope:{attack:0.02,decay:0.2,sustain:0.5,release:1.2},
+      volume:-10
+    }).toDestination();
+  }
+}
+function playNote(pc, oct) {
+  ensureSynth();
+  Tone.start();
+  synth.triggerAttackRelease(NOTE_SHARP[pc] + oct, '4n');
+}
+function playChord(notes) {
+  ensureSynth();
+  Tone.start();
+  // notes: array of {pc, oct}
+  const noteNames = notes.map(n => NOTE_SHARP[n.pc] + n.oct);
+  synth.triggerAttackRelease(noteNames, '2n');
+}
+
+// ─── Game state ───────────────────────────────────────────────────────────────
+let score = 0;
+let roundNum = 0;
+let rounds = [];
+let currentChord = null; // {root, type, pcsNeeded: Set of "pc_oct", notes:[{pc,oct}]}
+let hitKeys = new Set();    // "pc_oct" of correct hits this round
+let wrongClicksThisRound = 0;
+let roundStartTime = 0;
+let timerInterval = null;
+let roundActive = false;
+let keyStates = {}; // "pc_oct" => state
+
+// ─── Piano ───────────────────────────────────────────────────────────────────
+function buildPiano(states) {
+  const svg = document.getElementById('piano-svg');
+  svg.setAttribute('viewBox', `0 0 ${TOTAL_W} ${WH+2}`);
+  svg.setAttribute('width', TOTAL_W);
+  svg.setAttribute('height', WH+2);
+  svg.setAttribute('style', 'overflow:visible;');
+
+  let html = '';
+  let wi_global = 0;
+  for (let oct = 0; oct < OCTS; oct++) {
+    WHITE_PCS.forEach((pc) => {
+      const x = wi_global * STEP;
+      const absOct = oct + 3;
+      const key = pc + '_' + absOct;
+      const state = states[key] || 'neutral';
+      const fill = state === 'correct' ? '#2a9d5c' : state === 'wrong' ? '#e05050' : '#f8f4ee';
+      const textColor = state !== 'neutral' ? '#fff' : '#8a7a64';
+      html += `<rect data-key="${key}" x="${x}" y="0" width="${WW}" height="${WH}" rx="3" fill="${fill}" stroke="#c8b89a" stroke-width="1" style="cursor:pointer" onmousedown="keyClick(${pc},${absOct})"/>`;
+      if (pc === 0) html += `<text x="${x+WW/2}" y="${WH-5}" text-anchor="middle" font-size="8" fill="${textColor}" font-family="monospace" pointer-events="none">C${absOct}</text>`;
+      wi_global++;
+    });
+  }
+  // Extra C5
+  {
+    const x = wi_global * STEP;
+    const key = '0_5';
+    const state = states[key] || 'neutral';
+    const fill = state === 'correct' ? '#2a9d5c' : state === 'wrong' ? '#e05050' : '#f8f4ee';
+    html += `<rect data-key="${key}" x="${x}" y="0" width="${WW}" height="${WH}" rx="3" fill="${fill}" stroke="#c8b89a" stroke-width="1" style="cursor:pointer" onmousedown="keyClick(0,5)"/>`;
+    html += `<text x="${x+WW/2}" y="${WH-5}" text-anchor="middle" font-size="8" fill="#8a7a64" font-family="monospace" pointer-events="none">C5</text>`;
+  }
+  // Black keys
+  for (let oct = 0; oct < OCTS; oct++) {
+    Object.entries(BLACK_OFFSETS_REL).forEach(([pcStr, relOffset]) => {
+      const pc = parseInt(pcStr);
+      const absOct = oct + 3;
+      const octStartX = oct * 7 * STEP;
+      const x = octStartX + relOffset * STEP;
+      const key = pc + '_' + absOct;
+      const state = states[key] || 'neutral';
+      const fill = state === 'correct' ? '#2a9d5c' : state === 'wrong' ? '#c03030' : '#1a1410';
+      html += `<rect data-key="${key}" x="${x}" y="0" width="${BW}" height="${BH}" rx="3" fill="${fill}" stroke="#000" stroke-width="0.5" style="cursor:pointer" onmousedown="keyClick(${pc},${absOct})"/>`;
+    });
+  }
+  svg.innerHTML = html;
+}
+
+// ─── Generate chord ───────────────────────────────────────────────────────────
+function randomChord() {
+  const root = ROOTS[Math.floor(Math.random() * ROOTS.length)];
+  const typeKeys = Object.keys(CHORD_TYPES);
+  const type = typeKeys[Math.floor(Math.random() * typeKeys.length)];
+  const intervals = CHORD_TYPES[type].intervals;
+
+  // Place chord in a range that fits the piano (C3-B4)
+  // Root octave: try oct 3 first, but push up if needed
+  let rootOct = 3;
+  // highest interval
+  const maxInterval = Math.max(...intervals);
+  // pc + root = first note
+  // If root + maxInterval > 23 (B4 = pc11, oct4 = 23 semitones from C3)
+  // semitone from C3 = (oct-3)*12 + pc
+  const rootSemi = (rootOct - 3) * 12 + root;
+  // all must be <= 23
+  if (rootSemi + maxInterval > 23) rootOct = 3; // will wrap: handled below
+
+  const notes = intervals.map(iv => {
+    const totalSemi = rootSemi + iv;
+    const oct = Math.floor(totalSemi / 12) + 3;
+    const pc = totalSemi % 12;
+    return {pc, oct};
+  });
+
+  const pcsNeeded = new Set(notes.map(n => n.pc + '_' + n.oct));
+
+  return {
+    root,
+    type,
+    name: NOTE_SHARP[root] + CHORD_TYPES[type].suffix,
+    typeName: CHORD_TYPES[type].name,
+    notes,
+    pcsNeeded
+  };
+}
+
+// ─── Timer display ───────────────────────────────────────────────────────────
+function startChordTimer() {
+  clearInterval(timerInterval);
+  roundStartTime = performance.now();
+  timerInterval = setInterval(() => {
+    const elapsed = (performance.now() - roundStartTime) / 1000;
+    document.getElementById('chord-timer').textContent = elapsed.toFixed(1) + 's';
+  }, 100);
+}
+
+// ─── Game logic ───────────────────────────────────────────────────────────────
+function startGame() {
+  score = 0;
+  roundNum = 0;
+  rounds = [];
+  showScreen('game');
+  nextRound();
+}
+
+function nextRound() {
+  if (roundNum >= 10) { endGame(); return; }
+  roundNum++;
+  wrongClicksThisRound = 0;
+  hitKeys = new Set();
+  keyStates = {};
+  roundActive = true;
+
+  currentChord = randomChord();
+
+  document.getElementById('round-num').textContent = roundNum;
+  document.getElementById('score-display').textContent = score + ' pts';
+  document.getElementById('chord-name').textContent = currentChord.name;
+  document.getElementById('chord-type-label').textContent = currentChord.typeName;
+  document.getElementById('chord-timer').textContent = '0.0s';
+  document.getElementById('feedback-text').textContent = 'Pulsa las notas del acorde en cualquier orden';
+  document.getElementById('feedback-text').className = 'feedback-text info';
+
+  // Build dots
+  const dotsEl = document.getElementById('chord-dots');
+  dotsEl.innerHTML = '';
+  currentChord.notes.forEach((n, i) => {
+    const d = document.createElement('div');
+    d.className = 'chord-dot';
+    d.id = 'dot-' + i;
+    dotsEl.appendChild(d);
+  });
+
+  buildPiano({});
+  setTimeout(() => {
+    playChord(currentChord.notes);
+    startChordTimer();
+  }, 300);
+}
+
+function keyClick(pc, oct) {
+  if (!roundActive) return;
+  const key = pc + '_' + oct;
+  playNote(pc, oct);
+
+  if (hitKeys.has(key)) return; // already hit
+
+  if (currentChord.pcsNeeded.has(key)) {
+    // Correct!
+    hitKeys.add(key);
+    keyStates[key] = 'correct';
+    buildPiano(keyStates);
+
+    // Update dot
+    const dotIdx = currentChord.notes.findIndex(n => n.pc === pc && n.oct === oct);
+    if (dotIdx >= 0) {
+      const dot = document.getElementById('dot-' + dotIdx);
+      if (dot) {
+        dot.classList.add('hit');
+        dot.textContent = NOTE_SHARP[pc];
+      }
+    }
+
+    document.getElementById('feedback-text').textContent = '✓ ' + NOTE_SHARP[pc] + oct;
+    document.getElementById('feedback-text').className = 'feedback-text correct';
+
+    if (hitKeys.size === currentChord.pcsNeeded.size) {
+      onChordComplete();
+    }
+  } else {
+    // Wrong
+    wrongClicksThisRound++;
+    keyStates[key] = 'wrong';
+    buildPiano(keyStates);
+    document.getElementById('feedback-text').textContent = NOTE_SHARP[pc] + oct + ' no es parte del acorde';
+    document.getElementById('feedback-text').className = 'feedback-text wrong';
+    setTimeout(() => {
+      if (keyStates[key] === 'wrong') {
+        delete keyStates[key];
+        buildPiano(keyStates);
+      }
+    }, 400);
+  }
+}
+
+function onChordComplete() {
+  roundActive = false;
+  clearInterval(timerInterval);
+  const elapsed = (performance.now() - roundStartTime) / 1000;
+
+  let pts = 200;
+  if (elapsed < 5) pts += 50;
+  else if (elapsed < 10) pts += 30;
+  pts = Math.max(0, pts);
+
+  score += pts;
+  document.getElementById('score-display').textContent = score + ' pts';
+  document.getElementById('feedback-text').textContent = '¡Acorde completo! +' + pts + ' pts (' + elapsed.toFixed(1) + 's)';
+  document.getElementById('feedback-text').className = 'feedback-text correct';
+
+  rounds.push({
+    num: roundNum,
+    chord: currentChord.name,
+    time: elapsed,
+    wrong: wrongClicksThisRound,
+    pts
+  });
+
+  setTimeout(nextRound, 1200);
+}
+
+function endGame() {
+  showScreen('end');
+  document.getElementById('final-score').textContent = score;
+
+  const avgWrong = rounds.length ? (rounds.reduce((a,r)=>a+r.wrong,0)/rounds.length).toFixed(1) : '0';
+  const bestTime = rounds.length ? Math.min(...rounds.map(r=>r.time)).toFixed(1)+'s' : '—';
+  document.getElementById('stat-avg-wrong').textContent = avgWrong;
+  document.getElementById('stat-best-time').textContent = bestTime;
+  document.getElementById('stat-rounds').textContent = rounds.length;
+
+  const tbody = document.getElementById('breakdown-body');
+  tbody.innerHTML = '';
+  rounds.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.num}</td><td style="font-family:var(--mono);font-weight:600">${r.chord}</td><td style="font-family:var(--mono)">${r.time.toFixed(1)}s</td><td>${r.wrong}</td><td class="pts">+${r.pts}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function showStart() {
+  clearInterval(timerInterval);
+  roundActive = false;
+  showScreen('start');
+}
+
+function showScreen(name) {
+  ['start','game','end'].forEach(s => {
+    document.getElementById('screen-'+s).classList.toggle('active', s===name);
+  });
+}
+
+buildPiano({});
+</script>
+</body>
+</html>

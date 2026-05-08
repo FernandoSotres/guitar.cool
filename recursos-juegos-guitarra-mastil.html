@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Juego de guitarra: identifica la nota en el mástil. Se marca una posición y tienes 5 segundos para nombrar la nota. Entrena el conocimiento del diapasón en tremolo.mx.">
+<link rel="canonical" href="https://tremolo.mx/recursos/juegos/guitarra/mastil">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="tremolo.mx">
+<meta property="og:locale" content="es_MX">
+<meta property="og:url" content="https://tremolo.mx/recursos/juegos/guitarra/mastil">
+<meta property="og:title" content="Identifica la Nota en el Mástil | tremolo.mx">
+<meta property="og:description" content="Juego de guitarra: identifica la nota en el mástil. Se marca una posición y tienes 5 segundos para nombrar la nota.">
+<meta property="og:image" content="https://tremolo.mx/img/og-tremolo.jpg">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"tremolo.mx","item":"https://tremolo.mx"},{"@type":"ListItem","position":2,"name":"Recursos","item":"https://tremolo.mx/recursos"},{"@type":"ListItem","position":3,"name":"Juegos","item":"https://tremolo.mx/recursos/juegos"},{"@type":"ListItem","position":4,"name":"Guitarra","item":"https://tremolo.mx/recursos/juegos/guitarra"},{"@type":"ListItem","position":5,"name":"Identifica la Nota en el Mástil","item":"https://tremolo.mx/recursos/juegos/guitarra/mastil"}]}</script>
+<title>Identifica la Nota en el Mástil | tremolo.mx</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:#f4ece0; --paper2:#f2ece3; --paper3:#e8e0d4;
+  --paper4:#c8b99f; --paper5:#cec4b0;
+  --copper:#a85a1e; --copper-lt:#c47a36; --copper-dk:#7a3e10;
+  --ink:#1c1410; --ink2:#2e2418; --ink3:#4a3c2c;
+  --ink4:#8a7a64; --ink5:#8a7a66;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --green:#2d7a3a; --green-lt:#3da050; --green-bg:#edf7ef;
+  --red:#9a2020; --red-lt:#c43030; --red-bg:#fdf0f0;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--paper); color:var(--ink); font-family:var(--sans); font-size:15px; line-height:1.6; min-height:100vh; display:flex; flex-direction:column; }
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{font-family:var(--mono);font-size:0.52em;font-weight:400;color:var(--ink4);}
+.nav-link{padding:0 16px;height:56px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+
+/* BREADCRUMB */
+.breadcrumb { padding:20px 48px 0; font-size:12px; color:var(--ink5); font-family:var(--mono); }
+.breadcrumb a { color:var(--ink4); text-decoration:none; }
+.breadcrumb a:hover { color:var(--copper); }
+.breadcrumb span { margin:0 6px; }
+
+/* MAIN GAME AREA */
+.game-wrap { flex:1; padding:40px 48px 72px; }
+.game-inner { max-width:780px; margin:0 auto; }
+
+/* ===== SCREENS ===== */
+.screen { display:none; }
+.screen.active { display:block; }
+
+/* INTRO */
+.intro-header { text-align:center; margin-bottom:40px; }
+.intro-eyebrow { font-size:11px; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:var(--copper); font-family:var(--mono); margin-bottom:16px; }
+.intro-title { font-family:var(--serif); font-size:clamp(36px,5vw,56px); color:var(--ink); margin-bottom:16px; line-height:1.1; }
+.intro-desc { font-size:15px; color:var(--ink4); line-height:1.7; max-width:520px; margin:0 auto; }
+
+.difficulty-section { margin:40px 0; }
+.difficulty-label { font-size:11px; font-weight:700; letter-spacing:.15em; text-transform:uppercase; color:var(--ink4); font-family:var(--mono); margin-bottom:16px; display:block; }
+.difficulty-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.diff-btn {
+  background:var(--paper2); border:1.5px solid var(--paper4); border-radius:10px;
+  padding:18px 20px; cursor:pointer; text-align:left; transition:all .18s;
+  font-family:var(--sans); color:var(--ink);
+}
+.diff-btn:hover { border-color:var(--copper-lt); background:var(--paper3); }
+.diff-btn.selected { border-color:var(--copper); background:#fdf7f0; box-shadow:0 0 0 3px rgba(168,90,30,.12); }
+.diff-btn-name { font-size:14px; font-weight:600; color:var(--ink2); margin-bottom:4px; }
+.diff-btn-desc { font-size:12px; color:var(--ink4); line-height:1.5; }
+
+.rules-box { background:var(--paper3); border:1px solid var(--paper4); border-radius:10px; padding:22px 26px; margin:28px 0 36px; }
+.rules-box ul { list-style:none; display:flex; flex-direction:column; gap:10px; }
+.rules-box li { font-size:13px; color:var(--ink3); display:flex; align-items:flex-start; gap:10px; line-height:1.5; }
+.rules-box li::before { content:''; display:block; width:6px; height:6px; border-radius:50%; background:var(--copper); flex-shrink:0; margin-top:6px; }
+
+.btn-start {
+  display:block; width:100%; padding:18px; background:var(--copper); color:#fff;
+  font-size:16px; font-weight:600; font-family:var(--sans); border:none; border-radius:10px;
+  cursor:pointer; letter-spacing:.02em; transition:background .18s, transform .1s;
+}
+.btn-start:hover { background:var(--copper-lt); transform:translateY(-1px); }
+.btn-start:active { transform:translateY(0); }
+
+/* GAME SCREEN */
+.game-header {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:28px;
+}
+.game-progress-wrap { flex:1; max-width:240px; }
+.game-progress-label { font-size:11px; color:var(--ink5); font-family:var(--mono); margin-bottom:6px; }
+.game-progress-bar { height:5px; background:var(--paper3); border-radius:3px; overflow:hidden; }
+.game-progress-fill { height:100%; background:var(--copper); border-radius:3px; transition:width .3s ease; }
+.game-score-display { text-align:right; }
+.game-score-label { font-size:11px; color:var(--ink5); font-family:var(--mono); }
+.game-score-val { font-family:var(--serif); font-size:28px; color:var(--copper); line-height:1; }
+
+/* TIMER */
+.timer-row { display:flex; align-items:center; gap:14px; margin-bottom:24px; }
+.timer-bar-wrap { flex:1; height:8px; background:var(--paper3); border-radius:4px; overflow:hidden; }
+.timer-bar { height:100%; border-radius:4px; transition:width .1s linear, background .3s; }
+.timer-label { font-family:var(--mono); font-size:14px; font-weight:500; color:var(--ink4); min-width:36px; text-align:right; }
+
+/* FRETBOARD */
+.fretboard-wrap {
+  background:#0d0804; border-radius:12px; padding:20px 24px;
+  margin-bottom:28px; overflow-x:auto;
+  box-shadow:0 4px 20px rgba(0,0,0,.3);
+}
+.fretboard-svg-container { min-width:580px; }
+.fretboard-svg-container svg { display:block; width:100%; }
+
+/* STRING LABELS aside the fretboard */
+.fretboard-inner { position:relative; }
+
+/* NOTE BUTTONS */
+.note-buttons-wrap { margin-bottom:24px; }
+.note-buttons-label { font-size:11px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--ink5); font-family:var(--mono); margin-bottom:12px; }
+.note-grid { display:grid; grid-template-columns:repeat(6, 1fr); gap:8px; }
+.note-btn {
+  background:var(--paper2); border:1.5px solid var(--paper4); border-radius:8px;
+  padding:13px 6px; cursor:pointer; font-size:14px; font-weight:600;
+  color:var(--ink2); font-family:var(--mono); transition:all .14s;
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+  position:relative;
+}
+.note-btn:hover:not(:disabled) { border-color:var(--copper-lt); background:var(--paper3); transform:translateY(-1px); }
+.note-btn:disabled { cursor:not-allowed; }
+.note-btn .note-main { font-size:15px; }
+.note-btn .note-alt { font-size:10px; color:var(--ink5); font-weight:400; }
+.note-btn .kbd-hint { position:absolute; top:4px; right:5px; font-size:9px; color:var(--ink5); font-weight:400; }
+.note-btn.correct { background:var(--green-bg); border-color:var(--green); color:var(--green); }
+.note-btn.wrong { background:var(--red-bg); border-color:var(--red); color:var(--red); }
+.note-btn.reveal { background:#fff3e0; border-color:#d4820a; color:#8a5000; }
+
+/* FEEDBACK */
+.feedback-box {
+  border-radius:10px; padding:16px 20px; margin-bottom:20px;
+  display:flex; align-items:center; gap:14px;
+  opacity:0; transform:translateY(6px); transition:all .22s;
+}
+.feedback-box.show { opacity:1; transform:translateY(0); }
+.feedback-box.correct { background:var(--green-bg); border:1px solid var(--green); }
+.feedback-box.wrong { background:var(--red-bg); border:1px solid var(--red); }
+.feedback-icon { font-size:22px; flex-shrink:0; }
+.feedback-text { font-size:14px; color:var(--ink3); line-height:1.5; }
+.feedback-text strong { display:block; font-size:15px; }
+.feedback-pts { margin-left:auto; font-family:var(--serif); font-size:22px; color:var(--copper); font-weight:700; white-space:nowrap; }
+
+/* ROUND INFO */
+.round-info { text-align:center; margin-bottom:20px; }
+.round-position { font-family:var(--mono); font-size:13px; color:var(--ink5); }
+.round-question { font-family:var(--serif); font-size:20px; color:var(--ink3); margin-top:4px; }
+
+/* END SCREEN */
+.end-header { text-align:center; margin-bottom:36px; }
+.end-medal { font-size:56px; margin-bottom:16px; }
+.end-title { font-family:var(--serif); font-size:clamp(32px,5vw,48px); color:var(--ink); margin-bottom:8px; }
+.end-subtitle { font-size:15px; color:var(--ink4); }
+
+.end-stats { display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-bottom:36px; }
+.end-stat { background:var(--paper2); border:1px solid var(--paper4); border-radius:10px; padding:22px 16px; text-align:center; }
+.end-stat-val { font-family:var(--serif); font-size:36px; color:var(--copper); line-height:1; margin-bottom:6px; }
+.end-stat-label { font-size:12px; color:var(--ink5); font-family:var(--mono); }
+
+.end-table { width:100%; border-collapse:collapse; margin-bottom:36px; font-size:13px; }
+.end-table th { text-align:left; padding:10px 12px; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink5); font-family:var(--mono); border-bottom:1.5px solid var(--paper4); }
+.end-table td { padding:11px 12px; border-bottom:1px solid var(--paper3); color:var(--ink3); }
+.end-table tr:last-child td { border-bottom:none; }
+.end-table .td-result { font-weight:600; }
+.end-table .td-result.ok { color:var(--green); }
+.end-table .td-result.fail { color:var(--red); }
+.end-table .td-pts { font-family:var(--mono); font-weight:500; color:var(--copper); }
+.end-table .td-string { font-family:var(--mono); font-size:12px; }
+
+.end-actions { display:flex; gap:12px; }
+.btn-restart {
+  flex:1; padding:16px; background:var(--copper); color:#fff;
+  font-size:15px; font-weight:600; font-family:var(--sans); border:none; border-radius:10px;
+  cursor:pointer; transition:background .18s;
+}
+.btn-restart:hover { background:var(--copper-lt); }
+.btn-hub {
+  padding:16px 24px; background:var(--paper2); color:var(--ink3);
+  font-size:15px; font-weight:500; font-family:var(--sans); border:1.5px solid var(--paper4); border-radius:10px;
+  cursor:pointer; text-decoration:none; display:flex; align-items:center;
+  transition:border-color .18s, background .18s;
+}
+.btn-hub:hover { border-color:var(--copper-lt); background:var(--paper3); }
+
+/* AUDIO TOGGLE */
+.audio-toggle {
+  display:flex; align-items:center; gap:8px;
+  font-size:12px; color:var(--ink5); cursor:pointer;
+  background:none; border:none; font-family:var(--sans);
+}
+.audio-toggle input { cursor:pointer; accent-color:var(--copper); }
+
+@media (max-width:640px) {
+  nav { padding:0 16px; overflow-x:auto; flex-wrap:nowrap; white-space:nowrap; scrollbar-width:none; }
+  nav::-webkit-scrollbar { display:none; }
+  nav > * { flex-shrink:0; }
+  .breadcrumb { padding:16px 20px 0; }
+  .game-wrap { padding:24px 16px 48px; }
+  .difficulty-grid { grid-template-columns:1fr; }
+  .note-grid { grid-template-columns:repeat(4, 1fr); }
+  .end-stats { grid-template-columns:1fr 1fr; }
+  .end-actions { flex-direction:column; }
+  .btn-hub { justify-content:center; }
+}
+</style>
+</head>
+<body>
+
+<nav><a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a><a href="/teoria" class="nav-link">Teoría</a><a href="/practica" class="nav-link">Práctica</a><a href="/herramientas" class="nav-link">Herramientas</a><a href="/recursos" class="nav-link active">Recursos</a></nav>
+
+<div class="breadcrumb">
+  <a href="/recursos">Recursos</a>
+  <span>›</span>
+  <a href="/recursos/juegos">Juegos</a>
+  <span>›</span>
+  <a href="/recursos/juegos/guitarra">Guitarra</a>
+  <span>›</span>
+  <span>Identifica la Nota en el Mástil</span>
+</div>
+
+<div class="game-wrap">
+<div class="game-inner">
+
+<!-- ====== INTRO SCREEN ====== -->
+<div id="screen-intro" class="screen active">
+  <div class="intro-header">
+    <div class="intro-eyebrow">Juegos · Guitarra</div>
+    <h1 class="intro-title">Identifica la Nota en el Mástil</h1>
+    <p class="intro-desc">Se ilumina una posición en el diapasón. Tienes 5 segundos para identificar la nota. 10 rondas, puntaje basado en velocidad.</p>
+  </div>
+
+  <div class="difficulty-section">
+    <span class="difficulty-label">Dificultad</span>
+    <div class="difficulty-grid">
+      <button class="diff-btn selected" data-diff="high">
+        <div class="diff-btn-name">Cuerdas altas (1–3)</div>
+        <div class="diff-btn-desc">Cuerdas e, B y G — las más usadas para melodía. Ideal para comenzar.</div>
+      </button>
+      <button class="diff-btn" data-diff="all">
+        <div class="diff-btn-name">Todas las cuerdas</div>
+        <div class="diff-btn-desc">Todas las posiciones del mástil, de la 1.ª a la 6.ª cuerda.</div>
+      </button>
+      <button class="diff-btn" data-diff="low-frets">
+        <div class="diff-btn-name">Sin cejilla (trastes 0–5)</div>
+        <div class="diff-btn-desc">Solo la primera posición. Perfecto para principiantes.</div>
+      </button>
+      <button class="diff-btn" data-diff="full">
+        <div class="diff-btn-name">Mástil completo (0–12)</div>
+        <div class="diff-btn-desc">Cualquier cuerda, cualquier traste. El desafío total.</div>
+      </button>
+    </div>
+  </div>
+
+  <div class="rules-box">
+    <ul>
+      <li>Se marca una posición en el mástil — identifica qué nota es</li>
+      <li>150 pts si respondes en menos de 2 s · 120 pts en 2–4 s · 100 pts en 4–5 s</li>
+      <li>Falla o se acaba el tiempo: 0 pts y se revela la nota correcta</li>
+      <li>Atajos de teclado: <strong style="font-family:var(--mono)">1–9 0 Q W</strong> para las 12 notas</li>
+    </ul>
+  </div>
+
+  <div style="display:flex; align-items:center; gap:16px; margin-bottom:20px;">
+    <label class="audio-toggle">
+      <input type="checkbox" id="audio-enabled" checked>
+      <span>Reproducir nota al inicio de cada ronda</span>
+    </label>
+  </div>
+
+  <button class="btn-start" id="btn-start">Comenzar →</button>
+</div>
+
+<!-- ====== GAME SCREEN ====== -->
+<div id="screen-game" class="screen">
+  <div class="game-header">
+    <div class="game-progress-wrap">
+      <div class="game-progress-label">Ronda <span id="round-num">1</span> de 10</div>
+      <div class="game-progress-bar"><div class="game-progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:20px;">
+      <div class="game-score-display">
+        <div class="game-score-label">Puntos</div>
+        <div class="game-score-val" id="score-display">0</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="timer-row">
+    <div class="timer-bar-wrap"><div class="timer-bar" id="timer-bar" style="width:100%;background:var(--copper)"></div></div>
+    <div class="timer-label" id="timer-label">5.0</div>
+  </div>
+
+  <div class="round-info">
+    <div class="round-position" id="round-position">Cuerda 1 (e) · Traste 0</div>
+    <div class="round-question">¿Qué nota es esta?</div>
+  </div>
+
+  <div class="fretboard-wrap">
+    <div class="fretboard-svg-container">
+      <svg id="fretboard-svg" viewBox="0 0 710 176" width="100%" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+  </div>
+
+  <div id="feedback-box" class="feedback-box">
+    <div class="feedback-icon" id="feedback-icon"></div>
+    <div class="feedback-text">
+      <strong id="feedback-title"></strong>
+      <span id="feedback-detail"></span>
+    </div>
+    <div class="feedback-pts" id="feedback-pts"></div>
+  </div>
+
+  <div class="note-buttons-wrap">
+    <div class="note-buttons-label">Selecciona la nota</div>
+    <div class="note-grid" id="note-grid"></div>
+  </div>
+</div>
+
+<!-- ====== END SCREEN ====== -->
+<div id="screen-end" class="screen">
+  <div class="end-header">
+    <div class="end-medal" id="end-medal">🎸</div>
+    <h2 class="end-title" id="end-title">Resultado</h2>
+    <p class="end-subtitle" id="end-subtitle"></p>
+  </div>
+
+  <div class="end-stats">
+    <div class="end-stat">
+      <div class="end-stat-val" id="stat-score">0</div>
+      <div class="end-stat-label">Puntos totales</div>
+    </div>
+    <div class="end-stat">
+      <div class="end-stat-val" id="stat-correct">0/10</div>
+      <div class="end-stat-label">Aciertos</div>
+    </div>
+    <div class="end-stat">
+      <div class="end-stat-val" id="stat-streak">0</div>
+      <div class="end-stat-label">Mejor racha</div>
+    </div>
+  </div>
+
+  <table class="end-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Posición</th>
+        <th>Nota correcta</th>
+        <th>Tu respuesta</th>
+        <th>Resultado</th>
+        <th>Pts</th>
+      </tr>
+    </thead>
+    <tbody id="end-tbody"></tbody>
+  </table>
+
+  <div class="end-actions">
+    <button class="btn-restart" id="btn-restart">Jugar de nuevo</button>
+    <a href="/recursos/juegos/guitarra" class="btn-hub">← Volver a Juegos de Guitarra</a>
+  </div>
+</div>
+
+</div><!-- /game-inner -->
+</div><!-- /game-wrap -->
+
+<footer style="border-top:1px solid var(--paper4);padding:24px 48px;text-align:center;font-size:12px;color:var(--ink5);">© 2026 tremolo.mx · <a href="/privacidad" style="color:var(--ink4)">Privacidad</a> · <a href="/terminos" style="color:var(--ink4)">Términos</a></footer>
+
+<script>
+// =========================================================
+// CONSTANTS & DATA
+// =========================================================
+const OPEN_STRINGS = [4, 9, 2, 7, 11, 4]; // strings 6,5,4,3,2,1 (pitch class)
+const STRING_OCTAVES = [2, 2, 3, 3, 3, 4]; // base octave per string
+const STRING_NAMES = ['E', 'A', 'D', 'G', 'B', 'e']; // string 0=low E, 5=high e
+
+// Notes in two forms: enharmonic display
+const NOTES = [
+  { pc: 0,  main: 'C',   alt: null },
+  { pc: 1,  main: 'C#',  alt: 'D♭' },
+  { pc: 2,  main: 'D',   alt: null },
+  { pc: 3,  main: 'D#',  alt: 'E♭' },
+  { pc: 4,  main: 'E',   alt: null },
+  { pc: 5,  main: 'F',   alt: null },
+  { pc: 6,  main: 'F#',  alt: 'G♭' },
+  { pc: 7,  main: 'G',   alt: null },
+  { pc: 8,  main: 'G#',  alt: 'A♭' },
+  { pc: 9,  main: 'A',   alt: null },
+  { pc: 10, main: 'A#',  alt: 'B♭' },
+  { pc: 11, main: 'B',   alt: null },
+];
+
+// Keyboard shortcuts (1-9, 0, q, w) → note index 0-11
+const KEY_MAP = {
+  '1':0, '2':1, '3':2, '4':3, '5':4, '6':5,
+  '7':6, '8':7, '9':8, '0':9, 'q':10, 'w':11
+};
+const KEY_LABELS = ['1','2','3','4','5','6','7','8','9','0','Q','W'];
+
+const TOTAL_ROUNDS = 10;
+const ROUND_TIME = 5; // seconds
+
+// Difficulty presets
+const DIFFICULTY = {
+  'high':      { strings: [3,4,5], frets: [0,12] }, // G, B, e (index 3,4,5)
+  'all':       { strings: [0,1,2,3,4,5], frets: [0,12] },
+  'low-frets': { strings: [0,1,2,3,4,5], frets: [0,5] },
+  'full':      { strings: [0,1,2,3,4,5], frets: [0,12] },
+};
+
+// =========================================================
+// SVG FRETBOARD BUILDER
+// =========================================================
+const W = 710, STRING_H = 26, FRET_W = 50, STRINGS = 6, FRETS = 13;
+const MARGIN_L = 32, MARGIN_T = 16;
+const FB_H = (STRINGS - 1) * STRING_H + MARGIN_T * 2;
+
+function buildFretboard(svgEl, highlightString = -1, highlightFret = -1) {
+  svgEl.setAttribute('viewBox', `0 0 ${W} ${FB_H}`);
+
+  let h = '';
+
+  // Background (fretboard wood)
+  h += `<rect width="${W}" height="${FB_H}" fill="#c8824a" rx="8"/>`;
+  h += `<rect width="${W}" height="${FB_H}" fill="url(#wood-grain)" rx="8" opacity="0.18"/>`;
+
+  // Defs for wood grain subtle overlay
+  h += `<defs>
+    <linearGradient id="wood-grain" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.08"/>
+      <stop offset="50%" stop-color="#000" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0.04"/>
+    </linearGradient>
+  </defs>`;
+
+  // Nut
+  h += `<rect x="${MARGIN_L}" y="${MARGIN_T - 4}" width="6" height="${(STRINGS-1)*STRING_H + 8}" fill="#e8d5a0" stroke="#8a6020" stroke-width="1.5" rx="1"/>`;
+
+  // Fret bars (1–12)
+  for (let f = 1; f <= FRETS; f++) {
+    const x = MARGIN_L + 6 + f * FRET_W;
+    h += `<rect x="${x-1}" y="${MARGIN_T - 3}" width="3" height="${(STRINGS-1)*STRING_H + 6}" fill="#7a5818" opacity="0.85" rx="1"/>`;
+  }
+
+  // Fret numbers (below strings)
+  for (let f = 1; f <= 12; f++) {
+    const x = MARGIN_L + 6 + (f - 0.5) * FRET_W;
+    h += `<text x="${x}" y="${FB_H - 3}" text-anchor="middle" font-size="9" fill="#5a3808" font-family="JetBrains Mono, monospace" opacity="0.8">${f}</text>`;
+  }
+  // Open string label
+  h += `<text x="${MARGIN_L - 10}" y="${FB_H - 3}" text-anchor="middle" font-size="9" fill="#5a3808" font-family="JetBrains Mono, monospace" opacity="0.8">0</text>`;
+
+  // Position dots (inlays)
+  const DOT_FRETS_SINGLE = [3, 5, 7, 9];
+  DOT_FRETS_SINGLE.forEach(f => {
+    const x = MARGIN_L + 6 + (f - 0.5) * FRET_W;
+    const y = MARGIN_T + ((STRINGS-1) * STRING_H) / 2;
+    h += `<circle cx="${x}" cy="${y}" r="6" fill="rgba(60,30,0,0.22)"/>`;
+  });
+  // Double dot at 12
+  const x12 = MARGIN_L + 6 + 11.5 * FRET_W;
+  h += `<circle cx="${x12}" cy="${MARGIN_T + STRING_H}" r="6" fill="rgba(60,30,0,0.22)"/>`;
+  h += `<circle cx="${x12}" cy="${MARGIN_T + (STRINGS-2)*STRING_H}" r="6" fill="rgba(60,30,0,0.22)"/>`;
+
+  // Strings (thicker for lower strings)
+  for (let s = 0; s < STRINGS; s++) {
+    const y = MARGIN_T + s * STRING_H;
+    const thickness = 1 + (STRINGS - 1 - s) * 0.45; // s=5 is high e (thinnest)
+    const strOpacity = 0.82 + s * 0.02;
+    h += `<line x1="${MARGIN_L + 6}" y1="${y}" x2="${MARGIN_L + 6 + FRETS * FRET_W}" y2="${y}" stroke="#d4a858" stroke-width="${thickness}" opacity="${strOpacity}"/>`;
+    // String name label (left)
+    h += `<text x="${MARGIN_L - 4}" y="${y + 4}" text-anchor="end" font-size="10" fill="#e8d0a0" font-family="JetBrains Mono, monospace" font-weight="500" opacity="0.9">${STRING_NAMES[s]}</text>`;
+  }
+
+  // Highlighted note dot
+  if (highlightString >= 0 && highlightFret >= 0) {
+    const fx = highlightFret === 0
+      ? MARGIN_L + 3 // open string: just left of nut
+      : MARGIN_L + 6 + (highlightFret - 0.5) * FRET_W;
+    const fy = MARGIN_T + highlightString * STRING_H;
+
+    // Glow ring
+    h += `<circle cx="${fx}" cy="${fy}" r="15" fill="rgba(168,90,30,0.22)"/>`;
+    // Main dot
+    h += `<circle cx="${fx}" cy="${fy}" r="11" fill="#a85a1e" opacity="0.96"/>`;
+    // Inner shine
+    h += `<circle cx="${fx-3}" cy="${fy-3}" r="4" fill="rgba(255,255,255,0.28)"/>`;
+    // White ring
+    h += `<circle cx="${fx}" cy="${fy}" r="11" fill="none" stroke="#fff" stroke-width="2" opacity="0.55"/>`;
+  }
+
+  svgEl.innerHTML = h;
+}
+
+// =========================================================
+// NOTE MATH
+// =========================================================
+function noteAt(string, fret) {
+  const pc = (OPEN_STRINGS[string] + fret) % 12;
+  const oct = STRING_OCTAVES[string] + Math.floor((OPEN_STRINGS[string] + fret) / 12);
+  return { pc, oct };
+}
+
+function noteFrequency(pc, oct) {
+  // MIDI note number: C4 = 60
+  const midi = (oct + 1) * 12 + pc;
+  return 440 * Math.pow(2, (midi - 69) / 12);
+}
+
+// =========================================================
+// AUDIO (Web Audio API — no external deps needed)
+// =========================================================
+let audioCtx = null;
+
+function ensureAudioCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  return audioCtx;
+}
+
+function playGuitarNote(pc, oct) {
+  const ctx = ensureAudioCtx();
+  const freq = noteFrequency(pc, oct);
+
+  // Create a plucked-string-like sound with oscillator + envelope
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
+
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(freq, ctx.currentTime);
+
+  // Slight pitch bend downward (string attack characteristic)
+  osc.frequency.setTargetAtTime(freq * 0.998, ctx.currentTime + 0.01, 0.05);
+
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(3000, ctx.currentTime);
+  filter.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.4);
+  filter.Q.setValueAtTime(1.5, ctx.currentTime);
+
+  // Envelope: quick attack, fast decay, moderate sustain, long release
+  gain.gain.setValueAtTime(0, ctx.currentTime);
+  gain.gain.linearRampToValueAtTime(0.32, ctx.currentTime + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 0.25);
+  gain.gain.exponentialRampToValueAtTime(0.06, ctx.currentTime + 0.8);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.2);
+
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(ctx.destination);
+
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + 2.5);
+}
+
+// =========================================================
+// GAME STATE
+// =========================================================
+let state = {
+  difficulty: 'high',
+  round: 0,
+  score: 0,
+  history: [],
+  streak: 0,
+  bestStreak: 0,
+  currentString: 0,
+  currentFret: 0,
+  currentPc: 0,
+  answered: false,
+  timerInterval: null,
+  timerStart: 0,
+  audioOn: true,
+};
+
+// =========================================================
+// UI HELPERS
+// =========================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function buildNoteButtons() {
+  const grid = document.getElementById('note-grid');
+  grid.innerHTML = '';
+  NOTES.forEach((n, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'note-btn';
+    btn.dataset.pc = n.pc;
+    btn.dataset.idx = i;
+    const kbdLabel = KEY_LABELS[i] || '';
+    btn.innerHTML = `
+      <span class="kbd-hint">${kbdLabel}</span>
+      <span class="note-main">${n.main}</span>
+      ${n.alt ? `<span class="note-alt">${n.alt}</span>` : ''}
+    `;
+    btn.addEventListener('click', () => handleAnswer(n.pc));
+    grid.appendChild(btn);
+  });
+}
+
+function resetNoteButtons() {
+  document.querySelectorAll('.note-btn').forEach(btn => {
+    btn.classList.remove('correct', 'wrong', 'reveal');
+    btn.disabled = false;
+  });
+}
+
+function disableAllButtons() {
+  document.querySelectorAll('.note-btn').forEach(btn => btn.disabled = true);
+}
+
+// =========================================================
+// TIMER
+// =========================================================
+function startTimer() {
+  const bar = document.getElementById('timer-bar');
+  const label = document.getElementById('timer-label');
+  state.timerStart = performance.now();
+
+  clearInterval(state.timerInterval);
+  state.timerInterval = setInterval(() => {
+    const elapsed = (performance.now() - state.timerStart) / 1000;
+    const remaining = Math.max(0, ROUND_TIME - elapsed);
+    const pct = (remaining / ROUND_TIME) * 100;
+
+    bar.style.width = pct + '%';
+    label.textContent = remaining.toFixed(1);
+
+    // Color: green → orange → red
+    if (pct > 60) {
+      bar.style.background = 'var(--green-lt)';
+    } else if (pct > 30) {
+      bar.style.background = '#d4820a';
+    } else {
+      bar.style.background = 'var(--red-lt)';
+    }
+
+    if (remaining <= 0) {
+      clearInterval(state.timerInterval);
+      handleTimeout();
+    }
+  }, 50);
+}
+
+function stopTimer() {
+  clearInterval(state.timerInterval);
+}
+
+function getElapsed() {
+  return (performance.now() - state.timerStart) / 1000;
+}
+
+// =========================================================
+// ROUND LOGIC
+// =========================================================
+function pickRound() {
+  const diff = DIFFICULTY[state.difficulty];
+  const strings = diff.strings;
+  const [fretMin, fretMax] = diff.frets;
+
+  // Avoid repeating the exact same position twice in a row
+  let s, f;
+  let tries = 0;
+  do {
+    s = strings[Math.floor(Math.random() * strings.length)];
+    f = fretMin + Math.floor(Math.random() * (fretMax - fretMin + 1));
+    tries++;
+  } while (tries < 8 && s === state.currentString && f === state.currentFret);
+
+  state.currentString = s;
+  state.currentFret = f;
+  const { pc, oct } = noteAt(s, f);
+  state.currentPc = pc;
+  state.currentOct = oct;
+}
+
+function startRound() {
+  state.answered = false;
+  pickRound();
+
+  // Update UI
+  const roundNumEl = document.getElementById('round-num');
+  roundNumEl.textContent = state.round + 1;
+
+  const progressFill = document.getElementById('progress-fill');
+  progressFill.style.width = (state.round / TOTAL_ROUNDS * 100) + '%';
+
+  // Position label
+  const stringLabel = STRING_NAMES[state.currentString];
+  const fretLabel = state.currentFret === 0 ? 'al aire' : `traste ${state.currentFret}`;
+  document.getElementById('round-position').textContent = `Cuerda ${6 - state.currentString} (${stringLabel}) · ${fretLabel}`;
+
+  // Rebuild fretboard
+  const svg = document.getElementById('fretboard-svg');
+  buildFretboard(svg, state.currentString, state.currentFret);
+
+  // Reset buttons
+  resetNoteButtons();
+
+  // Hide feedback
+  const fb = document.getElementById('feedback-box');
+  fb.className = 'feedback-box';
+
+  // Play note if audio on
+  if (state.audioOn) {
+    playGuitarNote(state.currentPc, state.currentOct);
+  }
+
+  // Start timer
+  startTimer();
+}
+
+function scoreForTime(elapsed) {
+  if (elapsed < 2) return 150;
+  if (elapsed < 4) return 120;
+  return 100;
+}
+
+function handleAnswer(pc) {
+  if (state.answered) return;
+  state.answered = true;
+  stopTimer();
+
+  const elapsed = getElapsed();
+  const correct = pc === state.currentPc;
+  const pts = correct ? scoreForTime(elapsed) : 0;
+
+  if (correct) {
+    state.score += pts;
+    state.streak++;
+    if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+  } else {
+    state.streak = 0;
+  }
+
+  document.getElementById('score-display').textContent = state.score;
+
+  // Color buttons
+  disableAllButtons();
+  document.querySelectorAll('.note-btn').forEach(btn => {
+    const bpc = parseInt(btn.dataset.pc);
+    if (bpc === state.currentPc) {
+      btn.classList.add(correct ? 'correct' : 'reveal');
+    }
+    if (bpc === pc && !correct) {
+      btn.classList.add('wrong');
+    }
+  });
+
+  // Feedback
+  const fb = document.getElementById('feedback-box');
+  const noteName = NOTES.find(n => n.pc === state.currentPc);
+  const noteDisplay = noteName.alt ? `${noteName.main} / ${noteName.alt}` : noteName.main;
+  const elapsedDisplay = elapsed.toFixed(1) + 's';
+
+  if (correct) {
+    fb.className = 'feedback-box show correct';
+    document.getElementById('feedback-icon').textContent = '✓';
+    document.getElementById('feedback-title').textContent = '¡Correcto!';
+    document.getElementById('feedback-detail').textContent = `${noteDisplay} — respondiste en ${elapsedDisplay}`;
+    document.getElementById('feedback-pts').textContent = `+${pts}`;
+  } else {
+    const wrongNote = NOTES.find(n => n.pc === pc);
+    const wrongDisplay = wrongNote ? (wrongNote.alt ? `${wrongNote.main}/${wrongNote.alt}` : wrongNote.main) : '?';
+    fb.className = 'feedback-box show wrong';
+    document.getElementById('feedback-icon').textContent = '✗';
+    document.getElementById('feedback-title').textContent = `Incorrecto — era ${noteDisplay}`;
+    document.getElementById('feedback-detail').textContent = `Seleccionaste ${wrongDisplay}`;
+    document.getElementById('feedback-pts').textContent = '+0';
+  }
+
+  // Record history
+  state.history.push({
+    round: state.round + 1,
+    string: state.currentString,
+    fret: state.currentFret,
+    correctPc: state.currentPc,
+    answeredPc: pc,
+    correct,
+    pts,
+    elapsed,
+  });
+
+  state.round++;
+
+  // Advance after delay
+  setTimeout(() => {
+    if (state.round >= TOTAL_ROUNDS) {
+      endGame();
+    } else {
+      startRound();
+    }
+  }, correct ? 1000 : 1600);
+}
+
+function handleTimeout() {
+  if (state.answered) return;
+  state.answered = true;
+  state.streak = 0;
+
+  disableAllButtons();
+
+  // Reveal correct button
+  document.querySelectorAll('.note-btn').forEach(btn => {
+    if (parseInt(btn.dataset.pc) === state.currentPc) {
+      btn.classList.add('reveal');
+    }
+  });
+
+  const fb = document.getElementById('feedback-box');
+  const noteName = NOTES.find(n => n.pc === state.currentPc);
+  const noteDisplay = noteName.alt ? `${noteName.main} / ${noteName.alt}` : noteName.main;
+
+  fb.className = 'feedback-box show wrong';
+  document.getElementById('feedback-icon').textContent = '⏱';
+  document.getElementById('feedback-title').textContent = `Tiempo agotado — era ${noteDisplay}`;
+  document.getElementById('feedback-detail').textContent = 'No respondiste a tiempo';
+  document.getElementById('feedback-pts').textContent = '+0';
+
+  state.history.push({
+    round: state.round + 1,
+    string: state.currentString,
+    fret: state.currentFret,
+    correctPc: state.currentPc,
+    answeredPc: -1,
+    correct: false,
+    pts: 0,
+    elapsed: ROUND_TIME,
+  });
+
+  state.round++;
+
+  setTimeout(() => {
+    if (state.round >= TOTAL_ROUNDS) {
+      endGame();
+    } else {
+      startRound();
+    }
+  }, 1800);
+}
+
+// =========================================================
+// END GAME
+// =========================================================
+function endGame() {
+  stopTimer();
+  const correct = state.history.filter(h => h.correct).length;
+  const pct = correct / TOTAL_ROUNDS;
+
+  // Medal & title
+  let medal, title, subtitle;
+  if (pct === 1) {
+    medal = '🏆'; title = '¡Perfecto!'; subtitle = 'Dominas el mástil. Puntuación máxima.';
+  } else if (pct >= 0.8) {
+    medal = '🥇'; title = '¡Excelente!'; subtitle = 'Casi perfecto. Tu mástil está muy bien mapeado.';
+  } else if (pct >= 0.6) {
+    medal = '🥈'; title = '¡Buen trabajo!'; subtitle = 'Vas por el buen camino. Sigue practicando.';
+  } else if (pct >= 0.4) {
+    medal = '🥉'; title = 'Sigue practicando'; subtitle = 'Con constancia dominarás el mástil.';
+  } else {
+    medal = '🎸'; title = '¡A practicar!'; subtitle = 'El mástil lleva tiempo. No te rindas.';
+  }
+
+  document.getElementById('end-medal').textContent = medal;
+  document.getElementById('end-title').textContent = title;
+  document.getElementById('end-subtitle').textContent = subtitle;
+  document.getElementById('stat-score').textContent = state.score;
+  document.getElementById('stat-correct').textContent = `${correct}/10`;
+  document.getElementById('stat-streak').textContent = state.bestStreak;
+
+  // Build table
+  const tbody = document.getElementById('end-tbody');
+  tbody.innerHTML = '';
+  state.history.forEach((h, i) => {
+    const correctNote = NOTES.find(n => n.pc === h.correctPc);
+    const correctDisplay = correctNote.alt ? `${correctNote.main}/${correctNote.alt}` : correctNote.main;
+
+    let answeredDisplay = '–';
+    if (h.answeredPc === -1) {
+      answeredDisplay = '<em style="color:var(--ink5)">tiempo</em>';
+    } else {
+      const an = NOTES.find(n => n.pc === h.answeredPc);
+      if (an) answeredDisplay = an.alt ? `${an.main}/${an.alt}` : an.main;
+    }
+
+    const stringLabel = STRING_NAMES[h.string];
+    const fretLabel = h.fret === 0 ? 'al aire' : `traste ${h.fret}`;
+
+    tbody.innerHTML += `
+      <tr>
+        <td style="color:var(--ink5);font-family:var(--mono)">${h.round}</td>
+        <td class="td-string">Cuerda ${6 - h.string} (${stringLabel}) · ${fretLabel}</td>
+        <td style="font-family:var(--mono);font-weight:600">${correctDisplay}</td>
+        <td style="font-family:var(--mono)">${answeredDisplay}</td>
+        <td class="td-result ${h.correct ? 'ok' : 'fail'}">${h.correct ? '✓' : '✗'}</td>
+        <td class="td-pts">${h.pts > 0 ? '+' + h.pts : '0'}</td>
+      </tr>`;
+  });
+
+  showScreen('screen-end');
+}
+
+// =========================================================
+// INIT
+// =========================================================
+function startGame() {
+  state.difficulty = document.querySelector('.diff-btn.selected')?.dataset.diff || 'high';
+  state.audioOn = document.getElementById('audio-enabled').checked;
+  state.round = 0;
+  state.score = 0;
+  state.history = [];
+  state.streak = 0;
+  state.bestStreak = 0;
+  state.currentString = -1;
+  state.currentFret = -1;
+
+  buildNoteButtons();
+  showScreen('screen-game');
+  startRound();
+}
+
+// Difficulty buttons
+document.querySelectorAll('.diff-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  });
+});
+
+document.getElementById('btn-start').addEventListener('click', startGame);
+document.getElementById('btn-restart').addEventListener('click', () => {
+  showScreen('screen-intro');
+});
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  // Don't fire on input fields
+  if (e.target.tagName === 'INPUT') return;
+
+  const key = e.key.toLowerCase();
+  if (key in KEY_MAP) {
+    const idx = KEY_MAP[key];
+    const note = NOTES[idx];
+    if (note) {
+      // Only if game screen is active and round not answered
+      const gameScreen = document.getElementById('screen-game');
+      if (gameScreen.classList.contains('active') && !state.answered) {
+        handleAnswer(note.pc);
+      }
+    }
+  }
+
+  // Space to start/restart
+  if (key === ' ' || key === 'enter') {
+    const introScreen = document.getElementById('screen-intro');
+    if (introScreen.classList.contains('active')) {
+      e.preventDefault();
+      startGame();
+    }
+  }
+});
+
+// Draw a blank fretboard on intro screen
+(function initIntroFretboard() {
+  // We don't show a fretboard on intro, but we can prepare the SVG element
+  // (already in game screen, built per round)
+})();
+</script>
+</body>
+</html>

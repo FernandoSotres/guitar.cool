@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Escala en Orden · tremolo.mx</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+<style>
+:root {
+  --paper:#f4ece0; --paper2:#f2ece3; --paper3:#e8e0d4;
+  --paper4:#c8b99f; --paper5:#cec4b0;
+  --copper:#a85a1e; --copper-lt:#c47a36; --copper-dk:#7a3e10;
+  --ink:#1c1410; --ink2:#2e2418; --ink3:#4a3c2c;
+  --ink4:#8a7a64; --ink5:#8a7a66;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);min-height:100vh;display:flex;flex-direction:column;}
+nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{font-family:var(--mono);font-size:0.52em;font-weight:400;color:var(--ink4);letter-spacing:0;margin-left:2px;}
+.nav-link{padding:0 16px;height:56px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+
+main{flex:1;display:flex;flex-direction:column;align-items:center;padding:40px 24px 60px;}
+h1{font-family:var(--serif);font-size:2rem;color:var(--ink);margin-bottom:6px;text-align:center;}
+.subtitle{color:var(--ink4);font-size:0.9rem;margin-bottom:32px;text-align:center;}
+
+.game-card{background:var(--paper2);border:1px solid var(--paper4);border-radius:16px;padding:32px;width:100%;max-width:760px;display:flex;flex-direction:column;align-items:center;gap:20px;}
+
+.screen{display:none;flex-direction:column;align-items:center;gap:20px;width:100%;}
+.screen.active{display:flex;}
+
+.btn-primary{background:var(--copper);color:#fff;border:none;padding:14px 36px;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;font-family:var(--sans);transition:background .15s;}
+.btn-primary:hover{background:var(--copper-lt);}
+.btn-secondary{background:transparent;color:var(--copper);border:2px solid var(--copper);padding:10px 28px;border-radius:8px;font-size:0.9rem;font-weight:500;cursor:pointer;font-family:var(--sans);transition:all .15s;}
+.btn-secondary:hover{background:var(--copper);color:#fff;}
+
+.rules-box{background:var(--paper3);border-radius:10px;padding:20px 24px;font-size:0.85rem;color:var(--ink3);line-height:1.7;width:100%;}
+.rules-box h3{font-family:var(--serif);font-size:1rem;margin-bottom:8px;color:var(--ink);}
+
+/* Difficulty */
+.diff-chips{display:flex;gap:10px;}
+.diff-chip{padding:7px 20px;border-radius:20px;font-size:0.82rem;font-weight:500;border:2px solid var(--paper4);cursor:pointer;background:var(--paper3);color:var(--ink3);transition:all .15s;}
+.diff-chip.selected{background:var(--copper);color:#fff;border-color:var(--copper);}
+
+/* Round info */
+.round-info{display:flex;justify-content:space-between;align-items:center;width:100%;font-size:0.85rem;color:var(--ink4);}
+.round-info span{font-weight:600;color:var(--ink);}
+.score-display{font-family:var(--mono);font-size:1.1rem;color:var(--copper);}
+
+/* Scale card */
+.scale-card{background:var(--paper3);border:2px solid var(--paper4);border-radius:14px;padding:20px 36px;display:flex;flex-direction:column;align-items:center;gap:8px;}
+.scale-title{font-family:var(--mono);font-size:2.4rem;font-weight:500;color:var(--ink);}
+.scale-subtitle{font-size:0.82rem;color:var(--ink4);text-transform:uppercase;letter-spacing:.06em;}
+.scale-timer{font-family:var(--mono);font-size:1.4rem;color:var(--copper-lt);}
+
+/* Step progress */
+.step-progress{display:flex;gap:8px;align-items:center;}
+.step-circle{width:28px;height:28px;border-radius:50%;border:2px solid var(--paper4);background:var(--paper3);display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-family:var(--mono);color:var(--ink4);transition:all .2s;position:relative;}
+.step-circle.active{border-color:var(--copper);background:var(--copper-lt);color:#fff;box-shadow:0 0 0 3px rgba(168,90,30,.2);}
+.step-circle.done{background:#2a9d5c;border-color:#2a9d5c;color:#fff;}
+.step-circle.wrong-flash{background:#e05050;border-color:#c03030;color:#fff;}
+.step-arrow{color:var(--paper4);font-size:0.8rem;}
+
+/* Piano */
+.piano-wrap{position:relative;overflow-x:auto;max-width:100%;padding-bottom:4px;}
+.piano-wrap svg{display:block;margin:0 auto;}
+
+/* Feedback */
+.feedback-text{font-size:0.88rem;font-weight:500;min-height:22px;text-align:center;}
+.feedback-text.correct{color:#1a7a52;}
+.feedback-text.wrong{color:#c0392b;}
+.feedback-text.info{color:var(--ink4);}
+
+/* End screen */
+.end-title{font-family:var(--serif);font-size:1.8rem;color:var(--ink);}
+.final-score{font-family:var(--mono);font-size:3rem;color:var(--copper);font-weight:700;}
+.stats-row{display:flex;gap:24px;flex-wrap:wrap;justify-content:center;}
+.stat-box{background:var(--paper3);border-radius:10px;padding:14px 22px;text-align:center;}
+.stat-val{font-family:var(--mono);font-size:1.5rem;color:var(--ink);}
+.stat-lbl{font-size:0.72rem;color:var(--ink4);margin-top:2px;}
+table{width:100%;border-collapse:collapse;font-size:0.82rem;}
+th{text-align:left;color:var(--ink4);font-weight:500;padding:6px 10px;border-bottom:1px solid var(--paper4);}
+td{padding:6px 10px;border-bottom:1px solid var(--paper3);}
+td.pts{color:var(--copper);font-family:var(--mono);font-weight:600;}
+.round-breakdown{width:100%;max-height:260px;overflow-y:auto;}
+
+footer{border-top:1px solid var(--paper4);padding:24px 48px;text-align:center;font-size:12px;color:var(--ink5);}
+footer a{color:var(--ink4);text-decoration:none;}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link active">Recursos</a>
+</nav>
+
+<main>
+  <h1>Escala en Orden</h1>
+  <p class="subtitle">Toca los 8 grados de la escala en orden ascendente · 10 rondas</p>
+
+  <div class="game-card">
+
+    <!-- START SCREEN -->
+    <div id="screen-start" class="screen active">
+      <div class="rules-box">
+        <h3>¿Cómo jugar?</h3>
+        <p>Se muestra una clave y modo (por ejemplo, <strong>Sol mayor</strong>). Pulsa las 8 notas de la escala en orden ascendente, desde la tónica hasta la octava.</p>
+        <br>
+        <p>· Nota correcta: se ilumina verde y avanza al siguiente grado.<br>
+           · Nota incorrecta: parpadea rojo y suena (sin penalización de puntos, pero cuesta tiempo).<br>
+           · Completa la escala lo más rápido posible para ganar bonus.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+        <p style="font-size:0.85rem;color:var(--ink4);">Dificultad</p>
+        <div class="diff-chips">
+          <div class="diff-chip selected" id="chip-facil" onclick="selectDiff('facil')">Fácil (con guías)</div>
+          <div class="diff-chip" id="chip-dificil" onclick="selectDiff('dificil')">Difícil (sin guías)</div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="startGame()">Comenzar juego</button>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="screen-game" class="screen">
+      <div class="round-info">
+        <div>Ronda <span id="round-num">1</span>/10</div>
+        <div class="score-display" id="score-display">0 pts</div>
+      </div>
+
+      <div class="scale-card">
+        <div class="scale-title" id="scale-title">—</div>
+        <div class="scale-subtitle" id="scale-subtitle">—</div>
+        <div class="scale-timer" id="scale-timer">0.0s</div>
+      </div>
+
+      <div class="step-progress" id="step-progress"></div>
+
+      <div class="piano-wrap">
+        <svg id="piano-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+
+      <div class="feedback-text info" id="feedback-text">Pulsa la primera nota de la escala</div>
+    </div>
+
+    <!-- END SCREEN -->
+    <div id="screen-end" class="screen">
+      <div class="end-title">¡Juego terminado!</div>
+      <div class="final-score" id="final-score">0</div>
+      <p style="color:var(--ink4);font-size:0.85rem;">puntos totales</p>
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-val" id="stat-best">—</div><div class="stat-lbl">Mejor tiempo</div></div>
+        <div class="stat-box"><div class="stat-val" id="stat-avg-wrong">0</div><div class="stat-lbl">Promedio errores</div></div>
+        <div class="stat-box"><div class="stat-val" id="stat-rounds">10</div><div class="stat-lbl">Rondas</div></div>
+      </div>
+      <div class="round-breakdown">
+        <table>
+          <thead><tr><th>#</th><th>Escala</th><th>Tiempo</th><th>Errores</th><th>Pts</th></tr></thead>
+          <tbody id="breakdown-body"></tbody>
+        </table>
+      </div>
+      <div style="display:flex;gap:12px;">
+        <button class="btn-primary" onclick="startGame()">Jugar de nuevo</button>
+        <button class="btn-secondary" onclick="showStart()">Menú</button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>© 2026 tremolo.mx · <a href="/privacidad">Privacidad</a> · <a href="/terminos">Términos</a></footer>
+
+<script>
+// ─── Constants ───────────────────────────────────────────────────────────────
+const NOTE_SHARP = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+
+// Piano: C3 to C5 (2 octaves + extra C)
+const WHITE_PCS  = [0,2,4,5,7,9,11];
+const BLACK_OFFSETS_REL = {1:0.6, 3:1.6, 6:3.6, 8:4.6, 10:5.6};
+const WW=32, WH=110, BW=19, BH=68, GAP=1, STEP=WW+GAP;
+const OCTS = 2; // C3-B4
+const N_WHITES = 7*OCTS + 1; // + C5
+const TOTAL_W = N_WHITES * STEP;
+
+const MAJOR_STEPS = [0,2,4,5,7,9,11,12];
+const MINOR_STEPS = [0,2,3,5,7,8,10,12];
+const SCALE_KEYS = [
+  {pc:0,name:'Do'}, {pc:2,name:'Re'}, {pc:4,name:'Mi'},
+  {pc:5,name:'Fa'}, {pc:7,name:'Sol'}, {pc:9,name:'La'}, {pc:11,name:'Si'}
+];
+
+// ─── Audio ───────────────────────────────────────────────────────────────────
+let synth = null;
+function ensureSynth() {
+  if (!synth) {
+    synth = new Tone.PolySynth(Tone.Synth, {
+      oscillator:{type:'triangle'},
+      envelope:{attack:0.02,decay:0.2,sustain:0.5,release:1.2},
+      volume:-10
+    }).toDestination();
+  }
+}
+function playNote(pc, oct) {
+  ensureSynth();
+  Tone.start();
+  synth.triggerAttackRelease(NOTE_SHARP[pc] + oct, '4n');
+}
+
+// ─── Difficulty ───────────────────────────────────────────────────────────────
+let difficulty = 'facil';
+function selectDiff(d) {
+  difficulty = d;
+  ['facil','dificil'].forEach(id => {
+    document.getElementById('chip-'+id).classList.toggle('selected', id===d);
+  });
+}
+
+// ─── Game state ───────────────────────────────────────────────────────────────
+let score = 0;
+let roundNum = 0;
+let rounds = [];
+let currentScale = null; // {keyName, modeName, steps:[{pc,oct}]}
+let currentStep = 0;
+let wrongClicksThisRound = 0;
+let roundStartTime = 0;
+let timerInterval = null;
+let roundActive = false;
+let keyStates = {};
+
+// ─── Piano ───────────────────────────────────────────────────────────────────
+function buildPiano(states) {
+  const svg = document.getElementById('piano-svg');
+  svg.setAttribute('viewBox', `0 0 ${TOTAL_W} ${WH+2}`);
+  svg.setAttribute('width', TOTAL_W);
+  svg.setAttribute('height', WH+2);
+  svg.setAttribute('style', 'overflow:visible;');
+
+  let html = '';
+  let wi_global = 0;
+
+  for (let oct = 0; oct < OCTS; oct++) {
+    WHITE_PCS.forEach((pc) => {
+      const x = wi_global * STEP;
+      const absOct = oct + 3;
+      const key = pc + '_' + absOct;
+      const state = states[key] || 'neutral';
+      let fill = '#f8f4ee';
+      if (state === 'correct') fill = '#2a9d5c';
+      else if (state === 'wrong') fill = '#e05050';
+      else if (state === 'hint') fill = '#d4e8dc'; // subtle tint for easy mode
+      const textColor = (state === 'correct' || state === 'wrong') ? '#fff' : '#8a7a64';
+      html += `<rect data-key="${key}" x="${x}" y="0" width="${WW}" height="${WH}" rx="3" fill="${fill}" stroke="#c8b89a" stroke-width="1" style="cursor:pointer" onmousedown="keyClick(${pc},${absOct})"/>`;
+      if (pc === 0) html += `<text x="${x+WW/2}" y="${WH-5}" text-anchor="middle" font-size="8" fill="${textColor}" font-family="monospace" pointer-events="none">C${absOct}</text>`;
+      wi_global++;
+    });
+  }
+
+  // Extra C5
+  {
+    const x = wi_global * STEP;
+    const key = '0_5';
+    const state = states[key] || 'neutral';
+    let fill = '#f8f4ee';
+    if (state === 'correct') fill = '#2a9d5c';
+    else if (state === 'wrong') fill = '#e05050';
+    else if (state === 'hint') fill = '#d4e8dc';
+    html += `<rect data-key="${key}" x="${x}" y="0" width="${WW}" height="${WH}" rx="3" fill="${fill}" stroke="#c8b89a" stroke-width="1" style="cursor:pointer" onmousedown="keyClick(0,5)"/>`;
+    html += `<text x="${x+WW/2}" y="${WH-5}" text-anchor="middle" font-size="8" fill="#8a7a64" font-family="monospace" pointer-events="none">C5</text>`;
+  }
+
+  // Black keys
+  for (let oct = 0; oct < OCTS; oct++) {
+    Object.entries(BLACK_OFFSETS_REL).forEach(([pcStr, relOffset]) => {
+      const pc = parseInt(pcStr);
+      const absOct = oct + 3;
+      const octStartX = oct * 7 * STEP;
+      const x = octStartX + relOffset * STEP;
+      const key = pc + '_' + absOct;
+      const state = states[key] || 'neutral';
+      let fill = '#1a1410';
+      if (state === 'correct') fill = '#2a9d5c';
+      else if (state === 'wrong') fill = '#c03030';
+      else if (state === 'hint') fill = '#3a5a48';
+      html += `<rect data-key="${key}" x="${x}" y="0" width="${BW}" height="${BH}" rx="3" fill="${fill}" stroke="#000" stroke-width="0.5" style="cursor:pointer" onmousedown="keyClick(${pc},${absOct})"/>`;
+    });
+  }
+
+  svg.innerHTML = html;
+}
+
+// ─── Build hint states for easy mode ─────────────────────────────────────────
+function buildHintStates(scale, doneStates) {
+  const states = {...doneStates};
+  if (difficulty === 'facil') {
+    scale.steps.forEach(s => {
+      const key = s.pc + '_' + s.oct;
+      if (!states[key]) states[key] = 'hint';
+    });
+  }
+  return states;
+}
+
+// ─── Generate scale ───────────────────────────────────────────────────────────
+function randomScale() {
+  const keyDef = SCALE_KEYS[Math.floor(Math.random() * SCALE_KEYS.length)];
+  const mode = Math.random() < 0.5 ? 'mayor' : 'menor';
+  const intervals = mode === 'mayor' ? MAJOR_STEPS : MINOR_STEPS;
+
+  // Place root at C3 or D3 etc., pick octave so all 8 notes fit in C3-C5
+  // rootSemi from C3: intervals go 0..12, max = 12
+  // root must be in C3-B3 (semi 0..11) since 11+12=23 <= 24 (C5)
+  const rootPc = keyDef.pc;
+  const rootOct = 3; // always start in oct 3
+  const rootSemi = rootPc; // from C3
+
+  const steps = intervals.map(iv => {
+    const totalSemi = rootSemi + iv;
+    const oct = Math.floor(totalSemi / 12) + 3;
+    const pc = totalSemi % 12;
+    return {pc, oct};
+  });
+
+  return {
+    keyName: keyDef.name,
+    modeName: mode,
+    steps
+  };
+}
+
+// ─── Step progress ───────────────────────────────────────────────────────────
+function renderStepProgress(step, wrongFlash) {
+  const el = document.getElementById('step-progress');
+  const DEGREE_NAMES = ['1','2','3','4','5','6','7','8'];
+  el.innerHTML = '';
+  currentScale.steps.forEach((s, i) => {
+    if (i > 0) {
+      const arrow = document.createElement('div');
+      arrow.className = 'step-arrow';
+      arrow.textContent = '›';
+      el.appendChild(arrow);
+    }
+    const circle = document.createElement('div');
+    circle.className = 'step-circle';
+    circle.textContent = DEGREE_NAMES[i];
+    if (i < step) circle.classList.add('done');
+    else if (i === step && wrongFlash) circle.classList.add('wrong-flash');
+    else if (i === step) circle.classList.add('active');
+    el.appendChild(circle);
+  });
+}
+
+// ─── Game logic ───────────────────────────────────────────────────────────────
+function startGame() {
+  score = 0;
+  roundNum = 0;
+  rounds = [];
+  showScreen('game');
+  nextRound();
+}
+
+function nextRound() {
+  if (roundNum >= 10) { endGame(); return; }
+  roundNum++;
+  wrongClicksThisRound = 0;
+  currentStep = 0;
+  keyStates = {};
+  roundActive = true;
+
+  currentScale = randomScale();
+  document.getElementById('round-num').textContent = roundNum;
+  document.getElementById('score-display').textContent = score + ' pts';
+  document.getElementById('scale-title').textContent = currentScale.keyName;
+  document.getElementById('scale-subtitle').textContent = currentScale.modeName.toUpperCase();
+  document.getElementById('scale-timer').textContent = '0.0s';
+  document.getElementById('feedback-text').textContent = 'Pulsa ' + NOTE_SHARP[currentScale.steps[0].pc] + currentScale.steps[0].oct + ' para comenzar';
+  document.getElementById('feedback-text').className = 'feedback-text info';
+
+  renderStepProgress(0, false);
+  const states = buildHintStates(currentScale, {});
+  buildPiano(states);
+
+  clearInterval(timerInterval);
+  roundStartTime = performance.now();
+  timerInterval = setInterval(() => {
+    const elapsed = (performance.now() - roundStartTime) / 1000;
+    document.getElementById('scale-timer').textContent = elapsed.toFixed(1) + 's';
+  }, 100);
+}
+
+function keyClick(pc, oct) {
+  if (!roundActive) return;
+  const key = pc + '_' + oct;
+  const expected = currentScale.steps[currentStep];
+  playNote(pc, oct);
+
+  if (pc === expected.pc && oct === expected.oct) {
+    // Correct!
+    keyStates[key] = 'correct';
+    currentStep++;
+    renderStepProgress(currentStep, false);
+
+    if (currentStep >= currentScale.steps.length) {
+      // Scale complete!
+      buildPiano(keyStates);
+      onScaleComplete();
+    } else {
+      const next = currentScale.steps[currentStep];
+      document.getElementById('feedback-text').textContent = '✓ ' + NOTE_SHARP[pc] + ' · Siguiente: ' + NOTE_SHARP[next.pc] + next.oct;
+      document.getElementById('feedback-text').className = 'feedback-text correct';
+      const states = buildHintStates(currentScale, keyStates);
+      buildPiano(states);
+    }
+  } else {
+    // Wrong
+    wrongClicksThisRound++;
+    renderStepProgress(currentStep, true);
+    const wrongKey = pc + '_' + oct;
+    const tempStates = buildHintStates(currentScale, keyStates);
+    tempStates[wrongKey] = 'wrong';
+    buildPiano(tempStates);
+    document.getElementById('feedback-text').textContent = NOTE_SHARP[pc] + oct + ' no es la nota correcta';
+    document.getElementById('feedback-text').className = 'feedback-text wrong';
+    setTimeout(() => {
+      if (roundActive) {
+        renderStepProgress(currentStep, false);
+        const s = buildHintStates(currentScale, keyStates);
+        buildPiano(s);
+      }
+    }, 400);
+  }
+}
+
+function onScaleComplete() {
+  roundActive = false;
+  clearInterval(timerInterval);
+  const elapsed = (performance.now() - roundStartTime) / 1000;
+
+  let pts = 150;
+  if (elapsed < 5) pts += 50;
+  else if (elapsed < 10) pts += 30; // no explicit bonus for 5-10 in spec but adds nicely
+  pts = Math.max(0, pts - wrongClicksThisRound * 10);
+  score += pts;
+
+  document.getElementById('score-display').textContent = score + ' pts';
+  document.getElementById('feedback-text').textContent = '¡Escala completa! +' + pts + ' pts (' + elapsed.toFixed(1) + 's)';
+  document.getElementById('feedback-text').className = 'feedback-text correct';
+
+  rounds.push({
+    num: roundNum,
+    label: currentScale.keyName + ' ' + currentScale.modeName,
+    time: elapsed,
+    wrong: wrongClicksThisRound,
+    pts
+  });
+
+  setTimeout(nextRound, 1200);
+}
+
+function endGame() {
+  showScreen('end');
+  document.getElementById('final-score').textContent = score;
+
+  const bestTime = rounds.length ? Math.min(...rounds.map(r=>r.time)).toFixed(1)+'s' : '—';
+  const avgWrong = rounds.length ? (rounds.reduce((a,r)=>a+r.wrong,0)/rounds.length).toFixed(1) : '0';
+  document.getElementById('stat-best').textContent = bestTime;
+  document.getElementById('stat-avg-wrong').textContent = avgWrong;
+  document.getElementById('stat-rounds').textContent = rounds.length;
+
+  const tbody = document.getElementById('breakdown-body');
+  tbody.innerHTML = '';
+  rounds.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.num}</td><td style="font-family:var(--mono)">${r.label}</td><td style="font-family:var(--mono)">${r.time.toFixed(1)}s</td><td>${r.wrong}</td><td class="pts">+${r.pts}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function showStart() {
+  clearInterval(timerInterval);
+  roundActive = false;
+  showScreen('start');
+}
+
+function showScreen(name) {
+  ['start','game','end'].forEach(s => {
+    document.getElementById('screen-'+s).classList.toggle('active', s===name);
+  });
+}
+
+buildPiano({});
+</script>
+</body>
+</html>

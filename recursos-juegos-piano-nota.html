@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Identifica la Nota · tremolo.mx</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+<style>
+:root {
+  --paper:#f4ece0; --paper2:#f2ece3; --paper3:#e8e0d4;
+  --paper4:#c8b99f; --paper5:#cec4b0;
+  --copper:#a85a1e; --copper-lt:#c47a36; --copper-dk:#7a3e10;
+  --ink:#1c1410; --ink2:#2e2418; --ink3:#4a3c2c;
+  --ink4:#8a7a64; --ink5:#8a7a66;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);min-height:100vh;display:flex;flex-direction:column;}
+nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;gap:0;}
+.nav-logo{font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none;}
+.nav-logo span{font-family:var(--mono);font-size:0.52em;font-weight:400;color:var(--ink4);letter-spacing:0;margin-left:2px;}
+.nav-link{padding:0 16px;height:56px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;}
+.nav-link:hover{color:var(--ink2);}
+.nav-link.active{color:var(--copper);border-bottom-color:var(--copper);}
+
+main{flex:1;display:flex;flex-direction:column;align-items:center;padding:40px 24px 60px;}
+h1{font-family:var(--serif);font-size:2rem;color:var(--ink);margin-bottom:6px;text-align:center;}
+.subtitle{color:var(--ink4);font-size:0.9rem;margin-bottom:32px;text-align:center;}
+
+.game-card{background:var(--paper2);border:1px solid var(--paper4);border-radius:16px;padding:32px;width:100%;max-width:680px;display:flex;flex-direction:column;align-items:center;gap:20px;}
+
+/* Screens */
+.screen{display:none;flex-direction:column;align-items:center;gap:20px;width:100%;}
+.screen.active{display:flex;}
+
+/* Start screen */
+.btn-primary{background:var(--copper);color:#fff;border:none;padding:14px 36px;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;font-family:var(--sans);transition:background .15s;}
+.btn-primary:hover{background:var(--copper-lt);}
+.btn-secondary{background:transparent;color:var(--copper);border:2px solid var(--copper);padding:10px 28px;border-radius:8px;font-size:0.9rem;font-weight:500;cursor:pointer;font-family:var(--sans);transition:all .15s;}
+.btn-secondary:hover{background:var(--copper);color:#fff;}
+.rules-box{background:var(--paper3);border-radius:10px;padding:20px 24px;font-size:0.85rem;color:var(--ink3);line-height:1.7;width:100%;}
+.rules-box h3{font-family:var(--serif);font-size:1rem;margin-bottom:8px;color:var(--ink);}
+.mode-chips{display:flex;gap:10px;}
+.mode-chip{padding:6px 16px;border-radius:20px;font-size:0.8rem;font-weight:500;border:2px solid var(--paper4);cursor:pointer;background:var(--paper3);color:var(--ink3);transition:all .15s;}
+.mode-chip.selected{background:var(--copper);color:#fff;border-color:var(--copper);}
+
+/* Round header */
+.round-info{display:flex;justify-content:space-between;align-items:center;width:100%;font-size:0.85rem;color:var(--ink4);}
+.round-info span{font-weight:600;color:var(--ink);}
+.score-display{font-family:var(--mono);font-size:1.1rem;color:var(--copper);}
+
+/* Timer bar */
+.timer-wrap{width:100%;height:6px;background:var(--paper3);border-radius:3px;overflow:hidden;}
+.timer-bar{height:100%;background:var(--copper);border-radius:3px;transition:width .1s linear,background .5s;}
+.timer-bar.warning{background:#d4a520;}
+.timer-bar.danger{background:#c0392b;}
+
+/* Mode badge */
+.mode-badge{padding:5px 18px;border-radius:20px;font-size:0.78rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;}
+.mode-badge.escucha{background:#dff0eb;color:#1a7a52;border:1px solid #a8d8c8;}
+.mode-badge.visual{background:#e8e0f8;color:#5a3a9a;border:1px solid #c8b8e8;}
+
+/* Note display for visual mode */
+.note-display{font-family:var(--mono);font-size:3.5rem;font-weight:500;color:var(--ink);min-height:72px;display:flex;align-items:center;justify-content:center;letter-spacing:.05em;}
+.note-display.hidden{opacity:0;}
+
+/* Piano container */
+.piano-wrap{position:relative;overflow-x:auto;max-width:100%;padding-bottom:4px;}
+.piano-wrap svg{display:block;margin:0 auto;}
+
+/* Feedback text */
+.feedback-text{font-size:0.9rem;font-weight:500;min-height:22px;text-align:center;transition:opacity .2s;}
+.feedback-text.correct{color:#1a7a52;}
+.feedback-text.wrong{color:#c0392b;}
+
+/* Spacebar hint */
+.spacebar-hint{font-size:0.75rem;color:var(--ink5);display:flex;align-items:center;gap:6px;}
+.key-icon{display:inline-block;background:var(--paper3);border:1px solid var(--paper4);border-radius:4px;padding:2px 8px;font-family:var(--mono);font-size:0.7rem;}
+
+/* End screen */
+.end-title{font-family:var(--serif);font-size:1.8rem;color:var(--ink);}
+.final-score{font-family:var(--mono);font-size:3rem;color:var(--copper);font-weight:700;}
+.round-breakdown{width:100%;max-height:260px;overflow-y:auto;}
+table{width:100%;border-collapse:collapse;font-size:0.82rem;}
+th{text-align:left;color:var(--ink4);font-weight:500;padding:6px 10px;border-bottom:1px solid var(--paper4);}
+td{padding:6px 10px;border-bottom:1px solid var(--paper3);}
+td.pts{color:var(--copper);font-family:var(--mono);font-weight:600;}
+td.correct-td{color:#1a7a52;}
+td.miss-td{color:var(--ink4);}
+
+footer{border-top:1px solid var(--paper4);padding:24px 48px;text-align:center;font-size:12px;color:var(--ink5);}
+footer a{color:var(--ink4);text-decoration:none;}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link active">Recursos</a>
+</nav>
+
+<main>
+  <h1>Identifica la Nota</h1>
+  <p class="subtitle">Escucha y encuentra la nota correcta en el teclado · 10 rondas</p>
+
+  <div class="game-card">
+
+    <!-- START SCREEN -->
+    <div id="screen-start" class="screen active">
+      <div class="rules-box">
+        <h3>¿Cómo jugar?</h3>
+        <p>Cada ronda suena una nota. Encuentra y pulsa la tecla correcta en el piano antes de que se acabe el tiempo.</p>
+        <br>
+        <p>· <strong>Escucha:</strong> solo audio, sin pistas visuales.<br>
+           · <strong>Visual:</strong> el nombre de la nota aparece para confirmar.<br>
+           · Respuesta rápida = más puntos. Clic erróneo = −20 pts.</p>
+        <br>
+        <p>Pulsa <strong>Espacio</strong> para escuchar la nota de nuevo.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:12px;width:100%;">
+        <p style="font-size:0.85rem;color:var(--ink4);">Modo de inicio</p>
+        <div class="mode-chips">
+          <div class="mode-chip selected" id="chip-mixed" onclick="selectMode('mixed')">Alternado</div>
+          <div class="mode-chip" id="chip-escucha" onclick="selectMode('escucha')">Solo Escucha</div>
+          <div class="mode-chip" id="chip-visual" onclick="selectMode('visual')">Solo Visual</div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="startGame()">Comenzar juego</button>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="screen-game" class="screen">
+      <div class="round-info">
+        <div>Ronda <span id="round-num">1</span>/10</div>
+        <div class="score-display" id="score-display">0 pts</div>
+      </div>
+      <div class="timer-wrap"><div class="timer-bar" id="timer-bar"></div></div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="mode-badge escucha" id="mode-badge">ESCUCHA</div>
+        <div class="spacebar-hint"><span class="key-icon">espacio</span> reproducir nota</div>
+      </div>
+      <div class="note-display" id="note-display">—</div>
+      <div class="piano-wrap">
+        <svg id="piano-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="feedback-text" id="feedback-text"></div>
+    </div>
+
+    <!-- END SCREEN -->
+    <div id="screen-end" class="screen">
+      <div class="end-title">¡Juego terminado!</div>
+      <div class="final-score" id="final-score">0</div>
+      <p style="color:var(--ink4);font-size:0.85rem;">puntos totales</p>
+      <div class="round-breakdown">
+        <table>
+          <thead><tr><th>#</th><th>Nota</th><th>Modo</th><th>Resultado</th><th>Pts</th></tr></thead>
+          <tbody id="breakdown-body"></tbody>
+        </table>
+      </div>
+      <div style="display:flex;gap:12px;">
+        <button class="btn-primary" onclick="startGame()">Jugar de nuevo</button>
+        <button class="btn-secondary" onclick="showStart()">Menú</button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<footer>© 2026 tremolo.mx · <a href="/privacidad">Privacidad</a> · <a href="/terminos">Términos</a></footer>
+
+<script>
+// ─── Constants ───────────────────────────────────────────────────────────────
+const NOTE_SHARP = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const WHITE_PCS  = [0,2,4,5,7,9,11];
+const BLACK_OFFSETS_REL = {1:0.6, 3:1.6, 6:3.6, 8:4.6, 10:5.6};
+const WW=34, WH=110, BW=20, BH=68, GAP=1, STEP=WW+GAP;
+const OCTS = 2; // C3-B4 = 2 octaves (15 white keys + extra C5)
+const N_WHITES = 7*OCTS + 1; // 15 white + C5
+const TOTAL_W = N_WHITES * STEP;
+const TIMER_DURATION = 4000;
+
+// ─── Audio ───────────────────────────────────────────────────────────────────
+let synth = null;
+function ensureSynth() {
+  if (!synth) {
+    synth = new Tone.PolySynth(Tone.Synth, {
+      oscillator:{type:'triangle'},
+      envelope:{attack:0.02,decay:0.2,sustain:0.5,release:1.2},
+      volume:-10
+    }).toDestination();
+  }
+}
+function playNote(pc, oct) {
+  ensureSynth();
+  Tone.start();
+  synth.triggerAttackRelease(NOTE_SHARP[pc] + oct, '4n');
+}
+
+// ─── Game state ───────────────────────────────────────────────────────────────
+let gameMode = 'mixed'; // mixed | escucha | visual
+let score = 0;
+let roundNum = 0;
+let rounds = [];
+let currentNote = null; // {pc, oct}
+let roundStartTime = 0;
+let timerInterval = null;
+let wrongClicksThisRound = 0;
+let roundActive = false;
+
+// ─── Mode selection ───────────────────────────────────────────────────────────
+function selectMode(m) {
+  gameMode = m;
+  ['mixed','escucha','visual'].forEach(id => {
+    document.getElementById('chip-'+id).classList.toggle('selected', id === m);
+  });
+}
+
+// ─── Piano SVG ───────────────────────────────────────────────────────────────
+let keyStates = {}; // key: "pc_oct" => 'neutral'|'correct'|'wrong'
+
+function buildPiano(highlightedKeys = {}) {
+  const svg = document.getElementById('piano-svg');
+  svg.setAttribute('viewBox', `0 0 ${TOTAL_W} ${WH+2}`);
+  svg.setAttribute('width', TOTAL_W);
+  svg.setAttribute('height', WH+2);
+  svg.setAttribute('style', 'overflow:visible;');
+
+  let html = '';
+  // White keys
+  let wi_global = 0;
+  for (let oct = 0; oct < OCTS; oct++) {
+    WHITE_PCS.forEach((pc, wi) => {
+      const x = wi_global * STEP;
+      const absOct = oct + 3;
+      const key = pc + '_' + absOct;
+      const state = highlightedKeys[key] || 'neutral';
+      const fill = state === 'correct' ? '#2a9d5c' : state === 'wrong' ? '#e05050' : '#f8f4ee';
+      const textColor = state === 'neutral' ? '#8a7a64' : '#fff';
+      html += `<rect data-key="${key}" x="${x}" y="0" width="${WW}" height="${WH}" rx="3" fill="${fill}" stroke="#c8b89a" stroke-width="1" style="cursor:pointer" onmousedown="keyClick(${pc},${absOct})"/>`;
+      if (pc === 0) {
+        html += `<text x="${x+WW/2}" y="${WH-5}" text-anchor="middle" font-size="8" fill="${textColor}" font-family="monospace" pointer-events="none">C${absOct}</text>`;
+      }
+      wi_global++;
+    });
+  }
+  // Extra C5
+  {
+    const x = wi_global * STEP;
+    const pc = 0, absOct = 5;
+    const key = pc + '_' + absOct;
+    const state = highlightedKeys[key] || 'neutral';
+    const fill = state === 'correct' ? '#2a9d5c' : state === 'wrong' ? '#e05050' : '#f8f4ee';
+    html += `<rect data-key="${key}" x="${x}" y="0" width="${WW}" height="${WH}" rx="3" fill="${fill}" stroke="#c8b89a" stroke-width="1" style="cursor:pointer" onmousedown="keyClick(${pc},${absOct})"/>`;
+    html += `<text x="${x+WW/2}" y="${WH-5}" text-anchor="middle" font-size="8" fill="#8a7a64" font-family="monospace" pointer-events="none">C5</text>`;
+  }
+  // Black keys
+  for (let oct = 0; oct < OCTS; oct++) {
+    Object.entries(BLACK_OFFSETS_REL).forEach(([pcStr, relOffset]) => {
+      const pc = parseInt(pcStr);
+      const absOct = oct + 3;
+      const octStartX = oct * 7 * STEP;
+      const x = octStartX + relOffset * STEP;
+      const key = pc + '_' + absOct;
+      const state = highlightedKeys[key] || 'neutral';
+      const fill = state === 'correct' ? '#2a9d5c' : state === 'wrong' ? '#c03030' : '#1a1410';
+      html += `<rect data-key="${key}" x="${x}" y="0" width="${BW}" height="${BH}" rx="3" fill="${fill}" stroke="#000" stroke-width="0.5" style="cursor:pointer" onmousedown="keyClick(${pc},${absOct})"/>`;
+    });
+  }
+  svg.innerHTML = html;
+}
+
+// ─── Game logic ───────────────────────────────────────────────────────────────
+function getRandomNote() {
+  const pc = Math.floor(Math.random() * 12);
+  const oct = Math.random() < 0.5 ? 3 : 4;
+  return {pc, oct};
+}
+
+function getRoundMode(rnd) {
+  if (gameMode === 'escucha') return 'escucha';
+  if (gameMode === 'visual') return 'visual';
+  return rnd % 2 === 0 ? 'escucha' : 'visual';
+}
+
+function startGame() {
+  score = 0;
+  roundNum = 0;
+  rounds = [];
+  showScreen('game');
+  nextRound();
+}
+
+function nextRound() {
+  if (roundNum >= 10) { endGame(); return; }
+  roundNum++;
+  wrongClicksThisRound = 0;
+  roundActive = true;
+  currentNote = getRandomNote();
+  keyStates = {};
+  buildPiano({});
+
+  const mode = getRoundMode(roundNum);
+  document.getElementById('round-num').textContent = roundNum;
+  document.getElementById('score-display').textContent = score + ' pts';
+  document.getElementById('feedback-text').textContent = '';
+  document.getElementById('feedback-text').className = 'feedback-text';
+
+  const badge = document.getElementById('mode-badge');
+  if (mode === 'escucha') {
+    badge.textContent = 'ESCUCHA';
+    badge.className = 'mode-badge escucha';
+    document.getElementById('note-display').textContent = '?';
+    document.getElementById('note-display').className = 'note-display';
+  } else {
+    badge.textContent = 'VISUAL';
+    badge.className = 'mode-badge visual';
+    document.getElementById('note-display').textContent = NOTE_SHARP[currentNote.pc];
+    document.getElementById('note-display').className = 'note-display';
+  }
+
+  playNote(currentNote.pc, currentNote.oct);
+  startTimer();
+  roundStartTime = performance.now();
+}
+
+function startTimer() {
+  clearInterval(timerInterval);
+  const bar = document.getElementById('timer-bar');
+  bar.style.width = '100%';
+  bar.className = 'timer-bar';
+  const start = performance.now();
+  timerInterval = setInterval(() => {
+    const elapsed = performance.now() - start;
+    const pct = Math.max(0, 1 - elapsed / TIMER_DURATION);
+    bar.style.width = (pct * 100) + '%';
+    if (pct < 0.25) bar.className = 'timer-bar danger';
+    else if (pct < 0.5) bar.className = 'timer-bar warning';
+    else bar.className = 'timer-bar';
+    if (elapsed >= TIMER_DURATION) {
+      clearInterval(timerInterval);
+      onMissed();
+    }
+  }, 50);
+}
+
+function onMissed() {
+  if (!roundActive) return;
+  roundActive = false;
+  const mode = getRoundMode(roundNum);
+  // Show correct key
+  const key = currentNote.pc + '_' + currentNote.oct;
+  const h = {};
+  h[key] = 'correct';
+  buildPiano(h);
+  document.getElementById('feedback-text').textContent = '¡Tiempo! Era ' + NOTE_SHARP[currentNote.pc] + currentNote.oct;
+  document.getElementById('feedback-text').className = 'feedback-text wrong';
+  rounds.push({num:roundNum, note:NOTE_SHARP[currentNote.pc]+currentNote.oct, mode, result:'miss', pts:0});
+  setTimeout(nextRound, 1400);
+}
+
+function keyClick(pc, oct) {
+  if (!roundActive) return;
+  playNote(pc, oct);
+  if (pc === currentNote.pc && oct === currentNote.oct) {
+    onCorrect(pc, oct);
+  } else {
+    onWrong(pc, oct);
+  }
+}
+
+function onCorrect(pc, oct) {
+  roundActive = false;
+  clearInterval(timerInterval);
+  const elapsed = (performance.now() - roundStartTime) / 1000;
+  let pts = elapsed < 1.5 ? 150 : elapsed < 3 ? 120 : 100;
+  pts = Math.max(0, pts - wrongClicksThisRound * 20);
+  score += pts;
+  const key = pc + '_' + oct;
+  const h = {};
+  h[key] = 'correct';
+  buildPiano(h);
+  document.getElementById('feedback-text').textContent = '¡Correcto! +' + pts + ' pts';
+  document.getElementById('feedback-text').className = 'feedback-text correct';
+  document.getElementById('score-display').textContent = score + ' pts';
+  const mode = getRoundMode(roundNum);
+  rounds.push({num:roundNum, note:NOTE_SHARP[pc]+oct, mode, result:'correct', pts});
+  setTimeout(nextRound, 1000);
+}
+
+function onWrong(pc, oct) {
+  wrongClicksThisRound++;
+  const key = pc + '_' + oct;
+  const h = {};
+  h[key] = 'wrong';
+  buildPiano(h);
+  document.getElementById('feedback-text').textContent = 'Esa no es. Inténtalo de nuevo (−20 pts)';
+  document.getElementById('feedback-text').className = 'feedback-text wrong';
+  setTimeout(() => {
+    if (roundActive) buildPiano({});
+  }, 400);
+}
+
+function endGame() {
+  showScreen('end');
+  document.getElementById('final-score').textContent = score;
+  const tbody = document.getElementById('breakdown-body');
+  tbody.innerHTML = '';
+  rounds.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.num}</td><td style="font-family:var(--mono)">${r.note}</td><td>${r.mode}</td><td class="${r.result==='correct'?'correct-td':'miss-td'}">${r.result==='correct'?'Correcto':'Tiempo'}</td><td class="pts">${r.pts>0?'+'+r.pts:r.pts}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function showStart() {
+  clearInterval(timerInterval);
+  roundActive = false;
+  showScreen('start');
+}
+
+function showScreen(name) {
+  ['start','game','end'].forEach(s => {
+    document.getElementById('screen-'+s).classList.toggle('active', s===name);
+  });
+}
+
+// Spacebar to replay
+document.addEventListener('keydown', e => {
+  if (e.code === 'Space' && roundActive && currentNote) {
+    e.preventDefault();
+    playNote(currentNote.pc, currentNote.oct);
+  }
+});
+
+// Init piano on load
+buildPiano({});
+</script>
+</body>
+</html>

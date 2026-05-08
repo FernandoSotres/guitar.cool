@@ -81,6 +81,7 @@ nav { position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdro
 .res-grid { display:flex;flex-direction:column;gap:16px;margin-top:40px; }
 
 .res-card { display:flex;align-items:stretch;background:var(--paper2);border:1px solid var(--paper4);border-radius:10px;overflow:hidden;text-decoration:none;color:inherit;transition:box-shadow .2s,transform .2s; }
+.res-card:not(.coming):hover { box-shadow:0 6px 24px rgba(28,20,16,.08);transform:translateY(-2px); }
 .res-card.coming { opacity:.7;cursor:default;pointer-events:none; }
 .res-card-accent { width:6px;flex-shrink:0;background:var(--copper); }
 .res-card.coming .res-card-accent { background:var(--paper4); }
@@ -89,7 +90,9 @@ nav { position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdro
 .res-card.coming .res-card-tag { color:var(--ink5); }
 .res-card-title { font-family:var(--serif);font-size:26px;color:var(--ink);margin:8px 0 10px; }
 .res-card-desc { font-size:14px;color:var(--ink4);line-height:1.65; }
-.res-card-arrow { width:48px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--paper5);letter-spacing:.05em;font-family:var(--mono);flex-shrink:0; }
+.res-card-arrow { width:48px;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--paper5);transition:color .2s,transform .2s;flex-shrink:0; }
+.res-card:not(.coming):hover .res-card-arrow { color:var(--copper);transform:translateX(4px); }
+.res-card.coming .res-card-arrow { font-size:12px;color:var(--paper5);letter-spacing:.05em;font-family:var(--mono); }
 
 .section-label { font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--copper);display:block;margin-bottom:12px; }
 .section-title { font-family:var(--serif);font-size:clamp(28px,4vw,40px);color:var(--ink);margin-bottom:10px; }
@@ -133,21 +136,21 @@ nav { position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdro
 
 <section class="resources-section">
   <div class="resources-inner">
-    <span class="section-label">En desarrollo</span>
+    <span class="section-label">Juegos disponibles</span>
     <h2 class="section-title">Juegos de Guitarra</h2>
     <p class="section-sub">Juegos diseñados específicamente para el mástil. Algunos funcionan con teclado y mouse; los más avanzados detectan tu guitarra por micrófono o MIDI.</p>
 
     <div class="res-grid">
 
-      <div class="res-card coming">
+      <a href="/recursos/juegos/guitarra/mastil" class="res-card">
         <div class="res-card-accent"></div>
         <div class="res-card-body">
-          <span class="res-card-tag">Próximamente</span>
+          <span class="res-card-tag">Disponible · Mouse</span>
           <div class="res-card-title">Identifica la Nota en el Mástil</div>
           <p class="res-card-desc">Se marca una posición en el diagrama del mástil y tienes que nombrar la nota. Empieza con las cuerdas al aire y avanza hasta el traste doce.</p>
         </div>
-        <div class="res-card-arrow">pronto</div>
-      </div>
+        <div class="res-card-arrow">→</div>
+      </a>
 
       <div class="res-card coming">
         <div class="res-card-accent"></div>
