@@ -122,10 +122,10 @@ select.full:hover { border-color:var(--accent2); }
 
 /* Piano area */
 .piano-area { flex:1; display:flex; flex-direction:column; align-items:center; overflow:hidden; background:var(--bg); }
-.keys-scroll { flex:1; width:100%; overflow:auto; display:flex; align-items:center; justify-content:center; padding:40px 24px 24px; }
-#piano-svg { display:block; flex-shrink:0; pointer-events:all; }
-/* When a draw tool is active, key rects pass events through so the draw-capture intercepts them */
-#piano-svg.drawing rect:not(#draw-capture) { pointer-events:none !important; }
+.keys-scroll { flex:1; width:100%; overflow:auto; display:flex; align-items:center; justify-content:center; padding:40px 24px 24px; position:relative; }
+#piano-svg { display:block; flex-shrink:0; }
+/* Draw overlay — sits on top of the SVG, captures all pointer events when active */
+#draw-overlay { position:absolute; inset:0; z-index:10; pointer-events:none; touch-action:none; }
 
 .info-bar { background:var(--surface); border-top:1px solid var(--hl); padding:5px 14px; font-size:12px; color:var(--text2); flex-shrink:0; min-height:28px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; width:100%; }
 .midi-badge { font-size:11px; font-family:'JetBrains Mono',monospace; padding:2px 8px; border-radius:10px; border:1px solid var(--hl); background:var(--bg); color:var(--text2); transition:all .3s; white-space:nowrap; }
@@ -359,6 +359,7 @@ select.full:hover { border-color:var(--accent2); }
   <div class="piano-area">
     <div class="keys-scroll">
       <svg id="piano-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div id="draw-overlay"></div>
     </div>
     <div class="info-bar" id="info-bar">
       <span id="midi-badge" class="midi-badge" title="Controlador MIDI">MIDI ○</span>
@@ -620,7 +621,7 @@ function drawPiano(){
       const isRoot=pc===root;
       const isActive=activeNotes.has(pc);
       // White key — always default pastel color
-      h+=`<rect x="${x}" y="6" width="${WW}" height="${WH}" rx="7" fill="${wDef}" stroke="${wStroke}" stroke-width="1" style="cursor:${drawTool?'crosshair':'pointer'};${drawTool?'pointer-events:none;':''}" onclick="noteClick(${pc},${START_OCT}+${oct})"/>`;
+      h+=`<rect x="${x}" y="6" width="${WW}" height="${WH}" rx="7" fill="${wDef}" stroke="${wStroke}" stroke-width="1" style="cursor:pointer" onclick="noteClick(${pc},${START_OCT}+${oct})"/>`;
       h+=`<rect x="${x+1}" y="7" width="${WW-2}" height="${WH-2}" rx="6" fill="url(#wk-g)" style="pointer-events:none"/>`;
       // Colored dot with note name (C-label only when pressed)
       const dotX=x+WW/2, dotY=WH-24;
@@ -651,7 +652,7 @@ function drawPiano(){
       const isRootB=pc===root;
       const isActiveB=activeNotes.has(pc);
       // Black key — always default dark color
-      h+=`<rect x="${x}" y="6" width="${BW}" height="${BH}" rx="5" fill="${bDef}" filter="url(#bk-sh)" style="cursor:${drawTool?'crosshair':'pointer'};${drawTool?'pointer-events:none;':''}" onclick="noteClick(${pc},${START_OCT}+${oct})"/>`;
+      h+=`<rect x="${x}" y="6" width="${BW}" height="${BH}" rx="5" fill="${bDef}" filter="url(#bk-sh)" style="cursor:pointer" onclick="noteClick(${pc},${START_OCT}+${oct})"/>`;
       h+=`<rect x="${x+2}" y="7" width="${BW-4}" height="${BH-4}" rx="4" fill="url(#bk-g)" style="pointer-events:none"/>`;
       // Colored dot for active/root black keys
       const dotX=x+BW/2, dotY=BH-11;
@@ -675,7 +676,7 @@ function drawPiano(){
 
   // Capas de anotaciones al final (encima de las teclas)
   h += '<g id="annotation-layer"></g><g id="draw-preview"></g>';
-  if(drawTool) h+=`<rect id="draw-capture" x="0" y="0" width="${totalW}" height="${svgH}" fill="transparent" pointer-events="all" style="cursor:crosshair"/>`;
+  // (draw overlay is a separate div, no SVG capture rect needed)
   svg.innerHTML=h;
   renderAnnotations();
   if(mode!=='midi') redrawMidiOverlays();
@@ -848,17 +849,26 @@ function setDT(tool){
     const el=document.getElementById('di-'+t);
     if(el)el.querySelector('.dd-ck').textContent=t==='none'?(tool===null?'✓':''):(tool===t?'✓':'');
   });
-  const svg=document.getElementById('piano-svg');
-  if(svg){
-    svg.style.cursor=tool?'crosshair':'default';
-    svg.classList.toggle('drawing', !!tool);
-    drawPiano();
+  const ov=document.getElementById('draw-overlay');
+  if(ov){
+    ov.style.pointerEvents=tool?'all':'none';
+    ov.style.cursor=tool?'crosshair':'default';
   }
+  drawPiano();
 }
 document.getElementById('draw-color').addEventListener('input',e=>drawColor=e.target.value);
 document.getElementById('draw-size').addEventListener('change',e=>drawSW=+e.target.value);
 
-function svgPt(svg,e){const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const ctm=svg.getScreenCTM();return ctm?pt.matrixTransform(ctm.inverse()):pt;}
+// ── Coordinate conversion: overlay div → SVG viewBox coords ──────────────────
+function overlayToSVG(clientX, clientY){
+  const svg=document.getElementById('piano-svg');
+  const r=svg.getBoundingClientRect();
+  const vb=svg.viewBox.baseVal;
+  return {
+    x: (clientX-r.left)/r.width * vb.width,
+    y: (clientY-r.top)/r.height * vb.height
+  };
+}
 
 function renderAnnotations(){
   const layer=document.getElementById('annotation-layer');if(!layer)return;
@@ -896,56 +906,66 @@ function renderAnnotations(){
   }
 }
 
-function startDraw(e){
-  if(!drawTool||e.button!==0)return;
-  e.preventDefault();
-  const svg=document.getElementById('piano-svg'),p=svgPt(svg,e);
-  if(drawTool==='text'){placeText(svg,p.x,p.y,e.clientX,e.clientY);return;}
-  if(drawTool==='free'){drawState={points:[{x:p.x,y:p.y}]};return;}
-  drawState={x1:p.x,y1:p.y};
-}
-function moveDraw(e){
-  if(!drawState||!drawTool||drawTool==='text')return;
-  e.preventDefault();
-  const svg=document.getElementById('piano-svg'),p=svgPt(svg,e);
-  const prev=document.getElementById('draw-preview');if(!prev)return;
-  prev.innerHTML='';
-  if(drawTool==='free'){
-    drawState.points.push({x:p.x,y:p.y});
-    const pl=document.createElementNS('http://www.w3.org/2000/svg','polyline');
-    pl.setAttribute('points',drawState.points.map(pt=>`${pt.x},${pt.y}`).join(' '));
-    pl.setAttribute('stroke',drawColor);pl.setAttribute('stroke-width',drawSW);pl.setAttribute('fill','none');pl.setAttribute('stroke-linecap','round');pl.setAttribute('stroke-linejoin','round');
-    prev.appendChild(pl);return;
-  }
-  if(drawTool==='rect'){
-    const rx=document.createElementNS('http://www.w3.org/2000/svg','rect');
-    const x=Math.min(drawState.x1,p.x),y=Math.min(drawState.y1,p.y);
-    rx.setAttribute('x',x);rx.setAttribute('y',y);rx.setAttribute('width',Math.abs(p.x-drawState.x1));rx.setAttribute('height',Math.abs(p.y-drawState.y1));
-    rx.setAttribute('stroke',drawColor);rx.setAttribute('stroke-width',drawSW);rx.setAttribute('fill','none');rx.setAttribute('stroke-dasharray','5,4');rx.setAttribute('rx',3);
-    prev.appendChild(rx);return;
-  }
-  const ln=document.createElementNS('http://www.w3.org/2000/svg','line');
-  ln.setAttribute('x1',drawState.x1);ln.setAttribute('y1',drawState.y1);ln.setAttribute('x2',p.x);ln.setAttribute('y2',p.y);
-  ln.setAttribute('stroke',drawColor);ln.setAttribute('stroke-width',drawSW);ln.setAttribute('stroke-linecap','round');ln.setAttribute('stroke-dasharray','5,4');
-  prev.appendChild(ln);
-}
-function endDrawAt(clientX,clientY){
-  if(!drawState||!drawTool||drawTool==='text')return;
-  const svg=document.getElementById('piano-svg');
-  const pt=svg.createSVGPoint();pt.x=clientX;pt.y=clientY;
-  const p=pt.matrixTransform(svg.getScreenCTM().inverse());
-  if(drawTool==='free'){
-    if(drawState.points.length>2)annotations.push({type:'free',points:drawState.points,color:drawColor,sw:drawSW});
-    document.getElementById('draw-preview').innerHTML='';drawState=null;
-    renderAnnotations();return;
-  }
-  const dx=p.x-drawState.x1,dy=p.y-drawState.y1;
-  if(Math.sqrt(dx*dx+dy*dy)>5){annotations.push({type:drawTool,x1:drawState.x1,y1:drawState.y1,x2:p.x,y2:p.y,color:drawColor,sw:drawSW});renderAnnotations();}
-  document.getElementById('draw-preview').innerHTML='';drawState=null;
-}
-function endDraw(e){endDrawAt(e.clientX,e.clientY);}
+// ── Draw events — all on the #draw-overlay div (sits above SVG in DOM) ────────
+(()=>{
+  const ov=document.getElementById('draw-overlay');
 
-function placeText(svg,svgX,svgY,clientX,clientY){
+  ov.addEventListener('mousedown',e=>{
+    if(!drawTool||e.button!==0)return;
+    e.preventDefault();
+    const p=overlayToSVG(e.clientX,e.clientY);
+    if(drawTool==='text'){placeText(p.x,p.y,e.clientX,e.clientY);return;}
+    if(drawTool==='free'){drawState={points:[p]};return;}
+    drawState={x1:p.x,y1:p.y};
+  });
+
+  document.addEventListener('mousemove',e=>{
+    if(!drawState||!drawTool||drawTool==='text')return;
+    e.preventDefault();
+    const p=overlayToSVG(e.clientX,e.clientY);
+    const prev=document.getElementById('draw-preview');if(!prev)return;
+    prev.innerHTML='';
+    if(drawTool==='free'){
+      drawState.points.push(p);
+      const pl=document.createElementNS('http://www.w3.org/2000/svg','polyline');
+      pl.setAttribute('points',drawState.points.map(pt=>`${pt.x},${pt.y}`).join(' '));
+      pl.setAttribute('stroke',drawColor);pl.setAttribute('stroke-width',drawSW);pl.setAttribute('fill','none');
+      pl.setAttribute('stroke-linecap','round');pl.setAttribute('stroke-linejoin','round');
+      prev.appendChild(pl);return;
+    }
+    if(drawTool==='rect'){
+      const rx=document.createElementNS('http://www.w3.org/2000/svg','rect');
+      const x=Math.min(drawState.x1,p.x),y=Math.min(drawState.y1,p.y);
+      rx.setAttribute('x',x);rx.setAttribute('y',y);rx.setAttribute('width',Math.abs(p.x-drawState.x1));rx.setAttribute('height',Math.abs(p.y-drawState.y1));
+      rx.setAttribute('stroke',drawColor);rx.setAttribute('stroke-width',drawSW);rx.setAttribute('fill','none');rx.setAttribute('stroke-dasharray','5,4');rx.setAttribute('rx',3);
+      prev.appendChild(rx);return;
+    }
+    const ln=document.createElementNS('http://www.w3.org/2000/svg','line');
+    ln.setAttribute('x1',drawState.x1);ln.setAttribute('y1',drawState.y1);ln.setAttribute('x2',p.x);ln.setAttribute('y2',p.y);
+    ln.setAttribute('stroke',drawColor);ln.setAttribute('stroke-width',drawSW);ln.setAttribute('stroke-linecap','round');ln.setAttribute('stroke-dasharray','5,4');
+    prev.appendChild(ln);
+  });
+
+  document.addEventListener('mouseup',e=>{
+    if(!drawState||!drawTool||drawTool==='text')return;
+    const p=overlayToSVG(e.clientX,e.clientY);
+    if(drawTool==='free'){
+      if(drawState.points.length>2)annotations.push({type:'free',points:drawState.points,color:drawColor,sw:drawSW});
+      const prev=document.getElementById('draw-preview');if(prev)prev.innerHTML='';
+      drawState=null;renderAnnotations();return;
+    }
+    const dx=p.x-drawState.x1,dy=p.y-drawState.y1;
+    if(Math.sqrt(dx*dx+dy*dy)>3){
+      annotations.push({type:drawTool,x1:drawState.x1,y1:drawState.y1,x2:p.x,y2:p.y,color:drawColor,sw:drawSW});
+      renderAnnotations();
+    }
+    const prev=document.getElementById('draw-preview');if(prev)prev.innerHTML='';
+    drawState=null;
+  });
+})();
+
+function placeText(svgX,svgY,clientX,clientY){
+  const svg=document.getElementById('piano-svg');
   const inp=document.createElement('input');inp.type='text';
   inp.style.cssText=`position:fixed;left:${clientX}px;top:${clientY}px;background:var(--surface);color:var(--text);border:1.5px solid var(--accent);border-radius:4px;padding:4px 8px;font-size:13px;font-family:var(--sans);z-index:9999;outline:none;min-width:120px;box-shadow:0 2px 12px rgba(0,0,0,.4);`;
   document.body.appendChild(inp);
@@ -980,11 +1000,7 @@ buildNoteGrids();
 update();
 initMIDI();
 
-// Eventos de dibujo: mousedown en el SVG, move/up en document para no perder el trazo
-// si el cursor sale del SVG mientras arrastra.
-document.getElementById('piano-svg').addEventListener('mousedown', startDraw);
-document.addEventListener('mousemove', moveDraw);
-document.addEventListener('mouseup', e=>{if(drawState)endDrawAt(e.clientX,e.clientY);});
+// Los eventos de dibujo ya están registrados en el IIFE de arriba (#draw-overlay)
 
 // ── Pre-load audio samples (wrapped so JS errors here never block the UI) ─────
 (()=>{
