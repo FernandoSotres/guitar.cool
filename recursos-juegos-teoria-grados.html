@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Adivina el Grado: identifica acordes diatónicos en su tonalidad. Juego de entrenamiento auditivo para guitarristas. Modos visual y auditivo con puntuación. tremolo.mx.">
+<link rel="canonical" href="https://tremolo.mx/recursos/juegos/teoria/grados">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="tremolo.mx">
+<meta property="og:locale" content="es_MX">
+<meta property="og:url" content="https://tremolo.mx/recursos/juegos/teoria/grados">
+<meta property="og:title" content="Adivina el Grado — Juego de Entrenamiento Auditivo | tremolo.mx">
+<meta property="og:description" content="Identifica acordes diatónicos en su tonalidad. Modos visual y auditivo. Entrena tu oído armónico jugando.">
+<meta property="og:image" content="https://tremolo.mx/img/og-tremolo.jpg">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"tremolo.mx","item":"https://tremolo.mx"},{"@type":"ListItem","position":2,"name":"Recursos","item":"https://tremolo.mx/recursos"},{"@type":"ListItem","position":3,"name":"Juegos","item":"https://tremolo.mx/recursos/juegos"},{"@type":"ListItem","position":4,"name":"Teoría","item":"https://tremolo.mx/recursos/juegos/teoria"},{"@type":"ListItem","position":5,"name":"Adivina el Grado","item":"https://tremolo.mx/recursos/juegos/teoria/grados"}]}</script>
+<title>Adivina el Grado | tremolo.mx</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+<style>
+:root {
+  --paper:#f4ece0; --paper2:#f2ece3; --paper3:#e8e0d4;
+  --paper4:#c8b99f; --paper5:#cec4b0;
+  --copper:#a85a1e; --copper-lt:#c47a36; --copper-dk:#7a3e10;
+  --ink:#1c1410; --ink2:#2e2418; --ink3:#4a3c2c;
+  --ink4:#8a7a64; --ink5:#8a7a66;
+  --serif:'Marcellus',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:var(--paper); color:var(--ink); font-family:var(--sans); font-size:15px; line-height:1.6; min-height:100vh; display:flex; flex-direction:column; }
+
+/* NAV */
+nav { position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-filter:blur(12px);border-bottom:1px solid var(--paper4);padding:0 48px;display:flex;align-items:center;height:60px;gap:0;flex-shrink:0; }
+.nav-logo { font-family:var(--serif);font-size:22px;font-weight:700;color:var(--ink);margin-right:36px;letter-spacing:-.01em;text-decoration:none; }
+.nav-logo span { font-family:var(--mono);font-size:0.52em;font-weight:400;color:var(--ink4);letter-spacing:0;margin-left:2px; }
+.nav-link { padding:0 16px;height:56px;display:flex;align-items:center;font-size:13px;font-weight:500;color:var(--ink4);text-decoration:none;border-bottom:2px solid transparent;transition:color .2s,border-color .2s; }
+.nav-link:hover { color:var(--ink2); }
+.nav-link.active { color:var(--copper);border-bottom-color:var(--copper); }
+
+/* BREADCRUMB */
+.breadcrumb {
+  padding:14px 48px; font-size:12px; color:var(--ink5); font-family:var(--mono);
+  border-bottom:1px solid var(--paper3); background:var(--paper2);
+}
+.breadcrumb a { color:var(--ink4); text-decoration:none; }
+.breadcrumb a:hover { color:var(--copper); }
+.breadcrumb span { margin:0 6px; }
+
+/* ── SCREENS ── */
+.screen { display:none; flex:1; }
+.screen.active { display:flex; }
+
+/* ─── INTRO SCREEN ─── */
+#screen-intro {
+  flex-direction:column; align-items:center; justify-content:center;
+  padding:48px 24px 64px; text-align:center;
+}
+.intro-icon {
+  font-size:56px; margin-bottom:24px; line-height:1;
+}
+.intro-title {
+  font-family:var(--serif); font-size:clamp(36px,6vw,60px);
+  color:var(--ink); letter-spacing:-.02em; margin-bottom:12px;
+}
+.intro-sub {
+  font-size:15px; color:var(--ink4); max-width:460px; line-height:1.7; margin-bottom:36px;
+}
+.intro-rules {
+  background:var(--paper2); border:1px solid var(--paper4); border-radius:12px;
+  padding:24px 32px; max-width:480px; text-align:left; margin-bottom:40px;
+}
+.intro-rules h3 {
+  font-family:var(--serif); font-size:16px; color:var(--ink); margin-bottom:14px;
+}
+.intro-rules ul { list-style:none; }
+.intro-rules li {
+  font-size:13px; color:var(--ink4); padding:5px 0;
+  display:flex; align-items:baseline; gap:10px;
+}
+.intro-rules li::before {
+  content:'♩'; color:var(--copper); flex-shrink:0; font-size:12px;
+}
+.intro-config {
+  display:flex; flex-direction:column; align-items:center; gap:16px; margin-bottom:36px;
+}
+.config-row {
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:center;
+}
+.config-label {
+  font-size:12px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--ink4); font-family:var(--mono);
+}
+.config-select {
+  background:var(--paper); border:1px solid var(--paper4); border-radius:8px;
+  padding:8px 12px; font-size:14px; font-family:var(--sans); color:var(--ink);
+  cursor:pointer; outline:none; transition:border-color .2s;
+}
+.config-select:hover, .config-select:focus { border-color:var(--copper); }
+
+.btn-start {
+  background:var(--copper); color:#fff; border:none;
+  font-size:16px; font-weight:600; padding:16px 48px; border-radius:40px;
+  cursor:pointer; transition:background .2s,transform .15s,box-shadow .2s;
+  font-family:var(--sans); letter-spacing:.01em;
+  box-shadow:0 4px 16px rgba(168,90,30,.25);
+}
+.btn-start:hover {
+  background:var(--copper-dk); transform:translateY(-2px);
+  box-shadow:0 6px 24px rgba(168,90,30,.35);
+}
+.btn-start:active { transform:translateY(0); }
+
+/* ─── GAME SCREEN ─── */
+#screen-game {
+  flex-direction:column; padding:0; background:var(--paper);
+}
+.game-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 32px; background:var(--paper2); border-bottom:1px solid var(--paper3);
+  flex-shrink:0; flex-wrap:wrap; gap:8px;
+}
+.game-stat {
+  display:flex; flex-direction:column; align-items:center;
+}
+.game-stat-label {
+  font-size:10px; font-weight:600; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink5); font-family:var(--mono);
+}
+.game-stat-value {
+  font-family:var(--serif); font-size:22px; color:var(--ink); line-height:1.1;
+}
+.game-mode-badge {
+  background:var(--paper3); border:1px solid var(--paper4); border-radius:20px;
+  padding:6px 16px; font-size:12px; font-weight:600; color:var(--ink4);
+  font-family:var(--mono); letter-spacing:.05em; transition:all .3s;
+}
+.game-mode-badge.audio {
+  background:#1a1410; color:#c8b99f; border-color:#3a2a1a;
+}
+.game-key-display {
+  font-family:var(--serif); font-size:18px; color:var(--copper);
+}
+
+/* FALL ZONE */
+.fall-zone-wrap {
+  flex:1; display:flex; flex-direction:column; align-items:center;
+  padding:24px 32px 16px;
+}
+.timer-bar-wrap {
+  width:100%; max-width:640px; height:4px;
+  background:var(--paper3); border-radius:2px; margin-bottom:16px; overflow:hidden;
+}
+.timer-bar {
+  height:100%; background:var(--copper); border-radius:2px;
+  transition:width linear; width:100%;
+}
+
+.fall-zone {
+  width:100%; max-width:640px; height:320px;
+  background:#1a1410; border-radius:12px;
+  position:relative; overflow:hidden;
+}
+.fall-zone::after {
+  content:''; position:absolute; inset:0;
+  background:radial-gradient(ellipse 70% 40% at 50% 100%, rgba(168,90,30,.08) 0%, transparent 70%);
+  pointer-events:none;
+}
+
+.chord-display {
+  font-family:var(--serif); font-size:72px; font-weight:400;
+  color:#fff; position:absolute; left:50%; transform:translateX(-50%);
+  top:5%; white-space:nowrap; user-select:none;
+  transition:top 3s linear;
+  text-shadow:0 2px 20px rgba(0,0,0,.5);
+  z-index:2;
+}
+.chord-display.audio-mode {
+  color:rgba(255,255,255,.25); font-style:italic;
+}
+.chord-display.hidden-move {
+  transition:top 3s linear;
+}
+
+/* FEEDBACK overlay */
+.feedback-overlay {
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  flex-direction:column; gap:8px; opacity:0; pointer-events:none;
+  transition:opacity .15s; z-index:5;
+}
+.feedback-overlay.visible { opacity:1; }
+.feedback-text {
+  font-family:var(--serif); font-size:32px; color:#fff;
+  text-shadow:0 2px 12px rgba(0,0,0,.4);
+}
+.feedback-chord-reveal {
+  font-size:13px; font-family:var(--mono); color:rgba(255,255,255,.6);
+  letter-spacing:.1em;
+}
+
+/* ANSWER BUTTONS */
+.answer-area {
+  width:100%; max-width:640px; margin-top:20px;
+  display:flex; gap:10px; flex-wrap:wrap; justify-content:center;
+}
+.btn-answer {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  min-width:80px; height:56px; border-radius:28px;
+  background:var(--paper3); border:2px solid var(--paper4); color:var(--ink);
+  cursor:pointer; transition:background .15s,border-color .15s,color .15s,transform .1s;
+  font-family:var(--serif); font-size:18px; font-weight:400;
+  padding:0 20px; user-select:none; position:relative;
+}
+.btn-answer .degree-quality {
+  font-family:var(--mono); font-size:9px; font-weight:500;
+  letter-spacing:.06em; color:var(--ink5); line-height:1;
+  position:absolute; bottom:8px; left:50%; transform:translateX(-50%);
+  white-space:nowrap;
+}
+.btn-answer:hover:not(:disabled) {
+  border-color:var(--copper); color:var(--copper); transform:translateY(-2px);
+}
+.btn-answer:active:not(:disabled) { transform:translateY(0); }
+.btn-answer.correct {
+  background:#2a9d5c !important; border-color:#2a9d5c !important; color:#fff !important;
+}
+.btn-answer.correct .degree-quality { color:rgba(255,255,255,.7); }
+.btn-answer.wrong {
+  background:#c0392b !important; border-color:#c0392b !important; color:#fff !important;
+}
+.btn-answer.wrong .degree-quality { color:rgba(255,255,255,.7); }
+.btn-answer.missed-pulse { animation:missedPulse .5s ease; }
+.btn-answer:disabled { cursor:not-allowed; opacity:.7; }
+
+@keyframes missedPulse {
+  0%,100% { transform:scale(1); }
+  25% { transform:scale(1.06); }
+  75% { transform:scale(.97); }
+}
+
+/* ─── END SCREEN ─── */
+#screen-end {
+  flex-direction:column; align-items:center; justify-content:flex-start;
+  padding:48px 24px 64px; overflow-y:auto;
+}
+.end-title {
+  font-family:var(--serif); font-size:clamp(32px,5vw,52px);
+  color:var(--ink); letter-spacing:-.02em; margin-bottom:8px; text-align:center;
+}
+.end-score-big {
+  font-family:var(--serif); font-size:clamp(56px,10vw,96px);
+  color:var(--copper); line-height:1; letter-spacing:-.04em; margin-bottom:4px;
+}
+.end-score-label {
+  font-size:12px; color:var(--ink5); font-family:var(--mono);
+  letter-spacing:.1em; text-transform:uppercase; margin-bottom:32px;
+}
+.end-stats {
+  display:flex; gap:32px; margin-bottom:40px; flex-wrap:wrap; justify-content:center;
+}
+.end-stat {
+  text-align:center;
+}
+.end-stat-value {
+  font-family:var(--serif); font-size:32px; color:var(--ink);
+}
+.end-stat-label {
+  font-size:11px; color:var(--ink5); font-family:var(--mono);
+  letter-spacing:.1em; text-transform:uppercase;
+}
+
+/* Breakdown table */
+.breakdown {
+  width:100%; max-width:640px; border:1px solid var(--paper4); border-radius:10px;
+  overflow:hidden; margin-bottom:40px;
+}
+.breakdown-header, .breakdown-row {
+  display:grid; grid-template-columns:44px 1fr 1fr 72px 72px;
+  align-items:center; padding:10px 16px; gap:8px;
+}
+.breakdown-header {
+  background:var(--paper3); font-size:10px; font-weight:700;
+  letter-spacing:.12em; text-transform:uppercase; color:var(--ink5);
+  font-family:var(--mono);
+}
+.breakdown-row {
+  font-size:13px; color:var(--ink4); background:var(--paper2);
+  border-top:1px solid var(--paper3);
+}
+.breakdown-row:nth-child(odd) { background:var(--paper); }
+.bd-chord { font-family:var(--serif); font-size:16px; color:var(--ink); }
+.bd-degree { font-family:var(--mono); font-size:13px; color:var(--ink3); }
+.bd-result { font-size:12px; font-weight:600; font-family:var(--mono); }
+.bd-result.correct { color:#2a9d5c; }
+.bd-result.wrong { color:#c0392b; }
+.bd-result.missed { color:var(--ink5); }
+.bd-time { font-family:var(--mono); font-size:12px; color:var(--ink5); text-align:right; }
+
+.btn-again {
+  background:var(--copper); color:#fff; border:none;
+  font-size:16px; font-weight:600; padding:16px 48px; border-radius:40px;
+  cursor:pointer; transition:background .2s,transform .15s,box-shadow .2s;
+  font-family:var(--sans); letter-spacing:.01em;
+  box-shadow:0 4px 16px rgba(168,90,30,.25);
+}
+.btn-again:hover {
+  background:var(--copper-dk); transform:translateY(-2px);
+  box-shadow:0 6px 24px rgba(168,90,30,.35);
+}
+
+/* FOOTER */
+footer { flex-shrink:0; }
+
+@media (max-width:640px) {
+  nav { padding:0 16px;overflow-x:auto;flex-wrap:nowrap;white-space:nowrap;scrollbar-width:none; }
+  nav::-webkit-scrollbar { display:none; }
+  nav > * { flex-shrink:0; }
+  .breadcrumb { padding:12px 16px; font-size:11px; }
+  .game-header { padding:10px 16px; }
+  .fall-zone-wrap { padding:16px 16px 12px; }
+  .chord-display { font-size:52px; }
+  .answer-area { gap:8px; }
+  .btn-answer { min-width:60px; height:52px; font-size:16px; padding:0 14px; }
+  .breakdown-header, .breakdown-row { grid-template-columns:32px 1fr 1fr 60px 56px; padding:8px 12px; }
+  #screen-intro { padding:32px 16px 48px; }
+  .intro-rules { padding:18px 20px; }
+  .end-stats { gap:20px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-size:1em;font-family:inherit;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria" class="nav-link">Teoría</a>
+  <a href="/practica" class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos" class="nav-link active">Recursos</a>
+</nav>
+
+<div class="breadcrumb">
+  <a href="/recursos">Recursos</a>
+  <span>›</span>
+  <a href="/recursos/juegos">Juegos</a>
+  <span>›</span>
+  <a href="/recursos/juegos/teoria">Teoría</a>
+  <span>›</span>
+  <span>Adivina el Grado</span>
+</div>
+
+<!-- ─── INTRO SCREEN ─── -->
+<div id="screen-intro" class="screen active">
+  <div class="intro-icon">🎵</div>
+  <h1 class="intro-title">Adivina el Grado</h1>
+  <p class="intro-sub">Un acorde diatónico cae por la pantalla. Identifica su grado antes de que llegue al fondo. Alterna entre ver el acorde y solo escucharlo.</p>
+
+  <div class="intro-rules">
+    <h3>Cómo se juega</h3>
+    <ul>
+      <li>10 rondas por partida, 3 segundos para responder cada una</li>
+      <li>Las rondas pares muestran el nombre del acorde (modo visual)</li>
+      <li>Las rondas nones solo reproducen el sonido (modo auditivo)</li>
+      <li>Responde más rápido para sumar más puntos</li>
+      <li>Un bordón de la tónica suena durante toda la partida</li>
+    </ul>
+  </div>
+
+  <div class="intro-config">
+    <div class="config-row">
+      <span class="config-label">Tonalidad</span>
+      <select class="config-select" id="select-key">
+        <option value="0">C mayor</option>
+        <option value="7">G mayor</option>
+        <option value="2">D mayor</option>
+        <option value="9">A mayor</option>
+        <option value="5">F mayor</option>
+        <option value="10">B♭ mayor</option>
+        <option value="3">E♭ mayor</option>
+        <option value="random" selected>Aleatoria</option>
+      </select>
+    </div>
+  </div>
+
+  <button class="btn-start" id="btn-start">Comenzar</button>
+</div>
+
+<!-- ─── GAME SCREEN ─── -->
+<div id="screen-game" class="screen">
+  <div class="game-header">
+    <div class="game-stat">
+      <span class="game-stat-label">Ronda</span>
+      <span class="game-stat-value" id="stat-round">1/10</span>
+    </div>
+    <div class="game-stat">
+      <span class="game-stat-label">Puntos</span>
+      <span class="game-stat-value" id="stat-score">0</span>
+    </div>
+    <div class="game-key-display" id="stat-key">C mayor</div>
+    <div class="game-mode-badge" id="mode-badge">👁 Visual</div>
+    <div class="game-stat">
+      <span class="game-stat-label">Racha</span>
+      <span class="game-stat-value" id="stat-streak">0</span>
+    </div>
+  </div>
+
+  <div class="fall-zone-wrap">
+    <div class="timer-bar-wrap">
+      <div class="timer-bar" id="timer-bar"></div>
+    </div>
+    <div class="fall-zone" id="fall-zone">
+      <div class="chord-display" id="chord-display">—</div>
+      <div class="feedback-overlay" id="feedback-overlay">
+        <div class="feedback-text" id="feedback-text"></div>
+        <div class="feedback-chord-reveal" id="feedback-reveal"></div>
+      </div>
+    </div>
+    <div class="answer-area" id="answer-area">
+      <!-- Buttons injected by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ─── END SCREEN ─── -->
+<div id="screen-end" class="screen">
+  <h2 class="end-title">Juego terminado</h2>
+  <div class="end-score-big" id="end-score">0</div>
+  <div class="end-score-label">puntos de 1500 posibles</div>
+  <div class="end-stats">
+    <div class="end-stat">
+      <div class="end-stat-value" id="end-correct">0</div>
+      <div class="end-stat-label">Aciertos</div>
+    </div>
+    <div class="end-stat">
+      <div class="end-stat-value" id="end-streak">0</div>
+      <div class="end-stat-label">Mejor racha</div>
+    </div>
+    <div class="end-stat">
+      <div class="end-stat-value" id="end-avg">—</div>
+      <div class="end-stat-label">Tiempo prom.</div>
+    </div>
+  </div>
+  <div class="breakdown" id="breakdown">
+    <div class="breakdown-header">
+      <div>#</div>
+      <div>Acorde</div>
+      <div>Grado</div>
+      <div>Resultado</div>
+      <div style="text-align:right">Tiempo</div>
+    </div>
+  </div>
+  <button class="btn-again" id="btn-again">Jugar de nuevo</button>
+</div>
+
+<footer style="border-top:1px solid var(--paper4);padding:24px 48px;text-align:center;font-size:12px;color:var(--ink5);">
+  © 2026 tremolo.mx · Todos los derechos reservados ·
+  <a href="/privacidad" style="color:var(--ink4)">Privacidad</a> ·
+  <a href="/terminos" style="color:var(--ink4)">Términos</a>
+</footer>
+
+<script>
+// ─────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────
+const KEYS = [
+  { pc:0,  name:'C',  useFlats:false },
+  { pc:7,  name:'G',  useFlats:false },
+  { pc:2,  name:'D',  useFlats:false },
+  { pc:9,  name:'A',  useFlats:false },
+  { pc:5,  name:'F',  useFlats:true  },
+  { pc:10, name:'B♭', useFlats:true  },
+  { pc:3,  name:'E♭', useFlats:true  },
+];
+
+const MAJOR_STEPS = [0, 2, 4, 5, 7, 9, 11];
+
+const NOTE_SHARP = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const NOTE_FLAT  = ['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
+
+// Per degree: suffix, intervals from root (semitones), uppercase roman, quality label
+const DEGREE_DATA = [
+  { suffix:'',   intervals:[0,4,7],    upper:true,  label:'may' },
+  { suffix:'m',  intervals:[0,3,7],    upper:false, label:'men' },
+  { suffix:'m',  intervals:[0,3,7],    upper:false, label:'men' },
+  { suffix:'',   intervals:[0,4,7],    upper:true,  label:'may' },
+  { suffix:'7',  intervals:[0,4,7,10], upper:true,  label:'7ª'  },
+  { suffix:'m',  intervals:[0,3,7],    upper:false, label:'men' },
+  { suffix:'°',  intervals:[0,3,6],    upper:false, label:'dim' },
+];
+
+const ROMANS = ['I','II','III','IV','V','VI','VII'];
+
+const ROUND_COUNT = 10;
+const FALL_DURATION = 3000; // ms
+
+// Scoring thresholds
+const SCORE_FAST   = 150;  // < 1s
+const SCORE_MED    = 130;  // 1–2s
+const SCORE_SLOW   = 100;  // 2–3s
+
+// ─────────────────────────────────────────────
+// AUDIO
+// ─────────────────────────────────────────────
+let audioReady = false;
+let droneOsc = null;
+let droneGain = null;
+let chordSynth = null;
+
+function toFreq(pc, octave) {
+  // Middle C = C4 = MIDI 60. pc=0 → C, octave=4 → 261.63
+  const midi = pc + (octave + 1) * 12;
+  return 440 * Math.pow(2, (midi - 69) / 12);
+}
+
+async function initAudio(keyPC) {
+  await Tone.start();
+
+  // Tear down previous
+  if (droneOsc) { try { droneOsc.stop(); droneOsc.dispose(); } catch(e){} }
+  if (droneGain) { try { droneGain.dispose(); } catch(e){} }
+  if (chordSynth) { try { chordSynth.dispose(); } catch(e){} }
+
+  droneGain = new Tone.Gain(0.12).toDestination();
+  droneOsc = new Tone.Oscillator({
+    type: 'sine',
+    frequency: toFreq(keyPC, 2)
+  }).connect(droneGain);
+  droneOsc.start();
+
+  chordSynth = new Tone.PolySynth(Tone.Synth, {
+    oscillator: { type: 'triangle' },
+    envelope: { attack: 0.05, decay: 0.4, sustain: 0.6, release: 2.5 },
+    volume: -10
+  }).toDestination();
+
+  audioReady = true;
+}
+
+function stopDrone() {
+  if (droneOsc) { try { droneOsc.stop(); } catch(e){} }
+}
+
+function playChord(notesPCs) {
+  if (!audioReady || !chordSynth) return;
+  try {
+    chordSynth.releaseAll();
+    const notes = notesPCs.map(pc => NOTE_SHARP[pc % 12] + '4');
+    chordSynth.triggerAttackRelease(notes, '1n');
+  } catch(e) { console.warn('playChord error', e); }
+}
+
+// ─────────────────────────────────────────────
+// GAME STATE
+// ─────────────────────────────────────────────
+let state = {
+  key: null,          // { pc, name, useFlats }
+  round: 0,           // 0-indexed
+  score: 0,
+  streak: 0,
+  bestStreak: 0,
+  results: [],        // { chord, degree, correct, time, result }
+  answered: false,
+  roundStartTime: 0,
+  animFrame: null,
+  timerStart: 0,
+  currentDegreeIdx: 0,
+  currentChordNotes: [],
+  isAudioMode: false,
+};
+
+// ─────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────
+function pickKey(selectVal) {
+  if (selectVal === 'random') {
+    return KEYS[Math.floor(Math.random() * KEYS.length)];
+  }
+  const pc = parseInt(selectVal, 10);
+  return KEYS.find(k => k.pc === pc) || KEYS[0];
+}
+
+function getNoteName(pc, useFlats) {
+  return useFlats ? NOTE_FLAT[pc % 12] : NOTE_SHARP[pc % 12];
+}
+
+function buildChordForDegree(degreeIdx, keyPC, useFlats) {
+  const rootStep = MAJOR_STEPS[degreeIdx];
+  const rootPC = (keyPC + rootStep) % 12;
+  const dd = DEGREE_DATA[degreeIdx];
+  const notesPCs = dd.intervals.map(i => (rootPC + i) % 12);
+  const rootName = getNoteName(rootPC, useFlats);
+  const chordName = rootName + dd.suffix;
+  return { chordName, notesPCs, rootPC };
+}
+
+function pickDegreeIdx() {
+  // Weight toward all degrees equally but avoid trivial repeats
+  return Math.floor(Math.random() * 7);
+}
+
+function getRomanLabel(degreeIdx) {
+  const dd = DEGREE_DATA[degreeIdx];
+  return dd.upper ? ROMANS[degreeIdx] : ROMANS[degreeIdx].toLowerCase();
+}
+
+// ─────────────────────────────────────────────
+// DOM
+// ─────────────────────────────────────────────
+const screens = {
+  intro: document.getElementById('screen-intro'),
+  game:  document.getElementById('screen-game'),
+  end:   document.getElementById('screen-end'),
+};
+
+function showScreen(name) {
+  Object.values(screens).forEach(s => s.classList.remove('active'));
+  screens[name].classList.add('active');
+}
+
+// Build answer buttons
+const answerArea = document.getElementById('answer-area');
+const degreeButtons = [];
+
+ROMANS.forEach((r, i) => {
+  const dd = DEGREE_DATA[i];
+  const label = dd.upper ? r : r.toLowerCase();
+  const btn = document.createElement('button');
+  btn.className = 'btn-answer';
+  btn.innerHTML = `${label}<span class="degree-quality">${dd.label}</span>`;
+  btn.dataset.degree = i;
+  btn.addEventListener('click', () => handleAnswer(i));
+  answerArea.appendChild(btn);
+  degreeButtons.push(btn);
+});
+
+// ─────────────────────────────────────────────
+// GAME LOOP
+// ─────────────────────────────────────────────
+function startGame() {
+  state.round = 0;
+  state.score = 0;
+  state.streak = 0;
+  state.bestStreak = 0;
+  state.results = [];
+
+  document.getElementById('stat-score').textContent = '0';
+  document.getElementById('stat-streak').textContent = '0';
+
+  showScreen('game');
+  startRound();
+}
+
+function startRound() {
+  state.answered = false;
+  const roundNum = state.round + 1; // 1-based
+
+  // Determine mode: odd rounds = audio, even = visual
+  state.isAudioMode = (roundNum % 2 === 1);
+
+  // Pick degree
+  state.currentDegreeIdx = pickDegreeIdx();
+  const { chordName, notesPCs } = buildChordForDegree(
+    state.currentDegreeIdx, state.key.pc, state.key.useFlats
+  );
+  state.currentChordNotes = notesPCs;
+  state.currentChordName = chordName;
+
+  // Update header
+  document.getElementById('stat-round').textContent = `${roundNum}/10`;
+  document.getElementById('stat-key').textContent = `${state.key.name} may.`;
+
+  const badge = document.getElementById('mode-badge');
+  if (state.isAudioMode) {
+    badge.textContent = '👂 Auditivo';
+    badge.classList.add('audio');
+  } else {
+    badge.textContent = '👁 Visual';
+    badge.classList.remove('audio');
+  }
+
+  // Reset buttons
+  degreeButtons.forEach(btn => {
+    btn.classList.remove('correct','wrong','missed-pulse');
+    btn.disabled = false;
+  });
+
+  // Hide feedback
+  const overlay = document.getElementById('feedback-overlay');
+  overlay.classList.remove('visible');
+
+  // Position chord at top
+  const chordEl = document.getElementById('chord-display');
+  chordEl.style.transition = 'none';
+  chordEl.style.top = '5%';
+  chordEl.textContent = state.isAudioMode ? '?' : chordName;
+  chordEl.classList.toggle('audio-mode', state.isAudioMode);
+
+  // Play chord sound
+  playChord(notesPCs);
+
+  // Small delay so initial position is painted before transition
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      chordEl.style.transition = `top ${FALL_DURATION}ms linear`;
+      chordEl.style.top = '78%';
+    });
+  });
+
+  // Start timer bar animation
+  state.timerStart = performance.now();
+  state.roundStartTime = performance.now();
+  animateTimerBar();
+
+  // Auto-miss after FALL_DURATION
+  state.autoMissTimer = setTimeout(() => {
+    if (!state.answered) handleMiss();
+  }, FALL_DURATION);
+}
+
+function animateTimerBar() {
+  const bar = document.getElementById('timer-bar');
+  const startTime = state.timerStart;
+
+  function tick() {
+    if (state.answered) return;
+    const elapsed = performance.now() - startTime;
+    const pct = Math.max(0, 1 - elapsed / FALL_DURATION);
+    bar.style.width = (pct * 100) + '%';
+    // Color shift: green → copper → red
+    if (pct > 0.5) {
+      bar.style.background = 'var(--copper)';
+    } else if (pct > 0.2) {
+      bar.style.background = '#b8672a';
+    } else {
+      bar.style.background = '#c0392b';
+    }
+    if (pct > 0) state.animFrame = requestAnimationFrame(tick);
+  }
+  state.animFrame = requestAnimationFrame(tick);
+}
+
+function handleAnswer(clickedDegreeIdx) {
+  if (state.answered) return;
+  state.answered = true;
+  clearTimeout(state.autoMissTimer);
+  cancelAnimationFrame(state.animFrame);
+
+  const answerTime = (performance.now() - state.roundStartTime) / 1000;
+  const correct = (clickedDegreeIdx === state.currentDegreeIdx);
+
+  // Stop chord fall
+  const chordEl = document.getElementById('chord-display');
+  chordEl.style.transition = 'none';
+  chordEl.style.top = chordEl.style.top; // freeze
+
+  // Timer bar — freeze it
+  // (animation stopped above)
+
+  let pts = 0;
+  if (correct) {
+    if (answerTime < 1)      pts = SCORE_FAST;
+    else if (answerTime < 2) pts = SCORE_MED;
+    else                      pts = SCORE_SLOW;
+    state.score += pts;
+    state.streak++;
+    state.bestStreak = Math.max(state.bestStreak, state.streak);
+  } else {
+    state.streak = 0;
+  }
+
+  document.getElementById('stat-score').textContent = state.score;
+  document.getElementById('stat-streak').textContent = state.streak;
+
+  // Visual feedback on buttons
+  if (correct) {
+    degreeButtons[clickedDegreeIdx].classList.add('correct');
+  } else {
+    degreeButtons[clickedDegreeIdx].classList.add('wrong');
+    degreeButtons[state.currentDegreeIdx].classList.add('correct');
+  }
+  degreeButtons.forEach(btn => btn.disabled = true);
+
+  // Feedback overlay
+  const overlay = document.getElementById('feedback-overlay');
+  const feedbackText = document.getElementById('feedback-text');
+  const feedbackReveal = document.getElementById('feedback-reveal');
+
+  if (correct) {
+    feedbackText.textContent = '¡Correcto!';
+    feedbackText.style.color = '#4cca8a';
+  } else {
+    feedbackText.textContent = 'Incorrecto';
+    feedbackText.style.color = '#e05a4a';
+  }
+
+  // Reveal chord name if audio mode
+  if (state.isAudioMode) {
+    feedbackReveal.textContent = `El acorde era: ${state.currentChordName}`;
+    chordEl.textContent = state.currentChordName;
+    chordEl.classList.remove('audio-mode');
+  } else {
+    feedbackReveal.textContent = pts > 0 ? `+${pts} pts` : '';
+  }
+
+  overlay.classList.add('visible');
+
+  // Record result
+  state.results.push({
+    round: state.round + 1,
+    chord: state.currentChordName,
+    degree: getRomanLabel(state.currentDegreeIdx),
+    degreeIdx: state.currentDegreeIdx,
+    result: correct ? 'correct' : 'wrong',
+    time: answerTime,
+    pts,
+  });
+
+  // Advance after feedback
+  setTimeout(() => {
+    state.round++;
+    if (state.round < ROUND_COUNT) {
+      startRound();
+    } else {
+      endGame();
+    }
+  }, 800);
+}
+
+function handleMiss() {
+  state.answered = true;
+  clearTimeout(state.autoMissTimer);
+  cancelAnimationFrame(state.animFrame);
+
+  state.streak = 0;
+  document.getElementById('stat-streak').textContent = '0';
+
+  // Pulse all buttons
+  degreeButtons.forEach(btn => {
+    btn.disabled = true;
+    btn.classList.add('missed-pulse');
+  });
+
+  // Reveal correct
+  setTimeout(() => {
+    degreeButtons[state.currentDegreeIdx].classList.add('correct');
+  }, 150);
+
+  // Feedback overlay
+  const overlay = document.getElementById('feedback-overlay');
+  const feedbackText = document.getElementById('feedback-text');
+  const feedbackReveal = document.getElementById('feedback-reveal');
+
+  feedbackText.textContent = '¡Se escapó!';
+  feedbackText.style.color = 'rgba(255,255,255,.7)';
+  feedbackReveal.textContent = `Era: ${state.currentChordName} — ${getRomanLabel(state.currentDegreeIdx)}`;
+
+  // Show chord if was audio
+  const chordEl = document.getElementById('chord-display');
+  chordEl.textContent = state.currentChordName;
+  chordEl.classList.remove('audio-mode');
+
+  overlay.classList.add('visible');
+
+  // Timer bar to 0
+  const bar = document.getElementById('timer-bar');
+  bar.style.width = '0%';
+
+  // Record result
+  state.results.push({
+    round: state.round + 1,
+    chord: state.currentChordName,
+    degree: getRomanLabel(state.currentDegreeIdx),
+    degreeIdx: state.currentDegreeIdx,
+    result: 'missed',
+    time: null,
+    pts: 0,
+  });
+
+  setTimeout(() => {
+    state.round++;
+    if (state.round < ROUND_COUNT) {
+      startRound();
+    } else {
+      endGame();
+    }
+  }, 800);
+}
+
+function endGame() {
+  stopDrone();
+  showScreen('end');
+
+  document.getElementById('end-score').textContent = state.score;
+  const correctCount = state.results.filter(r => r.result === 'correct').length;
+  document.getElementById('end-correct').textContent = `${correctCount}/10`;
+  document.getElementById('end-streak').textContent = state.bestStreak;
+
+  const times = state.results.filter(r => r.time !== null).map(r => r.time);
+  const avgTime = times.length > 0
+    ? (times.reduce((a,b) => a+b, 0) / times.length).toFixed(1)
+    : '—';
+  document.getElementById('end-avg').textContent = times.length > 0 ? avgTime + 's' : '—';
+
+  // Breakdown
+  const breakdown = document.getElementById('breakdown');
+  // Remove old rows
+  const oldRows = breakdown.querySelectorAll('.breakdown-row');
+  oldRows.forEach(r => r.remove());
+
+  state.results.forEach(r => {
+    const row = document.createElement('div');
+    row.className = 'breakdown-row';
+    let resultLabel = '';
+    let resultClass = '';
+    if (r.result === 'correct') { resultLabel = '✓ Correcto'; resultClass = 'correct'; }
+    else if (r.result === 'wrong') { resultLabel = '✗ Incorrecto'; resultClass = 'wrong'; }
+    else { resultLabel = '— Escapó'; resultClass = 'missed'; }
+
+    const timeStr = r.time !== null ? r.time.toFixed(2) + 's' : '—';
+    row.innerHTML = `
+      <div style="font-family:var(--mono);font-size:12px;color:var(--ink5)">${r.round}</div>
+      <div class="bd-chord">${r.chord}</div>
+      <div class="bd-degree">${r.degree}</div>
+      <div class="bd-result ${resultClass}">${resultLabel}</div>
+      <div class="bd-time">${timeStr}</div>
+    `;
+    breakdown.appendChild(row);
+  });
+}
+
+// ─────────────────────────────────────────────
+// EVENT LISTENERS
+// ─────────────────────────────────────────────
+document.getElementById('btn-start').addEventListener('click', async () => {
+  const selectVal = document.getElementById('select-key').value;
+  state.key = pickKey(selectVal);
+  await initAudio(state.key.pc);
+  startGame();
+});
+
+document.getElementById('btn-again').addEventListener('click', async () => {
+  const selectVal = document.getElementById('select-key').value;
+  state.key = pickKey(selectVal);
+  showScreen('intro');
+  // Re-init audio on next start
+});
+
+// Keyboard shortcuts: 1-7 → degrees I-VII
+document.addEventListener('keydown', (e) => {
+  if (screens.game.classList.contains('active') && !state.answered) {
+    const num = parseInt(e.key, 10);
+    if (num >= 1 && num <= 7) {
+      handleAnswer(num - 1);
+    }
+  }
+});
+</script>
+</body>
+</html>
