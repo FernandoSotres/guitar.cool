@@ -28,13 +28,6 @@
   /* ── CSS ─────────────────────────────────────────────────────────────────── */
   var styleEl = document.createElement('style');
   styleEl.textContent = [
-    '.nav-comments-anchor{display:flex;align-items:center;gap:6px;padding:0 14px;height:56px;',
-    'font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;',
-    'text-decoration:none;white-space:nowrap;flex-shrink:0;color:#2e7d52;',
-    "font-family:'JetBrains Mono',monospace;border-bottom:2px solid transparent;",
-    'transition:color .2s,border-color .2s;}',
-    '.nav-comments-anchor:hover{color:#1a5c38;border-bottom-color:#2e7d52;}',
-    '.nav-comments-dot{width:7px;height:7px;border-radius:50%;background:#2e7d52;display:inline-block;flex-shrink:0;}',
     '.tm-comments-sep{height:1px;background:#e8e0d4;margin:0 48px;}',
     '.tm-comments-wrap{max-width:680px;margin:0 auto;padding:72px 48px 100px;}',
     '.tm-comments-label{font-size:10px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;',
@@ -118,33 +111,6 @@
       '</div>' +
       '<div id="tc-list"><p class="tm-comments-loading">Cargando comentarios…</p></div>' +
     '</div>';
-
-  /* ── NAV INDICATOR ───────────────────────────────────────────────────────── */
-  // Works whether DOMContentLoaded has fired or not
-  function addNavAnchor() {
-    var nav = document.querySelector('nav');
-    if (!nav || nav.querySelector('.nav-comments-anchor')) return;
-    var a = document.createElement('a');
-    a.href = '#comentarios';
-    a.className = 'nav-comments-anchor';
-    a.innerHTML = '<span class="nav-comments-dot"></span>Comentarios';
-    // Insert before auth wrap if present, else before last child, else append
-    var wrap = nav.querySelector('.tm-user-wrap');
-    if (wrap) {
-      nav.insertBefore(a, wrap);
-    } else {
-      nav.appendChild(a);
-    }
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', addNavAnchor);
-  } else {
-    // DOM already ready; auth.js may have run already or not yet
-    // Try now, and also after a tick to catch late auth.js init
-    addNavAnchor();
-    setTimeout(addNavAnchor, 50);
-  }
 
   /* ── HELPERS ─────────────────────────────────────────────────────────────── */
   function esc(s) {

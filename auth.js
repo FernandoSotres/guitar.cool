@@ -341,6 +341,30 @@
     // Quitar CTA estático si existe
     nav.querySelector('.nav-cta')?.remove();
 
+    // Enlace de Comentarios (verde, siempre visible)
+    if (!nav.querySelector('.tm-comments-nav')) {
+      const commentsLink = document.createElement('a');
+      commentsLink.href = '/recursos/compositores';
+      commentsLink.className = 'tm-comments-nav';
+      commentsLink.innerHTML = '<span class="tm-comments-dot"></span>Comentarios';
+
+      // Añadir estilos si no existen
+      if (!document.getElementById('tm-comments-nav-css')) {
+        const s = document.createElement('style');
+        s.id = 'tm-comments-nav-css';
+        s.textContent =
+          '.tm-comments-nav{display:flex;align-items:center;gap:6px;padding:0 16px;height:56px;' +
+          'font-size:13px;font-weight:500;text-decoration:none;white-space:nowrap;flex-shrink:0;' +
+          "color:#2e7d52;font-family:'Inter',system-ui,sans-serif;" +
+          'border-bottom:2px solid transparent;transition:color .2s,border-color .2s;}' +
+          '.tm-comments-nav:hover{color:#1a5c38;border-bottom-color:#2e7d52;}' +
+          '.tm-comments-dot{width:7px;height:7px;border-radius:50%;background:#2e7d52;' +
+          'display:inline-block;flex-shrink:0;}';
+        document.head.appendChild(s);
+      }
+      nav.appendChild(commentsLink);
+    }
+
     const wrap = document.createElement('div');
     wrap.className = 'tm-user-wrap';
     wrap.style.cssText = 'display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0;';
