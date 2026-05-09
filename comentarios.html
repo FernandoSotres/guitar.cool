@@ -150,6 +150,7 @@ nav {
 .cl-date { font-family: var(--mono); font-size: 10px; color: var(--ink5); letter-spacing: .04em; }
 .cl-text { font-size: 14px; color: var(--ink3); line-height: 1.7; }
 .cl-loading { font-family: var(--mono); font-size: 12px; color: var(--ink5); letter-spacing: .04em; }
+.cl-slug { font-family: var(--mono); font-size: 10px; color: var(--green); letter-spacing: .06em; text-transform: uppercase; margin-left: auto; }
 
 @media (max-width: 768px) {
   nav { padding: 0 16px; overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; scrollbar-width: none; }
@@ -227,8 +228,6 @@ nav {
 (function () {
   var SUPA_URL = 'https://osgbjknlajdxlbfeueqc.supabase.co';
   var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zZ2Jqa25sYWpkeGxiZmV1ZXFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NjcyMTYsImV4cCI6MjA5MzQ0MzIxNn0.6cDM7Xpf7ZkdwH88uBPPP3xH0GZGqXiEJBdnK7pSDW4';
-  var SLUG = 'general';
-
   function esc(s) {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
@@ -236,13 +235,24 @@ nav {
     try { return new Date(iso).toLocaleDateString('es-MX',{year:'numeric',month:'long',day:'numeric'}); }
     catch(e){ return iso; }
   }
+  function fmtSlug(s) {
+    return s.replace(/-/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();});
+  }
+
+  function loadAll(sb, cb) {
+    sb.from('comments')
+      .select('id,page_slug,user_name,comment_text,created_at')
+      .order('created_at',{ascending:false})
+      .then(function(r){ cb(r.data || []); })
+      .catch(function(){ cb([]); });
+  }
 
   function renderList(data) {
     var list = document.getElementById('c-list');
     var count = document.getElementById('c-count');
     if (!list) return;
     if (!data || data.length === 0) {
-      list.innerHTML = '<p class="cl-empty">Sé la primera persona en comentar.</p>';
+      list.innerHTML = '<p class="cl-empty">Aún no hay comentarios. Sé el primero.</p>';
       if (count) count.textContent = '';
       return;
     }
@@ -250,9 +260,15 @@ nav {
     var html = '<div class="cl-list">';
     for (var i = 0; i < data.length; i++) {
       var c = data[i];
+      var slugLabel = c.page_slug !== 'general'
+        ? '<span class="cl-slug">' + esc(fmtSlug(c.page_slug)) + '</span>'
+        : '';
       html += '<div class="cl-item">' +
-        '<div class="cl-meta"><span class="cl-name">' + esc(c.user_name) + '</span>' +
-        '<span class="cl-date">' + fmtDate(c.created_at) + '</span></div>' +
+        '<div class="cl-meta">' +
+          '<span class="cl-name">' + esc(c.user_name) + '</span>' +
+          '<span class="cl-date">' + fmtDate(c.created_at) + '</span>' +
+          slugLabel +
+        '</div>' +
         '<p class="cl-text">' + esc(c.comment_text).replace(/\n/g,'<br>') + '</p>' +
         '</div>';
     }
@@ -261,10 +277,8 @@ nav {
   }
 
   function init(sb) {
-    sb.from('comments').select('id,user_name,comment_text,created_at')
-      .eq('page_slug', SLUG).order('created_at',{ascending:true})
-      .then(function(r){ renderList(r.data); })
-      .catch(function(){ renderList([]); });
+    // Cargar todos los comentarios del sitio (sin filtro de slug)
+    loadAll(sb, renderList);
 
     var btn = document.getElementById('c-submit');
     var msg = document.getElementById('c-msg');
@@ -277,18 +291,22 @@ nav {
       if (!name) { msg.textContent='Escribe tu nombre.'; msg.className='cf-msg err'; return; }
       if (text.length < 10) { msg.textContent='Mínimo 10 caracteres.'; msg.className='cf-msg err'; return; }
       btn.disabled = true; btn.textContent = '…';
-      sb.from('comments').insert({page_slug:SLUG, user_name:name, comment_text:text})
+      sb.from('comments').insert({page_slug:'general', user_name:name, comment_text:text})
         .then(function(r){
           if (r.error) {
             msg.textContent = 'Error al publicar. Intenta de nuevo.'; msg.className = 'cf-msg err';
+            btn.disabled = false; btn.textContent = 'Publicar';
           } else {
-            msg.textContent = '¡Publicado! Gracias por tu comentario.'; msg.className = 'cf-msg ok';
-            document.getElementById('c-text').value = '';
-            sb.from('comments').select('id,user_name,comment_text,created_at')
-              .eq('page_slug',SLUG).order('created_at',{ascending:true})
-              .then(function(r2){ renderList(r2.data); });
+            // Ocultar el formulario y mostrar mensaje cálido
+            document.querySelector('.cf-card').innerHTML =
+              '<div style="text-align:center;padding:16px 0">' +
+              '<div style="font-size:32px;margin-bottom:16px">✉︎</div>' +
+              '<p style="font-family:Marcellus,Georgia,serif;font-size:22px;color:#1c1410;margin-bottom:10px">Recibí tu comentario.</p>' +
+              '<p style="font-size:14px;color:#8a7a64;line-height:1.7">Lo leeré atentamente y seguiré mejorando el sitio para ti.<br>Muchas gracias.</p>' +
+              '</div>';
+            // Recargar lista con el nuevo comentario
+            loadAll(sb, renderList);
           }
-          btn.disabled = false; btn.textContent = 'Publicar';
         }).catch(function(){
           msg.textContent = 'Error al publicar.'; msg.className = 'cf-msg err';
           btn.disabled = false; btn.textContent = 'Publicar';
