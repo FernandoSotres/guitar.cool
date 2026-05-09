@@ -201,16 +201,11 @@ nav {
     </div>
     <div class="cf-footer">
       <span class="cf-hint">Mín. 10 caracteres · Aparece en la lista abajo</span>
-      <button class="cf-submit" id="c-submit">Publicar</button>
+      <button class="cf-submit" id="c-submit">Enviar</button>
     </div>
     <div class="cf-msg" id="c-msg"></div>
   </div>
 
-  <div class="cl-head">
-    <h2 class="cl-title">Comentarios</h2>
-    <span class="cl-count" id="c-count"></span>
-  </div>
-  <div id="c-list"><p class="cl-loading">Cargando…</p></div>
 
 </main>
 
@@ -277,9 +272,6 @@ nav {
   }
 
   function init(sb) {
-    // Cargar todos los comentarios del sitio (sin filtro de slug)
-    loadAll(sb, renderList);
-
     var btn = document.getElementById('c-submit');
     var msg = document.getElementById('c-msg');
     if (!btn) return;
@@ -295,7 +287,7 @@ nav {
         .then(function(r){
           if (r.error) {
             msg.textContent = 'Error al publicar. Intenta de nuevo.'; msg.className = 'cf-msg err';
-            btn.disabled = false; btn.textContent = 'Publicar';
+            btn.disabled = false; btn.textContent = 'Enviar';
           } else {
             // Ocultar el formulario y mostrar mensaje cálido
             document.querySelector('.cf-card').innerHTML =
@@ -304,12 +296,10 @@ nav {
               '<p style="font-family:Marcellus,Georgia,serif;font-size:22px;color:#1c1410;margin-bottom:10px">Recibí tu comentario.</p>' +
               '<p style="font-size:14px;color:#8a7a64;line-height:1.7">Lo leeré atentamente y seguiré mejorando el sitio para ti.<br>Muchas gracias.</p>' +
               '</div>';
-            // Recargar lista con el nuevo comentario
-            loadAll(sb, renderList);
           }
         }).catch(function(){
           msg.textContent = 'Error al publicar.'; msg.className = 'cf-msg err';
-          btn.disabled = false; btn.textContent = 'Publicar';
+          btn.disabled = false; btn.textContent = 'Enviar';
         });
     });
   }

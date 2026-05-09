@@ -210,13 +210,25 @@ nav {
 <div id="state-login">
   <div class="login-box">
     <h1 class="login-title">Acceso admin</h1>
-    <p class="login-sub">Solo accesible con la cuenta de tremolo.mx.</p>
-    <label class="lf-label" for="adm-email">Email</label>
-    <input class="lf-input" id="adm-email" type="email" placeholder="tu@email.com" autocomplete="email"/>
-    <label class="lf-label" for="adm-pass">Contraseña</label>
-    <input class="lf-input" id="adm-pass" type="password" placeholder="••••••••" autocomplete="current-password"/>
-    <button class="lf-btn" id="adm-login-btn">Entrar</button>
-    <div class="lf-msg" id="adm-login-msg"></div>
+    <p class="login-sub">Te enviaremos un código de 6 dígitos a tu correo.</p>
+
+    <!-- Paso 1: pedir email -->
+    <div id="lf-step1">
+      <label class="lf-label" for="adm-email">Email</label>
+      <input class="lf-input" id="adm-email" type="email" value="fsotresdlt@gmail.com" autocomplete="email"/>
+      <button class="lf-btn" id="adm-send-btn">Enviar código</button>
+      <div class="lf-msg" id="adm-send-msg"></div>
+    </div>
+
+    <!-- Paso 2: ingresar código -->
+    <div id="lf-step2" style="display:none">
+      <p class="login-sub" style="margin-bottom:20px">Revisa tu correo y escribe el código de 6 dígitos.</p>
+      <label class="lf-label" for="adm-otp">Código</label>
+      <input class="lf-input" id="adm-otp" type="text" placeholder="123456" maxlength="6" inputmode="numeric" autocomplete="one-time-code"/>
+      <button class="lf-btn" id="adm-verify-btn">Verificar y entrar</button>
+      <div class="lf-msg" id="adm-verify-msg"></div>
+      <button style="background:none;border:none;font-family:var(--mono);font-size:11px;color:var(--ink4);cursor:pointer;margin-top:12px;padding:0" id="adm-back-btn">← Volver</button>
+    </div>
   </div>
 </div>
 
@@ -285,20 +297,47 @@ nav {
     el.style.display = 'block';
   }
 
-  /* ── LOGIN ── */
-  document.getElementById('adm-login-btn').addEventListener('click', async () => {
+  /* ── LOGIN OTP ── */
+  let otpEmail = '';
+
+  document.getElementById('adm-send-btn').addEventListener('click', async () => {
     const email = document.getElementById('adm-email').value.trim();
-    const pass  = document.getElementById('adm-pass').value;
-    const btn   = document.getElementById('adm-login-btn');
-    const msg   = document.getElementById('adm-login-msg');
+    const btn = document.getElementById('adm-send-btn');
+    const msg = document.getElementById('adm-send-msg');
     msg.className = 'lf-msg';
+    if (!email) { msg.textContent = 'Escribe tu email.'; msg.className = 'lf-msg err'; return; }
     btn.disabled = true; btn.textContent = '…';
-    const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+    const { error } = await sb.auth.signInWithOtp({ email });
+    btn.disabled = false; btn.textContent = 'Enviar código';
     if (error) {
-      msg.textContent = error.message || 'Email o contraseña incorrectos.';
+      msg.textContent = error.message || 'Error al enviar el código.';
+      msg.className = 'lf-msg err';
+    } else {
+      otpEmail = email;
+      document.getElementById('lf-step1').style.display = 'none';
+      document.getElementById('lf-step2').style.display = 'block';
+    }
+  });
+
+  document.getElementById('adm-verify-btn').addEventListener('click', async () => {
+    const token = (document.getElementById('adm-otp').value || '').trim();
+    const btn = document.getElementById('adm-verify-btn');
+    const msg = document.getElementById('adm-verify-msg');
+    msg.className = 'lf-msg';
+    if (token.length !== 6) { msg.textContent = 'El código tiene 6 dígitos.'; msg.className = 'lf-msg err'; return; }
+    btn.disabled = true; btn.textContent = '…';
+    const { error } = await sb.auth.verifyOtp({ email: otpEmail, token, type: 'email' });
+    btn.disabled = false; btn.textContent = 'Verificar y entrar';
+    if (error) {
+      msg.textContent = error.message || 'Código incorrecto o expirado.';
       msg.className = 'lf-msg err';
     }
-    btn.disabled = false; btn.textContent = 'Entrar';
+    // Si es correcto, onAuthStateChange dispara solo y muestra el dashboard
+  });
+
+  document.getElementById('adm-back-btn').addEventListener('click', () => {
+    document.getElementById('lf-step2').style.display = 'none';
+    document.getElementById('lf-step1').style.display = 'block';
   });
 
   /* ── LOGOUT ── */
