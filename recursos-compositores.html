@@ -181,22 +181,18 @@ nav {
   width: 20px;
 }
 .composer-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--copper);
-  flex-shrink: 0;
-  position: relative;
-  z-index: 2;
-}
-.composer-entry.available .composer-dot {
   width: 16px;
   height: 16px;
+  border-radius: 50%;
   background: transparent;
   border: 2px solid var(--copper);
   box-shadow: 0 0 0 3px rgba(168,90,30,.15);
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+  transition: background .2s, box-shadow .2s;
 }
-.composer-entry.available .composer-dot::after {
+.composer-dot::after {
   content: '';
   position: absolute;
   top: 50%;
@@ -206,27 +202,32 @@ nav {
   height: 6px;
   border-radius: 50%;
   background: var(--copper);
+  transition: transform .2s;
+}
+.composer-entry:hover .composer-dot {
+  background: rgba(168,90,30,.12);
+  box-shadow: 0 0 0 5px rgba(168,90,30,.12);
+}
+.composer-entry:hover .composer-dot::after {
+  transform: translate(-50%,-50%) scale(1.3);
 }
 
-/* Card */
+/* Card link */
 .composer-card {
+  display: block;
   margin-left: 28px;
   padding: 22px 28px 22px 24px;
   border-radius: 12px;
-  border: 1px solid transparent;
-  background: transparent;
+  border: 1px solid var(--paper4);
+  background: #fff;
   flex: 1;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 4px 24px rgba(168,90,30,.07);
   transition: background .2s, border-color .2s, box-shadow .2s;
 }
-.composer-entry:not(.available) .composer-card {
-  opacity: .68;
-}
-.composer-entry.available .composer-card {
-  background: #fff;
+.composer-card:hover {
   border-color: var(--copper);
-  box-shadow: 0 4px 24px rgba(168,90,30,.09);
-}
-.composer-entry.available .composer-card:hover {
   box-shadow: 0 6px 32px rgba(168,90,30,.15);
 }
 
@@ -255,22 +256,20 @@ nav {
   font-weight: 400;
   max-width: 540px;
 }
-.composer-link {
+.composer-read {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   margin-top: 16px;
-  background: var(--copper);
-  color: #fff;
+  color: var(--copper);
   font-size: 12px;
   font-weight: 600;
-  padding: 8px 18px;
-  border-radius: 6px;
-  text-decoration: none;
-  transition: background .2s;
-  letter-spacing: .01em;
+  letter-spacing: .04em;
+  transition: color .2s;
 }
-.composer-link:hover { background: var(--copper-dk); }
+.composer-card:hover .composer-read {
+  color: var(--copper-dk);
+}
 
 /* ── COUNT STRIP ── */
 .count-strip {
@@ -385,7 +384,7 @@ nav {
   <div class="count-strip-inner">
     <div class="count-item">
       <div class="count-num">30</div>
-      <div class="count-label">Compositores</div>
+      <div class="count-label">Compositores · disponibles</div>
     </div>
     <div class="count-divider"></div>
     <div class="count-item">
@@ -413,38 +412,42 @@ nav {
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/hildegarda" class="composer-card">
             <span class="composer-years">1098 – 1179</span>
             <div class="composer-name">Hildegarda de Bingen</div>
             <p class="composer-desc">Visionaria mística y compositora de canto gregoriano</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/machaut" class="composer-card">
             <span class="composer-years">c.1300 – 1377</span>
             <div class="composer-name">Guillaume de Machaut</div>
             <p class="composer-desc">Maestro del Ars Nova y padre del motete polifónico</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/josquin" class="composer-card">
             <span class="composer-years">c.1450 – 1521</span>
             <div class="composer-name">Josquin des Prez</div>
             <p class="composer-desc">El príncipe de la música; revolucionó la polifonía renacentista</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/palestrina" class="composer-card">
             <span class="composer-years">c.1525 – 1594</span>
             <div class="composer-name">Giovanni Pierluigi da Palestrina</div>
             <p class="composer-desc">La voz pura del Renacimiento; modelo eterno de contrapunto</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
       </div>
@@ -459,47 +462,52 @@ nav {
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/monteverdi" class="composer-card">
             <span class="composer-years">1567 – 1643</span>
             <div class="composer-name">Claudio Monteverdi</div>
             <p class="composer-desc">El inventor de la ópera; puente entre Renacimiento y Barroco</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/purcell" class="composer-card">
             <span class="composer-years">1659 – 1695</span>
             <div class="composer-name">Henry Purcell</div>
             <p class="composer-desc">El mayor compositor inglés del Barroco; maestro del drama musical</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/vivaldi" class="composer-card">
             <span class="composer-years">1678 – 1741</span>
             <div class="composer-name">Antonio Vivaldi</div>
             <p class="composer-desc">El Cura Rojo; dueño del concierto y del color armónico</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/bach" class="composer-card">
             <span class="composer-years">1685 – 1750</span>
             <div class="composer-name">Johann Sebastian Bach</div>
             <p class="composer-desc">La cumbre del contrapunto; arquitecto del sistema tonal occidental</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/handel" class="composer-card">
             <span class="composer-years">1685 – 1759</span>
             <div class="composer-name">Georg Friedrich Händel</div>
             <p class="composer-desc">El coloso del oratorio y la ópera; genio del espectáculo sonoro</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
       </div>
@@ -514,29 +522,32 @@ nav {
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/haydn" class="composer-card">
             <span class="composer-years">1732 – 1809</span>
             <div class="composer-name">Joseph Haydn</div>
             <p class="composer-desc">Padre de la sinfonía y el cuarteto de cuerdas; inventor de las formas clásicas</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/mozart" class="composer-card">
             <span class="composer-years">1756 – 1791</span>
             <div class="composer-name">Wolfgang Amadeus Mozart</div>
             <p class="composer-desc">El más perfecto de todos: melodía, forma y drama en equilibrio absoluto</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/beethoven" class="composer-card">
             <span class="composer-years">1770 – 1827</span>
             <div class="composer-name">Ludwig van Beethoven</div>
             <p class="composer-desc">El titán sordo; rompió todas las reglas y abrió el Romanticismo</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
       </div>
@@ -551,103 +562,112 @@ nav {
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/schubert" class="composer-card">
             <span class="composer-years">1797 – 1828</span>
             <div class="composer-name">Franz Schubert</div>
             <p class="composer-desc">El poeta del lied; 600 canciones en 31 años de vida</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/berlioz" class="composer-card">
             <span class="composer-years">1803 – 1869</span>
             <div class="composer-name">Hector Berlioz</div>
             <p class="composer-desc">Visionario de la orquesta moderna y padre del poema sinfónico</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/chopin" class="composer-card">
             <span class="composer-years">1810 – 1849</span>
             <div class="composer-name">Frédéric Chopin</div>
             <p class="composer-desc">El alma del piano; inventó un lenguaje que el instrumento no había soñado</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/schumann" class="composer-card">
             <span class="composer-years">1810 – 1856</span>
             <div class="composer-name">Robert Schumann</div>
             <p class="composer-desc">Poeta romántico dividido entre la música y la literatura</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/liszt" class="composer-card">
             <span class="composer-years">1811 – 1886</span>
             <div class="composer-name">Franz Liszt</div>
             <p class="composer-desc">El primer rockstar de la historia; reinventó la técnica pianística</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/wagner" class="composer-card">
             <span class="composer-years">1813 – 1883</span>
             <div class="composer-name">Richard Wagner</div>
             <p class="composer-desc">El drama total; transformó la ópera y la armonía para siempre</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/verdi" class="composer-card">
             <span class="composer-years">1813 – 1901</span>
             <div class="composer-name">Giuseppe Verdi</div>
             <p class="composer-desc">La voz de Italia; el dramaturgo más poderoso de la ópera</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
-        <!-- BRAHMS — AVAILABLE -->
-        <div class="composer-entry available">
+        <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/brahms" class="composer-card">
             <span class="composer-years">1833 – 1897</span>
             <div class="composer-name">Johannes Brahms</div>
             <p class="composer-desc">El guardián de la forma clásica en plena marea romántica</p>
-            <a href="/recursos/compositores/brahms" class="composer-link">Leer →</a>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/tchaikovsky" class="composer-card">
             <span class="composer-years">1840 – 1893</span>
             <div class="composer-name">Pyotr Ilyich Tchaikovsky</div>
             <p class="composer-desc">El maestro de la melodía; sinfonías, ballet y drama emocional</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/dvorak" class="composer-card">
             <span class="composer-years">1841 – 1904</span>
             <div class="composer-name">Antonín Dvořák</div>
             <p class="composer-desc">La voz del alma checa; puente entre folklore y forma sinfónica</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/mahler" class="composer-card">
             <span class="composer-years">1860 – 1911</span>
             <div class="composer-name">Gustav Mahler</div>
             <p class="composer-desc">El último gran romántico; sinfonías-universo sobre la vida y la muerte</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
       </div>
@@ -662,38 +682,42 @@ nav {
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/debussy" class="composer-card">
             <span class="composer-years">1862 – 1918</span>
             <div class="composer-name">Claude Debussy</div>
             <p class="composer-desc">El pintor del sonido; disolvió la tonalidad en color y atmósfera</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/schoenberg" class="composer-card">
             <span class="composer-years">1874 – 1951</span>
             <div class="composer-name">Arnold Schoenberg</div>
             <p class="composer-desc">El revolucionario; inventó el dodecafonismo y cambió la música para siempre</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/bartok" class="composer-card">
             <span class="composer-years">1881 – 1945</span>
             <div class="composer-name">Béla Bartók</div>
             <p class="composer-desc">El etnomusicólogo feroz; fusionó folklore húngaro y modernismo radical</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/stravinsky" class="composer-card">
             <span class="composer-years">1882 – 1971</span>
             <div class="composer-name">Igor Stravinsky</div>
             <p class="composer-desc">El camaleón del siglo XX; reinventó su lenguaje tres veces</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
       </div>
@@ -708,11 +732,12 @@ nav {
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/shostakovich" class="composer-card">
             <span class="composer-years">1906 – 1975</span>
             <div class="composer-name">Dmitri Shostakovich</div>
             <p class="composer-desc">Arte bajo tiranía; sinfonías de una elocuencia devastadora</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
       </div>
@@ -727,20 +752,22 @@ nav {
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/miles-davis" class="composer-card">
             <span class="composer-years">1926 – 1991</span>
             <div class="composer-name">Miles Davis</div>
             <p class="composer-desc">El eterno innovador del jazz; inventó cinco géneros a lo largo de su carrera</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
         <div class="composer-entry">
           <div class="composer-dot-wrap"><div class="composer-dot"></div></div>
-          <div class="composer-card">
+          <a href="/recursos/compositores/philip-glass" class="composer-card">
             <span class="composer-years">1937 –</span>
             <div class="composer-name">Philip Glass</div>
             <p class="composer-desc">El maestro del minimalismo; redefinió qué puede ser la música contemporánea</p>
-          </div>
+            <span class="composer-read">Leer →</span>
+          </a>
         </div>
 
       </div>
