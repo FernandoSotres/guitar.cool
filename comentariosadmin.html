@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin · Comentarios — tremolo.mx</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:  #f4ece0; --paper2: #f2ece3; --paper3: #e8e0d4; --paper4: #c8b99f;
+  --copper: #a85a1e; --copper-lt: #c47a36; --copper-dk: #7a3e10;
+  --ink:    #1c1410; --ink2: #2e2418; --ink3: #4a3c2c; --ink4: #8a7a64; --ink5: #8a7a66;
+  --green:  #2e7d52; --green-dk: #1a5c38;
+  --serif: 'Marcellus', Georgia, serif;
+  --sans:  'Inter', system-ui, sans-serif;
+  --mono:  'JetBrains Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6; min-height: 100vh; }
+
+/* NAV */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(244,236,224,.94); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--paper4);
+  padding: 0 48px; display: flex; align-items: center; height: 60px; gap: 0;
+}
+.nav-logo { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--ink); margin-right: 36px; letter-spacing: -.01em; text-decoration: none; }
+.nav-badge {
+  font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; padding: 3px 10px; border-radius: 4px;
+  background: var(--green); color: #fff; margin-left: 12px;
+}
+.nav-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.nav-back {
+  font-family: var(--mono); font-size: 11px; color: var(--ink4);
+  text-decoration: none; letter-spacing: .04em;
+}
+.nav-back:hover { color: var(--ink2); }
+.btn-logout {
+  font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: .06em;
+  text-transform: uppercase; padding: 6px 14px; border-radius: 5px;
+  border: 1px solid var(--paper4); background: transparent;
+  color: var(--ink4); cursor: pointer; transition: all .2s;
+}
+.btn-logout:hover { border-color: var(--copper); color: var(--copper); }
+
+/* ESTADOS */
+#state-loading, #state-denied, #state-login { display: none; }
+
+/* LOADING */
+#state-loading {
+  padding: 120px 48px; text-align: center;
+  font-family: var(--mono); font-size: 13px; color: var(--ink4); letter-spacing: .06em;
+}
+
+/* LOGIN */
+#state-login {
+  max-width: 380px; margin: 100px auto; padding: 0 24px;
+}
+.login-box {
+  background: #fff; border: 1px solid var(--paper4); border-radius: 14px; padding: 36px 32px;
+}
+.login-title { font-family: var(--serif); font-size: 26px; margin-bottom: 6px; }
+.login-sub { font-size: 13px; color: var(--ink4); margin-bottom: 28px; }
+.lf-label { display: block; font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink5); margin-bottom: 5px; }
+.lf-input {
+  width: 100%; background: var(--paper); border: 1px solid var(--paper4); border-radius: 6px;
+  padding: 9px 12px; font-family: var(--mono); font-size: 13px; color: var(--ink);
+  outline: none; transition: border-color .15s; margin-bottom: 14px;
+}
+.lf-input:focus { border-color: var(--green); }
+.lf-btn {
+  width: 100%; background: var(--green); color: #fff; border: none; border-radius: 6px;
+  font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; padding: 11px; cursor: pointer; transition: background .2s;
+}
+.lf-btn:hover { background: var(--green-dk); }
+.lf-btn:disabled { background: var(--paper4); cursor: default; }
+.lf-msg { font-family: var(--mono); font-size: 11px; margin-top: 12px; padding: 8px 12px; border-radius: 5px; display: none; }
+.lf-msg.err { display: block; background: rgba(200,60,60,.07); color: #c03030; border: 1px solid rgba(200,60,60,.2); }
+
+/* DENIED */
+#state-denied {
+  padding: 120px 48px; text-align: center;
+}
+.denied-title { font-family: var(--serif); font-size: 32px; color: var(--copper); margin-bottom: 12px; }
+.denied-sub { font-size: 14px; color: var(--ink4); }
+
+/* DASHBOARD */
+#state-main { display: none; }
+.dash-header {
+  background: #0d0804; padding: 56px 48px 52px;
+  position: relative; overflow: hidden;
+}
+.dash-header::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 70% 80% at 50% 120%, rgba(46,125,82,.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+.dash-eyebrow {
+  font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .22em;
+  text-transform: uppercase; color: #2e7d52; margin-bottom: 16px;
+}
+.dash-title {
+  font-family: var(--serif); font-size: clamp(32px, 5vw, 56px);
+  color: var(--paper); font-weight: 700; letter-spacing: -.03em; line-height: .95;
+  margin-bottom: 14px;
+}
+.dash-title em { font-style: italic; color: #4aad78; }
+.dash-stats {
+  display: flex; gap: 28px; flex-wrap: wrap; margin-top: 24px;
+}
+.dash-stat {
+  background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08);
+  border-radius: 8px; padding: 12px 20px;
+}
+.dash-stat-n { font-family: var(--mono); font-size: 26px; font-weight: 700; color: #4aad78; }
+.dash-stat-l { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: rgba(244,236,224,.35); margin-top: 2px; }
+
+/* CONTROLES */
+.dash-controls {
+  padding: 28px 48px; background: var(--paper2); border-bottom: 1px solid var(--paper3);
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+.dash-filter-label { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink4); }
+.dash-select {
+  background: #fff; border: 1px solid var(--paper4); border-radius: 6px;
+  padding: 7px 12px; font-family: var(--mono); font-size: 12px; color: var(--ink);
+  outline: none; cursor: pointer;
+}
+.dash-select:focus { border-color: var(--green); }
+.dash-refresh {
+  margin-left: auto; background: transparent; border: 1px solid var(--paper4);
+  border-radius: 6px; padding: 7px 16px; font-family: var(--mono); font-size: 11px;
+  color: var(--ink4); cursor: pointer; transition: all .2s; letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.dash-refresh:hover { border-color: var(--green); color: var(--green); }
+
+/* LISTA */
+.dash-body { padding: 40px 48px 80px; }
+.dash-inner { max-width: 860px; margin: 0 auto; }
+
+.dash-group { margin-bottom: 44px; }
+.dash-group-head {
+  display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px;
+  padding-bottom: 10px; border-bottom: 2px solid var(--paper3);
+}
+.dash-group-slug {
+  font-family: var(--serif); font-size: 22px; color: var(--ink); text-transform: capitalize;
+}
+.dash-group-count {
+  font-family: var(--mono); font-size: 11px; color: var(--ink4); letter-spacing: .06em;
+}
+
+.dash-card {
+  background: #fff; border: 1px solid var(--paper4); border-radius: 10px;
+  padding: 18px 20px 16px; margin-bottom: 10px;
+  display: grid; grid-template-columns: 1fr auto; gap: 12px;
+}
+.dash-card-meta {
+  display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px;
+}
+.dash-card-name { font-weight: 600; font-size: 13px; color: var(--ink); }
+.dash-card-date { font-family: var(--mono); font-size: 10px; color: var(--ink4); letter-spacing: .04em; }
+.dash-card-text { font-size: 14px; color: var(--ink3); line-height: 1.65; }
+.dash-card-slug-pill {
+  font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; padding: 3px 8px; border-radius: 4px;
+  background: rgba(46,125,82,.1); color: var(--green); white-space: nowrap; align-self: start;
+}
+.btn-del {
+  background: transparent; border: 1px solid rgba(200,60,60,.25);
+  border-radius: 5px; padding: 5px 12px; font-family: var(--mono);
+  font-size: 10px; letter-spacing: .06em; text-transform: uppercase;
+  color: #c03030; cursor: pointer; transition: all .15s; margin-top: 8px; align-self: start;
+}
+.btn-del:hover { background: rgba(200,60,60,.07); border-color: rgba(200,60,60,.5); }
+
+.dash-empty { font-size: 14px; color: var(--ink4); font-style: italic; padding: 16px 0; }
+.dash-loading-main { font-family: var(--mono); font-size: 13px; color: var(--ink4); letter-spacing: .06em; padding: 40px 0; }
+
+@media (max-width: 768px) {
+  nav { padding: 0 16px; }
+  .dash-header { padding: 40px 20px 36px; }
+  .dash-controls { padding: 20px; }
+  .dash-body { padding: 28px 20px 60px; }
+  .dash-card { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">trémolo</a>
+  <span class="nav-badge">Admin</span>
+  <div class="nav-right">
+    <a href="/recursos/compositores" class="nav-back">← Compositores</a>
+    <button class="btn-logout" id="adm-logout" style="display:none">Cerrar sesión</button>
+  </div>
+</nav>
+
+<!-- Estado: cargando sesión -->
+<div id="state-loading">Verificando sesión…</div>
+
+<!-- Estado: login -->
+<div id="state-login">
+  <div class="login-box">
+    <h1 class="login-title">Acceso admin</h1>
+    <p class="login-sub">Solo accesible con la cuenta de tremolo.mx.</p>
+    <label class="lf-label" for="adm-email">Email</label>
+    <input class="lf-input" id="adm-email" type="email" placeholder="tu@email.com" autocomplete="email"/>
+    <label class="lf-label" for="adm-pass">Contraseña</label>
+    <input class="lf-input" id="adm-pass" type="password" placeholder="••••••••" autocomplete="current-password"/>
+    <button class="lf-btn" id="adm-login-btn">Entrar</button>
+    <div class="lf-msg" id="adm-login-msg"></div>
+  </div>
+</div>
+
+<!-- Estado: acceso denegado (sesión de otro usuario) -->
+<div id="state-denied">
+  <p class="denied-title">Acceso restringido</p>
+  <p class="denied-sub">Esta página es exclusiva del administrador de tremolo.mx.</p>
+</div>
+
+<!-- Dashboard -->
+<div id="state-main">
+  <div class="dash-header">
+    <div class="dash-eyebrow">tremolo.mx · Panel de administración</div>
+    <h1 class="dash-title">Comentarios<br><em>de compositores</em></h1>
+    <div class="dash-stats">
+      <div class="dash-stat">
+        <div class="dash-stat-n" id="stat-total">—</div>
+        <div class="dash-stat-l">Total</div>
+      </div>
+      <div class="dash-stat">
+        <div class="dash-stat-n" id="stat-pages">—</div>
+        <div class="dash-stat-l">Páginas</div>
+      </div>
+      <div class="dash-stat">
+        <div class="dash-stat-n" id="stat-today">—</div>
+        <div class="dash-stat-l">Hoy</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-controls">
+    <span class="dash-filter-label">Filtrar por:</span>
+    <select class="dash-select" id="adm-filter">
+      <option value="">Todos los compositores</option>
+    </select>
+    <button class="dash-refresh" id="adm-refresh">↻ Actualizar</button>
+  </div>
+
+  <div class="dash-body">
+    <div class="dash-inner" id="dash-list">
+      <p class="dash-loading-main">Cargando comentarios…</p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function () {
+  'use strict';
+
+  const SUPA_URL   = 'https://osgbjknlajdxlbfeueqc.supabase.co';
+  const SUPA_KEY   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zZ2Jqa25sYWpkeGxiZmV1ZXFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NjcyMTYsImV4cCI6MjA5MzQ0MzIxNn0.6cDM7Xpf7ZkdwH88uBPPP3xH0GZGqXiEJBdnK7pSDW4';
+  const ADMIN_EMAIL = 'fsotresdlt@gmail.com';
+
+  const sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+
+  // UI refs
+  const stLoading = document.getElementById('state-loading');
+  const stLogin   = document.getElementById('state-login');
+  const stDenied  = document.getElementById('state-denied');
+  const stMain    = document.getElementById('state-main');
+  const logoutBtn = document.getElementById('adm-logout');
+
+  function show(el) {
+    [stLoading, stLogin, stDenied, stMain].forEach(e => e.style.display = 'none');
+    el.style.display = 'block';
+  }
+
+  /* ── LOGIN ── */
+  document.getElementById('adm-login-btn').addEventListener('click', async () => {
+    const email = document.getElementById('adm-email').value.trim();
+    const pass  = document.getElementById('adm-pass').value;
+    const btn   = document.getElementById('adm-login-btn');
+    const msg   = document.getElementById('adm-login-msg');
+    msg.className = 'lf-msg';
+    btn.disabled = true; btn.textContent = '…';
+    const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if (error) {
+      msg.textContent = error.message || 'Email o contraseña incorrectos.';
+      msg.className = 'lf-msg err';
+    }
+    btn.disabled = false; btn.textContent = 'Entrar';
+  });
+
+  /* ── LOGOUT ── */
+  logoutBtn.addEventListener('click', async () => { await sb.auth.signOut(); });
+
+  /* ── HELPERS ── */
+  function esc(s) {
+    return String(s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function fmtDate(iso) {
+    return new Date(iso).toLocaleString('es-MX', {
+      year:'numeric', month:'short', day:'numeric',
+      hour:'2-digit', minute:'2-digit'
+    });
+  }
+  function fmtSlug(s) {
+    return s.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  /* ── RENDER ── */
+  let allComments = [];
+
+  function renderDash(filterSlug) {
+    const list = document.getElementById('dash-list');
+    let data = filterSlug ? allComments.filter(c => c.page_slug === filterSlug) : allComments;
+
+    if (data.length === 0) {
+      list.innerHTML = '<p class="dash-empty">No hay comentarios aún.</p>';
+      return;
+    }
+
+    // Group by page_slug
+    const groups = {};
+    data.forEach(c => {
+      if (!groups[c.page_slug]) groups[c.page_slug] = [];
+      groups[c.page_slug].push(c);
+    });
+
+    list.innerHTML = Object.entries(groups).sort((a,b) => a[0].localeCompare(b[0])).map(([slug, comments]) => `
+      <div class="dash-group">
+        <div class="dash-group-head">
+          <span class="dash-group-slug">${fmtSlug(slug)}</span>
+          <span class="dash-group-count">${comments.length} comentario${comments.length !== 1 ? 's' : ''}</span>
+        </div>
+        ${comments.map(c => `
+          <div class="dash-card" id="card-${c.id}">
+            <div>
+              <div class="dash-card-meta">
+                <span class="dash-card-name">${esc(c.user_name)}</span>
+                <span class="dash-card-date">${fmtDate(c.created_at)}</span>
+              </div>
+              <p class="dash-card-text">${esc(c.comment_text).replace(/\n/g,'<br>')}</p>
+              <button class="btn-del" data-id="${c.id}">Eliminar</button>
+            </div>
+            <span class="dash-card-slug-pill">${esc(slug)}</span>
+          </div>`
+        ).join('')}
+      </div>`
+    ).join('');
+
+    // Delete handlers
+    list.querySelectorAll('.btn-del').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        if (!confirm('¿Eliminar este comentario? No se puede deshacer.')) return;
+        btn.disabled = true; btn.textContent = '…';
+        const { error } = await sb.from('comments').delete().eq('id', id);
+        if (error) {
+          alert('Error al eliminar: ' + error.message);
+          btn.disabled = false; btn.textContent = 'Eliminar';
+        } else {
+          document.getElementById('card-' + id)?.remove();
+          allComments = allComments.filter(c => c.id !== id);
+          updateStats();
+        }
+      });
+    });
+  }
+
+  function updateStats() {
+    const today = new Date().toISOString().slice(0, 10);
+    const todayCount = allComments.filter(c => c.created_at.startsWith(today)).length;
+    const slugs = new Set(allComments.map(c => c.page_slug));
+    document.getElementById('stat-total').textContent = allComments.length;
+    document.getElementById('stat-pages').textContent = slugs.size;
+    document.getElementById('stat-today').textContent = todayCount;
+  }
+
+  function populateFilter(slugs) {
+    const sel = document.getElementById('adm-filter');
+    // Keep first option, remove rest
+    while (sel.options.length > 1) sel.remove(1);
+    [...slugs].sort().forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s; opt.textContent = fmtSlug(s);
+      sel.appendChild(opt);
+    });
+  }
+
+  async function loadComments() {
+    document.getElementById('dash-list').innerHTML = '<p class="dash-loading-main">Cargando…</p>';
+    const { data, error } = await sb
+      .from('comments')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      document.getElementById('dash-list').innerHTML = `<p class="dash-empty">Error: ${esc(error.message)}</p>`;
+      return;
+    }
+
+    allComments = data || [];
+    updateStats();
+    populateFilter(new Set(allComments.map(c => c.page_slug)));
+    renderDash(document.getElementById('adm-filter').value || '');
+  }
+
+  document.getElementById('adm-filter').addEventListener('change', function () {
+    renderDash(this.value);
+  });
+  document.getElementById('adm-refresh').addEventListener('click', loadComments);
+
+  /* ── AUTH STATE ── */
+  async function onSession(session) {
+    if (!session) {
+      logoutBtn.style.display = 'none';
+      show(stLogin);
+      return;
+    }
+    if (session.user.email !== ADMIN_EMAIL) {
+      logoutBtn.style.display = 'inline-flex';
+      show(stDenied);
+      return;
+    }
+    logoutBtn.style.display = 'inline-flex';
+    show(stMain);
+    await loadComments();
+  }
+
+  // Init
+  show(stLoading);
+  sb.auth.getSession().then(({ data: { session } }) => onSession(session));
+  sb.auth.onAuthStateChange((_ev, session) => onSession(session));
+})();
+</script>
+</body>
+</html>

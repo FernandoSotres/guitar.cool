@@ -13,6 +13,12 @@
       ]
     },
     {
+      "source": "/comments.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=604800" }
+      ]
+    },
+    {
       "source": "/sitemap.xml",
       "headers": [
         { "key": "Content-Type", "value": "application/xml; charset=utf-8" },
@@ -153,6 +159,7 @@
     { "source": "/recursos/juegos/piano/acordes",       "destination": "/recursos-juegos-piano-acordes.html" },
     { "source": "/recursos/juegos/piano/escala",        "destination": "/recursos-juegos-piano-escala.html" },
     { "source": "/recursos/juegos/guitarra/mastil",     "destination": "/recursos-juegos-guitarra-mastil.html" },
+    { "source": "/comentariosadmin",                   "destination": "/comentariosadmin.html" },
     { "source": "/privacidad",                        "destination": "/privacidad.html" },
     { "source": "/terminos",                          "destination": "/terminos.html" },
     { "source": "/cookies",                           "destination": "/cookies.html" },
