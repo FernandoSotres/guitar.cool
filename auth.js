@@ -344,7 +344,7 @@
     // Enlace de Comentarios (verde, siempre visible)
     if (!nav.querySelector('.tm-comments-nav')) {
       const commentsLink = document.createElement('a');
-      commentsLink.href = '/recursos/compositores';
+      commentsLink.href = '/comentarios';
       commentsLink.className = 'tm-comments-nav';
       commentsLink.innerHTML = '<span class="tm-comments-dot"></span>Comentarios';
 

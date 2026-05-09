@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Deja tu comentario, sugerencia o mensaje para tremolo.mx. Tu voz nos ayuda a mejorar.">
+<link rel="canonical" href="https://tremolo.mx/comentarios">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="tremolo.mx">
+<meta property="og:locale" content="es_MX">
+<meta property="og:url" content="https://tremolo.mx/comentarios">
+<meta property="og:title" content="Comentarios — tremolo.mx">
+<meta property="og:description" content="Deja tu comentario, sugerencia o mensaje para tremolo.mx.">
+<meta property="og:image" content="https://tremolo.mx/img/og-tremolo.jpg">
+<title>Comentarios — tremolo.mx</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper:    #f4ece0; --paper2: #f2ece3; --paper3: #e8e0d4;
+  --paper4:   #c8b99f; --paper5: #cec4b0;
+  --copper:   #a85a1e; --copper-lt: #c47a36; --copper-dk: #7a3e10;
+  --ink:      #1c1410; --ink2: #2e2418; --ink3: #4a3c2c;
+  --ink4:     #8a7a64; --ink5: #8a7a66;
+  --green:    #2e7d52; --green-dk: #1a5c38;
+  --serif: 'Marcellus', Georgia, serif;
+  --sans:  'Inter', system-ui, sans-serif;
+  --mono:  'JetBrains Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.6; min-height: 100vh; }
+
+/* NAV */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(244,236,224,.94); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--paper4);
+  padding: 0 48px; display: flex; align-items: center; height: 60px; gap: 0;
+}
+.nav-logo { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--ink); margin-right: 36px; letter-spacing: -.01em; text-decoration: none; }
+.nav-logo span { font-family: var(--mono); font-size: 0.52em; font-weight: 400; color: var(--ink4); letter-spacing: 0; margin-left: 2px; }
+.nav-link { padding: 0 16px; height: 56px; display: flex; align-items: center; font-size: 13px; font-weight: 500; color: var(--ink4); text-decoration: none; border-bottom: 2px solid transparent; transition: color .2s, border-color .2s; }
+.nav-link:hover { color: var(--ink2); }
+.nav-link.active { color: var(--copper); border-bottom-color: var(--copper); }
+.nav-cta { margin-left: auto; background: var(--copper); color: #fff; font-size: 12px; font-weight: 600; padding: 7px 18px; border-radius: 6px; text-decoration: none; transition: background .2s; }
+.nav-cta:hover { background: var(--copper-dk); }
+
+/* HERO */
+.hero {
+  background: #0a0e0c; padding: 96px 48px 88px;
+  position: relative; overflow: hidden; text-align: center;
+}
+.hero::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 70% 60% at 50% 110%, rgba(46,125,82,.28) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-eyebrow {
+  font-size: 11px; font-weight: 600; letter-spacing: .2em; text-transform: uppercase;
+  color: #4aad78; margin-bottom: 24px;
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+}
+.hero-eyebrow::before, .hero-eyebrow::after {
+  content: ''; display: block; height: 1px; width: 40px; background: #4aad78; opacity: .35;
+}
+.hero-title {
+  font-family: var(--serif); font-size: clamp(44px, 7vw, 80px);
+  font-weight: 700; line-height: .95; letter-spacing: -.03em;
+  color: var(--paper); margin-bottom: 20px;
+}
+.hero-title em { font-style: italic; color: #4aad78; }
+.hero-lead {
+  font-family: var(--serif); font-size: clamp(15px, 1.8vw, 18px); font-style: italic;
+  color: rgba(244,236,224,.45); max-width: 460px; margin: 0 auto; line-height: 1.75;
+}
+
+/* MAIN */
+.main {
+  max-width: 680px; margin: 0 auto;
+  padding: 80px 48px 120px;
+}
+
+/* FORM CARD */
+.cf-card {
+  background: #fff; border: 1px solid var(--paper4); border-radius: 14px;
+  padding: 36px 36px 30px; margin-bottom: 64px;
+  box-shadow: 0 4px 24px rgba(46,125,82,.06);
+}
+.cf-card-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--green); margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+}
+.cf-card-label::before {
+  content: ''; display: block; width: 20px; height: 1px; background: var(--green); opacity: .5;
+}
+.cf-card-title {
+  font-family: var(--serif); font-size: 26px; font-weight: 700;
+  letter-spacing: -.015em; color: var(--ink); margin-bottom: 6px;
+}
+.cf-card-sub { font-size: 14px; color: var(--ink4); line-height: 1.6; margin-bottom: 28px; }
+
+.cf-row { display: flex; gap: 12px; margin-bottom: 14px; }
+.cf-name { flex: 0 0 220px; }
+.cf-label {
+  display: block; font-size: 10px; font-weight: 600; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--ink5); margin-bottom: 5px; font-family: var(--mono);
+}
+.cf-input, .cf-textarea {
+  width: 100%; background: var(--paper); border: 1px solid var(--paper4); border-radius: 6px;
+  padding: 9px 12px; font-family: var(--sans); font-size: 14px; color: var(--ink);
+  outline: none; transition: border-color .15s; box-sizing: border-box;
+}
+.cf-input:focus, .cf-textarea:focus { border-color: var(--green); }
+.cf-textarea { resize: vertical; min-height: 100px; }
+.cf-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 4px; }
+.cf-hint { font-size: 11px; color: var(--ink5); }
+.cf-submit {
+  background: var(--green); color: #fff; border: none; border-radius: 6px;
+  font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; padding: 10px 22px; cursor: pointer; transition: background .2s; white-space: nowrap;
+}
+.cf-submit:hover    { background: var(--green-dk); }
+.cf-submit:disabled { background: var(--paper4); cursor: default; }
+.cf-msg {
+  font-size: 11px; padding: 9px 12px; border-radius: 5px; margin-top: 14px;
+  display: none; font-family: var(--mono); letter-spacing: .02em;
+}
+.cf-msg.ok  { display: block; background: rgba(46,125,82,.08); color: var(--green); border: 1px solid rgba(46,125,82,.25); }
+.cf-msg.err { display: block; background: rgba(200,60,60,.07); color: #c03030; border: 1px solid rgba(200,60,60,.2); }
+
+/* COMMENTS LIST */
+.cl-head {
+  display: flex; align-items: baseline; gap: 10px; margin-bottom: 20px;
+}
+.cl-title {
+  font-family: var(--serif); font-size: 22px; font-weight: 700;
+  letter-spacing: -.015em; color: var(--ink);
+}
+.cl-count { font-family: var(--mono); font-size: 11px; color: var(--ink5); letter-spacing: .06em; }
+
+.cl-list { display: flex; flex-direction: column; gap: 12px; }
+.cl-empty { font-size: 14px; color: var(--ink5); font-style: italic; padding: 4px 0; }
+.cl-item {
+  background: #fff; border: 1px solid var(--paper3); border-radius: 10px;
+  padding: 18px 20px;
+}
+.cl-meta { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+.cl-name { font-weight: 600; font-size: 13px; color: var(--ink); }
+.cl-date { font-family: var(--mono); font-size: 10px; color: var(--ink5); letter-spacing: .04em; }
+.cl-text { font-size: 14px; color: var(--ink3); line-height: 1.7; }
+.cl-loading { font-family: var(--mono); font-size: 12px; color: var(--ink5); letter-spacing: .04em; }
+
+@media (max-width: 768px) {
+  nav { padding: 0 16px; overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; scrollbar-width: none; }
+  nav::-webkit-scrollbar { display: none; }
+  nav > * { flex-shrink: 0; }
+  .hero { padding: 72px 20px 64px; }
+  .main { padding: 56px 20px 80px; }
+  .cf-card { padding: 24px 20px 20px; }
+  .cf-row { flex-direction: column; }
+  .cf-name { flex: unset; }
+  .cf-footer { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">tr<span style="color:var(--copper);font-family:inherit;font-size:1em;letter-spacing:inherit;margin:0">é</span>molo<span>.mx</span></a>
+  <a href="/teoria"       class="nav-link">Teoría</a>
+  <a href="/practica"     class="nav-link">Práctica</a>
+  <a href="/herramientas" class="nav-link">Herramientas</a>
+  <a href="/recursos"     class="nav-link">Recursos</a>
+  <a href="/herramientas" class="nav-cta">Empezar →</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-eyebrow">tremolo.mx</div>
+  <h1 class="hero-title">Deja tu<br><em>comentario</em></h1>
+  <p class="hero-lead">¿Algo que falta? ¿Algo que te gustó? ¿Una sugerencia? Escríbelo aquí.</p>
+</section>
+
+<main class="main">
+
+  <div class="cf-card">
+    <span class="cf-card-label">Escríbenos</span>
+    <h2 class="cf-card-title">Tu mensaje</h2>
+    <p class="cf-card-sub">Sin registro necesario. Solo tu nombre y lo que quieras decir.</p>
+
+    <div class="cf-row">
+      <div class="cf-name">
+        <label class="cf-label" for="c-name">Tu nombre</label>
+        <input class="cf-input" id="c-name" type="text" placeholder="Nombre o alias" maxlength="80" autocomplete="nickname"/>
+      </div>
+    </div>
+    <div style="margin-bottom:4px">
+      <label class="cf-label" for="c-text">Comentario</label>
+      <textarea class="cf-textarea" id="c-text" placeholder="¿Qué piensas? ¿Qué mejorarías? ¿Qué te faltó?" maxlength="2000"></textarea>
+    </div>
+    <div class="cf-footer">
+      <span class="cf-hint">Mín. 10 caracteres · Aparece en la lista abajo</span>
+      <button class="cf-submit" id="c-submit">Publicar</button>
+    </div>
+    <div class="cf-msg" id="c-msg"></div>
+  </div>
+
+  <div class="cl-head">
+    <h2 class="cl-title">Comentarios</h2>
+    <span class="cl-count" id="c-count"></span>
+  </div>
+  <div id="c-list"><p class="cl-loading">Cargando…</p></div>
+
+</main>
+
+<footer class="tm-footer-legal">
+  <div class="tm-f-copy">© 2026 tremolo.mx · Todos los derechos reservados</div>
+  <div class="tm-f-links">
+    <a href="/privacidad">Aviso de Privacidad</a>
+    <a href="/terminos">Términos y Condiciones</a>
+    <a href="/cookies">Cookies</a>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(function () {
+  var SUPA_URL = 'https://osgbjknlajdxlbfeueqc.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zZ2Jqa25sYWpkeGxiZmV1ZXFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NjcyMTYsImV4cCI6MjA5MzQ0MzIxNn0.6cDM7Xpf7ZkdwH88uBPPP3xH0GZGqXiEJBdnK7pSDW4';
+  var SLUG = 'general';
+
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function fmtDate(iso) {
+    try { return new Date(iso).toLocaleDateString('es-MX',{year:'numeric',month:'long',day:'numeric'}); }
+    catch(e){ return iso; }
+  }
+
+  function renderList(data) {
+    var list = document.getElementById('c-list');
+    var count = document.getElementById('c-count');
+    if (!list) return;
+    if (!data || data.length === 0) {
+      list.innerHTML = '<p class="cl-empty">Sé la primera persona en comentar.</p>';
+      if (count) count.textContent = '';
+      return;
+    }
+    if (count) count.textContent = data.length + (data.length === 1 ? ' comentario' : ' comentarios');
+    var html = '<div class="cl-list">';
+    for (var i = 0; i < data.length; i++) {
+      var c = data[i];
+      html += '<div class="cl-item">' +
+        '<div class="cl-meta"><span class="cl-name">' + esc(c.user_name) + '</span>' +
+        '<span class="cl-date">' + fmtDate(c.created_at) + '</span></div>' +
+        '<p class="cl-text">' + esc(c.comment_text).replace(/\n/g,'<br>') + '</p>' +
+        '</div>';
+    }
+    html += '</div>';
+    list.innerHTML = html;
+  }
+
+  function init(sb) {
+    sb.from('comments').select('id,user_name,comment_text,created_at')
+      .eq('page_slug', SLUG).order('created_at',{ascending:true})
+      .then(function(r){ renderList(r.data); })
+      .catch(function(){ renderList([]); });
+
+    var btn = document.getElementById('c-submit');
+    var msg = document.getElementById('c-msg');
+    if (!btn) return;
+
+    btn.addEventListener('click', function () {
+      var name = (document.getElementById('c-name').value||'').trim();
+      var text = (document.getElementById('c-text').value||'').trim();
+      msg.className = 'cf-msg';
+      if (!name) { msg.textContent='Escribe tu nombre.'; msg.className='cf-msg err'; return; }
+      if (text.length < 10) { msg.textContent='Mínimo 10 caracteres.'; msg.className='cf-msg err'; return; }
+      btn.disabled = true; btn.textContent = '…';
+      sb.from('comments').insert({page_slug:SLUG, user_name:name, comment_text:text})
+        .then(function(r){
+          if (r.error) {
+            msg.textContent = 'Error al publicar. Intenta de nuevo.'; msg.className = 'cf-msg err';
+          } else {
+            msg.textContent = '¡Publicado! Gracias por tu comentario.'; msg.className = 'cf-msg ok';
+            document.getElementById('c-text').value = '';
+            sb.from('comments').select('id,user_name,comment_text,created_at')
+              .eq('page_slug',SLUG).order('created_at',{ascending:true})
+              .then(function(r2){ renderList(r2.data); });
+          }
+          btn.disabled = false; btn.textContent = 'Publicar';
+        }).catch(function(){
+          msg.textContent = 'Error al publicar.'; msg.className = 'cf-msg err';
+          btn.disabled = false; btn.textContent = 'Publicar';
+        });
+    });
+  }
+
+  function wait(tries) {
+    if (window.supabase && window.supabase.createClient) {
+      try { init(window.supabase.createClient(SUPA_URL, SUPA_KEY)); } catch(e){ renderList([]); }
+      return;
+    }
+    if (tries > 40) { renderList([]); return; }
+    setTimeout(function(){ wait(tries+1); }, 100);
+  }
+  wait(0);
+})();
+</script>
+<script src="/auth.js"></script>
+</body>
+</html>
