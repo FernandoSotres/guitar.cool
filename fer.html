@@ -674,6 +674,17 @@ function copyEmails(){
   });
 }
 
+// ── OWNER USER ID (para excluir visitas propias) ──────────────────────────────
+var _ownUserId = null;
+async function getOwnUserId() {
+  if (_ownUserId) return _ownUserId;
+  try {
+    var { data } = await sb.from('profiles').select('id').eq('email', 'fsotresdlt@gmail.com').single();
+    _ownUserId = data && data.id ? data.id : null;
+  } catch(e) {}
+  return _ownUserId;
+}
+
 // ── TRÁFICO ───────────────────────────────────────────────────────────────────
 async function loadTrafico() {
   var body = document.getElementById('tr-body');
@@ -682,9 +693,18 @@ async function loadTrafico() {
   var since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
   var prevSince = new Date(Date.now() - days * 2 * 24 * 60 * 60 * 1000).toISOString();
 
+  var ownId = await getOwnUserId();
+
+  // Construir queries excluyendo tus propias visitas
+  // (incluye filas con user_id nulo —visitantes anónimos— pero excluye las tuyas)
+  function buildQuery(base) {
+    if (ownId) return base.or('user_id.is.null,user_id.neq.' + ownId);
+    return base;
+  }
+
   var [curRes, prevRes] = await Promise.all([
-    sb.from('page_views').select('path,referrer,device,session_id,created_at').gte('created_at', since),
-    sb.from('page_views').select('created_at,session_id').gte('created_at', prevSince).lt('created_at', since)
+    buildQuery(sb.from('page_views').select('path,referrer,device,session_id,visitor_id,user_id,created_at').gte('created_at', since)),
+    buildQuery(sb.from('page_views').select('created_at,visitor_id,user_id').gte('created_at', prevSince).lt('created_at', since))
   ]);
 
   if (curRes.error) { body.innerHTML = '<div class="com-empty">Error al cargar datos.</div>'; return; }
@@ -693,14 +713,20 @@ async function loadTrafico() {
   var prev = prevRes.data || [];
 
   // Stats globales
-  var views    = rows.length;
-  var sessions = new Set(rows.map(function(r){ return r.session_id; })).size;
+  var views     = rows.length;
   var prevViews = prev.length;
-  var prevSess  = new Set(prev.map(function(r){ return r.session_id; })).size;
+
+  // Visitantes únicos: user_id para autenticados, visitor_id para anónimos
+  var unique     = new Set(rows.map(function(r){ return r.user_id || r.visitor_id; }).filter(Boolean)).size;
+  var prevUnique = new Set(prev.map(function(r){ return r.user_id || r.visitor_id; }).filter(Boolean)).size;
 
   // Hoy
   var todayStr = new Date().toISOString().slice(0, 10);
   var todayViews = rows.filter(function(r){ return r.created_at.startsWith(todayStr); }).length;
+  var todayUnique = new Set(
+    rows.filter(function(r){ return r.created_at.startsWith(todayStr); })
+        .map(function(r){ return r.user_id || r.visitor_id; }).filter(Boolean)
+  ).size;
 
   document.getElementById('badge-trafico').textContent = views;
 
@@ -773,9 +799,9 @@ async function loadTrafico() {
     // Stats
     '<div class="tr-grid">' +
       '<div class="tr-stat"><div class="tr-stat-n">' + views + '</div>' + delta(views, prevViews) + '<div class="tr-stat-l">Páginas vistas</div></div>' +
-      '<div class="tr-stat"><div class="tr-stat-n">' + sessions + '</div>' + delta(sessions, prevSess) + '<div class="tr-stat-l">Sesiones</div></div>' +
-      '<div class="tr-stat"><div class="tr-stat-n">' + todayViews + '</div><div class="tr-stat-l">Vistas hoy</div></div>' +
-      '<div class="tr-stat"><div class="tr-stat-n">' + (views && sessions ? (views / sessions).toFixed(1) : '—') + '</div><div class="tr-stat-l">Páginas / sesión</div></div>' +
+      '<div class="tr-stat"><div class="tr-stat-n">' + unique + '</div>' + delta(unique, prevUnique) + '<div class="tr-stat-l">Visitantes únicos</div></div>' +
+      '<div class="tr-stat"><div class="tr-stat-n">' + todayViews + '</div><div class="tr-stat-l" title="Visitantes únicos hoy: ' + todayUnique + '">Vistas hoy · ' + todayUnique + ' únicos</div></div>' +
+      '<div class="tr-stat"><div class="tr-stat-n">' + (views && unique ? (views / unique).toFixed(1) : '—') + '</div><div class="tr-stat-l">Páginas / visitante</div></div>' +
     '</div>' +
 
     // Gráfica diaria

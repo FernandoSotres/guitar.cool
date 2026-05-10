@@ -11,6 +11,18 @@
 
   let _session = null;
 
+  // ID de visitante persistente (sobrevive cierres de pestaña, base de "únicos")
+  var _visitorId = (function () {
+    try {
+      var vid = localStorage.getItem('_tm_vid');
+      if (!vid) {
+        vid = 'v_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+        localStorage.setItem('_tm_vid', vid);
+      }
+      return vid;
+    } catch (e) { return 'v_' + Math.random().toString(36).slice(2); }
+  })();
+
   // ── ESTILOS ──────────────────────────────────────────────────────────────────
   const CSS = `
     .tm-user-wrap { position: relative; flex-shrink: 0; }
@@ -461,14 +473,19 @@
   }
 
   // ── TRACKER ANÓNIMO ──────────────────────────────────────────────────────────
-  // Registra cada visita (todos los visitantes, sin login requerido)
-  (function () {
+  // Registra cada visita incluyendo visitor_id persistente y user_id si hay sesión.
+  // Se llama desde DOMContentLoaded (después de getSession) para tener el user_id.
+  var _pageTracked = false;
+  function _doPageTrack(userId) {
+    if (_pageTracked) return; // una sola vez por carga de página
+    _pageTracked = true;
+
     if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') return;
     if (/bot|crawler|spider|headless|preview/i.test(navigator.userAgent)) return;
     var skip = ['/fer', '/comentariosadmin'];
     if (skip.some(function(p){ return location.pathname.startsWith(p); })) return;
 
-    // ID de sesión por pestaña (distingue sesiones de pageviews)
+    // ID de sesión por pestaña (distingue múltiples visitas en la misma sesión)
     var sid = sessionStorage.getItem('_tm_sid');
     if (!sid) {
       sid = Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -486,22 +503,25 @@
 
     var device = window.innerWidth < 768 ? 'mobile' : window.innerWidth < 1024 ? 'tablet' : 'desktop';
 
-    function doTrack(tries) {
+    var record = {
+      path:       location.pathname,
+      referrer:   ref,
+      device:     device,
+      session_id: sid,
+      visitor_id: _visitorId
+    };
+    if (userId) record.user_id = userId;
+
+    function doInsert(tries) {
       if (!window.supabase) {
-        if (tries < 60) setTimeout(function(){ doTrack(tries + 1); }, 100);
+        if (tries < 60) setTimeout(function(){ doInsert(tries + 1); }, 100);
         return;
       }
       var sb2 = window.supabase.createClient(SUPA_URL, SUPA_KEY);
-      sb2.from('page_views').insert({
-        path:       location.pathname,
-        referrer:   ref,
-        device:     device,
-        session_id: sid
-      }).then(function(){}).catch(function(){});
+      sb2.from('page_views').insert(record).then(function(){}).catch(function(){});
     }
-    // Esperar a que el SDK esté listo (lo carga la página antes de auth.js)
-    doTrack(0);
-  })();
+    doInsert(0);
+  }
 
   // ── PERFIL ───────────────────────────────────────────────────────────────────
   async function ensureProfile(session) {
@@ -534,6 +554,8 @@
     const { data: { session } } = await sb.auth.getSession();
     _session = session;
     updateNav(session);
+    // Registrar visita DESPUÉS de saber si hay sesión (para incluir user_id)
+    _doPageTrack(session ? session.user.id : null);
     if (session) {
       ensureProfile(session);
       trackView(session);
