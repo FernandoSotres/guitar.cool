@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>tremolo · notas</title>
+<title>tremolo · admin</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -37,17 +37,31 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--s
 /* ── LAYOUT ── */
 #app{display:none;flex-direction:column;height:100vh;}
 #app.visible{display:flex;}
-header{background:var(--s1);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+
+/* ── HEADER ── */
+header{background:var(--s1);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;gap:12px;flex-shrink:0;height:48px;}
 .h-logo{font-family:var(--serif);font-size:17px;color:var(--accent);letter-spacing:-.01em;}
 .h-logo span{font-family:var(--mono);font-size:.5em;color:var(--text2);}
-.h-badge{font-size:10px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--text2);background:var(--s3);border:1px solid var(--border2);padding:2px 8px;border-radius:3px;}
-.h-count{margin-left:auto;font-size:11px;color:var(--text3);font-family:var(--mono);}
+
+/* ── TABS ── */
+.tab-bar{display:flex;align-items:center;gap:0;margin-left:16px;}
+.tab{padding:0 16px;height:48px;display:flex;align-items:center;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:color .15s,border-color .15s;letter-spacing:.02em;background:none;border-top:none;border-left:none;border-right:none;font-family:var(--sans);}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.tab .tab-badge{margin-left:7px;font-family:var(--mono);font-size:10px;background:var(--s3);border:1px solid var(--border2);padding:1px 6px;border-radius:8px;color:var(--text3);}
+.tab.active .tab-badge{border-color:rgba(214,136,56,.3);color:var(--accent);}
+
+.h-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
 .h-lock-btn{font-size:11px;color:var(--text3);background:transparent;border:none;cursor:pointer;padding:4px 8px;border-radius:4px;font-family:var(--sans);}
 .h-lock-btn:hover{color:var(--text2);}
 
-.main{display:flex;flex:1;overflow:hidden;}
+/* ── PANELS ── */
+.panel{display:none;flex:1;overflow:hidden;}
+.panel.active{display:flex;}
 
-/* ── SIDEBAR (form) ── */
+/* ── NOTAS PANEL ── */
+#panel-notas{flex-direction:row;}
+
 .sidebar{width:320px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;padding:16px;}
 .form-title{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--text2);margin-bottom:12px;}
 .form-group{margin-bottom:12px;}
@@ -67,7 +81,6 @@ select.f-sel:focus{border-color:var(--accent);}
 .form-msg.ok{color:var(--green);}
 .form-msg.err{color:#e06060;}
 
-/* ── NOTES PANEL ── */
 .notes-panel{flex:1;display:flex;flex-direction:column;overflow:hidden;}
 .filters{background:var(--s1);border-bottom:1px solid var(--border);padding:8px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0;}
 .filter-label{font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;}
@@ -80,7 +93,6 @@ select.f-sel:focus{border-color:var(--accent);}
 .empty-state{text-align:center;padding:60px 20px;color:var(--text3);font-size:13px;}
 .empty-state .em-icon{font-size:32px;margin-bottom:12px;}
 
-/* ── NOTE CARD ── */
 .note-card{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;transition:border-color .2s;position:relative;}
 .note-card:hover{border-color:var(--border2);}
 .note-card.status-revisado{opacity:.55;}
@@ -108,10 +120,36 @@ select.f-sel:focus{border-color:var(--accent);}
 .dot-revisado{background:var(--green);}
 .dot-descartado{background:var(--text3);}
 
-/* ── SETUP NOTICE ── */
 #setup-notice{background:rgba(168,64,48,.12);border:1px solid rgba(168,64,48,.4);border-radius:8px;padding:14px;margin-bottom:16px;font-size:12px;line-height:1.7;display:none;}
 #setup-notice code{font-family:var(--mono);font-size:11px;background:var(--s3);padding:1px 5px;border-radius:3px;}
 #setup-notice a{color:var(--accent);text-decoration:underline;}
+
+/* ── COMENTARIOS PANEL ── */
+#panel-comentarios{flex-direction:column;overflow:hidden;}
+
+.com-toolbar{background:var(--s1);border-bottom:1px solid var(--border);padding:8px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.com-filter-label{font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;}
+.com-select{background:var(--s2);border:1px solid var(--border2);color:var(--text);border-radius:5px;padding:5px 10px;font-size:12px;font-family:var(--mono);outline:none;cursor:pointer;}
+.com-select:focus{border-color:var(--accent);}
+.com-refresh{margin-left:auto;background:transparent;border:1px solid var(--border2);border-radius:5px;padding:5px 12px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text2);cursor:pointer;transition:all .2s;}
+.com-refresh:hover{border-color:var(--accent);color:var(--accent);}
+.com-stats{display:flex;gap:16px;margin-left:16px;}
+.com-stat{font-family:var(--mono);font-size:11px;color:var(--text3);}
+.com-stat strong{color:var(--accent);}
+
+.com-list{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:0;}
+.com-group{margin-bottom:32px;}
+.com-group-head{display:flex;align-items:baseline;gap:10px;padding-bottom:8px;margin-bottom:10px;border-bottom:1px solid var(--border);}
+.com-group-slug{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);}
+.com-group-count{font-size:10px;font-family:var(--mono);color:var(--text3);}
+
+.com-card{background:var(--s2);border:1px solid var(--border);border-radius:7px;padding:12px 14px;margin-bottom:8px;}
+.com-card-meta{display:flex;align-items:baseline;gap:8px;margin-bottom:6px;}
+.com-card-name{font-weight:600;font-size:12px;color:var(--text);}
+.com-card-date{font-family:var(--mono);font-size:10px;color:var(--text3);}
+.com-card-text{font-size:13px;color:rgba(240,232,220,.75);line-height:1.65;}
+
+.com-empty{padding:60px 20px;text-align:center;color:var(--text3);font-size:13px;}
 
 /* ── SCROLL ── */
 ::-webkit-scrollbar{width:5px;height:5px;}
@@ -119,7 +157,7 @@ select.f-sel:focus{border-color:var(--accent);}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
 
 @media(max-width:768px){
-  .main{flex-direction:column;}
+  #panel-notas{flex-direction:column;}
   .sidebar{width:100%;border-right:none;border-bottom:1px solid var(--border);max-height:50vh;}
 }
 </style>
@@ -140,13 +178,23 @@ select.f-sel:focus{border-color:var(--accent);}
 <div id="app">
   <header>
     <div class="h-logo">trémo<span>.mx</span></div>
-    <div class="h-badge">Notas internas</div>
-    <span class="h-count" id="h-count">— notas</span>
-    <button class="h-lock-btn" onclick="lockApp()">cerrar sesión</button>
+
+    <div class="tab-bar">
+      <button class="tab active" id="tab-notas" onclick="switchTab('notas')">
+        Notas <span class="tab-badge" id="badge-notas">—</span>
+      </button>
+      <button class="tab" id="tab-comentarios" onclick="switchTab('comentarios')">
+        Comentarios <span class="tab-badge" id="badge-comentarios">—</span>
+      </button>
+    </div>
+
+    <div class="h-right">
+      <button class="h-lock-btn" onclick="lockApp()">cerrar sesión</button>
+    </div>
   </header>
 
-  <div class="main">
-    <!-- FORM SIDEBAR -->
+  <!-- PANEL: NOTAS -->
+  <div class="panel active" id="panel-notas">
     <div class="sidebar">
       <div class="form-title">Nueva nota</div>
 
@@ -201,7 +249,6 @@ create policy "anon_all" on fer_notas for all
       <div class="form-msg" id="form-msg"></div>
     </div>
 
-    <!-- NOTES PANEL -->
     <div class="notes-panel">
       <div class="filters">
         <span class="filter-label">Estado</span>
@@ -217,6 +264,25 @@ create policy "anon_all" on fer_notas for all
       </div>
     </div>
   </div>
+
+  <!-- PANEL: COMENTARIOS -->
+  <div class="panel" id="panel-comentarios">
+    <div class="com-toolbar">
+      <span class="com-filter-label">Página</span>
+      <select class="com-select" id="com-filter">
+        <option value="">Todas las páginas</option>
+      </select>
+      <div class="com-stats">
+        <span class="com-stat">Total: <strong id="com-total">—</strong></span>
+        <span class="com-stat">Páginas: <strong id="com-pages">—</strong></span>
+        <span class="com-stat">Hoy: <strong id="com-today">—</strong></span>
+      </div>
+      <button class="com-refresh" onclick="loadComments()">↻ Actualizar</button>
+    </div>
+    <div class="com-list" id="com-list">
+      <div class="com-empty">Cargando comentarios…</div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -224,13 +290,13 @@ create policy "anon_all" on fer_notas for all
 const SUPA_URL = 'https://osgbjknlajdxlbfeueqc.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zZ2Jqa25sYWpkeGxiZmV1ZXFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NjcyMTYsImV4cCI6MjA5MzQ0MzIxNn0.6cDM7Xpf7ZkdwH88uBPPP3xH0GZGqXiEJBdnK7pSDW4';
 const TABLE   = 'fer_notas';
-const PWD_HASH = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918'; // sha256("admin") — CAMBIA ESTO
+const PWD_HASH = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918';
 
 const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 
 // ── AUTH ──────────────────────────────────────────────────────────────────────
 async function sha256(msg){
-  const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(msg));
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
   return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 
@@ -243,7 +309,7 @@ async function tryUnlock(e){
     showApp();
   } else {
     document.getElementById('lock-err').textContent = 'Contraseña incorrecta';
-    document.getElementById('pwd-input').value='';
+    document.getElementById('pwd-input').value = '';
     document.getElementById('pwd-input').focus();
   }
 }
@@ -259,91 +325,87 @@ function showApp(){
   document.getElementById('lock').classList.add('hidden');
   document.getElementById('app').classList.add('visible');
   loadNotes();
+  loadComments();
 }
 
-// ── STATE ─────────────────────────────────────────────────────────────────────
+// ── TABS ──────────────────────────────────────────────────────────────────────
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+// ── NOTAS STATE ───────────────────────────────────────────────────────────────
 let allNotes = [];
 let activeFilter = 'all';
 let searchQuery  = '';
 let activeTags   = new Set();
 
-// ── TAGS ──────────────────────────────────────────────────────────────────────
-document.querySelectorAll('.tag-pill').forEach(pill=>{
-  pill.addEventListener('click',()=>{
+document.querySelectorAll('.tag-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
     const tag = pill.dataset.tag;
-    if(activeTags.has(tag)){activeTags.delete(tag);pill.classList.remove('active');}
-    else{activeTags.add(tag);pill.classList.add('active');}
+    if(activeTags.has(tag)){activeTags.delete(tag); pill.classList.remove('active');}
+    else{activeTags.add(tag); pill.classList.add('active');}
   });
 });
 
-// ── LOAD NOTES ────────────────────────────────────────────────────────────────
 async function loadNotes(){
   const list = document.getElementById('notes-list');
   list.innerHTML = '<div class="empty-state"><div class="em-icon">⏳</div>Cargando…</div>';
-
-  const {data, error} = await sb
-    .from(TABLE)
-    .select('*')
-    .order('created_at', {ascending: false});
-
+  const {data, error} = await sb.from(TABLE).select('*').order('created_at', {ascending: false});
   if(error){
-    if(error.code === '42P01'){ // table doesn't exist
+    if(error.code === '42P01'){
       document.getElementById('setup-notice').style.display = 'block';
-      list.innerHTML = '<div class="empty-state"><div class="em-icon">⚙️</div>La tabla aún no existe.<br>Sigue las instrucciones en el panel izquierdo.</div>';
+      list.innerHTML = '<div class="empty-state"><div class="em-icon">⚙️</div>La tabla aún no existe.</div>';
     } else {
       list.innerHTML = `<div class="empty-state"><div class="em-icon">⚠️</div>Error: ${error.message}</div>`;
     }
     return;
   }
   allNotes = data || [];
+  document.getElementById('badge-notas').textContent = allNotes.length;
   renderNotes();
 }
 
-// ── RENDER ────────────────────────────────────────────────────────────────────
-const CAT_LABELS = {prompt:'💬 Prompt IA', feature:'✨ Feature', ui:'🎨 UI/UX', contenido:'📝 Contenido', bug:'🐛 Bug', otro:'· Otro'};
-const STATUS_NEXT = {pendiente:'proceso', proceso:'revisado', revisado:'descartado', descartado:'pendiente'};
+const CAT_LABELS   = {prompt:'💬 Prompt IA', feature:'✨ Feature', ui:'🎨 UI/UX', contenido:'📝 Contenido', bug:'🐛 Bug', otro:'· Otro'};
+const STATUS_NEXT  = {pendiente:'proceso', proceso:'revisado', revisado:'descartado', descartado:'pendiente'};
 const STATUS_LABEL = {pendiente:'⬤ Pendiente', proceso:'⬤ En proceso', revisado:'⬤ Revisado', descartado:'⬤ Descartado'};
 
 function fmtDate(iso){
-  const d=new Date(iso);
+  const d = new Date(iso);
   return d.toLocaleDateString('es-MX',{day:'2-digit',month:'short',year:'numeric'}) + ' ' + d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
 }
 
 function renderNotes(){
   const list = document.getElementById('notes-list');
   let notes = allNotes;
-
-  if(activeFilter !== 'all') notes = notes.filter(n=>n.status===activeFilter);
-  if(searchQuery) {
-    const q=searchQuery.toLowerCase();
-    notes = notes.filter(n=>n.content.toLowerCase().includes(q) || (n.tags||[]).some(t=>t.includes(q)));
+  if(activeFilter !== 'all') notes = notes.filter(n => n.status === activeFilter);
+  if(searchQuery){
+    const q = searchQuery.toLowerCase();
+    notes = notes.filter(n => n.content.toLowerCase().includes(q) || (n.tags||[]).some(t=>t.includes(q)));
   }
-
-  document.getElementById('h-count').textContent = `${allNotes.length} nota${allNotes.length!==1?'s':''}`;
-
   if(!notes.length){
-    list.innerHTML='<div class="empty-state"><div class="em-icon">📭</div>Sin notas aquí todavía.</div>';
+    list.innerHTML = '<div class="empty-state"><div class="em-icon">📭</div>Sin notas aquí todavía.</div>';
     return;
   }
-
-  list.innerHTML = notes.map(n=>{
-    const tags=(n.tags||[]).map(t=>`<span class="nc-tag">${t}</span>`).join('');
-    const catClass='cat-'+(n.categoria||'otro');
-    const catLabel=CAT_LABELS[n.categoria]||n.categoria;
-    const status=n.status||'pendiente';
-    return `
-    <div class="note-card status-${status}" id="nc-${n.id}">
+  list.innerHTML = notes.map(n => {
+    const tags = (n.tags||[]).map(t=>`<span class="nc-tag">${t}</span>`).join('');
+    const catClass = 'cat-' + (n.categoria||'otro');
+    const catLabel = CAT_LABELS[n.categoria] || n.categoria;
+    const status = n.status || 'pendiente';
+    return `<div class="note-card status-${status}" id="nc-${n.id}">
       <div class="nc-top">
         <span class="nc-cat ${catClass}">${catLabel}</span>
         <span class="status-dot dot-${status}" title="${STATUS_LABEL[status]}"></span>
         <span class="nc-date">${fmtDate(n.created_at)}</span>
       </div>
-      ${tags?`<div class="nc-tags">${tags}</div>`:''}
+      ${tags ? `<div class="nc-tags">${tags}</div>` : ''}
       <div class="nc-content">${escHtml(n.content)}</div>
       <div class="nc-actions">
-        <button class="nc-btn" onclick="cycleStatus('${n.id}','${status}')" title="Cambiar estado">${STATUS_LABEL[status]}</button>
-        <button class="nc-btn" onclick="copyNote('${n.id}')" title="Copiar texto">📋 Copiar</button>
-        <button class="nc-btn danger" onclick="deleteNote('${n.id}')" title="Eliminar">Eliminar</button>
+        <button class="nc-btn" onclick="cycleStatus('${n.id}','${status}')">${STATUS_LABEL[status]}</button>
+        <button class="nc-btn" onclick="copyNote('${n.id}')">📋 Copiar</button>
+        <button class="nc-btn danger" onclick="deleteNote('${n.id}')">Eliminar</button>
       </div>
     </div>`;
   }).join('');
@@ -353,87 +415,146 @@ function escHtml(s){
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ── SAVE ──────────────────────────────────────────────────────────────────────
 async function saveNote(){
   const content = document.getElementById('f-content').value.trim();
   if(!content) return;
-
   const btn = document.getElementById('submit-btn');
   const msg = document.getElementById('form-msg');
-  btn.disabled=true; btn.textContent='Guardando…';
-
+  btn.disabled = true; btn.textContent = 'Guardando…';
   const {data, error} = await sb.from(TABLE).insert([{
     content,
     categoria: document.getElementById('f-cat').value,
     tags: [...activeTags],
     status: 'pendiente'
   }]).select().single();
-
   if(error){
-    msg.textContent='Error al guardar: '+error.message;
-    msg.className='form-msg err';
-    if(error.code==='42P01') document.getElementById('setup-notice').style.display='block';
+    msg.textContent = 'Error al guardar: ' + error.message; msg.className = 'form-msg err';
+    if(error.code === '42P01') document.getElementById('setup-notice').style.display = 'block';
   } else {
     allNotes.unshift(data);
+    document.getElementById('badge-notas').textContent = allNotes.length;
     renderNotes();
-    document.getElementById('f-content').value='';
+    document.getElementById('f-content').value = '';
     activeTags.clear();
-    document.querySelectorAll('.tag-pill').forEach(p=>p.classList.remove('active'));
-    msg.textContent='✓ Guardado';
-    msg.className='form-msg ok';
-    setTimeout(()=>msg.textContent='',2000);
+    document.querySelectorAll('.tag-pill').forEach(p => p.classList.remove('active'));
+    msg.textContent = '✓ Guardado'; msg.className = 'form-msg ok';
+    setTimeout(() => msg.textContent = '', 2000);
   }
-  btn.disabled=false; btn.textContent='Guardar nota';
+  btn.disabled = false; btn.textContent = 'Guardar nota';
 }
 
-// Ctrl+Enter para guardar
-document.getElementById('f-content').addEventListener('keydown',e=>{
-  if((e.ctrlKey||e.metaKey)&&e.key==='Enter') saveNote();
+document.getElementById('f-content').addEventListener('keydown', e => {
+  if((e.ctrlKey||e.metaKey) && e.key === 'Enter') saveNote();
 });
 
-// ── ACTIONS ───────────────────────────────────────────────────────────────────
 async function cycleStatus(id, current){
-  const next = STATUS_NEXT[current]||'pendiente';
+  const next = STATUS_NEXT[current] || 'pendiente';
   const {error} = await sb.from(TABLE).update({status:next}).eq('id',id);
-  if(!error){
-    const n = allNotes.find(x=>x.id===id);
-    if(n){n.status=next; renderNotes();}
-  }
+  if(!error){ const n=allNotes.find(x=>x.id===id); if(n){n.status=next; renderNotes();} }
 }
 
 async function deleteNote(id){
   if(!confirm('¿Eliminar esta nota?')) return;
   const {error} = await sb.from(TABLE).delete().eq('id',id);
-  if(!error){
-    allNotes = allNotes.filter(n=>n.id!==id);
-    renderNotes();
-  }
+  if(!error){ allNotes = allNotes.filter(n=>n.id!==id); document.getElementById('badge-notas').textContent = allNotes.length; renderNotes(); }
 }
 
 function copyNote(id){
-  const n=allNotes.find(x=>x.id===id);
-  if(n){
-    navigator.clipboard.writeText(n.content).then(()=>{
-      const btn=document.querySelector(`#nc-${id} .nc-btn`);
-      if(btn){const orig=btn.textContent;btn.textContent='✓ Copiado';setTimeout(()=>btn.textContent=orig,1500);}
-    });
-  }
+  const n = allNotes.find(x=>x.id===id);
+  if(n) navigator.clipboard.writeText(n.content).then(()=>{
+    const btn = document.querySelector(`#nc-${id} .nc-btn`);
+    if(btn){const orig=btn.textContent; btn.textContent='✓ Copiado'; setTimeout(()=>btn.textContent=orig,1500);}
+  });
 }
 
-// ── FILTERS ───────────────────────────────────────────────────────────────────
 function setFilter(filter, el){
-  activeFilter=filter;
+  activeFilter = filter;
   document.querySelectorAll('.f-chip').forEach(c=>c.classList.remove('active'));
   el.classList.add('active');
   renderNotes();
 }
-function setSearch(q){
-  searchQuery=q;
-  renderNotes();
+function setSearch(q){ searchQuery = q; renderNotes(); }
+
+// ── COMENTARIOS ───────────────────────────────────────────────────────────────
+let allComments = [];
+
+async function loadComments(){
+  const list = document.getElementById('com-list');
+  list.innerHTML = '<div class="com-empty">Cargando comentarios…</div>';
+  const {data, error} = await sb.from('comments').select('*').order('created_at', {ascending: false});
+  if(error){
+    list.innerHTML = '<div class="com-empty">Error al cargar.</div>';
+    return;
+  }
+  allComments = data || [];
+  document.getElementById('badge-comentarios').textContent = allComments.length;
+  updateComStats();
+  populateComFilter();
+  renderComments(document.getElementById('com-filter').value || '');
 }
 
+function updateComStats(){
+  const today = new Date().toISOString().slice(0,10);
+  const todayN = allComments.filter(c => c.created_at.startsWith(today)).length;
+  const slugs = new Set(allComments.map(c => c.page_slug));
+  document.getElementById('com-total').textContent  = allComments.length;
+  document.getElementById('com-pages').textContent  = slugs.size;
+  document.getElementById('com-today').textContent  = todayN;
+}
+
+function populateComFilter(){
+  const sel = document.getElementById('com-filter');
+  while(sel.options.length > 1) sel.remove(1);
+  const slugs = [...new Set(allComments.map(c=>c.page_slug))].sort();
+  slugs.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s; opt.textContent = fmtSlug(s); sel.appendChild(opt);
+  });
+}
+
+function fmtSlug(s){
+  return s.replace(/-/g,' ').replace(/\b\w/g, c=>c.toUpperCase());
+}
+
+function fmtDateShort(iso){
+  return new Date(iso).toLocaleString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+
+function renderComments(filterSlug){
+  const list = document.getElementById('com-list');
+  const data = filterSlug ? allComments.filter(c=>c.page_slug===filterSlug) : allComments;
+  if(!data.length){
+    list.innerHTML = '<div class="com-empty">No hay comentarios aún.</div>';
+    return;
+  }
+  const groups = {};
+  data.forEach(c => { if(!groups[c.page_slug]) groups[c.page_slug]=[]; groups[c.page_slug].push(c); });
+  let html = '';
+  Object.keys(groups).sort().forEach(slug => {
+    const comments = groups[slug];
+    html += `<div class="com-group">
+      <div class="com-group-head">
+        <span class="com-group-slug">${escHtml(slug)}</span>
+        <span class="com-group-count">${comments.length} comentario${comments.length!==1?'s':''}</span>
+      </div>`;
+    comments.forEach(c => {
+      html += `<div class="com-card">
+        <div class="com-card-meta">
+          <span class="com-card-name">${escHtml(c.user_name)}</span>
+          <span class="com-card-date">${fmtDateShort(c.created_at)}</span>
+        </div>
+        <p class="com-card-text">${escHtml(c.comment_text).replace(/\n/g,'<br>')}</p>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  list.innerHTML = html;
+}
+
+document.getElementById('com-filter').addEventListener('change', function(){ renderComments(this.value); });
+
 // ── INIT ──────────────────────────────────────────────────────────────────────
-if(sessionStorage.getItem('fer_auth')==='1'){
+if(sessionStorage.getItem('fer_auth') === '1'){
   showApp();
 } else {
   document.getElementById('pwd-input').focus();
