@@ -43,8 +43,9 @@
   ],
   "rewrites": [
     { "source": "/herramientas",          "destination": "/herramientas.html" },
-    { "source": "/herramientas/guitarra", "destination": "/herramientas-guitarra.html" },
-    { "source": "/herramientas/piano",    "destination": "/piano.html" },
+    { "source": "/herramientas/guitarra",  "destination": "/herramientas-guitarra.html" },
+    { "source": "/herramientas/piano",     "destination": "/piano.html" },
+    { "source": "/herramientas/afinador",  "destination": "/herramientas-afinador.html" },
     { "source": "/piano",                 "destination": "/piano.html" },
     { "source": "/teoria",               "destination": "/teoria.html" },
     { "source": "/teoria/notas",          "destination": "/teoria-notas.html" },
