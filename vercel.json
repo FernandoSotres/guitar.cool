@@ -41,26 +41,6 @@
       ]
     }
   ],
-  "redirects": [
-    {
-      "source": "/(.*)",
-      "has": [{ "type": "host", "value": "guitarra.cool" }],
-      "destination": "https://tremolo.mx/$1",
-      "permanent": true
-    },
-    {
-      "source": "/(.*)",
-      "has": [{ "type": "host", "value": "www.guitarra.cool" }],
-      "destination": "https://tremolo.mx/$1",
-      "permanent": true
-    },
-    {
-      "source": "/(.*)",
-      "has": [{ "type": "host", "value": "www.tremolo.mx" }],
-      "destination": "https://tremolo.mx/$1",
-      "permanent": true
-    }
-  ],
   "rewrites": [
     { "source": "/herramientas",          "destination": "/herramientas.html" },
     { "source": "/herramientas/guitarra", "destination": "/herramientas-guitarra.html" },
