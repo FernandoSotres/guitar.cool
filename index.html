@@ -993,11 +993,13 @@ footer .f-copy { font-size: 12px; color: var(--ink5); }
         </div>
         <div class="f-nav-col f-email-col">
           <h4>Mantente al día</h4>
-          <p class="f-email-desc">Avísame cuando llegue contenido nuevo.</p>
-          <form class="f-email-form" onsubmit="return false">
-            <input class="f-email-inp" type="email" placeholder="tu@email.com" aria-label="Correo electrónico">
-            <button class="f-email-btn" type="submit">Avisar</button>
+          <p class="f-email-desc" id="nl-desc">Avísame cuando llegue contenido nuevo.</p>
+          <form class="f-email-form" id="nl-form" onsubmit="nlSubmit(event)">
+            <input class="f-email-inp" id="nl-input" type="email" placeholder="tu@email.com" aria-label="Correo electrónico" required>
+            <button class="f-email-btn" id="nl-btn" type="submit">Avisar</button>
           </form>
+          <p id="nl-ok" style="display:none;font-size:12px;color:#a8d4b4;margin-top:8px;">¡Listo! Te aviso cuando haya novedades.</p>
+          <p id="nl-err" style="display:none;font-size:12px;color:#e08080;margin-top:8px;"></p>
         </div>
       </div>
     </div>
@@ -1011,5 +1013,51 @@ footer .f-copy { font-size: 12px; color: var(--ink5); }
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/auth.js"></script>
+<script>
+(function(){
+  var SUPA_URL = 'https://osgbjknlajdxlbfeueqc.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9zZ2Jqa25sYWpkeGxiZmV1ZXFjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NjcyMTYsImV4cCI6MjA5MzQ0MzIxNn0.6cDM7Xpf7ZkdwH88uBPPP3xH0GZGqXiEJBdnK7pSDW4';
+
+  window.nlSubmit = function(e) {
+    e.preventDefault();
+    var email = document.getElementById('nl-input').value.trim();
+    var btn   = document.getElementById('nl-btn');
+    var ok    = document.getElementById('nl-ok');
+    var err   = document.getElementById('nl-err');
+    err.style.display = 'none';
+    if (!email) return;
+    btn.disabled = true; btn.textContent = '…';
+
+    function waitSupa(tries) {
+      if (window.supabase && window.supabase.createClient) {
+        var sb = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+        sb.from('suscriptores').insert({ email: email })
+          .then(function(res) {
+            if (res.error && res.error.code === '23505') {
+              // ya registrado — tratar como éxito silencioso
+              document.getElementById('nl-form').style.display = 'none';
+              ok.style.display = 'block';
+            } else if (res.error) {
+              err.textContent = 'Algo falló, intenta de nuevo.';
+              err.style.display = 'block';
+              btn.disabled = false; btn.textContent = 'Avisar';
+            } else {
+              document.getElementById('nl-form').style.display = 'none';
+              ok.style.display = 'block';
+            }
+          }).catch(function() {
+            err.textContent = 'Algo falló, intenta de nuevo.';
+            err.style.display = 'block';
+            btn.disabled = false; btn.textContent = 'Avisar';
+          });
+        return;
+      }
+      if (tries > 30) { btn.disabled = false; btn.textContent = 'Avisar'; return; }
+      setTimeout(function(){ waitSupa(tries+1); }, 100);
+    }
+    waitSupa(0);
+  };
+})();
+</script>
 </body>
 </html>

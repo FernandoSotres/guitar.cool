@@ -151,6 +151,13 @@ select.f-sel:focus{border-color:var(--accent);}
 
 .com-empty{padding:60px 20px;text-align:center;color:var(--text3);font-size:13px;}
 
+/* ── SUSCRIPTORES ── */
+.sus-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;}
+.sus-row:hover{background:var(--s2);}
+.sus-email{font-family:var(--mono);color:var(--text);font-size:12px;flex:1;}
+.sus-date{font-family:var(--mono);font-size:10px;color:var(--text3);white-space:nowrap;}
+.sus-new{background:rgba(58,138,80,.15);border:1px solid rgba(58,138,80,.3);color:var(--green);font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:1px 6px;border-radius:3px;}
+
 /* ── SCROLL ── */
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
@@ -185,6 +192,9 @@ select.f-sel:focus{border-color:var(--accent);}
       </button>
       <button class="tab" id="tab-comentarios" onclick="switchTab('comentarios')">
         Comentarios <span class="tab-badge" id="badge-comentarios">—</span>
+      </button>
+      <button class="tab" id="tab-suscriptores" onclick="switchTab('suscriptores')">
+        Suscriptores <span class="tab-badge" id="badge-suscriptores">—</span>
       </button>
     </div>
 
@@ -265,6 +275,22 @@ create policy "anon_all" on fer_notas for all
     </div>
   </div>
 
+  <!-- PANEL: SUSCRIPTORES -->
+  <div class="panel" id="panel-suscriptores" style="flex-direction:column;overflow:hidden;">
+    <div class="com-toolbar">
+      <span class="com-filter-label">Lista de correos</span>
+      <div class="com-stats" style="margin-left:0;">
+        <span class="com-stat">Total: <strong id="sus-total">—</strong></span>
+        <span class="com-stat">Esta semana: <strong id="sus-week">—</strong></span>
+      </div>
+      <button class="com-refresh" onclick="loadSuscriptores()">↻ Actualizar</button>
+      <button class="com-refresh" id="sus-copy-btn" onclick="copyEmails()" style="margin-left:8px;">📋 Copiar todos</button>
+    </div>
+    <div class="com-list" id="sus-list">
+      <div class="com-empty">Cargando suscriptores…</div>
+    </div>
+  </div>
+
   <!-- PANEL: COMENTARIOS -->
   <div class="panel" id="panel-comentarios">
     <div class="com-toolbar">
@@ -326,6 +352,7 @@ function showApp(){
   document.getElementById('app').classList.add('visible');
   loadNotes();
   loadComments();
+  loadSuscriptores();
 }
 
 // ── TABS ──────────────────────────────────────────────────────────────────────
@@ -552,6 +579,51 @@ function renderComments(filterSlug){
 }
 
 document.getElementById('com-filter').addEventListener('change', function(){ renderComments(this.value); });
+
+// ── SUSCRIPTORES ──────────────────────────────────────────────────────────────
+var allSuscriptores = [];
+
+async function loadSuscriptores(){
+  var list = document.getElementById('sus-list');
+  list.innerHTML = '<div class="com-empty">Cargando…</div>';
+  var res = await sb.from('suscriptores').select('*').order('created_at', {ascending: false});
+  if(res.error){
+    list.innerHTML = '<div class="com-empty">Error al cargar.</div>';
+    return;
+  }
+  allSuscriptores = res.data || [];
+  document.getElementById('badge-suscriptores').textContent = allSuscriptores.length;
+  document.getElementById('sus-total').textContent = allSuscriptores.length;
+  var weekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString();
+  var weekN = allSuscriptores.filter(function(s){ return s.created_at > weekAgo; }).length;
+  document.getElementById('sus-week').textContent = weekN;
+
+  if(!allSuscriptores.length){
+    list.innerHTML = '<div class="com-empty">Aún no hay suscriptores.</div>';
+    return;
+  }
+  var now = new Date();
+  var html = allSuscriptores.map(function(s){
+    var d = new Date(s.created_at);
+    var isNew = (now - d) < 7*24*60*60*1000;
+    return '<div class="sus-row">' +
+      '<span class="sus-email">' + escHtml(s.email) + '</span>' +
+      (isNew ? '<span class="sus-new">nuevo</span>' : '') +
+      '<span class="sus-date">' + fmtDate(s.created_at) + '</span>' +
+    '</div>';
+  }).join('');
+  list.innerHTML = html;
+}
+
+function copyEmails(){
+  var emails = allSuscriptores.map(function(s){ return s.email; }).join('\n');
+  navigator.clipboard.writeText(emails).then(function(){
+    var btn = document.getElementById('sus-copy-btn');
+    var orig = btn.textContent;
+    btn.textContent = '✓ Copiados';
+    setTimeout(function(){ btn.textContent = orig; }, 2000);
+  });
+}
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 if(sessionStorage.getItem('fer_auth') === '1'){
