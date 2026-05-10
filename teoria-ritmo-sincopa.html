@@ -401,7 +401,84 @@ PATTERNS.forEach((pat, patIdx) => {
     cellsDiv.appendChild(cell);
   }
   patDiv.appendChild(cellsDiv);
+
+  // Play button per pattern
+  const playBtn = document.createElement('button');
+  playBtn.className = 'metro-play-btn sync-play-btn';
+  playBtn.dataset.patIdx = patIdx;
+  playBtn.textContent = '▶ Reproducir';
+  playBtn.style.cssText = 'margin: 12px auto 0; display: block; font-size:13px; padding: 10px 36px;';
+  patDiv.appendChild(playBtn);
+
   gridContainer.appendChild(patDiv);
+});
+
+// ── Per-pattern play/stop ─────────────────────────────────────────────────────
+let syncSeq = null;
+let syncPlayIdx = -1;
+let syncLoopSynth = null;
+
+document.querySelectorAll('.sync-play-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const pIdx = parseInt(btn.dataset.patIdx);
+    const allBtns = document.querySelectorAll('.sync-play-btn');
+    try {
+      // Stop any running sequence
+      if (syncSeq) { try { syncSeq.stop(); syncSeq.dispose(); } catch(e){} syncSeq = null; }
+      if (syncLoopSynth) { try { syncLoopSynth.dispose(); } catch(e){} syncLoopSynth = null; }
+      Tone.getTransport().stop();
+      Tone.getTransport().cancel();
+
+      // If this button was already playing, just stop
+      if (syncPlayIdx === pIdx) {
+        syncPlayIdx = -1;
+        allBtns.forEach(b => { b.textContent = '▶ Reproducir'; });
+        document.getElementById('sync-desc').textContent = 'Haz clic en una celda para escuchar su acento.';
+        return;
+      }
+
+      syncPlayIdx = pIdx;
+      const pat = PATTERNS[pIdx];
+
+      await Tone.start();
+      Tone.getTransport().bpm.value = 80;
+
+      syncLoopSynth = new Tone.Synth({
+        oscillator: { type: 'triangle' },
+        envelope: { attack: 0.001, decay: 0.08, sustain: 0, release: 0.05 }
+      }).toDestination();
+
+      // Find DOM cells for this pattern
+      const patDiv = gridContainer.children[pIdx];
+      const domCells = Array.from(patDiv.querySelectorAll('.grid-cell'));
+
+      syncSeq = new Tone.Sequence((time, pos) => {
+        const isAccent = pat.accents.includes(pos);
+        syncLoopSynth.volume.value = isAccent ? -4 : -16;
+        syncLoopSynth.triggerAttackRelease(isAccent ? 'C5' : 'G3', '32n', time);
+
+        Tone.getDraw().schedule(() => {
+          if (domCells[pos]) {
+            domCells[pos].classList.add('active');
+            setTimeout(() => domCells[pos].classList.remove('active'), 150);
+          }
+          document.getElementById('sync-desc').textContent =
+            pat.label + ' · pos ' + (pos + 1) + ' (' + POS_LABELS[pos] + ') · ' +
+            (isAccent ? 'ACENTO' : 'débil');
+        }, time);
+      }, Array.from({ length: 16 }, (_, i) => i), '16n');
+
+      syncSeq.start(0);
+      Tone.getTransport().start();
+
+      // Update button labels
+      allBtns.forEach(b => { b.textContent = '▶ Reproducir'; });
+      btn.textContent = '⏹ Detener';
+
+    } catch(e) {
+      console.error('[sync play]', e);
+    }
+  });
 });
 
 gridContainer.addEventListener('click', async (e) => {

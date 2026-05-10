@@ -298,6 +298,11 @@ nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-
           Grupo 3
         </div>
       </div>
+
+      <div style="text-align:center;margin-top:28px;">
+        <button class="metro-play-btn" id="asim-play-btn">▶ Reproducir 7/8</button>
+        <p class="metro-desc" id="asim-play-desc" style="margin-top:10px;">Reproduce ambas filas en bucle a 80 BPM — nota los acentos en posiciones distintas</p>
+      </div>
     </div>
   </div>
 </section>
@@ -429,6 +434,69 @@ function buildRow(containerId, groupMap, accentList, positionFn) {
 
 buildRow('row-a', rowAGroups, rowAAccents, groupPositionA);
 buildRow('row-b', rowBGroups, rowBAccents, groupPositionB);
+
+// ── Play button: loop 7/8 through both rows ───────────────────────────────────
+let asimSeq = null;
+let asimPlaying = false;
+let asimLoopSynth = null;
+
+document.getElementById('asim-play-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('asim-play-btn');
+  const desc = document.getElementById('asim-play-desc');
+  try {
+    if (asimPlaying) {
+      if (asimSeq) { try { asimSeq.stop(); asimSeq.dispose(); } catch(e){} asimSeq = null; }
+      if (asimLoopSynth) { try { asimLoopSynth.dispose(); } catch(e){} asimLoopSynth = null; }
+      Tone.getTransport().stop();
+      asimPlaying = false;
+      btn.textContent = '▶ Reproducir 7/8';
+      desc.textContent = 'Reproduce ambas filas en bucle a 80 BPM — nota los acentos en posiciones distintas';
+      return;
+    }
+
+    await Tone.start();
+    const transport = Tone.getTransport();
+    transport.bpm.value = 80;
+    transport.cancel();
+
+    const cellsA = Array.from(document.getElementById('row-a').querySelectorAll('.asim-cell'));
+    const cellsB = Array.from(document.getElementById('row-b').querySelectorAll('.asim-cell'));
+
+    asimLoopSynth = new Tone.Synth({
+      oscillator: { type: 'triangle' },
+      envelope: { attack: 0.001, decay: 0.14, sustain: 0, release: 0.06 }
+    }).toDestination();
+    asimLoopSynth.volume.value = -6;
+
+    asimSeq = new Tone.Sequence((time, i) => {
+      const isAccentA = rowAAccents.includes(i);
+      const isAccentB = rowBAccents.includes(i);
+      const pitch = (isAccentA || isAccentB) ? PITCHES[0] : (isAccentA || isAccentB ? PITCHES[1] : PITCHES[1]);
+      // Strong note on any accent (A or B), medium otherwise
+      const vel = isAccentA ? 0.9 : (isAccentB ? 0.75 : 0.4);
+      const noteP = isAccentA ? PITCHES[0] : (isAccentB ? PITCHES[1] : PITCHES[2]);
+      asimLoopSynth.triggerAttackRelease(noteP, '32n', time, vel);
+
+      Tone.getDraw().schedule(() => {
+        if (cellsA[i]) flashCell(cellsA[i]);
+        if (cellsB[i]) flashCell(cellsB[i]);
+        const labelA = isAccentA ? 'ACENTO A' : '';
+        const labelB = isAccentB ? 'ACENTO B' : '';
+        const label = [labelA, labelB].filter(Boolean).join(' + ') || 'débil';
+        desc.textContent = `Paso ${i + 1}/7 · ${label}`;
+      }, time);
+    }, [0, 1, 2, 3, 4, 5, 6], '8n');
+
+    asimSeq.start(0);
+    transport.start();
+    asimPlaying = true;
+    btn.textContent = '⏹ Detener';
+  } catch(e) {
+    console.error('[asim play]', e);
+    btn.textContent = '▶ Reproducir 7/8';
+    asimPlaying = false;
+  }
+});
 </script>
 
 <footer style="background:var(--ink2);border-top:1px solid rgba(255,255,255,.06);padding:24px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">

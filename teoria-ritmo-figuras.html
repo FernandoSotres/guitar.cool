@@ -290,7 +290,10 @@ nav{position:sticky;top:0;z-index:100;background:rgba(244,236,224,.94);backdrop-
       <div class="figuras-title">Figuras rítmicas — toca cada barra para escucharla</div>
       <div class="figuras-subtitle">A 80 BPM · haz clic en cualquier fila para reproducir su duración</div>
       <div id="figuras-visual"></div>
-      <p class="metro-desc" id="figuras-desc" style="margin-top:20px;">Haz clic en una figura para escuchar su duración.</p>
+      <div style="text-align:center;margin-top:24px;">
+        <button class="metro-play-btn" id="figuras-play-btn">▶ Reproducir todo</button>
+      </div>
+      <p class="metro-desc" id="figuras-desc" style="margin-top:14px;">Haz clic en una figura o en "Reproducir todo" para escuchar las duraciones.</p>
     </div>
   </div>
 </section>
@@ -502,6 +505,93 @@ FIGURAS.forEach((fig, idx) => {
       if (activeSynth === synth) activeSynth = null;
     }, durMs + 400);
   });
+});
+
+// ── "Reproducir todo" — plays all figures sequentially ───────────────────────
+let figPlayingAll = false;
+let figPlayTimeout = null;
+
+document.getElementById('figuras-play-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('figuras-play-btn');
+  const desc = document.getElementById('figuras-desc');
+
+  if (figPlayingAll) {
+    figPlayingAll = false;
+    if (figPlayTimeout) { clearTimeout(figPlayTimeout); figPlayTimeout = null; }
+    if (activeSynth) { try { activeSynth.dispose(); } catch(e){} activeSynth = null; }
+    FIGURAS.forEach((_, i) => {
+      const bar = document.getElementById('figura-fill-' + i);
+      if (bar) bar.classList.remove('playing');
+    });
+    btn.textContent = '▶ Reproducir todo';
+    desc.textContent = 'Haz clic en una figura o en "Reproducir todo" para escuchar las duraciones.';
+    return;
+  }
+
+  try {
+    await Tone.start();
+    figPlayingAll = true;
+    btn.textContent = '⏹ Detener';
+
+    // Stop any individually-playing synth
+    if (activeSynth) { try { activeSynth.dispose(); } catch(e){} activeSynth = null; }
+    FIGURAS.forEach((_, i) => {
+      const bar = document.getElementById('figura-fill-' + i);
+      if (bar) bar.classList.remove('playing');
+    });
+
+    let cumMs = 0;
+    const timeouts = [];
+
+    FIGURAS.forEach((fig, idx) => {
+      const startMs = cumMs;
+      const durMs = fig.beats * BEAT_SECS * 1000;
+
+      const t1 = setTimeout(() => {
+        if (!figPlayingAll) return;
+        // Clear previous
+        FIGURAS.forEach((_, i) => {
+          const b = document.getElementById('figura-fill-' + i);
+          if (b) b.classList.remove('playing');
+        });
+        if (activeSynth) { try { activeSynth.dispose(); } catch(e){} activeSynth = null; }
+
+        const bar = document.getElementById('figura-fill-' + idx);
+        if (bar) bar.classList.add('playing');
+        desc.textContent = 'Reproduciendo: ' + fig.name + ' (' + fig.label + ')';
+
+        const synth = new Tone.Synth({
+          oscillator: { type: 'triangle' },
+          envelope: { attack: 0.01, decay: 0.1, sustain: 0.7, release: 0.3 }
+        }).toDestination();
+        synth.volume.value = -8;
+        activeSynth = synth;
+        synth.triggerAttackRelease(fig.pitch, fig.toneNote);
+      }, startMs);
+      timeouts.push(t1);
+
+      cumMs += durMs + 120; // small gap between figures
+    });
+
+    // Cleanup after all done
+    const totalMs = cumMs;
+    figPlayTimeout = setTimeout(() => {
+      if (!figPlayingAll) return;
+      figPlayingAll = false;
+      if (activeSynth) { try { activeSynth.dispose(); } catch(e){} activeSynth = null; }
+      FIGURAS.forEach((_, i) => {
+        const bar = document.getElementById('figura-fill-' + i);
+        if (bar) bar.classList.remove('playing');
+      });
+      btn.textContent = '▶ Reproducir todo';
+      desc.textContent = 'Haz clic en una figura o en "Reproducir todo" para escuchar las duraciones.';
+    }, totalMs);
+
+  } catch(e) {
+    console.error('[figuras play all]', e);
+    figPlayingAll = false;
+    btn.textContent = '▶ Reproducir todo';
+  }
 });
 </script>
 

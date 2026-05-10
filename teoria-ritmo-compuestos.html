@@ -406,7 +406,97 @@ COMP_PATTERNS.forEach((pat, pIdx) => {
   });
 
   rowDiv.appendChild(cellsDiv);
+
+  // Play button per pattern row
+  const playBtn = document.createElement('button');
+  playBtn.className = 'metro-play-btn comp-play-btn';
+  playBtn.dataset.patId = pat.id;
+  playBtn.dataset.patIdx = pIdx;
+  playBtn.textContent = '▶ Reproducir ' + (pat.id === '44' ? '4/4' : '6/8');
+  playBtn.style.cssText = 'margin: 14px auto 0; font-size:13px; padding: 10px 36px;';
+  rowDiv.appendChild(playBtn);
+
   compGrid.appendChild(rowDiv);
+});
+
+// ── Per-pattern play/stop ─────────────────────────────────────────────────────
+let compSeq = null;
+let compPlayIdx = -1;
+let compLoopSynth = null;
+
+document.querySelectorAll('.comp-play-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const pIdx = parseInt(btn.dataset.patIdx);
+    const allBtns = document.querySelectorAll('.comp-play-btn');
+    try {
+      // Stop any running sequence
+      if (compSeq) { try { compSeq.stop(); compSeq.dispose(); } catch(e){} compSeq = null; }
+      if (compLoopSynth) { try { compLoopSynth.dispose(); } catch(e){} compLoopSynth = null; }
+      Tone.getTransport().stop();
+      Tone.getTransport().cancel();
+
+      // If this button was playing, just stop
+      if (compPlayIdx === pIdx) {
+        compPlayIdx = -1;
+        allBtns.forEach(b => {
+          const id = b.dataset.patId;
+          b.textContent = '▶ Reproducir ' + (id === '44' ? '4/4' : '6/8');
+        });
+        document.getElementById('comp-desc').textContent = 'Haz clic en una celda para escuchar.';
+        return;
+      }
+
+      compPlayIdx = pIdx;
+      const pat = COMP_PATTERNS[pIdx];
+      // Collect real (non-empty) cells in order
+      const realCells = pat.cells.filter(c => !c.empty);
+
+      await Tone.start();
+      Tone.getTransport().bpm.value = 100;
+
+      compLoopSynth = new Tone.Synth({
+        oscillator: { type: 'triangle' },
+        envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.06 }
+      }).toDestination();
+
+      // Find DOM cells for this pattern
+      const patDiv = compGrid.children[pIdx];
+      const domCells = Array.from(patDiv.querySelectorAll('.comp-cell'));
+
+      let step = 0;
+      compSeq = new Tone.Sequence((time, _) => {
+        const ci = step % realCells.length;
+        const cellData = realCells[ci];
+        const isStrong = cellData.pitch !== 'G3';
+        compLoopSynth.volume.value = isStrong ? -4 : -14;
+        compLoopSynth.triggerAttackRelease(cellData.pitch, '32n', time);
+
+        Tone.getDraw().schedule(() => {
+          if (domCells[ci]) {
+            domCells[ci].classList.add('active');
+            setTimeout(() => domCells[ci].classList.remove('active'), 160);
+          }
+          document.getElementById('comp-desc').textContent =
+            pat.id.toUpperCase() + ' · ' + cellData.desc;
+        }, time);
+
+        step++;
+      }, Array.from({ length: realCells.length }, (_, i) => i), '8n');
+
+      compSeq.start(0);
+      Tone.getTransport().start();
+
+      // Update button labels
+      allBtns.forEach(b => {
+        const id = b.dataset.patId;
+        b.textContent = '▶ Reproducir ' + (id === '44' ? '4/4' : '6/8');
+      });
+      btn.textContent = '⏹ Detener ' + (pat.id === '44' ? '4/4' : '6/8');
+
+    } catch(e) {
+      console.error('[comp play]', e);
+    }
+  });
 });
 
 compGrid.addEventListener('click', async (e) => {
