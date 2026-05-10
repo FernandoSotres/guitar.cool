@@ -27,7 +27,7 @@
 <title>Técnica de Guitarra: Legato, Vibrato, Bend y Más | tremolo.mx</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tone@14.9.17/build/Tone.js"></script>
 <style>
 :root{
   --paper:#f4ece0;--paper2:#ebe1d2;--paper3:#ddd1bd;--paper4:#c8b99f;--paper5:#b8a890;
@@ -312,15 +312,20 @@ let dest = null;
 
 async function initAudio() {
   if (audioReady) return;
-  await Tone.start();
-  const reverb = new Tone.Freeverb({ roomSize: 0.35, wet: 0.16 }).toDestination();
-  const comp = new Tone.Compressor({ threshold: -20, ratio: 3.5 }).connect(reverb);
-  monoSynth = new Tone.Synth({
-    oscillator: { type: 'triangle' },
-    envelope: { attack: 0.02, decay: 0.2, sustain: 0.7, release: 1.8 },
-    volume: -6,
-  }).connect(comp);
-  audioReady = true;
+  try {
+    await Tone.start();
+    const reverb = new Tone.Freeverb({ roomSize: 0.35, wet: 0.16 }).toDestination();
+    const comp = new Tone.Compressor({ threshold: -20, ratio: 3.5 }).connect(reverb);
+    monoSynth = new Tone.Synth({
+      oscillator: { type: 'triangle' },
+      envelope: { attack: 0.02, decay: 0.2, sustain: 0.7, release: 1.8 },
+      volume: -6,
+    }).connect(comp);
+    audioReady = true;
+  } catch(err) {
+    console.error('[tremolo audio]', err);
+    if (!monoSynth) { try { monoSynth = new Tone.Synth().toDestination(); audioReady = true; } catch(e) {} }
+  }
 }
 
 function midiToFreq(midi) {
@@ -430,7 +435,10 @@ function buildTechniqueCards() {
       </div>
       <div class="technique-play-hint">▶ escuchar</div>
     `;
-    card.addEventListener('click', () => t.play(card));
+    card.addEventListener('click', async () => {
+      try { await t.play(card); }
+      catch(e) { console.error('[audio]', e); }
+    });
     container.appendChild(card);
   });
 }

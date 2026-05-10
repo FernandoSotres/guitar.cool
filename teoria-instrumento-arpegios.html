@@ -27,7 +27,7 @@
 <title>Arpegios en Guitarra: Posiciones y Sweep Picking | tremolo.mx</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tone@14.9.17/build/Tone.js"></script>
 <style>
 :root{
   --paper:#f4ece0;--paper2:#ebe1d2;--paper3:#ddd1bd;--paper4:#c8b99f;--paper5:#b8a890;
@@ -326,7 +326,8 @@ window.addEventListener('scroll', () => {
 let synth = null;
 async function initAudio() {
   if (synth) return;
-  await Tone.start();
+  try {
+    await Tone.start();
   const reverb = new Tone.Freeverb({ roomSize: 0.28, wet: 0.12 }).toDestination();
   const comp = new Tone.Compressor({ threshold: -22, ratio: 4 }).connect(reverb);
   synth = new Tone.PolySynth(Tone.Synth, {
@@ -334,6 +335,10 @@ async function initAudio() {
     envelope: { attack: 0.008, decay: 0.5, sustain: 0.15, release: 2.5 },
     volume: -8,
   }).connect(comp);
+  } catch(err) {
+    console.error('[tremolo audio]', err);
+    if (!synth) { try { synth = new Tone.PolySynth(Tone.Synth).toDestination(); } catch(e) {} }
+  }
 }
 
 function midiToNote(midi) {
@@ -411,31 +416,37 @@ function buildArpFretboard() {
 
   svg.querySelectorAll('.arp-note').forEach(el => {
     el.addEventListener('click', async () => {
-      await initAudio();
-      const midi = parseInt(el.dataset.midi);
-      synth.triggerAttackRelease(midiToNote(midi), '4n', Tone.now() + 0.05);
-      const orig = el.getAttribute('fill');
-      el.setAttribute('fill', '#fff');
-      setTimeout(() => el.setAttribute('fill', orig), 280);
+      try {
+        await initAudio();
+        const midi = parseInt(el.dataset.midi);
+        synth.triggerAttackRelease(midiToNote(midi), '4n', Tone.now() + 0.05);
+        const orig = el.getAttribute('fill');
+        el.setAttribute('fill', '#fff');
+        setTimeout(() => el.setAttribute('fill', orig), 280);
+      } catch(e) { console.error('[audio]', e); }
     });
   });
 }
 
 // C major arpeggio buttons (section 1)
 document.getElementById('play-arp-seq').addEventListener('click', async () => {
-  await initAudio();
-  // C3, E3, G3, C4
-  const notes = [48, 52, 55, 60];
-  const now = Tone.now() + 0.05;
-  notes.forEach((midi, i) => {
-    synth.triggerAttackRelease(midiToNote(midi), '4n', now + i * 0.18);
-  });
+  try {
+    await initAudio();
+    // C3, E3, G3, C4
+    const notes = [48, 52, 55, 60];
+    const now = Tone.now() + 0.05;
+    notes.forEach((midi, i) => {
+      synth.triggerAttackRelease(midiToNote(midi), '4n', now + i * 0.18);
+    });
+  } catch(e) { console.error('[audio]', e); }
 });
 
 document.getElementById('play-chord-btn').addEventListener('click', async () => {
-  await initAudio();
-  const notes = [48, 52, 55, 60].map(midiToNote);
-  synth.triggerAttackRelease(notes, '2n', Tone.now() + 0.05);
+  try {
+    await initAudio();
+    const notes = [48, 52, 55, 60].map(midiToNote);
+    synth.triggerAttackRelease(notes, '2n', Tone.now() + 0.05);
+  } catch(e) { console.error('[audio]', e); }
 });
 
 buildArpFretboard();

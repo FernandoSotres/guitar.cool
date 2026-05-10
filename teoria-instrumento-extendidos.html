@@ -27,7 +27,7 @@
 <title>Acordes Extendidos en Guitarra: 9ª, 11ª y 13ª | tremolo.mx</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tone@14.9.17/build/Tone.js"></script>
 <style>
 :root{
   --paper:#f4ece0;--paper2:#ebe1d2;--paper3:#ddd1bd;--paper4:#c8b99f;--paper5:#b8a890;
@@ -281,7 +281,8 @@ window.addEventListener('scroll', () => {
 let synth = null;
 async function initAudio() {
   if (synth) return;
-  await Tone.start();
+  try {
+    await Tone.start();
   const reverb = new Tone.Freeverb({ roomSize: 0.4, wet: 0.2 }).toDestination();
   const comp = new Tone.Compressor({ threshold: -22, ratio: 4 }).connect(reverb);
   synth = new Tone.PolySynth(Tone.Synth, {
@@ -289,6 +290,10 @@ async function initAudio() {
     envelope: { attack: 0.01, decay: 0.65, sustain: 0.12, release: 3.2 },
     volume: -8,
   }).connect(comp);
+  } catch(err) {
+    console.error('[tremolo audio]', err);
+    if (!synth) { try { synth = new Tone.PolySynth(Tone.Synth).toDestination(); } catch(e) {} }
+  }
 }
 
 function midiToNote(midi) {
@@ -497,7 +502,10 @@ function buildExtDiagrams() {
     const label = document.createElement('div');
     label.className = 'chord-diagram-label';
     label.textContent = ch.name;
-    label.addEventListener('click', () => playArpeggio(ch.midi, label));
+    label.addEventListener('click', async () => {
+      try { await playArpeggio(ch.midi, label); }
+      catch(e) { console.error('[audio]', e); }
+    });
 
     const tones = document.createElement('div');
     tones.className = 'chord-tones-row';

@@ -27,7 +27,7 @@
 <title>Sistema CAGED para Guitarra: Cinco Posiciones | tremolo.mx</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tone@14.9.17/build/Tone.js"></script>
 <style>
 :root{
   --paper:#f4ece0;--paper2:#ebe1d2;--paper3:#ddd1bd;--paper4:#c8b99f;--paper5:#b8a890;
@@ -599,8 +599,8 @@ function buildLegend() {
     `;
     item.title = `Escuchar raíz · Forma ${name}`;
     item.addEventListener('click', async () => {
-      await initAudio();
-      synth.triggerAttackRelease('C4', '4n', Tone.now() + 0.05);
+      try { await initAudio(); synth.triggerAttackRelease('C4', '4n', Tone.now() + 0.05); }
+      catch(e) { console.error('[audio]', e); }
     });
     el.appendChild(item);
   });
@@ -654,8 +654,8 @@ function buildCagedShapesList() {
     row.addEventListener('mouseenter', () => row.style.background = 'rgba(160,92,32,.12)');
     row.addEventListener('mouseleave', () => row.style.background = 'rgba(160,92,32,.06)');
     row.addEventListener('click', async () => {
-      await initAudio();
-      synth.triggerAttackRelease('C4', '4n', Tone.now() + 0.05);
+      try { await initAudio(); synth.triggerAttackRelease('C4', '4n', Tone.now() + 0.05); }
+      catch(e) { console.error('[audio]', e); }
     });
     el.appendChild(row);
   });
@@ -665,7 +665,8 @@ function buildCagedShapesList() {
 let synth = null;
 async function initAudio() {
   if (synth) return;
-  await Tone.start();
+  try {
+    await Tone.start();
   const reverb = new Tone.Freeverb({ roomSize: 0.28, wet: 0.12 }).toDestination();
   const comp = new Tone.Compressor({ threshold: -22, ratio: 4 }).connect(reverb);
   synth = new Tone.PolySynth(Tone.Synth, {
@@ -673,6 +674,10 @@ async function initAudio() {
     envelope: { attack: 0.008, decay: 0.6, sustain: 0.1, release: 2.8 },
     volume: -8,
   }).connect(comp);
+  } catch(err) {
+    console.error('[tremolo audio]', err);
+    if (!synth) { try { synth = new Tone.PolySynth(Tone.Synth).toDestination(); } catch(e) {} }
+  }
 }
 
 // Root click handler on canvas
@@ -695,17 +700,19 @@ canvas.addEventListener('click', async e => {
       const y = sY(dot.s);
       const dist = Math.sqrt((cx - x) ** 2 + (cy - y) ** 2);
       if (dist < 16) {
-        await initAudio();
-        synth.triggerAttackRelease('C4', '4n', Tone.now() + 0.05);
-        // Flash
-        const ctx = canvas.getContext('2d');
-        ctx.beginPath();
-        ctx.arc(x, y, 18, 0, Math.PI * 2);
-        ctx.fillStyle = sh.color;
-        ctx.globalAlpha = 0.5;
-        ctx.fill();
-        ctx.globalAlpha = 1;
-        setTimeout(drawCaged, 300);
+        try {
+          await initAudio();
+          synth.triggerAttackRelease('C4', '4n', Tone.now() + 0.05);
+          // Flash
+          const ctx = canvas.getContext('2d');
+          ctx.beginPath();
+          ctx.arc(x, y, 18, 0, Math.PI * 2);
+          ctx.fillStyle = sh.color;
+          ctx.globalAlpha = 0.5;
+          ctx.fill();
+          ctx.globalAlpha = 1;
+          setTimeout(drawCaged, 300);
+        } catch(e) { console.error('[audio]', e); }
         return;
       }
     }

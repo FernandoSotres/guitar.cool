@@ -27,7 +27,7 @@
 <title>Acordes Abiertos de Guitarra: Formas Fundamentales | tremolo.mx</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tone@14.9.17/build/Tone.js"></script>
 <style>
 :root{
   --paper:#f4ece0;--paper2:#ebe1d2;--paper3:#ddd1bd;--paper4:#c8b99f;--paper5:#b8a890;
@@ -368,7 +368,8 @@ const CHORDS = [
 let synth = null;
 async function initAudio() {
   if (synth) return;
-  await Tone.start();
+  try {
+    await Tone.start();
   const reverb = new Tone.Freeverb({ roomSize: 0.3, wet: 0.14 }).toDestination();
   const comp = new Tone.Compressor({ threshold: -22, ratio: 4 }).connect(reverb);
   synth = new Tone.PolySynth(Tone.Synth, {
@@ -376,6 +377,10 @@ async function initAudio() {
     envelope: { attack: 0.008, decay: 0.7, sustain: 0.1, release: 3.0 },
     volume: -8,
   }).connect(comp);
+  } catch(err) {
+    console.error('[tremolo audio]', err);
+    if (!synth) { try { synth = new Tone.PolySynth(Tone.Synth).toDestination(); } catch(e) {} }
+  }
 }
 
 function midiToNoteName(midi) {
@@ -522,10 +527,12 @@ function buildChordGrid() {
     box.appendChild(hint);
 
     box.addEventListener('click', async () => {
-      await initAudio();
-      playArpeggio(chord.midi);
-      box.classList.add('playing');
-      setTimeout(() => box.classList.remove('playing'), 1200);
+      try {
+        await initAudio();
+        playArpeggio(chord.midi);
+        box.classList.add('playing');
+        setTimeout(() => box.classList.remove('playing'), 1200);
+      } catch(e) { console.error('[audio]', e); }
     });
 
     grid.appendChild(box);
@@ -550,8 +557,8 @@ function buildMajorSummary() {
     row.addEventListener('mouseenter', () => row.style.background = 'rgba(160,92,32,.12)');
     row.addEventListener('mouseleave', () => row.style.background = 'rgba(160,92,32,.06)');
     row.addEventListener('click', async () => {
-      await initAudio();
-      playArpeggio(c.midi);
+      try { await initAudio(); playArpeggio(c.midi); }
+      catch(e) { console.error('[audio]', e); }
     });
     el.appendChild(row);
   });

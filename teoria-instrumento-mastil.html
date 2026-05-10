@@ -27,7 +27,7 @@
 <title>El Mástil de la Guitarra: Notas en el Diapasón | tremolo.mx</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/tone@14.7.77/build/Tone.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tone@14.9.17/build/Tone.js"></script>
 <style>
 :root{
   --paper:#f4ece0;--paper2:#ebe1d2;--paper3:#ddd1bd;--paper4:#c8b99f;--paper5:#b8a890;
@@ -305,10 +305,12 @@ function buildTuningDisplay() {
     badge.textContent = s.name;
     badge.title = 'Escuchar ' + s.name;
     badge.addEventListener('click', async () => {
-      await initAudio();
-      playNote(s.midi);
-      badge.style.background = 'rgba(160,92,32,.28)';
-      setTimeout(() => badge.style.background = 'rgba(160,92,32,.12)', 400);
+      try {
+        await initAudio();
+        playNote(s.midi);
+        badge.style.background = 'rgba(160,92,32,.28)';
+        setTimeout(() => badge.style.background = 'rgba(160,92,32,.12)', 400);
+      } catch(e) { console.error('[audio]', e); }
     });
     row.appendChild(badge);
     if (i < INTERVALS.length) {
@@ -349,7 +351,8 @@ function buildStringIntervals() {
 let synth = null;
 async function initAudio() {
   if (synth) return;
-  await Tone.start();
+  try {
+    await Tone.start();
   const reverb = new Tone.Freeverb({ roomSize: 0.28, wet: 0.12 }).toDestination();
   const comp = new Tone.Compressor({ threshold: -22, ratio: 4 }).connect(reverb);
   synth = new Tone.PolySynth(Tone.Synth, {
@@ -357,6 +360,10 @@ async function initAudio() {
     envelope: { attack: 0.008, decay: 0.6, sustain: 0.1, release: 2.8 },
     volume: -8,
   }).connect(comp);
+  } catch(err) {
+    console.error('[tremolo audio]', err);
+    if (!synth) { try { synth = new Tone.PolySynth(Tone.Synth).toDestination(); } catch(e) {} }
+  }
 }
 
 function midiToNoteName(midi) {
@@ -526,19 +533,21 @@ canvas.addEventListener('click', async e => {
 
   if (f < 0 || f > FRET_COUNT || s < 0 || s >= STRING_COUNT) return;
 
-  const midi = STRING_OPEN_MIDI[s] + f;
-  await initAudio();
-  playNote(midi);
+  try {
+    const midi = STRING_OPEN_MIDI[s] + f;
+    await initAudio();
+    playNote(midi);
 
-  // Flash the note
-  const ctx = canvas.getContext('2d');
-  const x = f === 0 ? LEFT_PAD + NUT_W / 2 : fretX(f) - CELL_W / 2;
-  const y = stringY(s);
-  ctx.beginPath();
-  ctx.arc(x, y, 16, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(196,122,54,.55)';
-  ctx.fill();
-  setTimeout(drawFretboard, 350);
+    // Flash the note
+    const ctx = canvas.getContext('2d');
+    const x = f === 0 ? LEFT_PAD + NUT_W / 2 : fretX(f) - CELL_W / 2;
+    const y = stringY(s);
+    ctx.beginPath();
+    ctx.arc(x, y, 16, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(196,122,54,.55)';
+    ctx.fill();
+    setTimeout(drawFretboard, 350);
+  } catch(e) { console.error('[audio]', e); }
 });
 
 // ── Init ──────────────────────────────────────────────────────────────────────
