@@ -460,6 +460,49 @@
     } catch (_) {}
   }
 
+  // ── TRACKER ANÓNIMO ──────────────────────────────────────────────────────────
+  // Registra cada visita (todos los visitantes, sin login requerido)
+  (function () {
+    if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') return;
+    if (/bot|crawler|spider|headless|preview/i.test(navigator.userAgent)) return;
+    var skip = ['/fer', '/comentariosadmin'];
+    if (skip.some(function(p){ return location.pathname.startsWith(p); })) return;
+
+    // ID de sesión por pestaña (distingue sesiones de pageviews)
+    var sid = sessionStorage.getItem('_tm_sid');
+    if (!sid) {
+      sid = Math.random().toString(36).slice(2) + Date.now().toString(36);
+      sessionStorage.setItem('_tm_sid', sid);
+    }
+
+    // Referrer simplificado (dominio externo o vacío)
+    var ref = '';
+    try {
+      if (document.referrer) {
+        var ru = new URL(document.referrer);
+        if (ru.hostname !== location.hostname) ref = ru.hostname;
+      }
+    } catch (e) {}
+
+    var device = window.innerWidth < 768 ? 'mobile' : window.innerWidth < 1024 ? 'tablet' : 'desktop';
+
+    function doTrack(tries) {
+      if (!window.supabase) {
+        if (tries < 60) setTimeout(function(){ doTrack(tries + 1); }, 100);
+        return;
+      }
+      var sb2 = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+      sb2.from('page_views').insert({
+        path:       location.pathname,
+        referrer:   ref,
+        device:     device,
+        session_id: sid
+      }).then(function(){}).catch(function(){});
+    }
+    // Esperar a que el SDK esté listo (lo carga la página antes de auth.js)
+    doTrack(0);
+  })();
+
   // ── PERFIL ───────────────────────────────────────────────────────────────────
   async function ensureProfile(session) {
     if (!session) return;

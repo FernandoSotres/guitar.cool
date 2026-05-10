@@ -158,6 +158,35 @@ select.f-sel:focus{border-color:var(--accent);}
 .sus-date{font-family:var(--mono);font-size:10px;color:var(--text3);white-space:nowrap;}
 .sus-new{background:rgba(58,138,80,.15);border:1px solid rgba(58,138,80,.3);color:var(--green);font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:1px 6px;border-radius:3px;}
 
+/* ── TRÁFICO ── */
+.tr-body{flex:1;overflow-y:auto;padding:24px 32px 48px;display:flex;flex-direction:column;gap:28px;}
+.tr-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.tr-stat{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:16px 18px;}
+.tr-stat-n{font-family:var(--mono);font-size:28px;font-weight:700;color:var(--accent);line-height:1;}
+.tr-stat-delta{font-family:var(--mono);font-size:10px;margin-top:3px;}
+.tr-stat-delta.up{color:var(--green);}
+.tr-stat-delta.dn{color:#e06060;}
+.tr-stat-delta.eq{color:var(--text3);}
+.tr-stat-l{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-top:6px;font-family:var(--mono);}
+.tr-section{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:18px 20px;}
+.tr-section-title{font-size:10px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--text2);margin-bottom:16px;}
+.tr-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.tr-row:last-child{margin-bottom:0;}
+.tr-row-label{font-family:var(--mono);font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:200px;flex-shrink:0;}
+.tr-bar-wrap{flex:1;background:var(--s3);border-radius:3px;height:6px;overflow:hidden;}
+.tr-bar{height:100%;background:var(--accent);border-radius:3px;transition:width .4s ease;}
+.tr-bar.green{background:var(--green);}
+.tr-bar.purple{background:#7c5cbf;}
+.tr-row-val{font-family:var(--mono);font-size:11px;color:var(--text3);width:36px;text-align:right;flex-shrink:0;}
+.tr-chart{display:flex;align-items:flex-end;gap:4px;height:80px;margin-top:4px;}
+.tr-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.tr-col-bar-wrap{flex:1;width:100%;display:flex;align-items:flex-end;}
+.tr-col-bar{width:100%;background:var(--accent);border-radius:2px 2px 0 0;min-height:2px;transition:height .4s ease;opacity:.8;}
+.tr-col-bar:hover{opacity:1;}
+.tr-col-label{font-family:var(--mono);font-size:8px;color:var(--text3);writing-mode:initial;}
+.tr-two{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:900px){.tr-grid{grid-template-columns:repeat(2,1fr);}.tr-two{grid-template-columns:1fr;}}
+
 /* ── SCROLL ── */
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
@@ -195,6 +224,9 @@ select.f-sel:focus{border-color:var(--accent);}
       </button>
       <button class="tab" id="tab-suscriptores" onclick="switchTab('suscriptores')">
         Suscriptores <span class="tab-badge" id="badge-suscriptores">—</span>
+      </button>
+      <button class="tab" id="tab-trafico" onclick="switchTab('trafico')">
+        Tráfico <span class="tab-badge" id="badge-trafico">—</span>
       </button>
     </div>
 
@@ -272,6 +304,22 @@ create policy "anon_all" on fer_notas for all
       <div class="notes-list" id="notes-list">
         <div class="empty-state"><div class="em-icon">📋</div>Cargando…</div>
       </div>
+    </div>
+  </div>
+
+  <!-- PANEL: TRÁFICO -->
+  <div class="panel" id="panel-trafico" style="flex-direction:column;overflow:hidden;">
+    <div class="com-toolbar">
+      <span class="com-filter-label">Período</span>
+      <select class="com-select" id="tr-range" onchange="loadTrafico()">
+        <option value="7">Últimos 7 días</option>
+        <option value="14" selected>Últimos 14 días</option>
+        <option value="30">Últimos 30 días</option>
+      </select>
+      <button class="com-refresh" onclick="loadTrafico()">↻ Actualizar</button>
+    </div>
+    <div class="tr-body" id="tr-body">
+      <div class="com-empty">Cargando tráfico…</div>
     </div>
   </div>
 
@@ -353,6 +401,7 @@ function showApp(){
   loadNotes();
   loadComments();
   loadSuscriptores();
+  loadTrafico();
 }
 
 // ── TABS ──────────────────────────────────────────────────────────────────────
@@ -623,6 +672,139 @@ function copyEmails(){
     btn.textContent = '✓ Copiados';
     setTimeout(function(){ btn.textContent = orig; }, 2000);
   });
+}
+
+// ── TRÁFICO ───────────────────────────────────────────────────────────────────
+async function loadTrafico() {
+  var body = document.getElementById('tr-body');
+  body.innerHTML = '<div class="com-empty">Cargando…</div>';
+  var days = parseInt(document.getElementById('tr-range').value) || 14;
+  var since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+  var prevSince = new Date(Date.now() - days * 2 * 24 * 60 * 60 * 1000).toISOString();
+
+  var [curRes, prevRes] = await Promise.all([
+    sb.from('page_views').select('path,referrer,device,session_id,created_at').gte('created_at', since),
+    sb.from('page_views').select('created_at,session_id').gte('created_at', prevSince).lt('created_at', since)
+  ]);
+
+  if (curRes.error) { body.innerHTML = '<div class="com-empty">Error al cargar datos.</div>'; return; }
+
+  var rows = curRes.data || [];
+  var prev = prevRes.data || [];
+
+  // Stats globales
+  var views    = rows.length;
+  var sessions = new Set(rows.map(function(r){ return r.session_id; })).size;
+  var prevViews = prev.length;
+  var prevSess  = new Set(prev.map(function(r){ return r.session_id; })).size;
+
+  // Hoy
+  var todayStr = new Date().toISOString().slice(0, 10);
+  var todayViews = rows.filter(function(r){ return r.created_at.startsWith(todayStr); }).length;
+
+  document.getElementById('badge-trafico').textContent = views;
+
+  // Vistas por día
+  var byDay = {};
+  rows.forEach(function(r) {
+    var d = r.created_at.slice(0, 10);
+    byDay[d] = (byDay[d] || 0) + 1;
+  });
+
+  // Generar todos los días del período
+  var dayLabels = [];
+  for (var i = days - 1; i >= 0; i--) {
+    var d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+    dayLabels.push(d.toISOString().slice(0, 10));
+  }
+
+  // Top páginas
+  var byPath = {};
+  rows.forEach(function(r){ byPath[r.path] = (byPath[r.path] || 0) + 1; });
+  var topPages = Object.entries(byPath).sort(function(a,b){ return b[1]-a[1]; }).slice(0, 8);
+
+  // Referrers
+  var byRef = {};
+  rows.forEach(function(r){
+    var ref = r.referrer || 'directo';
+    byRef[ref] = (byRef[ref] || 0) + 1;
+  });
+  var topRefs = Object.entries(byRef).sort(function(a,b){ return b[1]-a[1]; }).slice(0, 6);
+
+  // Dispositivos
+  var byDevice = { mobile: 0, tablet: 0, desktop: 0 };
+  rows.forEach(function(r){ if (byDevice[r.device] !== undefined) byDevice[r.device]++; });
+
+  // Delta helpers
+  function delta(cur, prv) {
+    if (!prv) return '<span class="tr-stat-delta eq">—</span>';
+    var pct = Math.round((cur - prv) / prv * 100);
+    var cls = pct > 0 ? 'up' : pct < 0 ? 'dn' : 'eq';
+    var sign = pct > 0 ? '+' : '';
+    return '<span class="tr-stat-delta ' + cls + '">' + sign + pct + '% vs período anterior</span>';
+  }
+
+  function barRows(items, maxVal, colorClass) {
+    return items.map(function(item) {
+      var pct = maxVal ? Math.round(item[1] / maxVal * 100) : 0;
+      return '<div class="tr-row">' +
+        '<span class="tr-row-label" title="' + escHtml(item[0]) + '">' + escHtml(item[0]) + '</span>' +
+        '<div class="tr-bar-wrap"><div class="tr-bar ' + (colorClass||'') + '" style="width:' + pct + '%"></div></div>' +
+        '<span class="tr-row-val">' + item[1] + '</span>' +
+      '</div>';
+    }).join('');
+  }
+
+  // Gráfica de días
+  var maxDay = Math.max.apply(null, dayLabels.map(function(d){ return byDay[d] || 0; })) || 1;
+  var chartHTML = dayLabels.map(function(d) {
+    var n = byDay[d] || 0;
+    var h = Math.max(Math.round(n / maxDay * 100), n > 0 ? 4 : 0);
+    var label = d.slice(5); // MM-DD
+    return '<div class="tr-col" title="' + d + ': ' + n + ' vistas">' +
+      '<div class="tr-col-bar-wrap"><div class="tr-col-bar" style="height:' + h + '%"></div></div>' +
+      '<span class="tr-col-label">' + label + '</span>' +
+    '</div>';
+  }).join('');
+
+  var devTotal = byDevice.mobile + byDevice.tablet + byDevice.desktop || 1;
+
+  body.innerHTML =
+    // Stats
+    '<div class="tr-grid">' +
+      '<div class="tr-stat"><div class="tr-stat-n">' + views + '</div>' + delta(views, prevViews) + '<div class="tr-stat-l">Páginas vistas</div></div>' +
+      '<div class="tr-stat"><div class="tr-stat-n">' + sessions + '</div>' + delta(sessions, prevSess) + '<div class="tr-stat-l">Sesiones</div></div>' +
+      '<div class="tr-stat"><div class="tr-stat-n">' + todayViews + '</div><div class="tr-stat-l">Vistas hoy</div></div>' +
+      '<div class="tr-stat"><div class="tr-stat-n">' + (views && sessions ? (views / sessions).toFixed(1) : '—') + '</div><div class="tr-stat-l">Páginas / sesión</div></div>' +
+    '</div>' +
+
+    // Gráfica diaria
+    '<div class="tr-section">' +
+      '<div class="tr-section-title">Vistas por día</div>' +
+      '<div class="tr-chart">' + chartHTML + '</div>' +
+    '</div>' +
+
+    // Top páginas + Referrers
+    '<div class="tr-two">' +
+      '<div class="tr-section">' +
+        '<div class="tr-section-title">Top páginas</div>' +
+        (topPages.length ? barRows(topPages, topPages[0][1]) : '<div class="com-empty" style="padding:16px 0">Sin datos</div>') +
+      '</div>' +
+      '<div class="tr-section">' +
+        '<div class="tr-section-title">Fuentes de tráfico</div>' +
+        (topRefs.length ? barRows(topRefs, topRefs[0][1], 'green') : '<div class="com-empty" style="padding:16px 0">Sin datos</div>') +
+      '</div>' +
+    '</div>' +
+
+    // Dispositivos
+    '<div class="tr-section">' +
+      '<div class="tr-section-title">Dispositivos</div>' +
+      barRows([
+        ['🖥 Desktop', byDevice.desktop],
+        ['📱 Mobile',  byDevice.mobile],
+        ['⬛ Tablet',   byDevice.tablet]
+      ], devTotal, 'purple') +
+    '</div>';
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
