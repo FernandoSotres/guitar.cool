@@ -221,6 +221,88 @@
     @media (max-width: 600px) {
       .tm-footer-legal { padding: 20px 16px; }
     }
+
+    /* ── MOBILE NAV ─────────────────────────────── */
+    .tm-hamburger {
+      display: none;
+      flex-direction: column; align-items: center; justify-content: center;
+      gap: 4px; background: none; border: none;
+      cursor: pointer; padding: 10px 8px; flex-shrink: 0;
+      margin-left: auto;
+    }
+    .tm-hamburger span {
+      display: block; width: 18px; height: 1.5px;
+      background: #8a7a6e; border-radius: 1px; transition: background .15s;
+    }
+    .tm-hamburger:hover span { background: #d68838; }
+
+    .tm-bottom-nav {
+      display: none; position: fixed; bottom: 0; left: 0; right: 0;
+      height: 56px; background: #1c1812; border-top: 1px solid #2e2820;
+      z-index: 400; flex-direction: row; align-items: stretch;
+    }
+    .tm-bnav-tab {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 3px; text-decoration: none; color: #5a4a3e;
+      font-family: 'JetBrains Mono', monospace; font-size: 9px;
+      letter-spacing: .05em; background: none; border: none;
+      cursor: pointer; padding: 6px 4px 8px; transition: color .15s; line-height: 1;
+    }
+    .tm-bnav-tab:hover, .tm-bnav-tab.active { color: #d68838; }
+    .tm-bnav-tab svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+    .tm-drawer-overlay {
+      position: fixed; inset: 0; z-index: 800;
+      background: rgba(0,0,0,0); transition: background .25s;
+      pointer-events: none; visibility: hidden;
+    }
+    .tm-drawer-overlay.open {
+      background: rgba(0,0,0,.55); pointer-events: all; visibility: visible;
+    }
+    .tm-drawer {
+      position: absolute; top: 0; right: 0; bottom: 0; width: 260px;
+      background: #1c1812; border-left: 1px solid #2e2820;
+      transform: translateX(100%); transition: transform .25s;
+      overflow-y: auto; -webkit-overflow-scrolling: touch;
+    }
+    .tm-drawer-overlay.open .tm-drawer { transform: translateX(0); }
+    .tm-drawer-head {
+      padding: 14px 20px; border-bottom: 1px solid #2e2820;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .tm-drawer-brand {
+      font-family: 'Marcellus', Georgia, serif; font-size: 17px;
+      color: #f5ede2; text-decoration: none;
+    }
+    .tm-drawer-x {
+      background: none; border: none; color: #8a7a6e;
+      font-size: 18px; cursor: pointer; padding: 4px 8px; line-height: 1;
+    }
+    .tm-drawer-x:hover { color: #f5ede2; }
+    .tm-drawer-sect {
+      padding: 12px 20px 4px; font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; letter-spacing: .15em; text-transform: uppercase; color: #5a4a3e;
+    }
+    .tm-drawer-link {
+      display: block; padding: 12px 20px; text-decoration: none; color: #8a7a6e;
+      font-family: 'Inter', system-ui, sans-serif; font-size: 14px;
+      border-bottom: 1px solid #26201a; border-left: 2px solid transparent;
+      transition: color .15s, background .15s;
+    }
+    .tm-drawer-link:hover { color: #f5ede2; background: #26201a; }
+    .tm-drawer-link.active { color: #f5ede2; background: #26201a; border-left-color: #d68838; }
+
+    @media (max-width: 768px) {
+      body { padding-bottom: 60px; overflow-x: hidden; }
+      .tm-cookie-banner { bottom: 60px !important; }
+      .tm-hamburger { display: flex; }
+      .tm-user-wrap { margin-left: 0 !important; }
+      nav > *:not(:first-child):not(.tm-user-wrap):not(.tm-hamburger) { display: none !important; }
+      .tm-bottom-nav { display: flex; }
+      #tm-nav-signup { display: none !important; }
+      nav { padding-left: 16px !important; padding-right: 16px !important; }
+    }
   `;
 
   function injectStyles() {
@@ -538,11 +620,91 @@
     } catch (_) {}
   }
 
+  // ── NAVEGACIÓN MOBILE ────────────────────────────────────────────────────────
+  var _ICONS = {
+    inicio:   '<svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor"><path d="M10 2.5L2 9.5h2V18h5v-5h2v5h5V9.5h2L10 2.5z"/></svg>',
+    teoria:   '<svg viewBox="0 0 20 20" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="10" cy="10" r="7"/><path d="M10 7v4l2.5 2"/></svg>',
+    practica: '<svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor"><rect x="3" y="4" width="14" height="2" rx="1"/><rect x="3" y="9" width="14" height="2" rx="1"/><rect x="3" y="14" width="8" height="2" rx="1"/></svg>',
+    recursos: '<svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor"><path d="M10 2l2 6h6l-5 4 2 6-5-4-5 4 2-6-5-4h6z"/></svg>',
+  };
+
+  function openDrawer() {
+    var el = document.getElementById('tm-drawer-overlay');
+    if (el) el.classList.add('open');
+  }
+  function closeDrawer() {
+    var el = document.getElementById('tm-drawer-overlay');
+    if (el) el.classList.remove('open');
+  }
+
+  function buildMobileNav() {
+    var path = window.location.pathname;
+    var isT = path.startsWith('/teoria');
+    var isP = path.startsWith('/practica');
+    var isH = path.startsWith('/herramientas');
+    var isR = path.startsWith('/recursos');
+
+    // Hamburger — va antes del user-wrap en el nav/header
+    var topNav = document.querySelector('nav') || document.querySelector('header');
+    if (topNav) {
+      var ham = document.createElement('button');
+      ham.className = 'tm-hamburger';
+      ham.setAttribute('aria-label', 'Abrir menú');
+      ham.innerHTML = '<span></span><span></span><span></span>';
+      ham.addEventListener('click', openDrawer);
+      var userWrap = topNav.querySelector('.tm-user-wrap');
+      userWrap ? topNav.insertBefore(ham, userWrap) : topNav.appendChild(ham);
+    }
+
+    // Drawer lateral
+    var drawerEl = document.createElement('div');
+    drawerEl.className = 'tm-drawer-overlay';
+    drawerEl.id = 'tm-drawer-overlay';
+    drawerEl.innerHTML =
+      '<div class="tm-drawer">' +
+        '<div class="tm-drawer-head">' +
+          '<a href="/" class="tm-drawer-brand">tremolo.mx</a>' +
+          '<button class="tm-drawer-x" id="tm-drawer-x">✕</button>' +
+        '</div>' +
+        '<div class="tm-drawer-sect">Aprender</div>' +
+        '<a href="/teoria"       class="tm-drawer-link' + (isT ? ' active' : '') + '">Teoría musical</a>' +
+        '<a href="/practica"     class="tm-drawer-link' + (isP ? ' active' : '') + '">Ejercicios</a>' +
+        '<a href="/herramientas" class="tm-drawer-link' + (isH ? ' active' : '') + '">Herramientas</a>' +
+        '<div class="tm-drawer-sect">Explorar</div>' +
+        '<a href="/recursos/historia"     class="tm-drawer-link">Historia</a>' +
+        '<a href="/recursos/generos"      class="tm-drawer-link">Géneros</a>' +
+        '<a href="/recursos/compositores" class="tm-drawer-link">Compositores</a>' +
+        '<a href="/recursos/blog"         class="tm-drawer-link">Blog</a>' +
+        '<div class="tm-drawer-sect">Comunidad</div>' +
+        '<a href="/comentarios" class="tm-drawer-link">Comentarios</a>' +
+      '</div>';
+    document.body.appendChild(drawerEl);
+    drawerEl.addEventListener('click', function(e) { if (e.target === drawerEl) closeDrawer(); });
+    document.getElementById('tm-drawer-x').addEventListener('click', closeDrawer);
+
+    // Barra de navegación inferior
+    var bnav = document.createElement('nav');
+    bnav.className = 'tm-bottom-nav';
+    bnav.setAttribute('aria-label', 'Navegación móvil');
+    var bTabs = [
+      { href: '/', label: 'Inicio', icon: 'inicio', active: path === '/' },
+      { href: '/teoria', label: 'Teoría', icon: 'teoria', active: isT },
+      { href: '/practica', label: 'Práctica', icon: 'practica', active: isP },
+      { href: '/recursos', label: 'Recursos', icon: 'recursos', active: isR || isH },
+    ];
+    bnav.innerHTML = bTabs.map(function(t) {
+      return '<a href="' + t.href + '" class="tm-bnav-tab' + (t.active ? ' active' : '') + '">' +
+        _ICONS[t.icon] + '<span>' + t.label + '</span></a>';
+    }).join('');
+    document.body.appendChild(bnav);
+  }
+
   // ── INIT ─────────────────────────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', async function () {
     injectStyles();
     buildModal();
     buildNavButton();
+    buildMobileNav();
     buildCookieBanner();
 
     // Global handler for [data-tm-open] buttons (e.g. hero CTAs)
