@@ -296,12 +296,31 @@
     @media (max-width: 768px) {
       body { padding-bottom: 60px; overflow-x: hidden; }
       .tm-cookie-banner { bottom: 60px !important; }
-      .tm-hamburger { display: flex; margin-left: auto; }
-      .tm-user-wrap { display: none !important; }
+
+      /* Nav limpio: sólo logo + hamburger */
+      nav {
+        padding: 0 16px !important;
+        overflow-x: hidden !important;
+        flex-wrap: nowrap !important;
+      }
+      /* Ocultar todos los links del nav salvo el logo (primer hijo) */
+      nav > a.nav-link,
+      nav > a.nav-cta,
+      nav > a.tm-comments-nav,
       .tm-comments-nav { display: none !important; }
-      nav > a:not(:first-child) { display: none !important; }
+
+      /* Ocultar user-wrap (login/signup buttons) */
+      .tm-user-wrap { display: none !important; }
+
+      /* Hamburger a la derecha */
+      .tm-hamburger {
+        display: flex !important;
+        margin-left: auto !important;
+        flex-shrink: 0 !important;
+      }
+
+      /* Barra inferior */
       .tm-bottom-nav { display: flex; }
-      nav { padding-left: 16px !important; padding-right: 16px !important; }
     }
   `;
 
