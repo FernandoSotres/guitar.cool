@@ -296,11 +296,11 @@
     @media (max-width: 768px) {
       body { padding-bottom: 60px; overflow-x: hidden; }
       .tm-cookie-banner { bottom: 60px !important; }
-      .tm-hamburger { display: flex; }
-      .tm-user-wrap { margin-left: 0 !important; }
-      nav > *:not(:first-child):not(.tm-user-wrap):not(.tm-hamburger) { display: none !important; }
+      .tm-hamburger { display: flex; margin-left: auto; }
+      .tm-user-wrap { display: none !important; }
+      .tm-comments-nav { display: none !important; }
+      nav > a:not(:first-child) { display: none !important; }
       .tm-bottom-nav { display: flex; }
-      #tm-nav-signup { display: none !important; }
       nav { padding-left: 16px !important; padding-right: 16px !important; }
     }
   `;
@@ -515,6 +515,26 @@
         .then(({ data }) => {
           if (plan && data?.plan) plan.textContent = 'Plan ' + data.plan;
         });
+      // Drawer: mostrar email + logout en vez de "Entrar"
+      var dl = document.getElementById('tm-drawer-login');
+      if (dl) {
+        dl.textContent = addr;
+        dl.removeEventListener('click', dl._loginHandler);
+        dl._logoutHandler = function(e) { e.preventDefault(); sb.auth.signOut(); closeDrawer(); };
+        dl.addEventListener('click', dl._logoutHandler);
+      }
+      var dsect = dl ? dl.previousElementSibling : null;
+      if (dsect && dsect.classList.contains('tm-drawer-sect')) dsect.textContent = 'Sesión';
+      // Añadir opción de salir si no existe
+      if (dl && !document.getElementById('tm-drawer-logout-link')) {
+        var lo = document.createElement('a');
+        lo.href = '#'; lo.className = 'tm-drawer-link danger'; lo.id = 'tm-drawer-logout-link';
+        lo.textContent = 'Cerrar sesión';
+        lo.style.color = '#e86060';
+        lo.addEventListener('click', function(e) { e.preventDefault(); sb.auth.signOut(); closeDrawer(); });
+        dl.parentNode.insertBefore(lo, dl.nextSibling);
+        dl.style.color = '#f5ede2'; dl.style.pointerEvents = 'none';
+      }
     } else {
       userBtn.style.display  = 'none';
       if (loginBtn)  loginBtn.style.display  = 'inline-flex';
@@ -677,10 +697,18 @@
         '<a href="/recursos/blog"         class="tm-drawer-link">Blog</a>' +
         '<div class="tm-drawer-sect">Comunidad</div>' +
         '<a href="/comentarios" class="tm-drawer-link">Comentarios</a>' +
+        '<div class="tm-drawer-sect">Cuenta</div>' +
+        '<a href="#" class="tm-drawer-link" id="tm-drawer-login">Entrar / Registrarse</a>' +
       '</div>';
     document.body.appendChild(drawerEl);
     drawerEl.addEventListener('click', function(e) { if (e.target === drawerEl) closeDrawer(); });
     document.getElementById('tm-drawer-x').addEventListener('click', closeDrawer);
+    var drawerLogin = document.getElementById('tm-drawer-login');
+    if (drawerLogin) {
+      drawerLogin.addEventListener('click', function(e) {
+        e.preventDefault(); closeDrawer(); openModal('login');
+      });
+    }
 
     // Barra de navegación inferior
     var bnav = document.createElement('nav');
