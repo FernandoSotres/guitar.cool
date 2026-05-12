@@ -877,6 +877,16 @@ function stopTuner() {
 var bufLen, tunerBuf;
 var silenceCount = 0;
 
+// ── Suavizado de frecuencia y confirmación de nota ──────────────────────────
+var smoothedFreq   = 0;      // frecuencia EMA
+var FREQ_EMA       = 0.15;   // cuánto sigue la freq bruta (0=nada, 1=crudo)
+var lockedNote     = null;   // nota que se está mostrando
+var pendingNote    = null;   // nota candidata a reemplazar la actual
+var pendingCount   = 0;      // frames consecutivos de pendingNote
+var CONFIRM_FRAMES = 5;      // frames necesarios para cambiar de nota
+var displayCents   = 0;      // cents suavizados para el medidor
+var CENTS_EMA      = 0.12;   // suavizado del medidor de cents
+
 function tunerLoop() {
   if (!tunerActive) return;
   rafId = requestAnimationFrame(tunerLoop);
@@ -890,7 +900,11 @@ function tunerLoop() {
 
   if (freq === -1) {
     silenceCount++;
-    if (silenceCount > 30) {
+    if (silenceCount > 50) {          // más frames antes de mostrar silencio
+      lockedNote = null;
+      pendingNote = null;
+      pendingCount = 0;
+      smoothedFreq = 0;
       elNoteName.className = 'note-name silence';
       elNoteName.textContent = '—';
       elNoteOctave.textContent = '';
@@ -906,24 +920,57 @@ function tunerLoop() {
   }
   silenceCount = 0;
 
-  var note = freqToNote(freq);
+  // 1. Suavizar la frecuencia con EMA
+  if (smoothedFreq === 0) smoothedFreq = freq;   // primer frame
+  smoothedFreq = FREQ_EMA * freq + (1 - FREQ_EMA) * smoothedFreq;
+
+  var note = freqToNote(smoothedFreq);
   if (!note) return;
 
-  // Actualizar display
-  elNoteName.textContent = note.name;
-  elNoteOctave.textContent = note.octave;
-  elNoteHz.textContent = note.hz + ' Hz';
+  // 2. Confirmación de nota: solo cambia el display tras N frames consecutivos
+  var sameAsLocked = lockedNote &&
+    note.name === lockedNote.name && note.octave === lockedNote.octave;
 
-  var absCents = Math.abs(note.cents);
+  if (sameAsLocked) {
+    // Nota confirmada — actualizar cents suavemente
+    pendingNote = null;
+    pendingCount = 0;
+    displayCents = CENTS_EMA * note.cents + (1 - CENTS_EMA) * displayCents;
+  } else {
+    // ¿Es la misma que la candidata pendiente?
+    if (pendingNote && note.name === pendingNote.name && note.octave === pendingNote.octave) {
+      pendingCount++;
+    } else {
+      pendingNote = note;
+      pendingCount = 1;
+    }
+    if (pendingCount >= CONFIRM_FRAMES) {
+      lockedNote = pendingNote;
+      pendingNote = null;
+      pendingCount = 0;
+      displayCents = note.cents;   // reset suavizado al cambiar de nota
+    } else {
+      // Todavía confirmando — mantener display actual sin cambios
+      return;
+    }
+  }
+
+  // 3. Actualizar display con nota confirmada
+  var dispNote = lockedNote;
+  elNoteName.textContent = dispNote.name;
+  elNoteOctave.textContent = dispNote.octave;
+  elNoteHz.textContent = Math.round(smoothedFreq * 10) / 10 + ' Hz';
+
+  var absCents = Math.abs(displayCents);
   var isInTune = absCents <= 5;
-  var isSharp  = note.cents > 5;
-  var isFlat   = note.cents < -5;
+  var isSharp  = displayCents > 5;
+  var isFlat   = displayCents < -5;
 
   elNoteName.className = 'note-name' +
     (isInTune ? ' in-tune' : isSharp ? ' sharp' : ' flat');
 
-  // Cents meter: centro = 50%, rango ±50¢ → barra desde centro hacia el lado
-  var pct = note.cents / 50; // -1 a +1
+  // Cents meter: usa displayCents (suavizado)
+  var pct = displayCents / 50; // -1 a +1
   var centerPct = 50;
   if (pct >= 0) {
     elCentsFill.style.left = centerPct + '%';
@@ -935,10 +982,11 @@ function tunerLoop() {
   }
   elCentsFill.className = 'cents-fill' + (isInTune ? ' in-tune' : '');
 
-  var sign = note.cents > 0 ? '+' : '';
-  elCentsValue.textContent = sign + note.cents + '¢  ' + (isInTune ? '✓ Afinado' : isSharp ? '▲ Sostenido' : '▼ Bemol');
+  var cRounded = Math.round(displayCents);
+  var sign = cRounded > 0 ? '+' : '';
+  elCentsValue.textContent = sign + cRounded + '¢  ' + (isInTune ? '✓ Afinado' : isSharp ? '▲ Sostenido' : '▼ Bemol');
 
-  setActivePill(note.idx);
+  setActivePill(dispNote.idx);
 
   // Actualizar ear training si está escuchando
   if (earListening) updateEarDetection(note);
