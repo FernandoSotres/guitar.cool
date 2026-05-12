@@ -240,14 +240,24 @@
       display: none; position: fixed; bottom: 0; left: 0; right: 0;
       height: 56px; background: #1c1812; border-top: 1px solid #2e2820;
       z-index: 400; flex-direction: row; align-items: stretch;
+      /* Contrarrestar CSS global de nav */
+      overflow: hidden !important;
+      flex-wrap: nowrap !important;
+      white-space: normal !important;
+      padding: 0 !important;
+      backdrop-filter: none !important;
     }
     .tm-bnav-tab {
-      flex: 1; display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
+      flex: 1 1 0 !important; width: 25% !important;
+      display: flex !important; flex-direction: column !important;
+      align-items: center !important; justify-content: center !important;
       gap: 3px; text-decoration: none; color: #5a4a3e;
       font-family: 'JetBrains Mono', monospace; font-size: 9px;
       letter-spacing: .05em; background: none; border: none;
       cursor: pointer; padding: 6px 4px 8px; transition: color .15s; line-height: 1;
+      flex-shrink: 1 !important; min-width: 0 !important;
+      height: 56px !important; box-sizing: border-box !important;
+      white-space: nowrap !important;
     }
     .tm-bnav-tab:hover, .tm-bnav-tab.active { color: #d68838; }
     .tm-bnav-tab svg { width: 18px; height: 18px; flex-shrink: 0; }
@@ -317,6 +327,7 @@
         display: flex !important;
         margin-left: auto !important;
         flex-shrink: 0 !important;
+        order: 999 !important;
       }
 
       /* Barra inferior */
@@ -729,9 +740,10 @@
       });
     }
 
-    // Barra de navegación inferior
-    var bnav = document.createElement('nav');
+    // Barra de navegación inferior (div, no nav, para no heredar CSS global de nav)
+    var bnav = document.createElement('div');
     bnav.className = 'tm-bottom-nav';
+    bnav.setAttribute('role', 'navigation');
     bnav.setAttribute('aria-label', 'Navegación móvil');
     var bTabs = [
       { href: '/', label: 'Inicio', icon: 'inicio', active: path === '/' },
