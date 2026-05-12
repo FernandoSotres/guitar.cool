@@ -227,52 +227,20 @@ main {
   margin-top: 8px;
 }
 
-/* Cents meter */
-.cents-wrap {
+/* Arc tuner gauge */
+.tuner-arc {
   width: 100%;
-  max-width: 420px;
-  margin-top: 20px;
-}
-.cents-label {
-  display: flex;
-  justify-content: space-between;
-  font-size: 10px;
-  color: var(--text3);
-  font-family: var(--mono);
-  margin-bottom: 6px;
-}
-.cents-track {
-  position: relative;
-  height: 8px;
-  background: var(--surf2);
-  border-radius: 4px;
-  overflow: hidden;
-  border: 1px solid var(--border);
-}
-.cents-fill {
-  position: absolute;
-  height: 100%;
-  background: var(--accent);
-  border-radius: 4px;
-  transition: left .05s, width .05s, background .1s;
-  top: 0;
-}
-.cents-fill.in-tune { background: var(--green); }
-.cents-center {
-  position: absolute;
-  left: 50%;
-  top: -3px;
-  width: 2px;
-  height: 14px;
-  background: var(--text3);
-  transform: translateX(-50%);
+  max-width: 300px;
+  height: auto;
+  display: block;
+  margin: 8px auto 0;
 }
 .cents-value {
   text-align: center;
   font-family: var(--mono);
   font-size: 12px;
   color: var(--text2);
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 /* Note ring */
@@ -581,18 +549,37 @@ footer a:hover { color: var(--accent); }
       <div class="note-octave" id="note-octave"></div>
       <div class="note-hz" id="note-hz"></div>
 
-      <div class="cents-wrap">
-        <div class="cents-label">
-          <span>−50¢</span>
-          <span>Afinado</span>
-          <span>+50¢</span>
-        </div>
-        <div class="cents-track">
-          <div class="cents-fill" id="cents-fill"></div>
-          <div class="cents-center"></div>
-        </div>
-        <div class="cents-value" id="cents-value">—</div>
-      </div>
+      <svg class="tuner-arc" viewBox="0 0 300 170" xmlns="http://www.w3.org/2000/svg">
+        <!-- Track de fondo -->
+        <path d="M 30 155 A 120 120 0 0 1 150 35 A 120 120 0 0 1 270 155"
+              fill="none" stroke="#2e2820" stroke-width="16" stroke-linecap="butt"/>
+        <!-- Rojo izquierda: −50¢ a −20¢ -->
+        <path d="M 30 155 A 120 120 0 0 1 79.5 57.9"
+              fill="none" stroke="#c05040" stroke-width="14" stroke-linecap="round" opacity="0.85"/>
+        <!-- Amarillo izquierda: −20¢ a −5¢ -->
+        <path d="M 79.5 57.9 A 120 120 0 0 1 131.2 36.5"
+              fill="none" stroke="#c09030" stroke-width="14" stroke-linecap="round" opacity="0.85"/>
+        <!-- Verde centro: −5¢ a +5¢ -->
+        <path d="M 131.2 36.5 A 120 120 0 0 1 168.8 36.5"
+              fill="none" stroke="#4a9e6a" stroke-width="16" stroke-linecap="round"/>
+        <!-- Amarillo derecha: +5¢ a +20¢ -->
+        <path d="M 168.8 36.5 A 120 120 0 0 1 220.5 57.9"
+              fill="none" stroke="#c09030" stroke-width="14" stroke-linecap="round" opacity="0.85"/>
+        <!-- Rojo derecha: +20¢ a +50¢ -->
+        <path d="M 220.5 57.9 A 120 120 0 0 1 270 155"
+              fill="none" stroke="#c05040" stroke-width="14" stroke-linecap="round" opacity="0.85"/>
+        <!-- Aguja (dinámica) -->
+        <line id="tuner-needle" x1="150" y1="155" x2="150" y2="60"
+              stroke="#f5ede2" stroke-width="3" stroke-linecap="round" opacity="0"/>
+        <!-- Pivote central -->
+        <circle id="tuner-pivot" cx="150" cy="155" r="7"
+                fill="#1c1812" stroke="#f5ede2" stroke-width="2" opacity="0"/>
+        <!-- Etiquetas -->
+        <text x="22"  y="170" fill="#5a4a3e" font-size="9" font-family="'JetBrains Mono',monospace" text-anchor="middle">−50¢</text>
+        <text x="150" y="22"  fill="#4a9e6a" font-size="9" font-family="'JetBrains Mono',monospace" text-anchor="middle">Afinado</text>
+        <text x="278" y="170" fill="#5a4a3e" font-size="9" font-family="'JetBrains Mono',monospace" text-anchor="middle">+50¢</text>
+      </svg>
+      <div class="cents-value" id="cents-value">—</div>
     </div>
 
     <div class="note-ring" id="note-ring"></div>
@@ -816,7 +803,6 @@ var tunerActive = false;
 var elNoteName    = document.getElementById('note-name');
 var elNoteOctave  = document.getElementById('note-octave');
 var elNoteHz      = document.getElementById('note-hz');
-var elCentsFill   = document.getElementById('cents-fill');
 var elCentsValue  = document.getElementById('cents-value');
 var elTunerStatus = document.getElementById('tuner-status');
 var micBtn        = document.getElementById('mic-btn');
@@ -867,9 +853,10 @@ function stopTuner() {
   elNoteOctave.textContent = '';
   elNoteHz.textContent = '';
   elCentsValue.textContent = '—';
-  elCentsFill.style.left = '50%';
-  elCentsFill.style.width = '0';
-  elCentsFill.className = 'cents-fill';
+  var needle = document.getElementById('tuner-needle');
+  var pivot  = document.getElementById('tuner-pivot');
+  if (needle) needle.setAttribute('opacity', '0');
+  if (pivot)  pivot.setAttribute('opacity', '0');
   setActivePill(-1);
   elTunerStatus.textContent = 'Pulsa "Activar micrófono" para comenzar';
 }
@@ -910,9 +897,10 @@ function tunerLoop() {
       elNoteOctave.textContent = '';
       elNoteHz.textContent = '';
       elCentsValue.textContent = '—';
-      elCentsFill.style.left = '50%';
-      elCentsFill.style.width = '0';
-      elCentsFill.className = 'cents-fill';
+      var _needle = document.getElementById('tuner-needle');
+      var _pivot  = document.getElementById('tuner-pivot');
+      if (_needle) _needle.setAttribute('opacity', '0');
+      if (_pivot)  _pivot.setAttribute('opacity', '0');
       setActivePill(-1);
       elTunerStatus.textContent = 'Silencio…';
     }
@@ -969,18 +957,23 @@ function tunerLoop() {
   elNoteName.className = 'note-name' +
     (isInTune ? ' in-tune' : isSharp ? ' sharp' : ' flat');
 
-  // Cents meter: usa displayCents (suavizado)
-  var pct = displayCents / 50; // -1 a +1
-  var centerPct = 50;
-  if (pct >= 0) {
-    elCentsFill.style.left = centerPct + '%';
-    elCentsFill.style.width = Math.min(pct * 50, 50) + '%';
-  } else {
-    var w = Math.min(-pct * 50, 50);
-    elCentsFill.style.left = (centerPct - w) + '%';
-    elCentsFill.style.width = w + '%';
+  // Arc needle: convierte displayCents a ángulo sobre la semicircunferencia
+  // −50¢ → 180° (izquierda), 0¢ → 270° (arriba), +50¢ → 360°/0° (derecha)
+  var c = Math.max(-50, Math.min(50, displayCents));
+  var needleAngleDeg = 180 + (c + 50) / 100 * 180;
+  var needleAngleRad = needleAngleDeg * Math.PI / 180;
+  var nx = (150 + 95 * Math.cos(needleAngleRad)).toFixed(1);
+  var ny = (155 + 95 * Math.sin(needleAngleRad)).toFixed(1);
+  var needleEl = document.getElementById('tuner-needle');
+  var pivotEl  = document.getElementById('tuner-pivot');
+  if (needleEl) {
+    var needleColor = isInTune ? '#4a9e6a' : (absCents <= 20 ? '#c09030' : '#c05040');
+    needleEl.setAttribute('x2', nx);
+    needleEl.setAttribute('y2', ny);
+    needleEl.setAttribute('stroke', needleColor);
+    needleEl.setAttribute('opacity', '1');
   }
-  elCentsFill.className = 'cents-fill' + (isInTune ? ' in-tune' : '');
+  if (pivotEl) pivotEl.setAttribute('opacity', '1');
 
   var cRounded = Math.round(displayCents);
   var sign = cRounded > 0 ? '+' : '';
