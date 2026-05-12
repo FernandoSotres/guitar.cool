@@ -237,30 +237,21 @@
     .tm-hamburger:hover span { background: #d68838; }
 
     .tm-bottom-nav {
-      display: none; position: fixed; bottom: 0; left: 0; right: 0;
+      display: none;
+      position: fixed; bottom: 0; left: 0; right: 0;
       height: 56px; background: #1c1812; border-top: 1px solid #2e2820;
-      z-index: 400; flex-direction: row; align-items: stretch;
-      /* Contrarrestar CSS global de nav */
-      overflow: hidden !important;
-      flex-wrap: nowrap !important;
-      white-space: normal !important;
-      padding: 0 !important;
-      backdrop-filter: none !important;
+      z-index: 9000;
     }
     .tm-bnav-tab {
-      flex: 1 1 0 !important; width: 25% !important;
-      display: flex !important; flex-direction: column !important;
-      align-items: center !important; justify-content: center !important;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
       gap: 3px; text-decoration: none; color: #5a4a3e;
       font-family: 'JetBrains Mono', monospace; font-size: 9px;
-      letter-spacing: .05em; background: none; border: none;
-      cursor: pointer; padding: 6px 4px 8px; transition: color .15s; line-height: 1;
-      flex-shrink: 1 !important; min-width: 0 !important;
-      height: 56px !important; box-sizing: border-box !important;
-      white-space: nowrap !important;
+      letter-spacing: .05em; cursor: pointer;
+      padding: 6px 4px 8px; transition: color .15s; line-height: 1;
     }
     .tm-bnav-tab:hover, .tm-bnav-tab.active { color: #d68838; }
-    .tm-bnav-tab svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .tm-bnav-tab svg { width: 18px; height: 18px; }
 
     .tm-drawer-overlay {
       position: fixed; inset: 0; z-index: 800;
@@ -330,8 +321,11 @@
         order: 999 !important;
       }
 
-      /* Barra inferior */
-      .tm-bottom-nav { display: flex; }
+      /* Barra inferior: grid garantiza 4 columnas iguales */
+      .tm-bottom-nav {
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+      }
     }
   `;
 
