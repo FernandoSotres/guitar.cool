@@ -295,7 +295,10 @@
     .tm-drawer-link.active { color: #f5ede2; background: #26201a; border-left-color: #d68838; }
 
     @media (max-width: 768px) {
-      body { padding-bottom: 60px; overflow-x: hidden; }
+      body { padding-bottom: 80px; overflow-x: hidden; }
+      /* Espacio extra bajo el último capítulo para no tapar con el bottom nav */
+      .chapter-list { padding-bottom: 16px; }
+      .hub-footer-strip, .section-footer, footer { margin-bottom: 0; }
       .tm-cookie-banner { bottom: 60px !important; }
 
       /* Nav limpio: sólo logo + hamburger */
@@ -712,7 +715,7 @@
     drawerEl.innerHTML =
       '<div class="tm-drawer">' +
         '<div class="tm-drawer-head">' +
-          '<a href="/" class="tm-drawer-brand">tremolo.mx</a>' +
+          '<a href="/" class="tm-drawer-brand">tr<svg width="12" height="12" viewBox="0 0 22 22" style="display:inline-block;vertical-align:middle;margin:0 1px 3px 1px"><path d="M2 11 Q 5.5 4, 9 11 T 16 11 T 20 11" stroke="#d68838" stroke-width="2" fill="none" stroke-linecap="round"/></svg>émolo<span style="font-family:\'JetBrains Mono\',monospace;font-size:0.55em;color:#8a7a64;margin-left:2px">.mx</span></a>' +
           '<button class="tm-drawer-x" id="tm-drawer-x">✕</button>' +
         '</div>' +
         '<div class="tm-drawer-sect">Aprender</div>' +
