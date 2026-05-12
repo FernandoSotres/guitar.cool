@@ -337,9 +337,14 @@
 
   function injectStyles() {
     const s = document.createElement('style');
+    s.id = 'tm-global-css';
     s.textContent = CSS;
-    document.head.appendChild(s);
+    (document.head || document.documentElement).appendChild(s);
   }
+
+  // Inyectar CSS inmediatamente — no esperar DOMContentLoaded
+  // para evitar que el CSS del HTML tenga prioridad de cascada
+  if (!document.getElementById('tm-global-css')) injectStyles();
 
   // ── MODAL ────────────────────────────────────────────────────────────────────
   function buildModal() {
@@ -760,7 +765,6 @@
 
   // ── INIT ─────────────────────────────────────────────────────────────────────
   document.addEventListener('DOMContentLoaded', async function () {
-    injectStyles();
     buildModal();
     buildNavButton();
     buildMobileNav();

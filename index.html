@@ -459,9 +459,20 @@ footer .f-copy { font-size: 12px; color: var(--ink5); }
 .f-email-btn:hover { background: var(--copper-lt); }
 
 @media (max-width: 768px) {
-  nav { padding: 0 16px; overflow-x: auto; flex-wrap: nowrap; white-space: nowrap; scrollbar-width: none; }
+  /* Nav: sólo logo visible, auth.js añade hamburger y barra inferior */
+  nav {
+    padding: 0 16px !important;
+    overflow-x: hidden !important;
+    flex-wrap: nowrap !important;
+    white-space: nowrap;
+    scrollbar-width: none;
+  }
   nav::-webkit-scrollbar { display: none; }
   nav > * { flex-shrink: 0; }
+  nav .nav-link,
+  nav .nav-cta,
+  nav .nav-soon { display: none !important; }
+  body { padding-bottom: 60px; }
   .hero { padding: 90px 20px 60px; }
   .pillars { padding: 60px 20px; }
   .tools-preview { padding: 60px 20px; }
